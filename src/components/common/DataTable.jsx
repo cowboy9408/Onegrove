@@ -56,7 +56,9 @@ export default function DataTable({
                   className={`${(checkable || link.base) && "cursor-pointer"} hover:bg-gray-50 dark:hover:bg-gray-900`}
                   onClick={() => {
                     if (!checkable && link) {
-                      navigate(`${link.base}/${row[link.path]}`);
+                      navigate(
+                        `${link.base}/${row[link.path]}${link.params ? "?" + link.params : ""}`
+                      );
                     } else if (checkable) {
                       onCheck(row._id, !isChecked);
                     }

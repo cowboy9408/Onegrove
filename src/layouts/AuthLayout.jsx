@@ -3,10 +3,9 @@ import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import { PanelLeftOpenIcon } from "@/components/ui/panel-left-open";
 import useSidebar from "@/hooks/useSidebar";
-import { findRouteMeta } from "@/routes";
+import { findMatchingRoute } from "@/routes";
 import { useAuthStore } from "@/store/authStore";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
@@ -42,7 +41,7 @@ export default function AuthLayout() {
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    const route = findRouteMeta(pathname);
+    const route = findMatchingRoute(pathname);
 
     if (!accessToken) {
       navigate("/login");

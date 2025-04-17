@@ -16,6 +16,9 @@ import AdminListPage from "@/pages/admin/AdminListPage";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import LoginPage from "@/pages/login/LoginPage";
 import MainPage from "@/pages/mainpage/MainPage";
+import UserCreatePage from "@/pages/user/UserCreatePage";
+import UserDetailPage from "@/pages/user/UserDetailPage";
+import UserListPage from "@/pages/user/UserListPage";
 import { matchPath } from "react-router-dom";
 
 export const routeMeta = [
@@ -39,7 +42,7 @@ export const routeMeta = [
         group: "/admin",
         element: <AdminListPage />,
         title: "관리자 관리",
-        icon: <UserIcon size={18} />,
+        icon: <UserIcon size={18} className="hover:bg-transparent" />,
         hidden: false,
         permissions: ["Admin"],
       },
@@ -49,7 +52,7 @@ export const routeMeta = [
         group: "/admin",
         element: <AdminDetailPage />,
         title: "관리자 상세",
-        icon: <UserIcon size={18} />,
+        icon: <UserIcon size={18} className="hover:bg-transparent" />,
         hidden: true,
         permissions: ["Admin"],
       },
@@ -57,10 +60,28 @@ export const routeMeta = [
         uuid: "0c3eb744-5f42-4e6e-8107-43644c68647c",
         path: "/user",
         group: "/user",
-        element: <></>,
+        element: <UserListPage />,
         title: "회원 관리",
-        icon: <UsersIcon size={18} />,
+        icon: <UsersIcon size={18} className="hover:bg-transparent" />,
         hidden: false,
+        permissions: ["Admin", "User"],
+      },
+      {
+        uuid: "b08ac13a-d0f2-4eaf-87a6-41be2ec1ca19",
+        path: "/user/create",
+        group: "/user",
+        element: <UserCreatePage />,
+        title: "회원 등록",
+        hidden: true,
+        permissions: ["Admin", "User"],
+      },
+      {
+        uuid: "9f4398bc-b8b1-47e4-bf39-77acecbf415e",
+        path: "/user/:id",
+        group: "/user",
+        element: <UserDetailPage />,
+        title: "회원 상세",
+        hidden: true,
         permissions: ["Admin", "User"],
       },
       {
@@ -68,7 +89,7 @@ export const routeMeta = [
         path: "/occupancy",
         element: <></>,
         title: "입주사 관리",
-        icon: <HomeIcon size={18} />,
+        icon: <HomeIcon size={18} className="hover:bg-transparent" />,
         hidden: false,
         permissions: ["Admin", "User"],
       },
@@ -77,7 +98,7 @@ export const routeMeta = [
         path: "/retail",
         element: <></>,
         title: "리테일 관리",
-        icon: <CartIcon size={18} />,
+        icon: <CartIcon size={18} className="hover:bg-transparent" />,
         hidden: false,
         permissions: ["Admin", "User"],
       },
@@ -86,7 +107,7 @@ export const routeMeta = [
         path: "/popup",
         element: <></>,
         title: "팝업 관리",
-        icon: <BellIcon size={18} />,
+        icon: <BellIcon size={18} className="hover:bg-transparent" />,
         hidden: false,
         permissions: ["Admin", "User"],
       },
@@ -95,7 +116,7 @@ export const routeMeta = [
         path: "/mainpage",
         element: <MainPage />,
         title: "메인화면 관리",
-        icon: <LayoutPanelTopIcon size={18} />,
+        icon: <LayoutPanelTopIcon size={18} className="hover:bg-transparent" />,
         hidden: false,
         permissions: ["Admin", "User"],
       },
@@ -104,7 +125,7 @@ export const routeMeta = [
         path: "/contents",
         element: <></>,
         title: "콘텐츠 관리",
-        icon: <FileTextIcon size={18} />,
+        icon: <FileTextIcon size={18} className="hover:bg-transparent" />,
         hidden: false,
         permissions: ["Admin", "User"],
         children: [
@@ -261,7 +282,7 @@ export const routeMeta = [
         path: "/office",
         element: <></>,
         title: "오피스 관리",
-        icon: <CalendarDaysIcon size={18} />,
+        icon: <CalendarDaysIcon size={18} className="hover:bg-transparent" />,
         hidden: false,
         permissions: ["Admin", "User"],
         children: [
@@ -304,7 +325,7 @@ export const routeMeta = [
         path: "/inquiry",
         element: <></>,
         title: "고객 문의",
-        icon: <CircleHelpIcon size={18} />,
+        icon: <CircleHelpIcon size={18} className="hover:bg-transparent" />,
         hidden: false,
         permissions: ["Admin", "User"],
         children: [
@@ -347,7 +368,7 @@ export const routeMeta = [
         path: "/system",
         element: <></>,
         title: "시스템 관리",
-        icon: <SettingsGearIcon size={18} />,
+        icon: <SettingsGearIcon size={18} className="hover:bg-transparent" />,
         hidden: false,
         permissions: ["Admin"],
         children: [
@@ -391,21 +412,6 @@ export const routeMeta = [
   { path: "/403", element: <Forbidden /> },
   { path: "*", element: <NotFoundPage /> },
 ];
-
-export function findRouteMeta(pathname, items = routeMeta, parents = []) {
-  for (const item of items) {
-    if (pathname === item.path && !item.children) {
-      return item;
-    }
-
-    if (item.children) {
-      const found = findRouteMeta(pathname, item.children, [...parents, item]);
-      if (found) return found;
-    }
-  }
-
-  return null;
-}
 
 export function buildRoutes(items = routeMeta) {
   return items.map((item) => {
