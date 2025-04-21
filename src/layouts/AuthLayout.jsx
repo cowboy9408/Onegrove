@@ -8,6 +8,8 @@ import { useAuthStore } from "@/store/authStore";
 import { useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
+import { getRefreshAccessToken } from "@/api/user";
 
 function ContentArea() {
   const { isExpanded } = useSidebar();
@@ -34,26 +36,47 @@ function ContentArea() {
 export default function AuthLayout() {
   const accessToken = useAuthStore((state) => state.accessToken);
   const permission = useAuthStore((state) => state.permission);
+  const setAccessToken = useAuthStore((state) => state.setAccessToken);
+  const removeAccessToken = useAuthStore((state) => state.removeAccessToken);
+
   const navigate = useNavigate();
   const isMobile = useMediaQuery({ maxWidth: 767 });
   const { isExpanded, toggleSidebar } = useSidebar();
   const { pathname } = useLocation();
+
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    const route = findMatchingRoute(pathname);
+    const checkAuth = async () => {
+      const token = Cookies.get("ACCESS_TOKEN");
+      const route = findMatchingRoute(pathname);
 
-    if (!accessToken) {
-      navigate("/login");
-      return;
-    }
+      if (!token) {
+        try {
+          const refreshed = await getRefreshAccessToken();
+          setAccessToken(refreshed.accessToken, refreshed.permission);
+        } catch (err) {
+          console.error("토큰 리프레시 실패:", err);
+          removeAccessToken();
+          navigate("/login");
+          return;
+        }
+      }
 
-    if (route?.permissions && !route.permissions.includes(permission)) {
-      navigate("/403");
-      return;
-    }
+      if (!accessToken) {
+        navigate("/login");
+        return;
+      }
 
-    setIsAuthorized(true);
+      if (route?.permissions && !route.permissions.includes(permission)) {
+        navigate("/403");
+        return;
+      }
+
+      setIsAuthorized(true);
+    };
+
+    checkAuth();
   }, [pathname, accessToken, permission, navigate]);
 
   if (!isAuthorized) return null;
