@@ -3,22 +3,37 @@ import Input from "@/components/common/Input";
 import { useId, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
-import { getUserInfo } from "@/api/user";
+// 임시 주석처리
+// import { getUserInfo } from "@/api/user";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
-  const setName = useAuthStore((state) => state.setName);
+  // 임시 주석처리
+  // const setName = useAuthStore((state) => state.setName);
 
+  // 임시 주석처리
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+  //
+  //   const res = await getUserInfo(username, password);
+  //
+  //   setAccessToken(res.accessToken);
+  //   setName(res.name);
+  //
+  //   navigate("/");
+  // };
+
+  // 임시 사용
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    const res = await getUserInfo(username, password);
-
-    setAccessToken(res.accessToken);
-    setName(res.name);
+    // TODO: SIGN API
+    setAccessToken("dummy");
+    // TODO: GET ME INFO API
+    // await getUserInfo();
 
     navigate("/");
   };
