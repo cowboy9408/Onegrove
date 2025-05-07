@@ -4,6 +4,9 @@ import { SidebarProvider } from "./context/SidebarProvider";
 import { ThemeProvider } from "./context/ThemeProvider";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import { ModalProvider } from "./context/ModalProvider";
+import "@/styles/common.css";
+
+
 
 function App() {
   return (

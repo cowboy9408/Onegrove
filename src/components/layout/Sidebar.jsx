@@ -19,8 +19,6 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
   const { isExpanded, setIsExpanded, toggleSidebar } = useSidebar();
-  // 임시 주석처리
-  // const name = useAuthStore((state) => state.name);
 
   const sidebarItems = useMemo(
     () => extractSidebarItems(routeMeta[0].children, permission),
@@ -180,12 +178,8 @@ export default function Sidebar() {
         {isExpanded ? (
           <div className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-gray-800 dark:text-gray-100">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-              {/*임시 주석처리*/}
-              {/*{name && name.substring(0, 1)}*/}
               홍
             </div>
-            {/*임시 주석처리*/}
-            {/*<span className="truncate">{name}님</span>*/}
             <span className="truncate">홍길동님</span>
             <div
               className="ml-auto hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -200,12 +194,8 @@ export default function Sidebar() {
             trigger={
               <button className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-600">
-                {/*임시 주석처리*/}
-                {/*{name && name.substring(0, 1)}*/}
                   홍
                 </div>
-                {/*임시 주석처리*/}
-                {/*{isExpanded && <span className="truncate">{name}님</span>}*/}
                 {isExpanded && <span className="truncate">홍길동님</span>}
               </button>
             }

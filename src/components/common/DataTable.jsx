@@ -4,7 +4,7 @@ export default function DataTable({
   columns = [],
   data = [],
   link = {},
-  checkable = false,
+  checkable = true,
   checkedIds = [],
   onCheck = () => {},
 }) {
@@ -31,9 +31,12 @@ export default function DataTable({
               </th>
             )}
             {columns.map((col) => (
-              <th key={col.key} className="px-4 py-3">
-                {col.label}
-              </th>
+              <th
+              key={col.key}
+              className="px-4 py-3 border-r border-gray-200 dark:border-gray-700 last:border-r-0"
+            >
+              {col.label}
+            </th>
             ))}
           </tr>
         </thead>
@@ -52,20 +55,19 @@ export default function DataTable({
               const isChecked = checkedIds.includes(row._id);
               return (
                 <tr
-                  key={idx}
-                  className={`${(checkable || link.base) && "cursor-pointer"} hover:bg-gray-50 dark:hover:bg-gray-900`}
-                  onClick={() => {
-                    if (!checkable && link) {
-                      navigate(
-                        `${link.base}/${row[link.path]}${link.params ? "?" + link.params : ""}`
-                      );
-                    } else if (checkable) {
-                      onCheck(row._id, !isChecked);
-                    }
-                  }}
-                >
+  key={idx}
+  className={`${(checkable || link.base) && "cursor-pointer"} hover:bg-gray-50 dark:hover:bg-gray-900`}
+  onClick={(e) => {
+    if (e.target.tagName === "INPUT") return;
+    if (!checkable && link) {
+      navigate(`${link.base}/${row[link.path]}`);
+    } else if (checkable) {
+      onCheck(row._id, !isChecked);
+    }
+  }}
+>
                   {checkable && (
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 border-r border-gray-200 dark:border-gray-700">
                       <input
                         type="checkbox"
                         checked={isChecked}
@@ -75,10 +77,13 @@ export default function DataTable({
                     </td>
                   )}
                   {columns.map((col) => (
-                    <td key={col.key} className="px-4 py-3 whitespace-nowrap">
-                      {row[col.key]}
-                    </td>
-                  ))}
+  <td
+  key={col.key}
+  className="px-4 py-3 whitespace-nowrap border-r border-gray-100 dark:border-gray-800 last:border-r-0"
+>
+  {col.render ? col.render(row) : row[col.key]}
+</td>
+))}
                 </tr>
               );
             })

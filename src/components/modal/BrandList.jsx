@@ -6,41 +6,25 @@ import Select from "../common/Select";
 import Box from "../layout/Box";
 import Col from "../layout/Col";
 import Row from "../layout/Row";
+import useModal from "@/hooks/useModal";
 
-export default function BrandList({ selected, onConfirm, closeModal }) {
+
+
+export default function BrandList({ selected = [], onConfirm, closeModal }) {
   const [items, setItems] = useState([]);
-  const [checked, setChecked] = useState(selected);
+  const [checked, setChecked] = useState(selected.map(String));
+  const { showModal } = useModal(); // 
+  
 
   useEffect(() => {
     // TODO: Fetch DATA
     setItems([
-      { _id: 1, category: "Lifewear", brand: "Uniqlo", useYn: "사용" },
-      { _id: 2, category: "Woman", brand: "SHESMISS", useYn: "사용" },
-      { _id: 3, category: "Woman", brand: "SHESMISS", useYn: "사용" },
-      { _id: 4, category: "Woman", brand: "SHESMISS", useYn: "사용" },
-      { _id: 5, category: "Woman", brand: "SHESMISS", useYn: "사용" },
-      { _id: 6, category: "Woman", brand: "SHESMISS", useYn: "사용" },
-      { _id: 7, category: "Woman", brand: "SHESMISS", useYn: "사용" },
-      { _id: 8, category: "Woman", brand: "SHESMISS", useYn: "사용" },
-      { _id: 9, category: "Woman", brand: "SHESMISS", useYn: "사용" },
-      { _id: 10, category: "Woman", brand: "SHESMISS", useYn: "사용" },
-      { _id: 11, category: "Woman", brand: "SHESMISS", useYn: "사용" },
-      { _id: 12, category: "Woman", brand: "SHESMISS", useYn: "사용" },
-      { _id: 13, category: "Woman", brand: "SHESMISS", useYn: "사용" },
-      { _id: 14, category: "Woman", brand: "SHESMISS", useYn: "사용" },
-      { _id: 15, category: "Woman", brand: "SHESMISS", useYn: "사용" },
-      { _id: 16, category: "Woman", brand: "SHESMISS", useYn: "사용" },
-      { _id: 17, category: "Woman", brand: "SHESMISS", useYn: "사용" },
-      { _id: 18, category: "Woman", brand: "SHESMISS", useYn: "사용" },
+      { _id: 1, category: "Lifewear", brand: "Uniqlo" },
+      { _id: 2, category: "Woman", brand: "SHESMISS" },
     ]);
   }, []);
 
-  useEffect(() => {
-    if (onConfirm) {
-      onConfirm(items.filter((item) => checked.includes(item._id)));
-    }
-  }, [items, checked, onConfirm]);
-
+  
   return (
     <>
       <div className="h-96 overflow-y-scroll">
@@ -64,14 +48,14 @@ export default function BrandList({ selected, onConfirm, closeModal }) {
           columns={[
             { key: "category", label: "대표 카테고리" },
             { key: "brand", label: "브랜드명" },
-            { key: "useYn", label: "사용여부" },
+            
           ]}
           data={items}
           checkable
           checkedIds={checked}
-          onCheck={(id, checked) => {
+          onCheck={(id, isChecked) => {
             setChecked((prev) =>
-              checked ? [...prev, id] : prev.filter((v) => v !== id)
+              isChecked ? [...prev, id] : prev.filter((v) => v !== id)
             );
           }}
         />
@@ -85,14 +69,26 @@ export default function BrandList({ selected, onConfirm, closeModal }) {
           초기화
         </button>
         <button
-          className="cursor-pointer rounded-md bg-black px-4 py-2 text-sm text-white transition hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-300"
-          onClick={() => {
-            onConfirm(items.filter((item) => checked.includes(item._id)));
-            closeModal();
-          }}
-        >
-          추가
-        </button>
+  className="cursor-pointer rounded-md bg-black px-4 py-2 text-sm text-white transition hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-300"
+  onClick={() => {
+    const selectedBrands = items.filter((item) => checked.includes(item._id));
+
+    if (selectedBrands.length > 1) {
+      showModal({
+        title: "안내",
+        children: <p>브랜드는 1개만 선택 가능합니다.</p>,
+        showCancel: false,
+      });
+      return;
+    }
+
+    // 공통 컴포넌트는 선택된 값만 전달!
+    onConfirm?.(selectedBrands); // 
+    closeModal();
+  }}
+>
+  추가
+</button>
       </div>
     </>
   );

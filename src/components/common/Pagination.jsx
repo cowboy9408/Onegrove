@@ -22,7 +22,7 @@ export default function Pagination({
       <button
         onClick={() => goToPage(1)}
         disabled={current === 1}
-        className="rounded border px-2 py-1 text-gray-600 not-disabled:cursor-pointer not-disabled:hover:bg-gray-100 disabled:opacity-40 dark:text-gray-300 not-disabled:dark:hover:bg-gray-800"
+        className="rounded border px-2 py-1 text-gray-600 hover:bg-gray-100 disabled:opacity-40 dark:text-gray-300 dark:hover:bg-gray-800"
       >
         ≪
       </button>
@@ -30,7 +30,7 @@ export default function Pagination({
       <button
         onClick={() => goToPage(current - 1)}
         disabled={current === 1}
-        className="rounded border px-2 py-1 text-gray-600 not-disabled:cursor-pointer not-disabled:hover:bg-gray-100 disabled:opacity-40 dark:text-gray-300 not-disabled:dark:hover:bg-gray-800"
+        className="rounded border px-2 py-1 text-gray-600 hover:bg-gray-100 disabled:opacity-40 dark:text-gray-300 dark:hover:bg-gray-800"
       >
         &lt;
       </button>
@@ -42,7 +42,7 @@ export default function Pagination({
           className={`rounded border px-3 py-1 ${
             page === current
               ? "bg-black font-semibold text-white dark:bg-white dark:text-black"
-              : "cursor-pointer text-gray-700 not-disabled:hover:bg-gray-100 dark:text-gray-200 not-disabled:dark:hover:bg-gray-800"
+              : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
           }`}
         >
           {page}
@@ -52,7 +52,7 @@ export default function Pagination({
       <button
         onClick={() => goToPage(current + 1)}
         disabled={current === totalPages}
-        className="rounded border px-2 py-1 text-gray-600 not-disabled:cursor-pointer not-disabled:hover:bg-gray-100 disabled:opacity-40 dark:text-gray-300 not-disabled:dark:hover:bg-gray-800"
+        className="rounded border px-2 py-1 text-gray-600 hover:bg-gray-100 disabled:opacity-40 dark:text-gray-300 dark:hover:bg-gray-800"
       >
         &gt;
       </button>
@@ -60,7 +60,7 @@ export default function Pagination({
       <button
         onClick={() => goToPage(totalPages)}
         disabled={current === totalPages}
-        className="rounded border px-2 py-1 text-gray-600 not-disabled:cursor-pointer not-disabled:hover:bg-gray-100 disabled:opacity-40 dark:text-gray-300 not-disabled:dark:hover:bg-gray-800"
+        className="rounded border px-2 py-1 text-gray-600 hover:bg-gray-100 disabled:opacity-40 dark:text-gray-300 dark:hover:bg-gray-800"
       >
         ≫
       </button>

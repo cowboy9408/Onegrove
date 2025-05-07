@@ -10,7 +10,7 @@ const DarkModeToggle = () => {
   return (
     <button
       onClick={toggleDarkMode}
-      className="relative inline-flex cursor-pointer items-center justify-center rounded-md p-2 transition-all duration-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+      className="relative inline-flex cursor-pointer mr-2.5 items-center justify-center rounded-md p-2 transition-all duration-300 hover:bg-gray-200 dark:hover:bg-gray-700"
     >
       <SunIcon
         size={20}

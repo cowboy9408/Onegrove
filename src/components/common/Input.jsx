@@ -20,8 +20,7 @@ const Input = forwardRef(function Input(
     onClear,
     error,
     topLabel = true,
-    regex,
-    ...rest
+    ...rest // ✅ 여전히 받지만 주의해서 사용
   },
   ref
 ) {
@@ -38,9 +37,7 @@ const Input = forwardRef(function Input(
       {topLabel && label && (
         <p className="mb-1 block pb-2 pl-1 text-sm font-medium text-gray-800 dark:text-gray-100">
           {label}
-          {!rest.readOnly && required && (
-            <span className="text-red-500">*</span>
-          )}
+          {required && <span className="text-red-500">*</span>}
         </p>
       )}
       <div className={`relative w-full ${className}`}>
@@ -49,24 +46,19 @@ const Input = forwardRef(function Input(
           ref={ref}
           type={inputType}
           value={value}
-          onChange={(e) => {
-            const reg = regex ? new RegExp(regex) : null;
-
-            if (!reg || reg.test(e.target.value) || e.target.value === "") {
-              onChange?.(e);
-            }
-          }}
+          onChange={onChange}
           required={required}
           disabled={disabled}
           placeholder={placeholder}
           maxLength={maxLength}
-          className={`peer w-full rounded-md border px-4 py-3 pr-10 text-sm placeholder-transparent focus:outline-none ${
-            error
+          className={`peer w-full rounded-md border px-4 py-3 pr-10 text-sm placeholder-gray-400 focus:outline-none
+            ${error 
               ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-              : rest?.readOnly
-                ? "cursor-default bg-gray-100 text-gray-500"
-                : "border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800"
-          }`}
+              : "border-black focus:border-black focus:ring-2 focus:ring-black"}
+            ${rest?.readOnly 
+              ? "cursor-default bg-gray-100 text-gray-500 focus:border-gray-300 focus:ring-0"
+              : ""}
+          `}
           {...rest}
         />
         {!rest.readOnly && (
@@ -77,25 +69,17 @@ const Input = forwardRef(function Input(
             {label}
           </label>
         )}
-        {/* 버튼 영역 */}
         <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-1">
           {isPassword && value && (
             <button
               type="button"
               onClick={togglePasswordVisibility}
-              className="cursor-pointer text-gray-400 hover:text-black dark:hover:text-white"
+              className="text-gray-400 hover:text-black dark:hover:text-white"
             >
-              {showPassword ? (
-                <EyeOffIcon size={16} />
-              ) : (
-                <EyeIcon
-                  size={32}
-                  className="rounded-md p-2 hover:bg-gray-100"
-                />
-              )}
+              {showPassword ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
             </button>
           )}
-          {!rest.readOnly && value && onClear && (
+          {value && onClear && (
             <button
               type="button"
               onClick={onClear}
@@ -106,19 +90,19 @@ const Input = forwardRef(function Input(
           )}
         </div>
       </div>
-      {!rest.readOnly && showDefaultInfo && maxLength && (
+      {showDefaultInfo && maxLength && (
         <span className="mt-1 flex items-center gap-1 pl-1 text-xs text-gray-400">
           <Info size={14} />
           최대 {maxLength}자까지 입력 가능
         </span>
       )}
-      {!rest.readOnly && info && (
+      {info && (
         <span className="mt-1 flex items-center gap-1 pl-1 text-xs text-gray-400">
           <Info size={14} />
           {info}
         </span>
       )}
-      {!rest.readOnly && error && (
+      {error && (
         <span className="mt-1 flex items-center gap-1 pl-1 text-xs text-red-500">
           <Info size={14} />
           {error}

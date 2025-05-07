@@ -11,10 +11,11 @@ import Row from "@/components/layout/Row";
 import SearchSection from "@/components/layout/SearchSection";
 import { faker } from "@faker-js/faker";
 import { useEffect, useId, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 export default function AdminListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const [name, setName] = useState(searchParams.get("name") || "");
   const [email, setEmail] = useState(searchParams.get("email") || "");
@@ -39,6 +40,7 @@ export default function AdminListPage() {
           const index = start + i + 1;
           return {
             no: index,
+            _id: String(index), 
             type: faker.helpers.arrayElement(["관리자", "일반", "외부"]),
             occupancy: faker.company.name(),
             name: faker.person.lastName() + faker.person.firstName(),
@@ -125,9 +127,30 @@ export default function AdminListPage() {
           </Row>
         </Box>
       </SearchSection>
+      <div className="flex items-center justify-between mb-4">
+  <ResultSummary total={total} />
 
+  <div className="flex gap-2">
+    <Button
+      className="bg-black text-white hover:bg-gray-800"
+      onClick={() => {
+        navigate("/admin/regist"); // 이동할 경로를 원하는 대로 변경하세요
+      }}
+    >
+      등록
+    </Button>
+    <Button
+      className="bg-black text-white hover:bg-gray-800"
+      onClick={() => {
+        // 삭제 버튼 클릭 시 로직
+      }}
+    >
+      삭제
+    </Button>
+  </div>
+</div>
       <ResultSection>
-        <ResultSummary total={total} />
+        
         <DataTable
           columns={[
             { key: "no", label: "번호" },

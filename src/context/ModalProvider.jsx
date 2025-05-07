@@ -137,6 +137,13 @@ export function ModalProvider({ children }) {
 
               {!customButton && (
                 <div className="flex justify-center gap-3">
+                  
+                  <button
+                    className="rounded-md bg-black px-4 py-2 text-sm text-white transition hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-300"
+                    onClick={handleConfirm}
+                  >
+                    {confirmButton}
+                  </button>
                   {showCancel && (
                     <button
                       className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -145,12 +152,6 @@ export function ModalProvider({ children }) {
                       취소
                     </button>
                   )}
-                  <button
-                    className="rounded-md bg-black px-4 py-2 text-sm text-white transition hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-300"
-                    onClick={handleConfirm}
-                  >
-                    {confirmButton}
-                  </button>
                 </div>
               )}
             </div>

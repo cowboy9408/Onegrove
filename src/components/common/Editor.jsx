@@ -1,7 +1,6 @@
 import useTheme from "@/hooks/useTheme";
 import {
   BlockNoteSchema,
-  combineByGroup,
   filterSuggestionItems,
   locales,
 } from "@blocknote/core";
@@ -14,35 +13,27 @@ import {
   useCreateBlockNote,
 } from "@blocknote/react";
 import {
-  getMultiColumnSlashMenuItems,
   multiColumnDropCursor,
   locales as multiColumnLocales,
   withMultiColumn,
 } from "@blocknote/xl-multi-column";
 import { forwardRef, useImperativeHandle, useMemo } from "react";
 
-/*
- * 파일 업로드
- * */
 async function uploadFile(file) {
   const body = new FormData();
   body.append("file", file);
-
   const ret = await fetch("/api/blocknote/upload", {
     method: "POST",
     body: body,
   });
-
   return (await ret.json()).url;
 }
 
 const Editor = forwardRef(({ initialContent }, ref) => {
   const { isDarkMode } = useTheme();
-  const editor = useCreateBlockNote({
-    /* 이미지 업로드 */
-    uploadFile,
 
-    /* multi column */
+  const editor = useCreateBlockNote({
+    uploadFile,
     schema: withMultiColumn(BlockNoteSchema.create()),
     dropCursor: multiColumnDropCursor,
     dictionary: {
@@ -56,30 +47,25 @@ const Editor = forwardRef(({ initialContent }, ref) => {
     getContent: async () => await editor.blocksToFullHTML(editor.document),
   }));
 
-  /*
-   * multi column
-   * */
   const getSlashMenuItems = useMemo(() => {
     return async (query) =>
       filterSuggestionItems(
-        combineByGroup(
-          getDefaultReactSlashMenuItems(editor),
-          getMultiColumnSlashMenuItems(editor)
-        ),
+        getDefaultReactSlashMenuItems(editor),
         query
       );
   }, [editor]);
 
   return (
-    <div className="">
+    <div>
       <BlockNoteView
         editor={editor}
-        slashMenu={false}
+        slashMenu={true} // ✅ Slash 메뉴 활성화
         className="editor-container"
         theme={isDarkMode ? "dark" : "light"}
       >
+        {/* Slash 명령어 입력 시 보여줄 메뉴 */}
         <SuggestionMenuController
-          triggerCharacter={"/"}
+          triggerCharacter="/"
           getItems={getSlashMenuItems}
         />
       </BlockNoteView>

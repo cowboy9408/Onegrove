@@ -2,7 +2,6 @@ import Button from "@/components/common/Button";
 import DataTable from "@/components/common/DataTable";
 import Input from "@/components/common/Input";
 import Pagination from "@/components/common/Pagination";
-import RadioGroup from "@/components/common/RadioGroup";
 import ResultSummary from "@/components/common/ResultSummary";
 import Select from "@/components/common/Select";
 import Box from "@/components/layout/Box";
@@ -12,16 +11,15 @@ import Row from "@/components/layout/Row";
 import SearchSection from "@/components/layout/SearchSection";
 import { faker } from "@faker-js/faker";
 import { useEffect, useId, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 export default function UserListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-
   const navigate = useNavigate();
 
   const [name, setName] = useState(searchParams.get("name") || "");
   const [email, setEmail] = useState(searchParams.get("email") || "");
-  const [page, setPage] = useState(searchParams.get("page") * 1 || 1);
+  const [page, setPage] = useState(searchParams.get("page") || 1);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
 
@@ -42,6 +40,7 @@ export default function UserListPage() {
           const index = start + i + 1;
           return {
             no: index,
+            type: faker.helpers.arrayElement(["관리자", "일반", "외부"]),
             occupancy: faker.company.name(),
             name: faker.person.lastName() + faker.person.firstName(),
             username: faker.internet.userName(),
@@ -77,15 +76,6 @@ export default function UserListPage() {
     fetchData();
   }, [page]);
 
-  useEffect(() => {
-    const current = Object.fromEntries(searchParams.entries());
-
-    setSearchParams({
-      ...current,
-      page: page,
-    });
-  }, [page, searchParams, setSearchParams]);
-
   return (
     <div>
       <SearchSection>
@@ -94,8 +84,8 @@ export default function UserListPage() {
             <Col>
               <Select label={"입주사"}>
                 <option value="">전체</option>
-                <option value="">통합</option>
-                <option value="">리테일</option>
+                <option value="">입주사1</option>
+                <option value="">입주사2</option>
               </Select>
             </Col>
             <Col>
@@ -116,16 +106,6 @@ export default function UserListPage() {
                 onClear={() => setName("")}
               />
             </Col>
-            <Col>
-              <RadioGroup
-                label={"사용여부"}
-                options={[
-                  { label: "사용", value: "Y" },
-                  { label: "미사용", value: "N" },
-                ]}
-                value="Y"
-              />
-            </Col>
             <Col className="self-end">
               <Button
                 className={"h-12 w-full"}
@@ -139,23 +119,30 @@ export default function UserListPage() {
           </Row>
         </Box>
       </SearchSection>
+<div className="flex items-center justify-between mb-4">
+  <ResultSummary total={total} />
 
+  <div className="flex gap-2">
+     <Button
+          className="bg-black text-white hover:bg-gray-800"
+          onClick={() => {
+            navigate("/user/regist"); // 이동할 경로를 원하는 대로 변경하세요
+          }}
+        >
+          등록
+        </Button>
+    <Button
+      className="bg-black text-white hover:bg-gray-800"
+      onClick={() => {
+        // 삭제 버튼 클릭 시 로직
+      }}
+    >
+      삭제
+    </Button>
+  </div>
+</div>
       <ResultSection>
-        <Row className="mb-6 items-center">
-          <Col>
-            <ResultSummary total={total} />
-          </Col>
-          <Col className="flex justify-end">
-            <Button
-              onClick={() =>
-                navigate(`/user/create?${searchParams.toString()}`)
-              }
-            >
-              등록
-            </Button>
-            <Button className="ml-4">삭제</Button>
-          </Col>
-        </Row>
+        
         <DataTable
           columns={[
             { key: "no", label: "번호" },
@@ -164,11 +151,12 @@ export default function UserListPage() {
             { key: "username", label: "아이디" },
             { key: "email", label: "이메일" },
             { key: "status", label: "계정 상태" },
+            { key: "", label: "사용 여부" },
             { key: "created_user", label: "등록자" },
             { key: "created_at", label: "등록일시" },
           ]}
           data={data}
-          link={{ base: "/user", path: "no", params: searchParams.toString() }}
+          link={{ base: "/admin", path: "no" }}
         />
         <Pagination
           current={page}

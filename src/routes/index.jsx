@@ -9,6 +9,14 @@ import { SettingsGearIcon } from "@/components/ui/settings-gear";
 import { UserIcon } from "@/components/ui/user";
 import { UsersIcon } from "@/components/ui/users";
 import AuthLayout from "@/layouts/AuthLayout";
+import RetailLayout from "@/pages/retail/RetailLayout";
+import ContentsLayout from "@/pages/contents/ContentsLayout";
+import WhatsonLayout from "@/pages/contents/whatson/WhatsonLayout";
+import LifeStyleLayout from "@/pages/contents/lifestyle/LifeStyleLayout";
+import OfficeLayout from "@/pages/office/OfficeLayout";
+import InquiryLayout from "@/pages/inquiry/InquiryLayout";
+import SystemLayout from "@/pages/system/SystemLayout"
+import EventLayout from "@/pages/contents/whatson/event/EventLayout";
 import Forbidden from "@/pages/403";
 import NotFoundPage from "@/pages/404";
 import AdminDetailPage from "@/pages/admin/AdminDetailPage";
@@ -16,10 +24,29 @@ import AdminListPage from "@/pages/admin/AdminListPage";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import LoginPage from "@/pages/login/LoginPage";
 import MainPage from "@/pages/mainpage/MainPage";
-import UserCreatePage from "@/pages/user/UserCreatePage";
-import UserDetailPage from "@/pages/user/UserDetailPage";
-import UserListPage from "@/pages/user/UserListPage";
 import { matchPath } from "react-router-dom";
+import UserListPage from "@/pages/user/UserListPage";
+import OccupancyListPage from "@/pages/occupancy/OccupancyListPage";
+import BrandListPage from "@/pages/retail/brand/BrandListPage";
+import PopupListPage from "@/pages/popup/PopupListPage";
+import EventListPage from "@/pages/contents/whatson/event/EventListPage";
+import StoriesListPage from "@/pages/contents/whatson/stories/StoriesListPage"
+import All from "@/pages/contents/lifestyle/all/All"
+import Meeting from "@/pages/office/meeting/Meeting";
+import Visit from "@/pages/office/visit/Visit"
+import Sleep from "@/pages/office/sleep/Sleep"
+import FnqListPage from "@/pages/inquiry/client/FnqListPage";
+import MeetingListPage from "@/pages/system/meeting/MeetingListPage"
+import EventRegist from "@/pages/contents/whatson/event/EventRegist"
+import StoriesRegist from "@/pages/contents/whatson/stories/StoriesRegist"
+import AdminRegist from "@/pages/admin/AdminRegist"
+import UserRegist from "@/pages/user/UserRegist";
+import OccupancyRegist from "@/pages/occupancy/OccupancyRegist";
+import BrandRegist from "@/pages/retail/brand/BrandRegist";
+import WhatsOnRegist from "@/pages/contents/whatson/event/WhatsOnRegist";
+
+
+
 
 export const routeMeta = [
   {
@@ -42,7 +69,7 @@ export const routeMeta = [
         group: "/admin",
         element: <AdminListPage />,
         title: "관리자 관리",
-        icon: <UserIcon size={18} className="hover:bg-transparent" />,
+        icon: <UserIcon size={18} />,
         hidden: false,
         permissions: ["Admin"],
       },
@@ -52,62 +79,94 @@ export const routeMeta = [
         group: "/admin",
         element: <AdminDetailPage />,
         title: "관리자 상세",
-        icon: <UserIcon size={18} className="hover:bg-transparent" />,
+        icon: <UserIcon size={18} />,
         hidden: true,
         permissions: ["Admin"],
       },
+      {
+        uuid: "403ed52e-f0a2-4bdb-b1d5-e1c7cf542e1f",
+        path: "/admin/regist",
+        group: "/admin",
+        element: <AdminRegist />,
+        title: "관리자 등록",
+        icon: <UserIcon size={18} />,
+        hidden: true,
+        permissions: ["Admin"],
+      },
+    
       {
         uuid: "0c3eb744-5f42-4e6e-8107-43644c68647c",
         path: "/user",
         group: "/user",
         element: <UserListPage />,
         title: "회원 관리",
-        icon: <UsersIcon size={18} className="hover:bg-transparent" />,
+        icon: <UsersIcon size={18} />,
         hidden: false,
         permissions: ["Admin", "User"],
       },
       {
-        uuid: "b08ac13a-d0f2-4eaf-87a6-41be2ec1ca19",
-        path: "/user/create",
+       uuid: "b269e884-b419-4961-9b85-144d20ff3b4d",
+        path: "/user/regist",
         group: "/user",
-        element: <UserCreatePage />,
+        element: <UserRegist />,
         title: "회원 등록",
+        icon: <UsersIcon size={18} />,
         hidden: true,
         permissions: ["Admin", "User"],
       },
-      {
-        uuid: "9f4398bc-b8b1-47e4-bf39-77acecbf415e",
-        path: "/user/:id",
-        group: "/user",
-        element: <UserDetailPage />,
-        title: "회원 상세",
-        hidden: true,
-        permissions: ["Admin", "User"],
-      },
+
       {
         uuid: "dc861768-42d2-4b30-ac51-657ea9d3e408",
         path: "/occupancy",
-        element: <></>,
+        element: <OccupancyListPage />,
         title: "입주사 관리",
-        icon: <HomeIcon size={18} className="hover:bg-transparent" />,
+        icon: <HomeIcon size={18} />,
         hidden: false,
         permissions: ["Admin", "User"],
       },
       {
+        uuid: "89309bbd-2edc-4cf0-8b6c-6960e023b340",
+        path: "/occupancy/regist",
+        element: <OccupancyRegist />,
+        title: "입주사 등록",
+        icon: <HomeIcon size={18} />,
+        hidden: true,
+        permissions: ["Admin", "User"],
+      },
+
+      {
         uuid: "8f9c0fc2-72b3-4347-be97-6ca3f7030286",
         path: "/retail",
-        element: <></>,
+        element: <RetailLayout/>,
         title: "리테일 관리",
-        icon: <CartIcon size={18} className="hover:bg-transparent" />,
+        icon: <CartIcon size={18} />,
         hidden: false,
         permissions: ["Admin", "User"],
+        children : [
+          {
+            uuid: "07dcc050-f903-402f-948f-2e38f7fb79cb",
+            path: "/retail/brand",
+            element: <BrandListPage />,
+            title: "입점 브랜드 관리",
+            hidden: false,
+            permissions: ["Admin", "User"],
+          },
+          {
+            uuid: "e002650c-3989-4441-81a8-32f69d76ecdb",
+            path: "/retail/brand/regist",
+            element: <BrandRegist />,
+            title: "입점 브랜드 관리",
+            hidden: true,
+            permissions: ["Admin", "User"],
+          },
+        ],
       },
       {
         uuid: "5c70b017-35f2-441f-8ac4-dee0f6a9401f",
         path: "/popup",
-        element: <></>,
+        element: <PopupListPage/>,
         title: "팝업 관리",
-        icon: <BellIcon size={18} className="hover:bg-transparent" />,
+        icon: <BellIcon size={18} />,
         hidden: false,
         permissions: ["Admin", "User"],
       },
@@ -116,56 +175,84 @@ export const routeMeta = [
         path: "/mainpage",
         element: <MainPage />,
         title: "메인화면 관리",
-        icon: <LayoutPanelTopIcon size={18} className="hover:bg-transparent" />,
+        icon: <LayoutPanelTopIcon size={18} />,
         hidden: false,
         permissions: ["Admin", "User"],
       },
       {
         uuid: "4c15f65b-5154-48be-8d42-d373136c529f",
         path: "/contents",
-        element: <></>,
+        element: <ContentsLayout/>,
         title: "콘텐츠 관리",
-        icon: <FileTextIcon size={18} className="hover:bg-transparent" />,
+        icon: <FileTextIcon size={18} />,
         hidden: false,
         permissions: ["Admin", "User"],
         children: [
           {
             uuid: "952664cb-fbe1-4ecd-bb18-ca6aecead4d1",
-            path: "/contents/wathson",
-            element: <></>,
+            path: "/contents/whatson",
+            element: <WhatsonLayout />,
             title: "Wath`s On",
             hidden: false,
             permissions: ["Admin", "User"],
             children: [
               {
-                uuid: "d37ccd54-b4bb-4980-b259-2905f47dcc3f",
-                path: "/contents/wathson/event",
-                group: "/contents/wathson/event",
-                element: <></>,
+                uuid: "65fd1d07-6662-4b26-aff1-31c9416c10d0",
+                path: "/contents/whatson/event",
+                element: <EventLayout />,
                 title: "Event & Promotion",
+                hidden: false,
+                permissions: ["Admin", "User"],
+                children: [
+              {
+                uuid: "13b5a3c8-4b1c-472c-baa5-0d129960be95",
+                path: "/contents/whatson/event/main",
+                
+                element: <WhatsOnRegist />,
+                title: "Event&Promotion 콘텐츠",
+                hidden: false,
+                permissions: ["Admin", "User"],
+              },
+
+              {
+                uuid: "d37ccd54-b4bb-4980-b259-2905f47dcc3f",
+                path: "/contents/whatson/event/list",
+            
+                element: <EventListPage />,
+                title: "Event & Promotion 리스트",
                 hidden: false,
                 permissions: ["Admin", "User"],
               },
               {
-                uuid: "02a4628c-ae19-4574-a39e-eec25a7e0138",
-                path: "/contents/wathson/event/:id",
-                group: "/contents/wathson/event",
-                element: <></>,
-                title: "Event & Promotion",
+                uuid: "335b31b2-0f7a-46f9-b4dd-1b2b92034be6",
+                path: "/contents/whatson/event/regist",
+                group: "/contents/whatson/event/list",
+                element: <EventRegist />,
+                title: "Event & Promotion 등록",
                 hidden: true,
                 permissions: ["Admin", "User"],
               },
+            ],
+          },
               {
                 uuid: "5bca7eb5-7483-43a2-89da-7f71b78ea41c",
-                path: "/contents/wathson/stories",
-                element: <></>,
+                path: "/contents/whatson/stories",
+                element: <StoriesListPage />,
                 title: "Stories of One Grove",
                 hidden: false,
                 permissions: ["Admin", "User"],
               },
               {
+                uuid: "e748e4e2-c9a5-4d87-a202-956dd565c286",
+                path: "/contents/whatson/stories/regist",
+                element: <StoriesRegist />,
+                title: "Stories of One Grove 등록",
+                hidden: true,
+                permissions: ["Admin", "User"],
+              },
+              {
                 uuid: "b4b2c8b4-a2ba-4d6c-9379-d0b0ef21698a",
-                path: "/contents/wathson/neighborhood",
+                path: "/contents/whatson/neighborhood",
                 element: <></>,
                 title: "Neighborhood",
                 hidden: false,
@@ -173,7 +260,7 @@ export const routeMeta = [
               },
               {
                 uuid: "b277e917-fa13-4827-be23-2e2ca4164853",
-                path: "/contents/wathson/media",
+                path: "/contents/whatson/media",
                 element: <></>,
                 title: "Press & Media",
                 hidden: false,
@@ -184,7 +271,7 @@ export const routeMeta = [
           {
             uuid: "88afdd08-b5f6-420a-bc03-28eb0f31d182",
             path: "/contents/lifestyle",
-            element: <></>,
+            element: <LifeStyleLayout />,
             title: "Lifestyle",
             hidden: false,
             permissions: ["Admin", "User"],
@@ -192,7 +279,7 @@ export const routeMeta = [
               {
                 uuid: "68f994c5-2dac-49cf-b30d-e7eae1b29b76",
                 path: "/contents/lifestyle/all",
-                element: <></>,
+                element: <All />,
                 title: "All",
                 hidden: false,
                 permissions: ["Admin", "User"],
@@ -280,16 +367,16 @@ export const routeMeta = [
       {
         uuid: "b7bd1575-4a90-4c6c-8edd-a638d05fb371",
         path: "/office",
-        element: <></>,
+        element: <OfficeLayout />,
         title: "오피스 관리",
-        icon: <CalendarDaysIcon size={18} className="hover:bg-transparent" />,
+        icon: <CalendarDaysIcon size={18} />,
         hidden: false,
         permissions: ["Admin", "User"],
         children: [
           {
             uuid: "b3c13f6a-0715-4199-b0bd-dcc163d4c89d",
             path: "/office/meeting",
-            element: <></>,
+            element: <Meeting />,
             title: "회의실 예약",
             hidden: false,
             permissions: ["Admin", "User"],
@@ -297,7 +384,7 @@ export const routeMeta = [
           {
             uuid: "28f505be-2143-4fe3-bef3-3b7e031a8247",
             path: "/office/visit",
-            element: <></>,
+            element: <Visit />,
             title: "방문 예약",
             hidden: false,
             permissions: ["Admin", "User"],
@@ -313,7 +400,7 @@ export const routeMeta = [
           {
             uuid: "95b2aae3-4ce2-4782-95ca-62c4111dcc17",
             path: "/office/sleep",
-            element: <></>,
+            element: <Sleep />,
             title: "수면실 예약",
             hidden: false,
             permissions: ["Admin", "User"],
@@ -323,17 +410,17 @@ export const routeMeta = [
       {
         uuid: "1ba90607-e1b4-4075-9b2d-c28a56559cb1",
         path: "/inquiry",
-        element: <></>,
+        element: <InquiryLayout />,
         title: "고객 문의",
-        icon: <CircleHelpIcon size={18} className="hover:bg-transparent" />,
+        icon: <CircleHelpIcon size={18} />,
         hidden: false,
         permissions: ["Admin", "User"],
         children: [
           {
             uuid: "e1582c44-00e8-4667-8361-dff7da5d9964",
-            path: "/inquiry/general",
-            element: <></>,
-            title: "일반문의",
+            path: "/inquiry/client",
+            element: <FnqListPage />,
+            title: "고객문의",
             hidden: false,
             permissions: ["Admin", "User"],
           },
@@ -366,9 +453,9 @@ export const routeMeta = [
       {
         uuid: "c9c84ed1-a896-4d9b-b659-cd6a43dc8cd2",
         path: "/system",
-        element: <></>,
+        element: <SystemLayout />,
         title: "시스템 관리",
-        icon: <SettingsGearIcon size={18} className="hover:bg-transparent" />,
+        icon: <SettingsGearIcon size={18} />,
         hidden: false,
         permissions: ["Admin"],
         children: [
@@ -383,7 +470,7 @@ export const routeMeta = [
           {
             uuid: "e59c7075-0b1c-4607-b548-c38fa7566532",
             path: "/system/meeting",
-            element: <></>,
+            element: <MeetingListPage />,
             title: "회의실 설정",
             hidden: false,
             permissions: ["Admin"],
@@ -412,6 +499,21 @@ export const routeMeta = [
   { path: "/403", element: <Forbidden /> },
   { path: "*", element: <NotFoundPage /> },
 ];
+
+export function findRouteMeta(pathname, items = routeMeta, parents = []) {
+  for (const item of items) {
+    if (pathname === item.path && !item.children) {
+      return item;
+    }
+
+    if (item.children) {
+      const found = findRouteMeta(pathname, item.children, [...parents, item]);
+      if (found) return found;
+    }
+  }
+
+  return null;
+}
 
 export function buildRoutes(items = routeMeta) {
   return items.map((item) => {

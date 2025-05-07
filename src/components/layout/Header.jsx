@@ -1,16 +1,16 @@
-import { findMatchingRoute } from "@/routes";
+import { findRouteMeta } from "@/routes";
 import { useAuthStore } from "@/store/authStore";
 import { useLocation, useNavigate } from "react-router-dom";
-import Tooltip from "../common/Tooltip";
-import { BadgeAlertIcon } from "../ui/badge-alert";
 import { LogoutIcon } from "../ui/logout";
 import DarkModeToggle from "./DarkModeToggle";
+import { BadgeAlertIcon } from "../ui/badge-alert";
+import Tooltip from "../common/Tooltip";
 
 export default function Header() {
   const removeAccessToken = useAuthStore((state) => state.removeAccessToken);
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const meta = findMatchingRoute(pathname);
+  const meta = findRouteMeta(pathname);
 
   const handleLogout = () => {
     removeAccessToken();

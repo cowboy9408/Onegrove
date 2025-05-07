@@ -7,11 +7,10 @@ export default function FieldGroup({ name, children }) {
 
   return (
     <>
-      {fields.map((field, index) => (
-        <React.Fragment key={field.id}>
-          {children({ fields, field, index, register, append, remove })}
-        </React.Fragment>
-      ))}
+      {fields.map((field, index) => {
+        const content = children({ fields, field, index, register, append, remove });
+        return <div key={field.id}>{content}</div>;
+      })}
     </>
   );
 }
