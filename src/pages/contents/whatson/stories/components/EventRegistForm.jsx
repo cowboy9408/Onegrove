@@ -11,7 +11,7 @@ import Col from "@/components/layout/Col";
 import BrandList from "@/components/modal/BrandList";
 import useModal from "@/hooks/useModal";
 import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ 목록 이동용
+import { useNavigate } from "react-router-dom"; //목록 이동용
 
 export default function EventRegistForm() {
   const methods = useForm();
@@ -19,7 +19,7 @@ export default function EventRegistForm() {
   const [brands, setBrands] = useState([]);
   const { showModal } = useModal();
   const [dateRange, setDateRange] = useState({ startDate: null, endDate: null });
-  const navigate = useNavigate(); // ✅ 페이지 이동 훅
+  const navigate = useNavigate(); 
 
   const onSubmit = async (data) => {
     const content = await editorRef.current.getContent();
@@ -34,7 +34,7 @@ export default function EventRegistForm() {
   return (
     <FormProvider {...methods}>
       <form
-        id="event-regist-form" // ✅ form ID 추가
+        id="event-regist-form"
         onSubmit={methods.handleSubmit(onSubmit)}
         className="space-y-6 p-6"
       >

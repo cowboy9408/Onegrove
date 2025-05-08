@@ -59,7 +59,7 @@ const Editor = forwardRef(({ initialContent }, ref) => {
     <div>
       <BlockNoteView
         editor={editor}
-        slashMenu={true} // ✅ Slash 메뉴 활성화
+        slashMenu={true} //  Slash 메뉴 활성화
         className="editor-container"
         theme={isDarkMode ? "dark" : "light"}
       >

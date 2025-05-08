@@ -142,7 +142,7 @@ export default function Upload({
       </div>
     )}
 
-    {/* ✅ 업로드 박스 (미리보기 아래에 위치 X) */}
+    {/* 업로드 박스 (미리보기 아래에 위치 X) */}
     <div
       className={cn(
         "relative flex h-10 w-full cursor-pointer items-center justify-center rounded-md border border-dashed text-xs text-gray-500",

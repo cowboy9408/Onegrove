@@ -184,7 +184,7 @@ const [visibility, setVisibility] = useState(""); // 노출 여부
     try {
       const parsed = JSON.parse(saved);
 
-      // ✅ 삭제 대상 ID 집합 만들기
+      // 삭제 대상 ID 집합 만들기
       const idsToDelete = new Set(
         data
           .filter((item) => checkedIds.includes(item._id))

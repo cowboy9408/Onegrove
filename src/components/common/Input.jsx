@@ -20,7 +20,7 @@ const Input = forwardRef(function Input(
     onClear,
     error,
     topLabel = true,
-    ...rest // ✅ 여전히 받지만 주의해서 사용
+    ...rest //여전히 받지만 주의해서 사용
   },
   ref
 ) {

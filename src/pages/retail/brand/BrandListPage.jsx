@@ -9,7 +9,6 @@ import Col from "@/components/layout/Col";
 import ResultSection from "@/components/layout/ResultSection";
 import Row from "@/components/layout/Row";
 import SearchSection from "@/components/layout/SearchSection";
-import { faker } from "@faker-js/faker";
 import { useEffect, useId, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
@@ -29,51 +28,28 @@ export default function UserListPage() {
   const size = 10;
 
   useEffect(() => {
-    const fetchData = async () => {
-      // TODO: faker 삭제
-      const generateFakePagedUsers = ({ page = 1, size = 10 }) => {
-        const totalElements = 23;
-        const totalPages = Math.ceil(totalElements / size);
-        const start = (page - 1) * size;
-
-        const data = Array.from({ length: size }, (_, i) => {
-          const index = start + i + 1;
-          return {
-            no: index,
-            type: faker.helpers.arrayElement(["관리자", "일반", "외부"]),
-            occupancy: faker.company.name(),
-            name: faker.person.lastName() + faker.person.firstName(),
-            username: faker.internet.userName(),
-            email: faker.internet.email(),
-            status: faker.helpers.arrayElement(["활성", "비활성"]),
-            created_user: faker.person.fullName(),
-            created_at: faker.date
-              .recent({ days: 30 })
-              .toISOString()
-              .split("T")[0],
-          };
-        });
-
-        return {
-          pageable: {
-            totalPages,
-            totalElements,
-            currentPage: page,
-            pageSize: size,
-          },
-          data: data.slice(0, totalElements - start), // 마지막 페이지 size 조정
-        };
-      };
-      // END TODO faker 삭제
-
-      // TODO: FETCH DATA
-      const res = generateFakePagedUsers(page);
-
-      setData(res.data);
-      setTotal(res.pageable.totalElements);
-    };
-
-    fetchData();
+    const saved = localStorage.getItem("brands");
+    if (!saved) return;
+  
+    try {
+      const parsed = JSON.parse(saved);
+      const start = (page - 1) * size;
+      const sliced = parsed.slice(start, start + size).map((brand, idx) => ({
+        no: start + idx + 1,
+        name: brand.companyName || "-",
+        occupancy: brand.office || "-",
+        username: brand.ceoName || "-",
+        email: brand.phone || "-",
+        status: brand.useStatus === "active" ? "활성" : "비활성",
+        created_user: "관리자",
+        created_at: brand.created_at?.split("T")[0] || "-",
+      }));
+  
+      setData(sliced);
+      setTotal(parsed.length);
+    } catch (err) {
+      console.error("브랜드 리스트 파싱 오류:", err);
+    }
   }, [page]);
 
   return (
@@ -82,10 +58,10 @@ export default function UserListPage() {
         <Box>
           <Row>
             <Col>
-              <Select label={"입주사"}>
+              <Select label={"카테고리"}>
                 <option value="">전체</option>
-                <option value="">입주사1</option>
-                <option value="">입주사2</option>
+                <option value="">카테고리1</option>
+                <option value="">카테고리2</option>
               </Select>
             </Col>
             <Col>

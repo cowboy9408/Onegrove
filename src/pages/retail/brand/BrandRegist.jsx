@@ -11,6 +11,7 @@ import Editor from "@/components/common/Editor";
 import NewInput from "@/components/common/NewInput";
 
 export default function BrandRegist() {
+  
   const [form, setForm] = useState({
     companyName: "",
     useStatus: "active",
@@ -51,19 +52,18 @@ export default function BrandRegist() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleNestedChange = (section, key, value) => {
-    setForm((prev) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [key]: value,
-      },
-    }));
-  };
+  
 
   const handleSubmit = () => {
-    console.log("등록 요청 데이터:", form);
-    // TODO: 서버로 전송 처리
+    const now = new Date().toISOString();
+    const newBrand = { ...form, created_at: now };
+  
+    const existing = JSON.parse(localStorage.getItem("brands") || "[]");
+    const updated = [...existing, newBrand];
+    localStorage.setItem("brands", JSON.stringify(updated));
+  
+    alert("저장되었습니다.");
+    navigate("/retail/brand"); // 목록 페이지로 이동
   };
 
   return (
