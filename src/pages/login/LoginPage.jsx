@@ -6,6 +6,7 @@ import { useAuthStore } from "../../store/authStore";
 import Checkbox from "@/components/common/Checkbox";
 import useModal from "@/hooks/useModal";
 import PasswordResetModal from "@/components/modal/PasswordResetModal";
+import { getUserInfo } from "@/api/user";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -14,14 +15,15 @@ export default function LoginPage() {
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
   const [saveId, setSaveId] = useState(false);
   const { showModal } = useModal();
+  const setName = useAuthStore((state) => state.setName);
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // TODO: SIGN API
-    setAccessToken("dummy");
-    // TODO: GET ME INFO API
-    // await getUserInfo();
+    const res = await getUserInfo(username, password);
+
+    setAccessToken(res.accessToken);
+    setName(res.name);
 
     navigate("/");
   };

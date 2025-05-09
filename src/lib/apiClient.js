@@ -53,7 +53,7 @@ api.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !originalRequest.url.includes("/api/auth/refresh")
+      !originalRequest.url.includes("/api/v1/auth/refresh")
     ) {
       originalRequest._retry = true;
 
@@ -73,7 +73,7 @@ api.interceptors.response.use(
 
       try {
         const response = await axios.post(
-          `${baseURL}/api/auth/refresh`,
+          `${baseURL}/api/v1/auth/refresh`,
           {},
           { withCredentials: true }
         );
