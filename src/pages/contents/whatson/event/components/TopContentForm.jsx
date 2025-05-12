@@ -12,12 +12,14 @@ import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
-
 const simpleSchema = z.object({
   type: z.literal("simple"),
   image: fileSchema,
   url: z.string().url("유효한 URL 이 아닙니다."),
-  category: z.string().min(1, "카테고리는 필수값입니다.").max(30, "카테고리는 30자 이내여야 합니다."),
+  category: z
+    .string()
+    .min(1, "카테고리는 필수값입니다.")
+    .max(30, "카테고리는 30자 이내여야 합니다."),
   title: z.string().optional(),
   subtitle: z.string().optional(),
   detail: z.string().optional(),
@@ -28,7 +30,10 @@ const complexSchema = z.object({
   type: z.literal("complex"),
   image: fileSchema,
   url: z.string().url("유효한 URL 이 아닙니다."),
-  category: z.string().min(1, "카테고리는 필수값입니다.").max(30, "카테고리는 30자 이내여야 합니다."),
+  category: z
+    .string()
+    .min(1, "카테고리는 필수값입니다.")
+    .max(30, "카테고리는 30자 이내여야 합니다."),
   title: z
     .string()
     .min(1, "타이틀은 필수값입니다.")
@@ -82,120 +87,125 @@ export default function TopContentForm({ data, setData }) {
     reset({ etc: data });
   }, [data, reset]);
 
-  
-
   const onSubmit = (formValues) => {
     setData(formValues.etc); // 이 줄이 없으면 오류 뜹니다!
   };
-  
 
   return (
     <FormProvider {...methods}>
       <form onBlur={handleSubmit(onSubmit)} className="space-y-8 p-4">
-       <FieldGroup name="etc">
+        <FieldGroup name="etc">
           {({ fields, field, index, append, remove }) => (
-            <Box key={`${field.id}-${index}`} className="mb-2 rounded-md border-2 border-gray-200">
+            <Box
+              key={`${field.id}-${index}`}
+              className="mb-2 rounded-md border-2 border-gray-200"
+            >
               <Title title={`■ 상단 콘텐츠 영역 ${index + 1}`} />
 
-      <Row className="pb-4">
-  <FormInput
-    label="카테고리"
-    fieldName={`etc.${index}.category`}
-    maxLength={30}
-    required
-    placeholder="카테고리를 입력해주세요."
-    {...register(`etc.${index}.category`)}
-    error={errors.etc?.[index]?.category?.message}
-    onClear={() => resetField(`etc.${index}.category`)}
-  />
-</Row>
-      <Row className="pb-4">
-      <FormInput
-  label="타이틀"
-  fieldName={`etc.${index}.title`}
-  required
-  {...register(`etc.${index}.title`)}
-  error={errors.etc?.[index]?.title?.message}
-  onClear={() => resetField(`etc.${index}.title`)}
-  placeholder="타이틀을 입력해주세요."
-/>
-      </Row>
+              <Row className="pb-4">
+                <FormInput
+                  label="카테고리"
+                  fieldName={`etc.${index}.category`}
+                  maxLength={30}
+                  required
+                  placeholder="카테고리를 입력해주세요."
+                  {...register(`etc.${index}.category`)}
+                  error={errors.etc?.[index]?.category?.message}
+                  onClear={() => resetField(`etc.${index}.category`)}
+                />
+              </Row>
+              <Row className="pb-4">
+                <FormInput
+                  label="타이틀"
+                  fieldName={`etc.${index}.title`}
+                  required
+                  {...register(`etc.${index}.title`)}
+                  error={errors.etc?.[index]?.title?.message}
+                  onClear={() => resetField(`etc.${index}.title`)}
+                  placeholder="타이틀을 입력해주세요."
+                />
+              </Row>
 
-      {/* 서브타이틀 */}
-      <Row className="pb-4">
-        <FormInput
-          id={`subtitle-${field.id}`}
-          label="서브타이틀"
-          fieldName={`etc.${index}.subtitle`}
-          maxLength={50}
-          required
-          placeholder="서브타이틀을 입력해주세요."
-          {...register(`etc.${index}.subtitle`)}
-          error={errors.etc?.[index]?.subtitle?.message}
-          onClear={() => resetField(`etc.${index}.subtitle`)}
-        />
-      </Row>
-      {/* 이미지 업로드 */}
-      <Row className="pb-4">
-        <Upload
-          name={`etc.${index}.image`}
-          label="이미지"
-          error={errors.etc?.[index]?.image?.message}
-        />
-      </Row>
+              {/* 서브타이틀 */}
+              <Row className="pb-4">
+                <FormInput
+                  id={`subtitle-${field.id}`}
+                  label="서브타이틀"
+                  fieldName={`etc.${index}.subtitle`}
+                  maxLength={50}
+                  required
+                  placeholder="서브타이틀을 입력해주세요."
+                  {...register(`etc.${index}.subtitle`)}
+                  error={errors.etc?.[index]?.subtitle?.message}
+                  onClear={() => resetField(`etc.${index}.subtitle`)}
+                />
+              </Row>
+              {/* 이미지 업로드 */}
+              <Row className="pb-4">
+                <Upload
+                  name={`etc.${index}.image`}
+                  label="이미지"
+                  error={errors.etc?.[index]?.image?.message}
+                />
+              </Row>
 
-      {/* 버튼명 */}
-      <Row className="pb-4">
-        <FormInput
-          id={`button-${field.id}`}
-          label="버튼명"
-          fieldName={`etc.${index}.button`}
-          maxLength={100}
-          required
-          placeholder="버튼명을 입력해주세요."
-          {...register(`etc.${index}.button`)}
-          error={errors.etc?.[index]?.button?.message}
-          onClear={() => resetField(`etc.${index}.button`)}
-        />
-      </Row>
+              {/* 버튼명 */}
+              <Row className="pb-4">
+                <FormInput
+                  id={`button-${field.id}`}
+                  label="버튼명"
+                  fieldName={`etc.${index}.button`}
+                  maxLength={100}
+                  required
+                  placeholder="버튼명을 입력해주세요."
+                  {...register(`etc.${index}.button`)}
+                  error={errors.etc?.[index]?.button?.message}
+                  onClear={() => resetField(`etc.${index}.button`)}
+                />
+              </Row>
 
-      {/* URL */}
-      <Row className="pb-4">
-        <FormInput
-          id={`url-${field.id}`}
-          label="URL"
-          fieldName={`etc.${index}.url`}
-          maxLength={1000}
-          required
-          placeholder="URL을 입력해주세요"
-          {...register(`etc.${index}.url`)}
-          error={errors.etc?.[index]?.url?.message}
-          onClear={() => resetField(`etc.${index}.url`)}
-        />
-      </Row>
+              {/* URL */}
+              <Row className="pb-4">
+                <FormInput
+                  id={`url-${field.id}`}
+                  label="URL"
+                  fieldName={`etc.${index}.url`}
+                  maxLength={1000}
+                  required
+                  placeholder="URL을 입력해주세요"
+                  {...register(`etc.${index}.url`)}
+                  error={errors.etc?.[index]?.url?.message}
+                  onClear={() => resetField(`etc.${index}.url`)}
+                />
+              </Row>
 
-      {/* 추가/삭제 버튼 */}
-      <Row className="flex justify-center gap-2">
-                {index === fields.length - 1 && fields.length < MAX_ETC_LENGTH && (
+              {/* 추가/삭제 버튼 */}
+              <Row className="flex justify-center gap-2">
+                {index === fields.length - 1 &&
+                  fields.length < MAX_ETC_LENGTH && (
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        append({
+                          type: "complex",
+                          image: { name: "", url: "", size: 0 },
+                          url: "",
+                          title: "",
+                          subtitle: "",
+                          detail: "",
+                          button: "",
+                        })
+                      }
+                    >
+                      추가
+                    </Button>
+                  )}
+                {index > 0 && (
                   <Button
                     type="button"
-                    onClick={() =>
-                      append({
-                        type: "complex",
-                        image: { name: "", url: "", size: 0 },
-                        url: "",
-                        title: "",
-                        subtitle: "",
-                        detail: "",
-                        button: "",
-                      })
-                    }
+                    color="red"
+                    onClick={() => remove(index)}
                   >
-                    추가
-                  </Button>
-                )}
-                {index > 0 && (
-                  <Button type="button" color="red" onClick={() => remove(index)}>
                     삭제
                   </Button>
                 )}

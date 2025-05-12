@@ -9,15 +9,13 @@ import Title from "@/components/layout/Title";
 import { fileSchema } from "@/validation/schemas/fileSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useId } from "react";
-import { FormProvider, useForm} from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
-
-
 
 const schema = z.object({
   banner: z.object({
     bannerNB: z
-    .string()
+      .string()
       .nullable()
       .refine((val) => !!val, {
         message: "배너 타입을 선택해주세요.",
@@ -72,7 +70,7 @@ export default function BannerForm({ data, setData }) {
         url: "",
       },
     },
-  }); 
+  });
 
   const {
     formState: { errors },
@@ -86,47 +84,44 @@ export default function BannerForm({ data, setData }) {
     reset({ banner: data });
   }, [data, reset]);
 
-
   const onSubmit = (formValues) => {
     setData(formValues.banner); // 상위로 전달
   };
 
-  
-
   return (
     <FormProvider {...methods}>
-    {/* 변경 시점에만 실행되도록 onBlur 사용 */}
-    <form onBlur={handleSubmit(onSubmit)} className="space-y-8 p-4">
-      <Box className="mb-2 rounded-md border-2 border-gray-200">
-        <Title title={`■ 띠배너 영역`} />
+      {/* 변경 시점에만 실행되도록 onBlur 사용 */}
+      <form onBlur={handleSubmit(onSubmit)} className="space-y-8 p-4">
+        <Box className="mb-2 rounded-md border-2 border-gray-200">
+          <Title title={`■ 띠배너 영역`} />
           <Row className="pb-4">
-  <div className="flex gap-8 w-full">
-    <div className="flex-1">
-      <FormRadioGroup
-        name={`banner.bannerNB`} 
-        label="배너타입"
-        options={[
-          { label: "기본형", value: "N" },
-          { label: "대형", value: "B" },
-        ]}
-        required
-        error={errors.banner?.type?.message}
-      />
-    </div>
-    <div className="flex-1">
-      <FormRadioGroup
-        name={`banner.displayYn`}
-        label="노출여부"
-        options={[
-          { label: "노출", value: "Y" },
-          { label: "미노출", value: "N" },
-        ]}
-        required
-        error={errors.banner?.displayYn?.message}
-      />
-    </div>
-  </div>
-</Row>
+            <div className="flex w-full gap-8">
+              <div className="flex-1">
+                <FormRadioGroup
+                  name={`banner.bannerNB`}
+                  label="배너타입"
+                  options={[
+                    { label: "기본형", value: "N" },
+                    { label: "대형", value: "B" },
+                  ]}
+                  required
+                  error={errors.banner?.type?.message}
+                />
+              </div>
+              <div className="flex-1">
+                <FormRadioGroup
+                  name={`banner.displayYn`}
+                  label="노출여부"
+                  options={[
+                    { label: "노출", value: "Y" },
+                    { label: "미노출", value: "N" },
+                  ]}
+                  required
+                  error={errors.banner?.displayYn?.message}
+                />
+              </div>
+            </div>
+          </Row>
           <Row className="pb-4">
             <FormInput
               id={titleId}
