@@ -33,7 +33,7 @@ export default function LoginPage() {
   className="flex flex-col min-h-screen items-center justify-center bg-white px-4 font-sans dark:bg-white"
 >
 <img
-    src="/src/img/ONE GROVE.png" // 실제 경로로 변경하세요
+    src="/src/img/ONE GROVE.png" 
     alt="ONE GROVE 로고"
     className="mx-auto h-20 w-auto mb-10"
   />
