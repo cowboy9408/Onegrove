@@ -24,6 +24,7 @@ export const useAuthStore = create(
           secure: import.meta.env.MODE === "development",
           sameSite: "strict",
         });
+        localStorage.setItem("accessToken", token);
       },
       removeAccessToken: () => {
         set({ accessToken: null, permission: null });

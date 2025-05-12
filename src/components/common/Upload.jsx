@@ -47,6 +47,14 @@ export default function Upload({
     if (value?.name && value?.size && value?.url) {
       setLocalFile({ name: value.name, size: value.size });
       setPreviewUrl(value.url);
+  
+      // status가 없다면 R로 설정 (유지 상태)
+      if (!value.status) {
+        onChange({
+          ...value,
+          status: 'R',
+        });
+      }
     }
   }, [value]);
 
@@ -77,27 +85,42 @@ export default function Upload({
     url: blobUrl,  // 실제 업로드 URL이 아니라 local preview용 URL
   });
 
-    // try {
-    //   const res = await api.post("/api/upload", formData, {
-    //     headers: { "Content-Type": "multipart/form-data" },
-    //   });
-
-    //   const result = res.data;
-    //   setLocalFile(selectedFile);
-
-    //   if (result.url) {
-    //     setPreviewUrl(result.url);
-    //     onChange({
-    //       name: selectedFile.name,
-    //       size: selectedFile.size,
-    //       url: result.url,
-    //     });
-    //   } else {
-    //     console.error("파일 업로드 실패", result);
-    //   }
-    // } catch (err) {
-    //   console.error("파일 업로드 에러", err);
-    // }
+  try {
+    const res = await api.post("/api/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      withCredentials: true,
+    });
+  
+    const result = res.data;
+    const isReplace = !!value; // 기존에 파일이 있었는지 확인
+  
+    if (result.name && result.path) {
+      onChange({
+        id: null,
+        originalName: selectedFile.name,
+        name: result.name,
+        size: result.size,
+        extension: "." + selectedFile.name.split(".").pop(),
+        mime: result.mime || selectedFile.type,
+        classification: null,
+        path: result.path,
+        status: isReplace ? 'E' : 'C',
+        url: result.url || previewUrl,
+      });
+    } else {
+      console.error("파일 업로드 실패", result);
+    }
+  } catch (err) {
+    if (err.isAuthFailed) {
+      alert("세션이 만료되었습니다. 다시 로그인해주세요.");
+      // 필요시 로그인 모달 오픈 등 UI 처리
+    } else {
+      console.error("파일 업로드 에러", err);
+      alert("파일 업로드 중 문제가 발생했습니다.");
+    }
+  }
   };
 
   const handleClick = () => {
@@ -108,7 +131,11 @@ export default function Upload({
     setLocalFile(null);
     setPreviewUrl(null);
     inputRef.current.value = null;
-    onChange(null); // react-hook-form에서 값 제거
+    onChange({
+      ...value,
+      url: null, 
+      status: 'D',
+    });
   };
 
   const formatSize = (size) => {

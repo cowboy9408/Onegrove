@@ -3,6 +3,8 @@ import { create } from "zustand";
 export const useLoadingStore = create((set, get) => ({
   count: 0,
   isLoading: false,
+  startLoading: () => set({ isLoading: true }),
+  endLoading: () => set({ isLoading: false }),
   increment: () =>
     set((state) => {
       const newCount = state.count + 1;

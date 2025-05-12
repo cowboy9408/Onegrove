@@ -17,9 +17,10 @@ export const getUserInfo = async (username, password) => {
 export const getRefreshAccessToken = async () => {
   const res = await api.post(import.meta.env.VITE_API_BASE_URL + "/api/v1/auth/refresh");
   const newAccessToken = res.data.accessToken;
+  const permission = res.data.permission;
 
   const setAccessToken = useAuthStore.getState().setAccessToken;
-  setAccessToken(newAccessToken);
+  setAccessToken(newAccessToken, permission);
 
-  return newAccessToken;
+  return { accessToken: newAccessToken, permission };
 }

@@ -7,7 +7,7 @@ import {  useForm,  FormProvider, Controller, } from "react-hook-form";
   import Checkbox from "@/components/common/Checkbox";
   import NewInput from "@/components/common/NewInput";
   import Editor from "@/components/common/Editor";
-  import api from "@/lib/apiClient";
+
   
   const BrandRegistForm = forwardRef(({ lang }, ref) => {
     const methods = useForm();
@@ -20,7 +20,36 @@ import {  useForm,  FormProvider, Controller, } from "react-hook-form";
         if (!valid) return null;
         const values = getValues();
         const content = await editorRef.current?.getContent?.();
-        return { ...values, description: content };
+    
+        // 이미지 메타데이터 변환 함수
+        const toImageMeta = (file) => {
+          if (!file || !file.name) return null;
+    
+          return {
+            id: null,
+            originalName: file.originalName || file.name,
+            name: file.name,
+            size: file.size,
+            extension: "." + file.name.split(".").pop(),
+            mime: file.type || "image/png",
+            classification: null,
+            path: `C:\\\\upload\\/test\\${file.name}`,
+            status: null,
+          };
+        };
+    
+        return {
+          ...values,
+          description: content,
+          mainImage: toImageMeta(values.mainImage),
+          pcImage: toImageMeta(values.pcImage),
+          moImage: toImageMeta(values.moImage),
+          contentImage1: toImageMeta(values.contentImage1),
+          contentImage2: toImageMeta(values.contentImage2),
+          contentImage3: toImageMeta(values.contentImage3),
+          contentImage4: toImageMeta(values.contentImage4),
+          contentImage5: toImageMeta(values.contentImage5),
+        };
       },
     }));
   
