@@ -9,6 +9,7 @@ export const useAuthStore = create(
   persist(
     (set, get) => ({
       accessToken: null,
+      refreshToken: null,
       permission: null,
       name: null,
       setAccessToken: (token) => {
@@ -25,6 +26,11 @@ export const useAuthStore = create(
           sameSite: "strict",
         });
         localStorage.setItem("accessToken", token);
+      },
+      setRefreshToken: (token) => {
+        if (!token) return;
+        set({ refreshToken: token });
+        localStorage.setItem("refreshToken", token);
       },
       removeAccessToken: () => {
         set({ accessToken: null, permission: null });

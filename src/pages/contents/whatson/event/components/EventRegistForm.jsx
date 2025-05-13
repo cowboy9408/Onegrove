@@ -15,12 +15,23 @@ import { forwardRef, useImperativeHandle } from "react";
 
 const EventRegistForm = forwardRef(({ setData, lang }, ref) => {
   const methods = useForm(); // 전체 객체는 유지
-const { control, register, setValue, watch, trigger, getValues, handleSubmit } = methods;
+  const {
+    control,
+    register,
+    setValue,
+    watch,
+    trigger,
+    getValues,
+    handleSubmit,
+  } = methods;
   const editorRef1 = useRef();
   const editorRef2 = useRef();
   const [brands, setBrands] = useState([]);
   const { showModal } = useModal();
-  const [dateRange, setDateRange] = useState({ startDate: null, endDate: null });
+  const [dateRange, setDateRange] = useState({
+    startDate: null,
+    endDate: null,
+  });
 
   useImperativeHandle(ref, () => ({
     submit: async () => {
@@ -31,12 +42,58 @@ const { control, register, setValue, watch, trigger, getValues, handleSubmit } =
       const content1 = await editorRef1.current?.getContent?.();
       const content2 = await editorRef2.current?.getContent?.();
 
+      const isMissingRequired = () => {
+        if (!data.category) return true;
+        if (!data.title) return true;
+        if (!data.thumbnail?.name) return true;
+        if (!data.banner?.name) return true;
+        if (!data.extraImage?.name) return true;
+        if (!content1) return true;
+        if (!dateRange.startDate || !dateRange.endDate) return true;
+        if (!brands.length) return true;
+        if (!data.pcImage?.name) return true;
+        if (!data.mobileImage?.name) return true;
+        if (!content2) return true;
+        return false;
+      };
+
+      if (isMissingRequired()) {
+        console.log("필수 항목 누락됨");
+        showModal({
+          title: "입력 확인",
+          message: "필수 항목을 모두 입력해주세요.",
+          showCancel: false,
+        });
+        return null;
+      }
+
+      const toImageMeta = (file) => {
+        if (!file || !file.name) return null;
+        return {
+          id: null,
+          originalName: file.originalName || file.name,
+          name: file.name,
+          size: file.size,
+          extension: "." + file.name.split(".").pop(),
+          mime: file.type || "image/png",
+          classification: null,
+          path: `C:\\\\upload\\/test\\${file.name}`,
+          status: null,
+        };
+      };
+
       return {
         ...data,
         brandIds: brands.map((e) => e._id),
         content1,
         content2,
         ...dateRange,
+
+        thumbImg: toImageMeta(data.thumbnail),
+        imgBodyPc: toImageMeta(data.banner),
+        imgBodyMo: toImageMeta(data.extraImage),
+        imgPc: toImageMeta(data.pcImage),
+        imgMo: toImageMeta(data.mobileImage),
       };
     },
   }));
@@ -45,79 +102,73 @@ const { control, register, setValue, watch, trigger, getValues, handleSubmit } =
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(() => {})} className="space-y-6 p-6">
         {/* 카테고리 + 노출 여부 */}
-        <div className="flex justify-between items-end">
-        <Controller
-  name="category"
-  control={control}
-  rules={{ required: true }}
-  render={({ field }) => (
-    <Select label="카테고리" className="w-1/2" {...field} required>
-      <option value="">선택</option>
-      <option value="프로모션">프로모션</option>
-      <option value="이벤트">이벤트</option>
-    </Select>
-  )}
-/>
+        <div className="flex items-end justify-between">
+          <Controller
+            name="category"
+            control={control}
+            rules={{ required: true }}
+            render={({ field }) => (
+              <Select label="카테고리" className="w-1/2" {...field} required>
+                <option value="">선택</option>
+                <option value="프로모션">프로모션</option>
+                <option value="이벤트">이벤트</option>
+              </Select>
+            )}
+          />
 
-          <div className="flex gap-4 items-center">
+          <div className="flex items-center gap-4">
             <input type="hidden" {...register("status")} />
             <p className="text-sm font-medium text-gray-800">노출 여부</p>
-            <Radio name="status" value="active" label="사용"
+            <Radio
+              name="status"
+              value="active"
+              label="사용"
               checked={watch("status") === "active"}
               onChange={() => setValue("status", "active")}
             />
-            <Radio name="status" value="inactive" label="미사용"
+            <Radio
+              name="status"
+              value="inactive"
+              label="미사용"
               checked={watch("status") === "inactive"}
-              onChange={() =>setValue("status", "inactive")}
+              onChange={() => setValue("status", "inactive")}
             />
           </div>
         </div>
 
         {/* 입력 필드 */}
-        <Input label="노출 순서" {...register("order")}type="number"/>
+        <Input label="노출 순서" {...register("order")} type="number" />
         <Input label="타이틀" {...register("title")} required />
 
         {/* 파일 업로드 */}
-        <Upload
-  name="thumbnail"
-  label={
-    <>
-      썸네일 이미지<span className="text-red-500">*</span>
-    </>
-  }
-/>
-<Upload
-  name="banner"
-  label={
-    <>
-      PC 본문 이미지<span className="text-red-500">*</span>
-    </>
-  }
-/>
-<Upload
-  name="extraImage"
-  label={
-    <>
-      모바일 본문 이미지<span className="text-red-500">*</span>
-    </>
-  }
-/>
+        <Upload name="thumbnail" label="썸네일 이미지" required />
+        <Upload name="banner" label="PC 본문 이미지" required />
+        <Upload name="extraImage" label="모바일 본문 이미지" required />
         {/* 상세 내용 에디터 1 */}
-        <p className="text-sm font-medium">상세 내용<span className="text-red-500">*</span></p>
+        <p className="text-sm font-medium">
+          상세 내용<span className="text-red-500">*</span>
+        </p>
         <Editor ref={editorRef1} />
 
         {/* 날짜 선택 */}
-        <p className="text-sm font-medium">이벤트 기간<span className="text-red-500">*</span></p>
+        <p className="text-sm font-medium">
+          이벤트 기간<span className="text-red-500">*</span>
+        </p>
         <DateRangePicker
           startDate={dateRange.startDate}
           endDate={dateRange.endDate}
-          onChange={({ startDate, endDate }) => setDateRange({ startDate, endDate })}
+          onChange={({ startDate, endDate }) =>
+            setDateRange({ startDate, endDate })
+          }
         />
 
         {/* 브랜드 선택 */}
         <Row className="pb-4">
           <Col className="flex-5">
-            <Input label="노출 브랜드"  readOnly required
+            <Input
+              label="노출 브랜드"
+              readOnly
+              required
               value={brands.map((e) => e.brand).join(", ")}
             />
             <input
@@ -127,63 +178,54 @@ const { control, register, setValue, watch, trigger, getValues, handleSubmit } =
             />
           </Col>
           <Col className="self-end">
-          <Button
-  onClick={() =>
-    showModal({
-      title: "브랜드 선택",
-      customButton: true,
-      showCancel: true,
-      size: "5xl",
-      children: ({ closeModal }) => (
-        <BrandList
-          selected={brands.map((e) => e._id)}
-          closeModal={closeModal}
-          onConfirm={(result) => {
-            setBrands(result);
-            setValue("lifestyle.brand", result.map((e) => e._id));
+            <Button
+              onClick={() =>
+                showModal({
+                  title: "브랜드 선택",
+                  customButton: true,
+                  showCancel: true,
+                  size: "5xl",
+                  children: ({ closeModal }) => (
+                    <BrandList
+                      selected={brands.map((e) => e._id)}
+                      closeModal={closeModal}
+                      onConfirm={(result) => {
+                        setBrands(result);
+                        setValue(
+                          "lifestyle.brand",
+                          result.map((e) => e._id)
+                        );
 
-            // 먼저 브랜드 선택 모달 닫기
-            closeModal();
+                        // 먼저 브랜드 선택 모달 닫기
+                        closeModal();
 
-            // 이후 모달 충돌 방지를 위해 setTimeout으로 알림 모달 띄움
-            setTimeout(() => {
-              showModal({
-                title: "알림",
-                children: <p>저장되었습니다.</p>,
-                showCancel: false,
-              });
-            }, 100);
-          }}
-        />
-      ),
-    })
-  }
->
-  관리
-</Button>
+                        // 이후 모달 충돌 방지를 위해 setTimeout으로 알림 모달 띄움
+                        setTimeout(() => {
+                          showModal({
+                            title: "알림",
+                            children: <p>저장되었습니다.</p>,
+                            showCancel: false,
+                          });
+                        }, 100);
+                      }}
+                    />
+                  ),
+                })
+              }
+            >
+              관리
+            </Button>
           </Col>
         </Row>
 
         {/* 파일 업로드 2 */}
-        <Upload
-  name="pcImage"
-  label={
-    <>
-      PC 이미지<span className="text-red-500">*</span>
-    </>
-  }
-/>
-<Upload
-  name="mobileImage"
-  label={
-    <>
-      모바일 이미지<span className="text-red-500">*</span>
-    </>
-  }
-/>
+        <Upload name="pcImage" label="PC 이미지" required />
+        <Upload name="mobileImage" label="모바일 이미지" required />
 
         {/* 내용 에디터 2 */}
-        <p className="text-sm font-medium">디스크립션<span className="text-red-500">*</span></p>
+        <p className="text-sm font-medium">
+          디스크립션<span className="text-red-500">*</span>
+        </p>
         <Editor ref={editorRef2} />
       </form>
     </FormProvider>

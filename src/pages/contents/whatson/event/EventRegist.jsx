@@ -3,15 +3,17 @@ import Tabs, { TabPanel } from "@/components/layout/Tabs";
 import { useEffect, useState, useRef } from "react";
 import EventRegistForm from "./components/EventRegistForm";
 import Button from "@/components/common/Button";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
+import api from "@/lib/apiClient";
+import useModal from "@/hooks/useModal";
 
 export default function EventRegist() {
   const [currentLang, setCurrentLang] = useState(0); // 0 = 국문, 1 = 영문
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const koFormRef = useRef();
-const enFormRef = useRef();
+  const enFormRef = useRef();
+  const { showModal } = useModal();
 
-  
   // 국문 상태
   const [koData, setKoData] = useState({
     keyVisual: [],
@@ -47,7 +49,7 @@ const enFormRef = useRef();
         }
       } catch (err) {
         console.warn("데이터 불러오기 실패 - mock 데이터로 대체");
-  
+
         const mock = {
           keyVisual: [
             { type: "image", title: "title1", subtitle: "subtitle1" },
@@ -81,89 +83,106 @@ const enFormRef = useRef();
             url: "https://example.com",
           },
         };
-  
+
         setKoData(mock);
         setEnData(mock);
       }
     };
-  
+
     fetchData();
   }, []);
 
   const handleSave = async () => {
-    const now = new Date().toISOString();
-  
-    if (currentLang === 0) {
-      const ko = await koFormRef.current?.submit();
-      if (!ko) return;
-  
-      const newEvent = { ko: { ...ko, created_at: now } };
-  
-      const existing = JSON.parse(localStorage.getItem("events") || "[]");
-      const updated = [...existing, newEvent];
-      localStorage.setItem("events", JSON.stringify(updated));
-    } else {
-      const en = await enFormRef.current?.submit();
-      if (!en) return;
-  
-      const existing = JSON.parse(localStorage.getItem("events") || "[]");
-  
-      // 기존 이벤트 중 마지막 항목의 ko 데이터가 있는 경우, 덮어쓰기
-      const lastEvent = existing[existing.length - 1];
-      if (lastEvent?.ko && !lastEvent?.en) {
-        lastEvent.en = { ...en };
-        localStorage.setItem("events", JSON.stringify(existing));
-      } else {
-        const newEvent = { en: { ...en } };
-        const updated = [...existing, newEvent];
-        localStorage.setItem("events", JSON.stringify(updated));
-      }
+    const ref = currentLang === 0 ? koFormRef : enFormRef;
+    const form = await ref.current?.submit();
+    if (!form) return;
+
+    const payload = {
+      eventId: null,
+      showYn: form.status === "active" ? "Y" : "N",
+      sort: Number(form.order),
+      lang: currentLang === 0 ? "ko" : "en",
+      category: form.category || "ep0101",
+      title: form.title,
+      thumbImg: form.thumbImg,
+      imgBodyPc: form.imgBodyPc,
+      imgBodyMo: form.imgBodyMo,
+      imgPc: form.imgPc,
+      imgMo: form.imgMo,
+      content: form.content1,
+      description: form.content2,
+      startDate: form.startDate,
+      endDate: form.endDate,
+      brandId: form.lifestyle?.brand?.[0],
+      delYn: "N",
+    };
+
+    try {
+      await api.post("/api/v1/event-promotion/item/insert", payload);
+      alert("저장되었습니다.");
+      navigate("/contents/whatson/event/list");
+    } catch (err) {
+      console.error("저장 실패", err);
+      alert("저장 중 오류가 발생했습니다.");
     }
-  
-    alert("저장되었습니다.");
-    navigate("/contents/whatson/event/list");
   };
 
   return (
     <Section>
-    <Tabs
-      tabs={[
-        { key: "kr", label: "국문" },
-        { key: "en", label: "영문" },
-      ]}
-      defaultIndex={0}
-      onTabChange={(index) => setCurrentLang(index)}
-    >
-      <TabPanel>
-      <EventRegistForm
-    ref={koFormRef}
-    data={koData}
-    setData={setKoData}
-    lang="ko"
-  />
-      </TabPanel>
+      <Tabs
+        tabs={[
+          { key: "kr", label: "국문" },
+          { key: "en", label: "영문" },
+        ]}
+        defaultIndex={0}
+        onTabChange={(index) => setCurrentLang(index)}
+      >
+        <TabPanel>
+          <EventRegistForm
+            ref={koFormRef}
+            data={koData}
+            setData={setKoData}
+            lang="ko"
+          />
+        </TabPanel>
 
-      <TabPanel>
-      <EventRegistForm
-    ref={enFormRef}
-    data={enData}
-    setData={setEnData}
-    lang="en"
-  />
-      </TabPanel>
-    </Tabs>
-    <div className="flex justify-end gap-4 px-6 pb-6">
-  <Button onClick={handleSave} variant="default">
-    저장
-  </Button>
-  <Button
-            type="button"
-            className="bg-gray-200"
-            onClick={() => navigate("/contents/whatson/event/list")}
-          >
-            목록
-          </Button>
-</div>
-  </Section>
+        <TabPanel>
+          <EventRegistForm
+            ref={enFormRef}
+            data={enData}
+            setData={setEnData}
+            lang="en"
+          />
+        </TabPanel>
+      </Tabs>
+      <div className="flex justify-end gap-4 px-6 pb-6">
+        <Button
+          onClick={() =>
+            showModal({
+              title: "저장 확인",
+              message: "저장하시겠습니까?",
+              showCancel: true,
+              onConfirm: handleSave,
+            })
+          }
+        >
+          저장
+        </Button>
+        <Button
+          type="button"
+          className="bg-gray-200"
+          onClick={() =>
+            showModal({
+              title: "이동 확인",
+              message: "이전 페이지로 돌아갈 경우 입려한 정보가 사라집니다.",
+              showCancel: true,
+              onConfirm: () => navigate("/contents/whatson/event/list"),
+            })
+          }
+        >
+          목록
+        </Button>
+      </div>
+    </Section>
   );
 }

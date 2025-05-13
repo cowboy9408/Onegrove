@@ -15,8 +15,9 @@ import WhatsonLayout from "@/pages/contents/whatson/WhatsonLayout";
 import LifeStyleLayout from "@/pages/contents/lifestyle/LifeStyleLayout";
 import OfficeLayout from "@/pages/office/OfficeLayout";
 import InquiryLayout from "@/pages/inquiry/InquiryLayout";
-import SystemLayout from "@/pages/system/SystemLayout"
+import SystemLayout from "@/pages/system/SystemLayout";
 import EventLayout from "@/pages/contents/whatson/event/EventLayout";
+import StoriesLayout from "@/pages/contents/whatson/stories/\bStoriesLayout";
 import Forbidden from "@/pages/403";
 import NotFoundPage from "@/pages/404";
 import AdminDetailPage from "@/pages/admin/AdminDetailPage";
@@ -30,23 +31,23 @@ import OccupancyListPage from "@/pages/occupancy/OccupancyListPage";
 import BrandListPage from "@/pages/retail/brand/BrandListPage";
 import PopupListPage from "@/pages/popup/PopupListPage";
 import EventListPage from "@/pages/contents/whatson/event/EventListPage";
-import StoriesListPage from "@/pages/contents/whatson/stories/StoriesListPage"
-import All from "@/pages/contents/lifestyle/all/All"
+import StoriesListPage from "@/pages/contents/whatson/stories/StoriesListPage";
+import PressListPage from "@/pages/contents/whatson/media/PressListPage";
+import All from "@/pages/contents/lifestyle/all/All";
 import Meeting from "@/pages/office/meeting/Meeting";
-import Visit from "@/pages/office/visit/Visit"
-import Sleep from "@/pages/office/sleep/Sleep"
+import Visit from "@/pages/office/visit/Visit";
+import Sleep from "@/pages/office/sleep/Sleep";
 import FnqListPage from "@/pages/inquiry/client/FnqListPage";
-import MeetingListPage from "@/pages/system/meeting/MeetingListPage"
-import EventRegist from "@/pages/contents/whatson/event/EventRegist"
-import StoriesRegist from "@/pages/contents/whatson/stories/StoriesRegist"
-import AdminRegist from "@/pages/admin/AdminRegist"
+import MeetingListPage from "@/pages/system/meeting/MeetingListPage";
+import EventRegist from "@/pages/contents/whatson/event/EventRegist";
+import StoriesRegist from "@/pages/contents/whatson/stories/StoriesRegist";
+import AdminRegist from "@/pages/admin/AdminRegist";
 import UserRegist from "@/pages/user/UserRegist";
 import OccupancyRegist from "@/pages/occupancy/OccupancyRegist";
 import BrandRegist from "@/pages/retail/brand/BrandRegist";
 import WhatsOnRegist from "@/pages/contents/whatson/event/WhatsOnRegist";
-
-
-
+import PressRegist from "@/pages/contents/whatson/media/PressRegist";
+import StoriesCont from "@/pages/contents/whatson/stories/StoriesCont";
 
 export const routeMeta = [
   {
@@ -93,7 +94,7 @@ export const routeMeta = [
         hidden: true,
         permissions: ["Admin"],
       },
-    
+
       {
         uuid: "0c3eb744-5f42-4e6e-8107-43644c68647c",
         path: "/user",
@@ -105,7 +106,7 @@ export const routeMeta = [
         permissions: ["Admin", "User"],
       },
       {
-       uuid: "b269e884-b419-4961-9b85-144d20ff3b4d",
+        uuid: "b269e884-b419-4961-9b85-144d20ff3b4d",
         path: "/user/regist",
         group: "/user",
         element: <UserRegist />,
@@ -137,12 +138,12 @@ export const routeMeta = [
       {
         uuid: "8f9c0fc2-72b3-4347-be97-6ca3f7030286",
         path: "/retail",
-        element: <RetailLayout/>,
+        element: <RetailLayout />,
         title: "리테일 관리",
         icon: <CartIcon size={18} />,
         hidden: false,
         permissions: ["Admin", "User"],
-        children : [
+        children: [
           {
             uuid: "07dcc050-f903-402f-948f-2e38f7fb79cb",
             path: "/retail/brand",
@@ -164,7 +165,7 @@ export const routeMeta = [
       {
         uuid: "5c70b017-35f2-441f-8ac4-dee0f6a9401f",
         path: "/popup",
-        element: <PopupListPage/>,
+        element: <PopupListPage />,
         title: "팝업 관리",
         icon: <BellIcon size={18} />,
         hidden: false,
@@ -182,7 +183,7 @@ export const routeMeta = [
       {
         uuid: "4c15f65b-5154-48be-8d42-d373136c529f",
         path: "/contents",
-        element: <ContentsLayout/>,
+        element: <ContentsLayout />,
         title: "콘텐츠 관리",
         icon: <FileTextIcon size={18} />,
         hidden: false,
@@ -204,51 +205,70 @@ export const routeMeta = [
                 hidden: false,
                 permissions: ["Admin", "User"],
                 children: [
-              {
-                uuid: "13b5a3c8-4b1c-472c-baa5-0d129960be95",
-                path: "/contents/whatson/event/main",
-                
-                element: <WhatsOnRegist />,
-                title: "Event&Promotion 콘텐츠",
-                hidden: false,
-                permissions: ["Admin", "User"],
-              },
+                  {
+                    uuid: "13b5a3c8-4b1c-472c-baa5-0d129960be95",
+                    path: "/contents/whatson/event/main",
+                    element: <WhatsOnRegist />,
+                    title: "Event&Promotion 콘텐츠",
+                    hidden: false,
+                    permissions: ["Admin", "User"],
+                  },
 
-              {
-                uuid: "d37ccd54-b4bb-4980-b259-2905f47dcc3f",
-                path: "/contents/whatson/event/list",
-            
-                element: <EventListPage />,
-                title: "Event & Promotion 리스트",
-                hidden: false,
-                permissions: ["Admin", "User"],
+                  {
+                    uuid: "d37ccd54-b4bb-4980-b259-2905f47dcc3f",
+                    path: "/contents/whatson/event/list",
+                    element: <EventListPage />,
+                    title: "Event & Promotion 리스트",
+                    hidden: false,
+                    permissions: ["Admin", "User"],
+                  },
+                  {
+                    uuid: "335b31b2-0f7a-46f9-b4dd-1b2b92034be6",
+                    path: "/contents/whatson/event/regist",
+                    group: "/contents/whatson/event/list",
+                    element: <EventRegist />,
+                    title: "Event & Promotion 등록",
+                    hidden: true,
+                    permissions: ["Admin", "User"],
+                  },
+                ],
               },
               {
-                uuid: "335b31b2-0f7a-46f9-b4dd-1b2b92034be6",
-                path: "/contents/whatson/event/regist",
-                group: "/contents/whatson/event/list",
-                element: <EventRegist />,
-                title: "Event & Promotion 등록",
-                hidden: true,
-                permissions: ["Admin", "User"],
-              },
-            ],
-          },
-              {
-                uuid: "5bca7eb5-7483-43a2-89da-7f71b78ea41c",
+                uuid: "ac675f35-ce7f-4616-a529-dbb192fe01a4",
                 path: "/contents/whatson/stories",
-                element: <StoriesListPage />,
+                element: <StoriesLayout />,
                 title: "Stories of One Grove",
                 hidden: false,
                 permissions: ["Admin", "User"],
-              },
-              {
-                uuid: "e748e4e2-c9a5-4d87-a202-956dd565c286",
-                path: "/contents/whatson/stories/regist",
-                element: <StoriesRegist />,
-                title: "Stories of One Grove 등록",
-                hidden: true,
-                permissions: ["Admin", "User"],
+                children: [
+                  {
+                    uuid: "6c7470f5-f849-4777-88a9-6e09ec9bdd90",
+                    path: "/contents/whatson/stories/main",
+                    element: <StoriesCont />,
+                    title: "Stories of One Grove 콘텐츠",
+                    hidden: false,
+                    permissions: ["Admin", "User"],
+                  },
+
+                  {
+                    uuid: "8275ec74-09ac-4b2a-9c65-78f5b75a06c7",
+                    path: "/contents/whatson/stories/list",
+
+                    element: <StoriesListPage />,
+                    title: "Stories of One Grove 리스트",
+                    hidden: false,
+                    permissions: ["Admin", "User"],
+                  },
+                  {
+                    uuid: "565c400a-1c08-46a9-ab0b-c28c05d543f4",
+                    path: "/contents/whatson/stories/regist",
+                    group: "/contents/whatson/stories/list",
+                    element: <StoriesRegist />,
+                    title: "Stories of One Grove 등록",
+                    hidden: true,
+                    permissions: ["Admin", "User"],
+                  },
+                ],
               },
               {
                 uuid: "b4b2c8b4-a2ba-4d6c-9379-d0b0ef21698a",
@@ -261,9 +281,17 @@ export const routeMeta = [
               {
                 uuid: "b277e917-fa13-4827-be23-2e2ca4164853",
                 path: "/contents/whatson/media",
-                element: <></>,
+                element: <PressListPage />,
                 title: "Press & Media",
                 hidden: false,
+                permissions: ["Admin", "User"],
+              },
+              {
+                uuid: "a87e5edb-3c21-4b02-8700-b7b31f31f1b8",
+                path: "/contents/whatson/media/regist",
+                element: <PressRegist />,
+                title: "Press & Media 등록",
+                hidden: true,
                 permissions: ["Admin", "User"],
               },
             ],

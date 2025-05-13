@@ -5,13 +5,14 @@ import Button from "@/components/common/Button";
 import BrandRegistForm from "./component/BrandRegistFom";
 import { useNavigate } from "react-router-dom";
 import api from "@/lib/apiClient";
+import useModal from "@/hooks/useModal";
 
 export default function BrandRegist() {
   const navigate = useNavigate();
   const [currentLang, setCurrentLang] = useState(0); // 0 = 국문, 1 = 영문
   const koFormRef = useRef();
   const enFormRef = useRef();
-
+  const { showModal } = useModal();
   const [koData, setKoData] = useState({});
   const [enData, setEnData] = useState({});
 
@@ -30,87 +31,69 @@ export default function BrandRegist() {
 
   const handleSave = async () => {
     try {
-      // 1. 폼 데이터 가져오기
-      const ko = await koFormRef.current?.submit();
-      const en = await enFormRef.current?.submit();
-      if (!ko || !en) return;
+      const ref = currentLang === 0 ? koFormRef : enFormRef;
+      const form = await ref.current?.submit();
+      if (!form) return;
 
-      // 2. 공통 필드 정의 (카테고리, 운영시간 등)
-      const sharedFields = {
-        category: ko.office,
-        thumbImg: ko.mainImage,
-        mainPcImg: ko.pcImage,
-        mainMoImg: ko.moImage,
-        contentImg1: ko.contentImage1,
-        contentImg2: ko.contentImage2,
-        contentImg3: ko.contentImage3,
-        contentImg4: ko.contentImage4,
-        contentImg5: ko.contentImage5,
+      const payload = {
+        lang: currentLang === 0 ? "KO" : "EN",
+        name: form.companyName,
+        title: form.phone,
+        subTitle: form.subtitle,
+        thumbText: form.ceoName,
+        content: form.description,
 
-        brandTel: ko.storePhone,
-        brandLocation: ko.storeLocation,
+        // 공통 필드도 현재 탭에서 가져옵니다
+        category: form.office,
+        thumbImg: form.mainImage,
+        mainPcImg: form.pcImage,
+        mainMoImg: form.moImage,
+        contentImg1: form.contentImage1,
+        contentImg2: form.contentImage2,
+        contentImg3: form.contentImage3,
+        contentImg4: form.contentImage4,
+        contentImg5: form.contentImage5,
 
-        homeUrl: ko.homepageUrl || "",
-        homeUrlNew: ko.homepageNewTab ? "Y" : "N",
+        brandTel: form.storePhone,
+        brandLocation: form.storeLocation,
 
-        instagram: ko.sns?.instagram?.url || "",
-        instagramNew: ko.sns?.instagram?.newWindow ? "Y" : "N",
-        facebook: ko.sns?.facebook?.url || "",
-        facebookNew: ko.sns?.facebook?.newWindow ? "Y" : "N",
-        youtube: ko.sns?.youtube?.url || "",
-        youtubeNew: ko.sns?.youtube?.newWindow ? "Y" : "N",
-        twitter: ko.sns?.twitter?.url || "",
-        twitterNew: ko.sns?.twitter?.newWindow ? "Y" : "N",
+        homeUrl: form.homepageUrl || "",
+        homeUrlNew: form.homepageNewTab ? "Y" : "N",
 
-        mon: ko.openingHours?.월?.time || "",
-        tue: ko.openingHours?.화?.time || "",
-        wed: ko.openingHours?.수?.time || "",
-        thu: ko.openingHours?.목?.time || "",
-        fri: ko.openingHours?.금?.time || "",
-        sat: ko.openingHours?.토?.time || "",
-        sun: ko.openingHours?.일?.time || "",
+        instagram: form.sns?.instagram?.url || "",
+        instagramNew: form.sns?.instagram?.newWindow ? "Y" : "N",
+        facebook: form.sns?.facebook?.url || "",
+        facebookNew: form.sns?.facebook?.newWindow ? "Y" : "N",
+        youtube: form.sns?.youtube?.url || "",
+        youtubeNew: form.sns?.youtube?.newWindow ? "Y" : "N",
+        twitter: form.sns?.twitter?.url || "",
+        twitterNew: form.sns?.twitter?.newWindow ? "Y" : "N",
 
-        monHoliday: ko.openingHours?.월?.holiday ? "Y" : "",
-        tueHoliday: ko.openingHours?.화?.holiday ? "Y" : "",
-        wedHoliday: ko.openingHours?.수?.holiday ? "Y" : "",
-        thuHoliday: ko.openingHours?.목?.holiday ? "Y" : "",
-        friHoliday: ko.openingHours?.금?.holiday ? "Y" : "",
-        satHoliday: ko.openingHours?.토?.holiday ? "Y" : "",
-        sunHoliday: ko.openingHours?.일?.holiday ? "Y" : "",
+        mon: form.openingHours?.월?.time || "",
+        tue: form.openingHours?.화?.time || "",
+        wed: form.openingHours?.수?.time || "",
+        thu: form.openingHours?.목?.time || "",
+        fri: form.openingHours?.금?.time || "",
+        sat: form.openingHours?.토?.time || "",
+        sun: form.openingHours?.일?.time || "",
 
-        breakTime: ko.openingHours?.breakTime?.time || "",
-        breakYn: ko.openingHours?.breakTime?.none ? "Y" : "N",
+        monHoliday: form.openingHours?.월?.holiday ? "Y" : "",
+        tueHoliday: form.openingHours?.화?.holiday ? "Y" : "",
+        wedHoliday: form.openingHours?.수?.holiday ? "Y" : "",
+        thuHoliday: form.openingHours?.목?.holiday ? "Y" : "",
+        friHoliday: form.openingHours?.금?.holiday ? "Y" : "",
+        satHoliday: form.openingHours?.토?.holiday ? "Y" : "",
+        sunHoliday: form.openingHours?.일?.holiday ? "Y" : "",
 
-        useYn: ko.useStatus === "active" ? "Y" : "N",
-        keywordList: ko.keywords?.map((k) => ({ keyword: k })) || [],
+        breakTime: form.openingHours?.breakTime?.time || "",
+        breakYn: form.openingHours?.breakTime?.none ? "Y" : "N",
+
+        useYn: form.useStatus === "active" ? "Y" : "N",
+        keywordList: form.keywords?.map((k) => ({ keyword: k })) || [],
       };
 
-      // 3. 언어별 개별 필드
-      const koFields = {
-        lang: "KO",
-        name: ko.companyName,
-        title: ko.phone,
-        subTitle: ko.subtitle,
-        thumbText: ko.ceoName,
-        content: ko.description,
-      };
-
-      const enFields = {
-        lang: "EN",
-        name: en.companyName,
-        title: en.phone,
-        subTitle: en.subtitle,
-        thumbText: en.ceoName,
-        content: en.description,
-      };
-
-      // 4. 각각 저장 요청
-      await Promise.all([
-        api.post("/api/v1/brand/insert", { ...sharedFields, ...koFields }),
-        api.post("/api/v1/brand/insert", { ...sharedFields, ...enFields }),
-      ]);
-
-      alert("국문과 영문 브랜드 정보가 저장되었습니다.");
+      await api.post("/api/v1/brand/insert", payload);
+      alert("브랜드 정보가 저장되었습니다.");
       navigate("/retail/brand");
     } catch (err) {
       console.error("저장 실패:", err);
@@ -139,11 +122,29 @@ export default function BrandRegist() {
       </Tabs>
 
       <div className="flex justify-end gap-4 px-6 pb-6">
-        <Button onClick={handleSave}>저장</Button>
+        <Button
+          onClick={() =>
+            showModal({
+              title: "저장 확인",
+              message: "저장하시겠습니까?",
+              showCancel: true,
+              onConfirm: handleSave,
+            })
+          }
+        >
+          저장
+        </Button>
         <Button
           type="button"
           className="bg-gray-200 text-black"
-          onClick={() => navigate("/retail/brand")}
+          onClick={() =>
+            showModal({
+              title: "이동 확인",
+              message: "이전 페이지로 돌아갈 경우 입려한 정보가 사라집니다.",
+              showCancel: true,
+              onConfirm: () => navigate("/retail/brand"),
+            })
+          }
         >
           목록
         </Button>

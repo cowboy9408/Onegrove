@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
+  const setRefreshToken = useAuthStore((state) => state.setRefreshToken);
   const [saveId, setSaveId] = useState(false);
   const { showModal } = useModal();
   const setName = useAuthStore((state) => state.setName);
@@ -21,9 +22,14 @@ export default function LoginPage() {
     e.preventDefault();
 
     const res = await getUserInfo(username, password);
+    console.log("로그인 응답 확인:", res);
 
     setAccessToken(res.accessToken);
+    setRefreshToken(res.refreshToken);
     setName(res.name);
+
+    localStorage.setItem("accessToken", res.accessToken);
+    localStorage.setItem("refreshToken", res.refreshToken); // 여기도 계속 null이면 응답에 없음
 
     navigate("/");
   };

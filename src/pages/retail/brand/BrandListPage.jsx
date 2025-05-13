@@ -13,10 +13,12 @@ import Row from "@/components/layout/Row";
 import SearchSection from "@/components/layout/SearchSection";
 import ResultSection from "@/components/layout/ResultSection";
 import api from "@/lib/apiClient";
+import useModal from "@/hooks/useModal";
 
 export default function BrandListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { showModal } = useModal();
 
   const [refreshKey, setRefreshKey] = useState(0);
   const [searchName, setSearchName] = useState("");

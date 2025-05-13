@@ -14,6 +14,7 @@ api.interceptors.request.use(
     const token = localStorage.getItem("accessToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log("accessToken", token);
     }
 
     // 로딩 시작
@@ -62,25 +63,25 @@ api.interceptors.response.use(
             },
           }
         );
-      
+
         const newAccessToken = res.data.accessToken;
-  const { setAccessToken } = useAuthStore.getState();
-  setAccessToken(newAccessToken);
-  localStorage.setItem("accessToken", newAccessToken);
+        const { setAccessToken } = useAuthStore.getState();
+        setAccessToken(newAccessToken);
+        localStorage.setItem("accessToken", newAccessToken);
 
-  originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-  return api(originalRequest);
-} catch (refreshError) {
-  console.error("토큰 리프레시 실패:", refreshError);
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        return api(originalRequest);
+      } catch (refreshError) {
+        console.error("토큰 리프레시 실패:", refreshError);
 
-  // 여기서 로그인 강제 이동 제거
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
+        // 여기서 로그인 강제 이동 제거
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
 
-  // 토큰 만료 에러를 호출 측에서 판단하게 처리
-  refreshError.isAuthFailed = true;
-  return Promise.reject(refreshError);
-}
+        // 토큰 만료 에러를 호출 측에서 판단하게 처리
+        refreshError.isAuthFailed = true;
+        return Promise.reject(refreshError);
+      }
     }
 
     return Promise.reject(error);

@@ -13,6 +13,7 @@ export default function Upload({
   preview = true,
   className = "",
   error,
+  required = false,
   defaultValue = null, // { name, size, url }
 }) {
   const inputRef = useRef(null);
@@ -47,12 +48,12 @@ export default function Upload({
     if (value?.name && value?.size && value?.url) {
       setLocalFile({ name: value.name, size: value.size });
       setPreviewUrl(value.url);
-  
+
       // status가 없다면 R로 설정 (유지 상태)
       if (!value.status) {
         onChange({
           ...value,
-          status: 'R',
+          status: "R",
         });
       }
     }
@@ -72,55 +73,55 @@ export default function Upload({
     formData.append("file", selectedFile);
 
     //  1. preview URL 생성
-  const blobUrl = URL.createObjectURL(selectedFile);
-  setPreviewUrl(blobUrl);
+    const blobUrl = URL.createObjectURL(selectedFile);
+    setPreviewUrl(blobUrl);
 
-  // 2. 로컬 상태 저장
-  setLocalFile(selectedFile);
+    // 2. 로컬 상태 저장
+    setLocalFile(selectedFile);
 
-  // 3. react-hook-form 값으로도 반영
-  onChange({
-    name: selectedFile.name,
-    size: selectedFile.size,
-    url: blobUrl,  // 실제 업로드 URL이 아니라 local preview용 URL
-  });
-
-  try {
-    const res = await api.post("/api/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      withCredentials: true,
+    // 3. react-hook-form 값으로도 반영
+    onChange({
+      name: selectedFile.name,
+      size: selectedFile.size,
+      url: blobUrl, // 실제 업로드 URL이 아니라 local preview용 URL
     });
-  
-    const result = res.data;
-    const isReplace = !!value; // 기존에 파일이 있었는지 확인
-  
-    if (result.name && result.path) {
-      onChange({
-        id: null,
-        originalName: selectedFile.name,
-        name: result.name,
-        size: result.size,
-        extension: "." + selectedFile.name.split(".").pop(),
-        mime: result.mime || selectedFile.type,
-        classification: null,
-        path: result.path,
-        status: isReplace ? 'E' : 'C',
-        url: result.url || previewUrl,
+
+    try {
+      const res = await api.post("/api/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
       });
-    } else {
-      console.error("파일 업로드 실패", result);
+
+      const result = res.data;
+      const isReplace = !!value; // 기존에 파일이 있었는지 확인
+
+      if (result.name && result.path) {
+        onChange({
+          id: null,
+          originalName: selectedFile.name,
+          name: result.name,
+          size: result.size,
+          extension: "." + selectedFile.name.split(".").pop(),
+          mime: result.mime || selectedFile.type,
+          classification: null,
+          path: result.path,
+          status: isReplace ? "E" : "C",
+          url: result.url || previewUrl,
+        });
+      } else {
+        console.error("파일 업로드 실패", result);
+      }
+    } catch (err) {
+      if (err.isAuthFailed) {
+        alert("세션이 만료되었습니다. 다시 로그인해주세요.");
+        // 필요시 로그인 모달 오픈 등 UI 처리
+      } else {
+        console.error("파일 업로드 에러", err);
+        alert("파일 업로드 중 문제가 발생했습니다.");
+      }
     }
-  } catch (err) {
-    if (err.isAuthFailed) {
-      alert("세션이 만료되었습니다. 다시 로그인해주세요.");
-      // 필요시 로그인 모달 오픈 등 UI 처리
-    } else {
-      console.error("파일 업로드 에러", err);
-      alert("파일 업로드 중 문제가 발생했습니다.");
-    }
-  }
   };
 
   const handleClick = () => {
@@ -133,8 +134,8 @@ export default function Upload({
     inputRef.current.value = null;
     onChange({
       ...value,
-      url: null, 
-      status: 'D',
+      url: null,
+      status: "D",
     });
   };
 
@@ -149,58 +150,61 @@ export default function Upload({
     <div className={cn("w-full", className)} ref={wrapperRef} tabIndex={-1}>
       <p className="mb-1 block pb-2 pl-1 text-sm font-medium text-gray-800 dark:text-gray-100">
         {label}
+        {required && <span className="text-red-500">*</span>}
       </p>
 
       {preview && previewUrl && (
-      <div className="mb-2 w-full text-center">
-        <img
-          src={previewUrl}
-          alt="preview"
-          className="mx-auto h-32 object-contain"
-        />
-        <div className="mt-1 text-sm text-gray-600">{localFile?.name} ({formatSize(localFile?.size)})</div>
-        <button
-          type="button"
-          onClick={handleDelete}
-          className="mt-1 text-xs text-red-500 underline"
-        >
-          이미지 제거
-        </button>
-      </div>
-    )}
-
-    {/* 업로드 박스 (미리보기 아래에 위치 X) */}
-    <div
-      className={cn(
-        "relative flex h-10 w-full cursor-pointer items-center justify-center rounded-md border border-dashed text-xs text-gray-500",
-        error
-          ? "border-red-500 text-red-500"
-          : "border-gray-300 hover:bg-gray-100"
+        <div className="mb-2 w-full text-center">
+          <img
+            src={previewUrl}
+            alt="preview"
+            className="mx-auto h-32 object-contain"
+          />
+          <div className="mt-1 text-sm text-gray-600">
+            {localFile?.name} ({formatSize(localFile?.size)})
+          </div>
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="mt-1 text-xs text-red-500 underline"
+          >
+            이미지 제거
+          </button>
+        </div>
       )}
-      onClick={handleClick}
-    >
-      <div className="flex flex-col items-center justify-center gap-1">
-        <UploadIcon size={20} />
-        <p className="text-gray-500">
-          {localFile ? "다시 업로드하려면 클릭" : "클릭하여 파일 업로드"}
-        </p>
+
+      {/* 업로드 박스 (미리보기 아래에 위치 X) */}
+      <div
+        className={cn(
+          "relative flex h-10 w-full cursor-pointer items-center justify-center rounded-md border border-dashed text-xs text-gray-500",
+          error
+            ? "border-red-500 text-red-500"
+            : "border-gray-300 hover:bg-gray-100"
+        )}
+        onClick={handleClick}
+      >
+        <div className="flex flex-col items-center justify-center gap-1">
+          <UploadIcon size={20} />
+          <p className="text-gray-500">
+            {localFile ? "다시 업로드하려면 클릭" : "클릭하여 파일 업로드"}
+          </p>
+        </div>
       </div>
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accepted || accept}
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
+      {error && (
+        <span className="flex items-center gap-1 pt-1 pl-1 text-xs text-red-500">
+          <Info size={14} />
+          {error}
+        </span>
+      )}
     </div>
-
-    <input
-      ref={inputRef}
-      type="file"
-      accept={accepted || accept}
-      className="hidden"
-      onChange={handleFileChange}
-    />
-
-    {error && (
-      <span className="flex items-center gap-1 pt-1 pl-1 text-xs text-red-500">
-        <Info size={14} />
-        {error}
-      </span>
-    )}
-  </div>
-);
+  );
 }

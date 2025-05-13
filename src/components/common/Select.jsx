@@ -20,6 +20,7 @@ export default function Select({
       {topLabel && label && (
         <p className="mb-1 block pb-2 pl-1 text-sm font-medium text-gray-800 dark:text-gray-100">
           {label}
+          {required && <span className="text-red-500">*</span>}
         </p>
       )}
       <div className={`relative w-full ${className}`}>

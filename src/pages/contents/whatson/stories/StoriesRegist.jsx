@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import EventRegistForm from "./components/EventRegistForm";
 
 export default function StoriesRegist() {
-  const [keyVisual, setKeyVisual] = useState([]);
-  const [whatsOn, setWhatsOn] = useState({});
-  const [lifestyle, setLifestyle] = useState({});
-  const [work, setWork] = useState({});
-  const [etc, setEtc] = useState([]);
-  const [banner, setBanner] = useState({});
+  const [setKeyVisual] = useState([]);
+  const [setWhatsOn] = useState({});
+  const [setLifestyle] = useState({});
+  const [setWork] = useState({});
+  const [setEtc] = useState([]);
+  const [setBanner] = useState({});
 
   useEffect(() => {
     // TODO: fetch data

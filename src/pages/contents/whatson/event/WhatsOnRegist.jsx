@@ -93,17 +93,33 @@ function mapFormDataToRequest(formData, lang, id = null) {
 }
 
 export default function WhatsOnRegist() {
-  const [krData, setKrData] = useState({ keyVisual: [], etc: [], banner: {} });
-  const [enData, setEnData] = useState({ keyVisual: [], etc: [], banner: {} });
+  const emptyData = {
+    keyVisual: [],
+    etc: [],
+    banner: {
+      bannerNB: "",
+      displayYn: "",
+      title: "",
+      subtitle: "",
+      image: { name: "", url: "", size: 0 },
+      button: "",
+      bg: "",
+      color: "",
+      url: "",
+    },
+  };
+
+  const [krData, setKrData] = useState(emptyData);
+  const [enData, setEnData] = useState(emptyData);
   const [currentLang, setCurrentLang] = useState(0);
   const [krId, setKrId] = useState(null);
   const [enId, setEnId] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const lang = currentLang === 0 ? "ko" : "en";
+      const lang = currentLang === 0 ? "ko" : "en";
 
+      try {
         const res = await api.get("/api/v1/event-promotion/contents", {
           params: { lang },
         });
@@ -119,7 +135,13 @@ export default function WhatsOnRegist() {
         }
       } catch (error) {
         console.error("콘텐츠 불러오기 실패:", error);
-        alert("데이터를 불러오는 데 실패했습니다.");
+        alert("데이터를 불러오는 데 실패했습니다. 빈 폼으로 표시됩니다.");
+
+        if (lang === "ko") {
+          setKrData(emptyData);
+        } else {
+          setEnData(emptyData);
+        }
       }
     };
 
