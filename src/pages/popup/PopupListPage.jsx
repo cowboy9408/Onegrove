@@ -11,11 +11,13 @@ import Row from "@/components/layout/Row";
 import SearchSection from "@/components/layout/SearchSection";
 import { faker } from "@faker-js/faker";
 import { useEffect, useId, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import DateRangePicker from "@/components/common/Datepicker";
+import Radio from "@/components/common/Radio";
 
 export default function PopupListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const [name, setName] = useState(searchParams.get("name") || "");
   const [email, setEmail] = useState(searchParams.get("email") || "");
@@ -23,10 +25,10 @@ export default function PopupListPage() {
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [startDate, setStartDate] = useState(null);
-const [endDate, setEndDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [visibility, setVisibility] = useState(""); // 노출 여부
 
   const nameId = useId();
-  
 
   const size = 10;
 
@@ -100,19 +102,37 @@ const [endDate, setEndDate] = useState(null);
               />
             </Col>
             <Row>
-            <Col>
-        <DateRangePicker
-          startDate={startDate}
-          endDate={endDate}
-          onChange={({ startDate, endDate }) => {
-            setStartDate(startDate);
-            setEndDate(endDate);
-          }}
-        />
-      </Col>
+              <Col>
+                <DateRangePicker
+                  startDate={startDate}
+                  endDate={endDate}
+                  onChange={({ startDate, endDate }) => {
+                    setStartDate(startDate);
+                    setEndDate(endDate);
+                  }}
+                />
+              </Col>
             </Row>
-            
-           
+            <span className="flex items-center text-sm font-medium whitespace-nowrap text-gray-800">
+              노출 여부
+            </span>
+            <Radio
+              id="visible"
+              name="visibility"
+              value="Y"
+              checked={visibility === "Y"}
+              onChange={(e) => setVisibility(e.target.value)}
+              label="노출"
+            />
+            <Radio
+              id="hidden"
+              name="visibility"
+              value="N"
+              checked={visibility === "N"}
+              onChange={(e) => setVisibility(e.target.value)}
+              label="미노출"
+            />
+
             <Col className="self-end">
               <Button
                 className={"h-12 w-full"}
@@ -126,30 +146,29 @@ const [endDate, setEndDate] = useState(null);
           </Row>
         </Box>
       </SearchSection>
-<div className="flex items-center justify-between mb-4">
-  <ResultSummary total={total} />
+      <div className="mb-4 flex items-center justify-between">
+        <ResultSummary total={total} />
 
-  <div className="flex gap-2">
-    <Button
-      className="bg-black text-white hover:bg-gray-800"
-      onClick={() => {
-        // 등록 버튼 클릭 시 로직
-      }}
-    >
-      등록
-    </Button>
-    <Button
-      className="bg-black text-white hover:bg-gray-800"
-      onClick={() => {
-        // 삭제 버튼 클릭 시 로직
-      }}
-    >
-      삭제
-    </Button>
-  </div>
-</div>
+        <div className="flex gap-2">
+          <Button
+            className="bg-black text-white hover:bg-gray-800"
+            onClick={() => {
+              navigate("/popup/regist");
+            }}
+          >
+            등록
+          </Button>
+          <Button
+            className="bg-black text-white hover:bg-gray-800"
+            onClick={() => {
+              // 삭제 버튼 클릭 시 로직
+            }}
+          >
+            삭제
+          </Button>
+        </div>
+      </div>
       <ResultSection>
-        
         <DataTable
           columns={[
             { key: "no", label: "번호" },

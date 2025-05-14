@@ -14,7 +14,7 @@ import { useEffect, useId, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Radio from "@/components/common/Radio";
 
-export default function UserListPage() {
+export default function AffairListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -42,6 +42,7 @@ export default function UserListPage() {
           const index = start + i + 1;
           return {
             no: index,
+            _id: String(index),
             type: faker.helpers.arrayElement(["관리자", "일반", "외부"]),
             occupancy: faker.company.name(),
             name: faker.person.lastName() + faker.person.firstName(),
@@ -145,7 +146,7 @@ export default function UserListPage() {
           <Button
             className="bg-black text-white hover:bg-gray-800"
             onClick={() => {
-              navigate("/user/regist"); // 이동할 경로를 원하는 대로 변경하세요
+              navigate("/admin/affair/regist");
             }}
           >
             등록
@@ -169,8 +170,7 @@ export default function UserListPage() {
             { key: "username", label: "아이디" },
             { key: "email", label: "이메일" },
             { key: "status", label: "계정 상태" },
-            { key: "", label: "사용 여부" },
-            { key: "created_user", label: "등록자" },
+            { key: "valuable", label: "사용 여부" },
             { key: "created_at", label: "등록일시" },
           ]}
           data={data}

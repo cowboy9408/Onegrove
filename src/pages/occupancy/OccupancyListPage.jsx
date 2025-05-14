@@ -10,21 +10,20 @@ import ResultSection from "@/components/layout/ResultSection";
 import Row from "@/components/layout/Row";
 import SearchSection from "@/components/layout/SearchSection";
 import { faker } from "@faker-js/faker";
-import { useEffect,  useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import Radio from "@/components/common/Radio";
 
 export default function OccupancyListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-//   const [name, setName] = useState(searchParams.get("name") || "");
-//   const [email, setEmail] = useState(searchParams.get("email") || "");
+  //   const [name, setName] = useState(searchParams.get("name") || "");
+  //   const [email, setEmail] = useState(searchParams.get("email") || "");
   const [page, setPage] = useState(searchParams.get("page") || 1);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
-
-  
- 
+  const [searchStatus, setSearchStatus] = useState("");
 
   const size = 10;
 
@@ -107,11 +106,28 @@ export default function OccupancyListPage() {
                 <option value="">7층</option>
               </Select>
             </Col>
+            <Col className="flex items-center gap-4">
+              <span className="text-sm font-medium">사용 여부</span>
+              <Radio
+                name="status"
+                value="active"
+                label="사용"
+                checked={searchStatus === "active"}
+                onChange={() => setSearchStatus("active")}
+              />
+              <Radio
+                name="status"
+                value="inactive"
+                label="미사용"
+                checked={searchStatus === "inactive"}
+                onChange={() => setSearchStatus("inactive")}
+              />
+            </Col>
             <Col className="self-end">
               <Button
                 className={"h-12 w-full"}
                 onClick={() => {
-                  setSearchParams({ name,  page });
+                  setSearchParams({ name, page });
                 }}
               >
                 검색
@@ -120,40 +136,39 @@ export default function OccupancyListPage() {
           </Row>
         </Box>
       </SearchSection>
-<div className="flex items-center justify-between mb-4">
-  <ResultSummary total={total} />
+      <div className="mb-4 flex items-center justify-between">
+        <ResultSummary total={total} />
 
-  <div className="flex gap-2">
-    <Button
-          className="bg-black text-white hover:bg-gray-800"
-          onClick={() => {
-            navigate("/occupancy/regist"); // 이동할 경로를 원하는 대로 변경하세요
-          }}
-        >
-          등록
-        </Button>
-    <Button
-      className="bg-black text-white hover:bg-gray-800"
-      onClick={() => {
-        // 삭제 버튼 클릭 시 로직
-      }}
-    >
-      삭제
-    </Button>
-  </div>
-</div>
+        <div className="flex gap-2">
+          <Button
+            className="bg-black text-white hover:bg-gray-800"
+            onClick={() => {
+              navigate("/occupancy/regist"); // 이동할 경로를 원하는 대로 변경하세요
+            }}
+          >
+            등록
+          </Button>
+          <Button
+            className="bg-black text-white hover:bg-gray-800"
+            onClick={() => {
+              // 삭제 버튼 클릭 시 로직
+            }}
+          >
+            삭제
+          </Button>
+        </div>
+      </div>
       <ResultSection>
-        
         <DataTable
           columns={[
             { key: "no", label: "번호" },
             { key: "occupancy", label: "입주사명" },
-            { key: "", label: "회의실사용여부" },
-            { key: "username", label: "방문자 등록 가능 여부" },
-            { key: "email", label: "입주자 연락처" },
+            { key: "office", label: "오피스" },
+            { key: "floor", label: "층수" },
+            { key: "phone", label: "입주자 연락처" },
             { key: "", label: "사용 여부" },
-            { key: "created_user", label: "등록자" },
-            { key: "created_at", label: "등록일시" },
+            { key: "created_user", label: "등록일자" },
+            { key: "created_at", label: "등록자" },
           ]}
           data={data}
           link={{ base: "/admin", path: "no" }}

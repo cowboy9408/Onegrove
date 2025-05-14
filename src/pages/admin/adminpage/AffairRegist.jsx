@@ -5,7 +5,7 @@ import Radio from "@/components/common/Radio";
 import { useNavigate } from "react-router-dom";
 import Select from "@/components/common/Select";
 
-export default function UserRegist() {
+export default function AffairRegist() {
   const [form, setForm] = useState({
     role: "admin",
     status: "active",
@@ -142,6 +142,25 @@ export default function UserRegist() {
           value={form.email}
           onChange={(e) => handleChange("email", e.target.value)}
         />
+        <div>
+          <p className="mb-2 text-sm font-medium text-gray-800">담당자 여부</p>
+          <div className="flex gap-4">
+            <Radio
+              name="agent"
+              label="등록"
+              value="yes"
+              checked={form.status === "active"}
+              onChange={() => handleChange("status", "active")}
+            />
+            <Radio
+              name="agent"
+              label="미등록"
+              value="no"
+              checked={form.status === "inactive"}
+              onChange={() => handleChange("status", "inactive")}
+            />
+          </div>
+        </div>
       </div>
 
       {/* 버튼 */}
@@ -150,7 +169,7 @@ export default function UserRegist() {
         <Button
           type="button"
           className="bg-gray-200"
-          onClick={() => navigate("/user")}
+          onClick={() => navigate("/admin/affair")}
         >
           목록
         </Button>

@@ -18,10 +18,11 @@ import InquiryLayout from "@/pages/inquiry/InquiryLayout";
 import SystemLayout from "@/pages/system/SystemLayout";
 import EventLayout from "@/pages/contents/whatson/event/EventLayout";
 import StoriesLayout from "@/pages/contents/whatson/stories/\bStoriesLayout";
+import AdminLayout from "@/pages/admin/AdminLayout";
 import Forbidden from "@/pages/403";
 import NotFoundPage from "@/pages/404";
-import AdminDetailPage from "@/pages/admin/AdminDetailPage";
-import AdminListPage from "@/pages/admin/AdminListPage";
+import AdminDetailPage from "@/pages/admin/adminpage/AdminDetailPage";
+import AdminListPage from "@/pages/admin/adminpage/AdminListPage";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import LoginPage from "@/pages/login/LoginPage";
 import MainPage from "@/pages/mainpage/MainPage";
@@ -41,13 +42,16 @@ import FnqListPage from "@/pages/inquiry/client/FnqListPage";
 import MeetingListPage from "@/pages/system/meeting/MeetingListPage";
 import EventRegist from "@/pages/contents/whatson/event/EventRegist";
 import StoriesRegist from "@/pages/contents/whatson/stories/StoriesRegist";
-import AdminRegist from "@/pages/admin/AdminRegist";
+import AdminRegist from "@/pages/admin/adminpage/AdminRegist";
 import UserRegist from "@/pages/user/UserRegist";
 import OccupancyRegist from "@/pages/occupancy/OccupancyRegist";
 import BrandRegist from "@/pages/retail/brand/BrandRegist";
 import WhatsOnRegist from "@/pages/contents/whatson/event/WhatsOnRegist";
 import PressRegist from "@/pages/contents/whatson/media/PressRegist";
 import StoriesCont from "@/pages/contents/whatson/stories/StoriesCont";
+import AffairListPage from "@/pages/admin/adminpage/AffairListPage";
+import AffairRegist from "@/pages/admin/adminpage/AffairRegist";
+import PopupRegist from "@/pages/popup/PopupRegist";
 
 export const routeMeta = [
   {
@@ -65,34 +69,55 @@ export const routeMeta = [
         description: "Dashboard 입니다",
       },
       {
-        uuid: "12b3ef89-1b74-450d-9f51-2888b953c1fd",
+        uuid: "16671022-870d-44a8-83ca-3cb254ca6857",
         path: "/admin",
-        group: "/admin",
-        element: <AdminListPage />,
+        element: <AdminLayout />,
         title: "관리자 관리",
-        icon: <UserIcon size={18} />,
+        icon: <CartIcon size={18} />,
         hidden: false,
-        permissions: ["Admin"],
-      },
-      {
-        uuid: "1e83ea43-0b00-4261-8c5a-a76102d971a0",
-        path: "/admin/:id",
-        group: "/admin",
-        element: <AdminDetailPage />,
-        title: "관리자 상세",
-        icon: <UserIcon size={18} />,
-        hidden: true,
-        permissions: ["Admin"],
-      },
-      {
-        uuid: "403ed52e-f0a2-4bdb-b1d5-e1c7cf542e1f",
-        path: "/admin/regist",
-        group: "/admin",
-        element: <AdminRegist />,
-        title: "관리자 등록",
-        icon: <UserIcon size={18} />,
-        hidden: true,
-        permissions: ["Admin"],
+        permissions: ["Admin", "User"],
+        children: [
+          {
+            uuid: "12b3ef89-1b74-450d-9f51-2888b953c1fd",
+            path: "/admin/list",
+            element: <AdminListPage />,
+            title: "일반 관리자",
+            hidden: false,
+            permissions: ["Admin"],
+          },
+          {
+            uuid: "1e83ea43-0b00-4261-8c5a-a76102d971a0",
+            path: "/admin/list/:id",
+            element: <AdminDetailPage />,
+            title: "관리자 상세",
+            hidden: true,
+            permissions: ["Admin"],
+          },
+          {
+            uuid: "403ed52e-f0a2-4bdb-b1d5-e1c7cf542e1f",
+            path: "/admin/list/regist",
+            element: <AdminRegist />,
+            title: "관리자 등록",
+            hidden: true,
+            permissions: ["Admin"],
+          },
+          {
+            uuid: "0a74902d-894e-421a-9471-2920c692e73a",
+            path: "/admin/affair",
+            element: <AffairListPage />,
+            title: "입주사 총무팀",
+            hidden: false,
+            permissions: ["Admin"],
+          },
+          {
+            uuid: "87046c63-2981-4c56-9e57-8c908ed82160",
+            path: "/admin/affair/regist",
+            element: <AffairRegist />,
+            title: "입주사 총무팀 등록",
+            hidden: true,
+            permissions: ["Admin"],
+          },
+        ],
       },
 
       {
@@ -130,7 +155,6 @@ export const routeMeta = [
         path: "/occupancy/regist",
         element: <OccupancyRegist />,
         title: "입주사 등록",
-        icon: <HomeIcon size={18} />,
         hidden: true,
         permissions: ["Admin", "User"],
       },
@@ -169,6 +193,14 @@ export const routeMeta = [
         title: "팝업 관리",
         icon: <BellIcon size={18} />,
         hidden: false,
+        permissions: ["Admin", "User"],
+      },
+      {
+        uuid: "05df59fa-6318-4b05-b325-590bfa1829d6",
+        path: "/popup/regist",
+        element: <PopupRegist />,
+        title: "팝업 등록",
+        hidden: true,
         permissions: ["Admin", "User"],
       },
       {

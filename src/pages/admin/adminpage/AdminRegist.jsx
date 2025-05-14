@@ -3,9 +3,8 @@ import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import Radio from "@/components/common/Radio";
 import { useNavigate } from "react-router-dom";
-import Select from "@/components/common/Select";
 
-export default function UserRegist() {
+export default function AdminRegist() {
   const [form, setForm] = useState({
     role: "admin",
     status: "active",
@@ -16,7 +15,6 @@ export default function UserRegist() {
     confirmPassword: "",
     phone: "",
     email: "",
-    agent: "yes",
   });
   const navigate = useNavigate();
 
@@ -33,17 +31,32 @@ export default function UserRegist() {
     <div className="max-w mx-auto space-y-6 rounded-lg bg-white p-6 shadow-md">
       {/* 라디오 그룹: 계정 유형 & 사용 여부 */}
       <div className="flex flex-wrap gap-8">
-        <Select
-          label="입주사"
-          value={form.company}
-          onChange={(e) => handleChange("company", e.target.value)}
-          className="w-[735px]"
-        >
-          <option value="">선택하세요</option>
-          <option value="LG">입주사1</option>
-          <option value="삼성">입주사2</option>
-          <option value="카카오">입주사3</option>
-        </Select>
+        <div>
+          <p className="mb-2 text-sm font-medium text-gray-800">계정 유형</p>
+          <div className="flex gap-4">
+            <Radio
+              name="role"
+              label="일반"
+              value="admin"
+              checked={form.role === "admin"}
+              onChange={() => handleChange("role", "admin")}
+            />
+            <Radio
+              name="role"
+              label="리테일"
+              value="retail"
+              checked={form.role === "retail"}
+              onChange={() => handleChange("role", "retail")}
+            />
+            <Radio
+              name="role"
+              label="오피스"
+              value="manager"
+              checked={form.role === "manager"}
+              onChange={() => handleChange("role", "manager")}
+            />
+          </div>
+        </div>
 
         <div>
           <p className="mb-2 text-sm font-medium text-gray-800">사용 여부</p>
@@ -150,7 +163,7 @@ export default function UserRegist() {
         <Button
           type="button"
           className="bg-gray-200"
-          onClick={() => navigate("/user")}
+          onClick={() => navigate("/admin/list")}
         >
           목록
         </Button>
