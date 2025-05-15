@@ -182,7 +182,7 @@ export default function StoriesListPage() {
           <Button
             className="bg-black text-white hover:bg-gray-800"
             onClick={() => {
-              navigate("/contents/whatson/event/regist");
+              navigate("/contents/whatson/stories/regist");
             }}
           >
             등록
