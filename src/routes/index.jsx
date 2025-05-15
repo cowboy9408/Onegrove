@@ -17,7 +17,7 @@ import OfficeLayout from "@/pages/office/OfficeLayout";
 import InquiryLayout from "@/pages/inquiry/InquiryLayout";
 import SystemLayout from "@/pages/system/SystemLayout";
 import EventLayout from "@/pages/contents/whatson/event/EventLayout";
-import StoriesLayout from "@/pages/contents/whatson/stories/\bStoriesLayout";
+import StoriesLayout from "@/pages/contents/whatson/stories/StoriesLayout";
 import AdminLayout from "@/pages/admin/AdminLayout";
 import Forbidden from "@/pages/403";
 import NotFoundPage from "@/pages/404";
