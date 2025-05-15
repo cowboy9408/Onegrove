@@ -24,7 +24,6 @@ export default function AdminRegist() {
 
   const handleSubmit = () => {
     console.log("등록 요청:", form);
-    // 실제 등록 API 호출 로직 추가
   };
 
   return (

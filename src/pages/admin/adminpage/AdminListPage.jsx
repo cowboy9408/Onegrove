@@ -153,9 +153,7 @@ export default function AdminListPage() {
           </Button>
           <Button
             className="bg-black text-white hover:bg-gray-800"
-            onClick={() => {
-              // 삭제 버튼 클릭 시 로직
-            }}
+            onClick={() => {}}
           >
             삭제
           </Button>

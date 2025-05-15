@@ -1,4 +1,3 @@
-// 📁 src/pages/retail/RetailLayout.jsx
 import { Outlet } from "react-router-dom";
 
 export default function AdminLayout() {
