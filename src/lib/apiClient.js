@@ -2,7 +2,7 @@ import axios from "axios";
 import { useAuthStore } from "@/store/authStore";
 import { useLoadingStore } from "@/store/loadingStore";
 
-const baseURL = "http://adminapi-dev.onegrove.kr";
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const api = axios.create({
   baseURL,

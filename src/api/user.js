@@ -12,6 +12,7 @@ export const getUserInfo = async (username, password) => {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
+      withCredentials: true
     }
   );
   return res.data;
