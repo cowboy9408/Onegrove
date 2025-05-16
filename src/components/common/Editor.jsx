@@ -29,7 +29,7 @@ async function uploadFile(file) {
   return (await ret.json()).url;
 }
 
-const Editor = forwardRef(({ initialContent }, ref) => {
+const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
   const { isDarkMode } = useTheme();
 
   const editor = useCreateBlockNote({
@@ -49,10 +49,7 @@ const Editor = forwardRef(({ initialContent }, ref) => {
 
   const getSlashMenuItems = useMemo(() => {
     return async (query) =>
-      filterSuggestionItems(
-        getDefaultReactSlashMenuItems(editor),
-        query
-      );
+      filterSuggestionItems(getDefaultReactSlashMenuItems(editor), query);
   }, [editor]);
 
   return (
@@ -62,6 +59,7 @@ const Editor = forwardRef(({ initialContent }, ref) => {
         slashMenu={true} //  Slash 메뉴 활성화
         className="editor-container"
         theme={isDarkMode ? "dark" : "light"}
+        editable={!readOnly}
       >
         {/* Slash 명령어 입력 시 보여줄 메뉴 */}
         <SuggestionMenuController

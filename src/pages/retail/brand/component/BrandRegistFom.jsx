@@ -7,11 +7,9 @@ import Upload from "@/components/common/Upload";
 import Checkbox from "@/components/common/Checkbox";
 import NewInput from "@/components/common/NewInput";
 import Editor from "@/components/common/Editor";
-
 import useModal from "@/hooks/useModal";
-import Modal from "@/components/common/Modal";
 
-const BrandRegistForm = forwardRef(({ lang }, ref) => {
+const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
   const methods = useForm({
     mode: "onChange",
   });
@@ -55,11 +53,14 @@ const BrandRegistForm = forwardRef(({ lang }, ref) => {
     submit: async () => {
       const values = getValues();
       const content = await editorRef.current?.getContent?.();
+      console.log("[submit] 수집된 값:", values);
+      console.log("[submit] 에디터 내용:", content);
       console.log("폼 값:", values);
       console.log("에디터 내용:", content);
 
       const message = validateRequiredFields(values, content);
       if (message) {
+        console.warn("유효성 검사 실패:", message);
         showModal({
           title: "입력 확인",
           message: message,
@@ -112,6 +113,7 @@ const BrandRegistForm = forwardRef(({ lang }, ref) => {
               showDefaultInfo
               required
               {...register("companyName", { required: true })}
+              disabled={readOnly}
             />
           </div>
 
@@ -122,6 +124,7 @@ const BrandRegistForm = forwardRef(({ lang }, ref) => {
               name="useStatus"
               value="active"
               label="사용"
+              disabled={readOnly}
               checked={watch("useStatus") === "active"}
               onChange={() => setValue("useStatus", "active")}
             />
@@ -129,6 +132,7 @@ const BrandRegistForm = forwardRef(({ lang }, ref) => {
               name="useStatus"
               value="inactive"
               label="미사용"
+              disabled={readOnly}
               checked={watch("useStatus") === "inactive"}
               onChange={() => setValue("useStatus", "inactive")}
             />
@@ -141,7 +145,7 @@ const BrandRegistForm = forwardRef(({ lang }, ref) => {
           control={control}
           rules={{ required: true }}
           render={({ field }) => (
-            <Select label="카테고리" required {...field}>
+            <Select label="카테고리" required {...field} disabled={readOnly}>
               <option value="">선택</option>
               <option value="office1">카테고리1</option>
               <option value="office2">카테고리2</option>
@@ -185,6 +189,7 @@ const BrandRegistForm = forwardRef(({ lang }, ref) => {
                       label={keyword}
                       checked={field.value.includes(keyword)}
                       onChange={() => handleToggle(keyword)}
+                      disabled={readOnly}
                     />
                   ))}
                 </div>
@@ -193,13 +198,20 @@ const BrandRegistForm = forwardRef(({ lang }, ref) => {
           />
         </div>
 
-        <Upload name="mainImage" label="썸네일 이미지" required preview />
+        <Upload
+          name="mainImage"
+          label="썸네일 이미지"
+          required
+          preview
+          readOnly={readOnly}
+        />
         <Input
           label="썸네일 텍스트"
           maxLength={200}
           showDefaultInfo
           required
           {...register("companyName", { required: true })}
+          disabled={readOnly}
         />
         <Input
           label="대타이틀"
@@ -207,6 +219,7 @@ const BrandRegistForm = forwardRef(({ lang }, ref) => {
           showDefaultInfo
           required
           {...register("companyName", { required: true })}
+          disabled={readOnly}
         />
         <Input
           label="서브타이틀"
@@ -214,30 +227,77 @@ const BrandRegistForm = forwardRef(({ lang }, ref) => {
           showDefaultInfo
           required
           {...register("companyName", { required: true })}
+          disabled={readOnly}
         />
 
         {/* 이미지 업로드 */}
-        <Upload name="pcImage" label="PC 본문 이미지" required />
-        <Upload name="moImage" label="MO 본문 이미지" required />
+        <Upload
+          name="pcImage"
+          label="PC 본문 이미지"
+          required
+          readOnly={readOnly}
+        />
+        <Upload
+          name="moImage"
+          label="MO 본문 이미지"
+          required
+          readOnly={readOnly}
+        />
 
         {/* 에디터 */}
         <p className="text-sm font-medium">
           메인 내용<span className="text-red-500">*</span>
         </p>
-        <Editor ref={editorRef} />
+        <Editor ref={editorRef} readOnly={readOnly} />
 
-        <Upload name="contentImage1" label="본문 이미지 1" required />
-        <Upload name="contentImage2" label="본문 이미지 2" required />
-        <Upload name="contentImage3" label="본문 이미지 3" required />
-        <Upload name="contentImage4" label="본문 이미지 4" required />
-        <Upload name="contentImage5" label="본문 이미지 5" required />
-        <Upload name="pcBodyImage" label="PC 본문 이미지" required />
-        <Upload name="moBodyImage" label="MO 본문 이미지" required />
+        <Upload
+          name="contentImage1"
+          label="본문 이미지 1"
+          required
+          readOnly={readOnly}
+        />
+        <Upload
+          name="contentImage2"
+          label="본문 이미지 2"
+          required
+          readOnly={readOnly}
+        />
+        <Upload
+          name="contentImage3"
+          label="본문 이미지 3"
+          required
+          readOnly={readOnly}
+        />
+        <Upload
+          name="contentImage4"
+          label="본문 이미지 4"
+          required
+          readOnly={readOnly}
+        />
+        <Upload
+          name="contentImage5"
+          label="본문 이미지 5"
+          required
+          readOnly={readOnly}
+        />
+        <Upload
+          name="pcBodyImage"
+          label="PC 본문 이미지"
+          required
+          readOnly={readOnly}
+        />
+        <Upload
+          name="moBodyImage"
+          label="MO 본문 이미지"
+          required
+          readOnly={readOnly}
+        />
 
         {/* 홈페이지 URL */}
         <div className="flex items-center gap-4">
           <NewInput
             label="홈페이지 URL"
+            disabled={readOnly}
             {...register("homepageUrl")}
             width="w-[550px]"
           />
@@ -247,6 +307,7 @@ const BrandRegistForm = forwardRef(({ lang }, ref) => {
             render={({ field }) => (
               <Checkbox
                 label="새 창"
+                disabled={readOnly}
                 checked={field.value}
                 onChange={(e) => field.onChange(e.target.checked)}
               />
@@ -261,6 +322,7 @@ const BrandRegistForm = forwardRef(({ lang }, ref) => {
             <div key={sns} className="flex items-center gap-4">
               <NewInput
                 label={sns}
+                disabled={readOnly}
                 {...register(`sns.${sns}.url`)}
                 width="w-[500px]"
               />
@@ -272,6 +334,7 @@ const BrandRegistForm = forwardRef(({ lang }, ref) => {
                     label="새 창"
                     checked={field.value}
                     onChange={(e) => field.onChange(e.target.checked)}
+                    disabled={readOnly}
                   />
                 )}
               />
@@ -290,6 +353,7 @@ const BrandRegistForm = forwardRef(({ lang }, ref) => {
                 label={day}
                 {...register(`openingHours.${day}.time`)}
                 width="w-[280px]"
+                disabled={readOnly}
               />
               <Controller
                 name={`openingHours.${day}.holiday`}
@@ -299,6 +363,7 @@ const BrandRegistForm = forwardRef(({ lang }, ref) => {
                     label="휴일"
                     checked={field.value}
                     onChange={(e) => field.onChange(e.target.checked)}
+                    disabled={readOnly}
                   />
                 )}
               />
@@ -310,6 +375,7 @@ const BrandRegistForm = forwardRef(({ lang }, ref) => {
               label="휴식시간"
               {...register("openingHours.breakTime.time")}
               width="w-[280px]"
+              disabled={readOnly}
             />
             <Controller
               name="openingHours.breakTime.none"
@@ -319,16 +385,22 @@ const BrandRegistForm = forwardRef(({ lang }, ref) => {
                   label="없음"
                   checked={field.value}
                   onChange={(e) => field.onChange(e.target.checked)}
+                  disabled={readOnly}
                 />
               )}
             />
           </div>
         </div>
 
-        <Input label="매장 전화번호" {...register("storePhone")} />
+        <Input
+          label="매장 전화번호"
+          {...register("storePhone")}
+          disabled={readOnly}
+        />
         <Input
           label="매장 위치"
           required
+          disabled={readOnly}
           {...register("storeLocation", { required: true })}
         />
       </form>

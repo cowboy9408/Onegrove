@@ -35,14 +35,14 @@ const NewInput = forwardRef(function NewInput(
 
   return (
     <div className={`${className}`}>
-      <div className="flex items-center gap-2 relative">
+      <div className="relative flex items-center gap-2">
         {label && (
           <label
             htmlFor={id}
             className="min-w-[100px] text-sm font-medium text-gray-800 dark:text-gray-100"
           >
             {label}
-            {required && <span className="text-red-500 ml-0.5">*</span>}
+            {required && <span className="ml-0.5 text-red-500">*</span>}
           </label>
         )}
         <div className={`relative ${width}`}>
@@ -56,11 +56,11 @@ const NewInput = forwardRef(function NewInput(
             disabled={disabled}
             placeholder={placeholder}
             maxLength={maxLength}
-            className={`peer w-full border px-4 pr-10 text-sm focus:outline-none focus:ring-2
-              ${height} rounded-none
-              ${error ? "border-red-500 focus:ring-red-500" : "border-black focus:ring-black"}
-              ${rest?.readOnly ? "cursor-default bg-gray-100 text-gray-500" : ""}
-            `}
+            className={`peer w-full border px-4 pr-10 text-sm focus:ring-2 focus:outline-none ${height} rounded-none ${error ? "border-red-500 focus:ring-red-500" : "border-black focus:ring-black"} ${
+              disabled || rest.readOnly
+                ? "cursor-not-allowed bg-gray-100 text-gray-500"
+                : ""
+            } ${className} `}
             {...rest}
           />
           <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-1">
@@ -70,7 +70,11 @@ const NewInput = forwardRef(function NewInput(
                 onClick={togglePasswordVisibility}
                 className="text-gray-400 hover:text-black dark:hover:text-white"
               >
-                {showPassword ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
+                {showPassword ? (
+                  <EyeOffIcon size={16} />
+                ) : (
+                  <EyeIcon size={16} />
+                )}
               </button>
             )}
             {value && onClear && (

@@ -8,6 +8,7 @@ import { useController, useFormContext, useWatch } from "react-hook-form";
 export default function Upload({
   name,
   label = "파일 업로드",
+  readOnly = false,
   accept = "image/*,video/*",
   acceptWith,
   preview = true,
@@ -125,10 +126,11 @@ export default function Upload({
   };
 
   const handleClick = () => {
-    inputRef.current?.click();
+    if (!readOnly) inputRef.current?.click();
   };
 
   const handleDelete = () => {
+    if (readOnly) return;
     setLocalFile(null);
     setPreviewUrl(null);
     inputRef.current.value = null;
@@ -176,10 +178,10 @@ export default function Upload({
       {/* 업로드 박스 (미리보기 아래에 위치 X) */}
       <div
         className={cn(
-          "relative flex h-10 w-full cursor-pointer items-center justify-center rounded-md border border-dashed text-xs text-gray-500",
-          error
-            ? "border-red-500 text-red-500"
-            : "border-gray-300 hover:bg-gray-100"
+          "relative flex h-10 w-full items-center justify-center rounded-md border text-xs",
+          readOnly
+            ? "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400"
+            : "cursor-pointer border-dashed border-gray-300 hover:bg-gray-100"
         )}
         onClick={handleClick}
       >

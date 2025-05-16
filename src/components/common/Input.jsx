@@ -51,14 +51,15 @@ const Input = forwardRef(function Input(
           disabled={disabled}
           placeholder={placeholder}
           maxLength={maxLength}
-          className={`peer w-full rounded-md border px-4 py-3 pr-10 text-sm placeholder-gray-400 focus:outline-none
-            ${error 
+          className={`peer w-full rounded-md border px-4 py-3 pr-10 text-sm placeholder-gray-400 focus:outline-none ${
+            error
               ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-              : "border-black focus:border-black focus:ring-2 focus:ring-black"}
-            ${rest?.readOnly 
-              ? "cursor-default bg-gray-100 text-gray-500 focus:border-gray-300 focus:ring-0"
-              : ""}
-          `}
+              : "border-black focus:border-black focus:ring-2 focus:ring-black"
+          } ${
+            disabled || rest.readOnly
+              ? "cursor-not-allowed bg-gray-100 text-gray-500"
+              : ""
+          } ${className} `}
           {...rest}
         />
         {!rest.readOnly && (

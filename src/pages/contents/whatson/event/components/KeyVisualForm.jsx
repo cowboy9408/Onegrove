@@ -64,7 +64,14 @@ export default function KeyVisualForm({ data, setData }) {
   } = methods;
 
   useEffect(() => {
-    reset({ kv: data });
+    if (Array.isArray(data)) {
+      reset({
+        kv:
+          data.length > 0
+            ? data
+            : [{ type: "image", file: null, title: "", subtitle: "" }],
+      });
+    }
   }, [data, reset]);
 
   const onSubmit = (formValues) => {

@@ -4,10 +4,17 @@ export function TabPanel({ children, isActive, className = "" }) {
   return isActive ? <div className={`${className}`}>{children}</div> : null;
 }
 
-export default function Tabs({ tabs = [], defaultIndex = 0, children, onTabChange }) {
+export default function Tabs({
+  tabs = [],
+  defaultIndex = 0,
+  children,
+  onTabChange,
+  disabled = false,
+}) {
   const [activeIndex, setActiveIndex] = useState(defaultIndex);
 
   const handleTabClick = (index) => {
+    if (disabled) return;
     setActiveIndex(index);
     if (onTabChange) onTabChange(index); // 외부에 현재 탭 인덱스 전달
   };
@@ -19,10 +26,13 @@ export default function Tabs({ tabs = [], defaultIndex = 0, children, onTabChang
           <button
             key={tab.key}
             onClick={() => handleTabClick(index)}
-            className={`flex-1 cursor-pointer border-r border-gray-200 px-4 py-2 text-sm font-medium transition-colors last:border-r-0 dark:border-gray-700 ${
-              index === activeIndex
-                ? "border-b-2 border-black text-black dark:border-white dark:text-white"
-                : "text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white"
+            disabled={disabled}
+            className={`flex-1 border-r border-gray-200 px-4 py-2 text-sm font-medium transition-colors last:border-r-0 ${
+              disabled
+                ? "cursor-not-allowed text-gray-300"
+                : index === activeIndex
+                  ? "border-b-2 border-black text-black"
+                  : "text-gray-500 hover:text-black"
             }`}
           >
             {tab.label}

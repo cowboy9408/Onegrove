@@ -52,6 +52,7 @@ import StoriesCont from "@/pages/contents/whatson/stories/StoriesCont";
 import AffairListPage from "@/pages/admin/adminpage/AffairListPage";
 import AffairRegist from "@/pages/admin/adminpage/AffairRegist";
 import PopupRegist from "@/pages/popup/PopupRegist";
+import BrandDetail from "@/pages/retail/brand/BrandDetail";
 
 export const routeMeta = [
   {
@@ -184,6 +185,14 @@ export const routeMeta = [
             hidden: true,
             permissions: ["Admin", "User"],
           },
+          {
+            uuid: "88722265-4bd6-4702-9dfd-07a9af8ac137",
+            path: "/retail/brand/detail/:masterId",
+            element: <BrandDetail />,
+            title: "입점 브랜드 관리",
+            hidden: true,
+            permissions: ["Admin", "User"],
+          },
         ],
       },
       {
@@ -303,14 +312,6 @@ export const routeMeta = [
                 ],
               },
               {
-                uuid: "b4b2c8b4-a2ba-4d6c-9379-d0b0ef21698a",
-                path: "/contents/whatson/neighborhood",
-                element: <></>,
-                title: "Neighborhood",
-                hidden: false,
-                permissions: ["Admin", "User"],
-              },
-              {
                 uuid: "b277e917-fa13-4827-be23-2e2ca4164853",
                 path: "/contents/whatson/media",
                 element: <PressListPage />,
@@ -355,26 +356,10 @@ export const routeMeta = [
             permissions: ["Admin", "User"],
             children: [
               {
-                uuid: "acb6ea73-0a9f-4cff-9839-04b432f90d02",
-                path: "/contents/work/life",
-                element: <></>,
-                title: "Life in One Grove",
-                hidden: false,
-                permissions: ["Admin", "User"],
-              },
-              {
                 uuid: "a79c9432-b510-4a3e-aa63-21046b90d625",
                 path: "/contents/work/guest",
                 element: <></>,
                 title: "Guest Services",
-                hidden: false,
-                permissions: ["Admin", "User"],
-              },
-              {
-                uuid: "cec9322a-ffe0-4ffd-9dff-976c4df6cbc2",
-                path: "/contents/work/leasing",
-                element: <></>,
-                title: "Leasing",
                 hidden: false,
                 permissions: ["Admin", "User"],
               },
@@ -389,14 +374,6 @@ export const routeMeta = [
             permissions: ["Admin", "User"],
             children: [
               {
-                uuid: "92e469cd-6c94-417e-a444-32d0a1c036d1",
-                path: "/contents/about/onegrove",
-                element: <></>,
-                title: "Building of One Grove",
-                hidden: false,
-                permissions: ["Admin", "User"],
-              },
-              {
                 uuid: "bf4a99a5-8e19-440e-823d-eb6f14cde19b",
                 path: "/contents/about/faq",
                 element: <></>,
@@ -409,14 +386,6 @@ export const routeMeta = [
                 path: "/contents/about/getting-here",
                 element: <></>,
                 title: "Getting Here",
-                hidden: false,
-                permissions: ["Admin", "User"],
-              },
-              {
-                uuid: "6f09d485-a971-45c8-9d1b-db783a496a7e",
-                path: "/contents/about/contact",
-                element: <></>,
-                title: "Contact Us",
                 hidden: false,
                 permissions: ["Admin", "User"],
               },

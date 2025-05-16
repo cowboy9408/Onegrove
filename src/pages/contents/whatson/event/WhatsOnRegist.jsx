@@ -1,7 +1,7 @@
 import Section from "@/components/layout/Section";
 import Tabs, { TabPanel } from "@/components/layout/Tabs";
 import { useEffect, useState } from "react";
-import KeyVisualForm from "../../lifestyle/all/components/KeyVisualForm";
+import KeyVisualForm from "./components/KeyVisualForm";
 import TopContentForm from "./components/TopContentForm";
 import BannerForm from "./components/BannerForm";
 import api from "@/lib/apiClient";
@@ -16,16 +16,26 @@ function mapResponseToFormData(resData) {
       subtitle: item.subTitle || "",
     })) || [];
 
+  const keyVisual =
+    kv.length > 0
+      ? kv
+      : [
+          {
+            type: "image",
+            file: { name: "", url: "", size: 0 },
+            title: "",
+            subtitle: "",
+          },
+        ];
+
   const etc =
     resData.topContents?.map((item) => ({
-      type: "complex",
-      image: { name: "", url: "", size: 0 },
-      category: item.category || "",
-      title: item.mainTitle || "",
-      subtitle: item.subTitle || "",
-      detail: "",
-      button: item.btnName || "",
-      url: item.url || "",
+      type: item.type || "simple",
+      image: {
+        name: "",
+        url: item.imgPc?.url || "",
+        size: 0,
+      },
     })) || [];
 
   const banner = {
@@ -40,7 +50,7 @@ function mapResponseToFormData(resData) {
     url: resData.banner?.bannerUrl || "",
   };
 
-  return { keyVisual: kv, etc, banner };
+  return { keyVisual, etc, banner };
 }
 
 function mapFormDataToRequest(formData, lang, id = null) {
@@ -62,13 +72,9 @@ function mapFormDataToRequest(formData, lang, id = null) {
 
     topContents: formData.etc.map((item, index) => ({
       id: null,
-      category: item.category || "",
-      mainTitle: item.title || "",
-      subTitle: item.subtitle || "",
+      type: item.type,
       imgPc: item.image?.url ? { url: item.image.url } : null,
       imgMo: item.image?.url ? { url: item.image.url } : null,
-      btnName: item.button || "",
-      url: item.url || "",
       sort: index + 1,
       delYn: "N",
     })),
@@ -136,7 +142,6 @@ export default function WhatsOnRegist() {
       } catch (error) {
         console.error("콘텐츠 불러오기 실패:", error);
         alert("데이터를 불러오는 데 실패했습니다. 빈 폼으로 표시됩니다.");
-
         if (lang === "ko") {
           setKrData(emptyData);
         } else {
@@ -184,7 +189,7 @@ export default function WhatsOnRegist() {
       >
         <TabPanel>
           <KeyVisualForm
-            data={krData.keyVisual}
+            data={krData.keyVisual || []}
             setData={(newVal) =>
               setKrData((prev) => ({ ...prev, keyVisual: newVal }))
             }
@@ -205,7 +210,7 @@ export default function WhatsOnRegist() {
 
         <TabPanel>
           <KeyVisualForm
-            data={enData.keyVisual}
+            data={krData.keyVisual || []}
             setData={(newVal) =>
               setEnData((prev) => ({ ...prev, keyVisual: newVal }))
             }

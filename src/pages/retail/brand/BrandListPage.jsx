@@ -18,7 +18,7 @@ import useModal from "@/hooks/useModal";
 export default function BrandListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { showModal } = useModal();
+  const { showModal } = useModal(); // 삭제할때 모달용 아직 미구현
 
   const [refreshKey, setRefreshKey] = useState(0);
   const [searchName, setSearchName] = useState("");
@@ -54,7 +54,16 @@ export default function BrandListPage() {
             id: brand.id,
             no: brand.rownum || (page - 1) * size + idx + 1,
             category: brand.category || "-",
-            name: ko.name || "-",
+            name: (
+              <button
+                className="text-black-600 underline"
+                onClick={() =>
+                  navigate(`/retail/brand/detail/${brand.masterId}`)
+                }
+              >
+                {ko.name || "-"}
+              </button>
+            ),
             status: ko.useYn || "-",
             created_at: ko.createDt?.split(" ")[0] || "-",
             created_user: ko.createUser || "-",
@@ -64,7 +73,7 @@ export default function BrandListPage() {
         });
 
         setData(rows);
-        setTotal(res.data.length); // 백엔드에서 총 건수 별도 제공 시 수정 가능
+        setTotal(res.data.length);
       } catch (err) {
         console.error("브랜드 목록 로딩 실패:", err);
       }
