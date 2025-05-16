@@ -87,7 +87,7 @@ export default function Upload({
     });
 
     try {
-      const res = await api.post("/api/upload", formData, {
+      const res = await api.post("/api/v1/file/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
