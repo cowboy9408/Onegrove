@@ -33,65 +33,6 @@ export default function EventRegist() {
     banner: {},
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const saved = localStorage.getItem("event");
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          setKoData(parsed.ko);
-          setEnData(parsed.en);
-        } else {
-          // 백엔드 API 호출 or 목업 fallback
-          const res = await api.get("/event");
-          setKoData(res.data.ko);
-          setEnData(res.data.en);
-        }
-      } catch (err) {
-        console.warn("데이터 불러오기 실패 - mock 데이터로 대체");
-
-        const mock = {
-          keyVisual: [
-            { type: "image", title: "title1", subtitle: "subtitle1" },
-            { type: "image", title: "title2", subtitle: "subtitle2" },
-          ],
-          whatsOn: {
-            subtitle: "샘플 서브타이틀",
-            type: "image",
-            url: "https://example.com",
-            contents: [],
-          },
-          lifestyle: {
-            subtitle1: "브랜드 소개",
-            subtitle2: "브랜드 부제목",
-            brand: [],
-          },
-          work: {
-            subtitle1: "작업내용1",
-            subtitle2: "작업내용2",
-            file: [],
-          },
-          etc: [],
-          banner: {
-            displayYn: "Y",
-            title: "배너 타이틀",
-            subtitle: "배너 서브타이틀",
-            image: { name: "", url: "", size: 0 },
-            button: "자세히 보기",
-            bg: "#FFFFFF",
-            color: "#000000",
-            url: "https://example.com",
-          },
-        };
-
-        setKoData(mock);
-        setEnData(mock);
-      }
-    };
-
-    fetchData();
-  }, []);
-
   const handleSave = async () => {
     const ref = currentLang === 0 ? koFormRef : enFormRef;
     const form = await ref.current?.submit();

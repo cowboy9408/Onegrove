@@ -11,7 +11,11 @@ function mapResponseToFormData(resData) {
   const kv =
     resData.keyVisual?.map((item) => ({
       type: item.contentType === "V" ? "video" : "image",
-      file: { name: "", url: "", size: 0 },
+      file: {
+        name: "",
+        url: item.contentFilePc?.url || "",
+        size: 0,
+      },
       title: item.title || "",
       subtitle: item.subTitle || "",
     })) || [];
@@ -43,7 +47,11 @@ function mapResponseToFormData(resData) {
     displayYn: resData.banner?.bannerShowYn || "",
     title: resData.banner?.bannerTitle || "",
     subtitle: resData.banner?.bannerSubTitle || "",
-    image: { name: "", url: "", size: 0 },
+    image: {
+      name: "",
+      url: resData.banner?.bannerImgPc?.url || "",
+      size: 0,
+    },
     button: resData.banner?.bannerBtnName || "",
     bg: resData.banner?.bannerBtnBackground || "",
     color: resData.banner?.bannerBtnColor || "",
@@ -90,9 +98,6 @@ function mapFormDataToRequest(formData, lang, id = null) {
       bannerImgMo: formData.banner?.image?.url
         ? { url: formData.banner.image.url }
         : null,
-      bannerBtnName: formData.banner?.button || "",
-      bannerBtnBackground: formData.banner?.bg || "",
-      bannerBtnColor: formData.banner?.color || "",
       bannerUrl: formData.banner?.url || "",
     },
   };
@@ -154,25 +159,19 @@ export default function WhatsOnRegist() {
   }, [currentLang]);
 
   const handleSave = async () => {
-    const krPayload = mapFormDataToRequest(krData, "ko", krId);
-    const enPayload = mapFormDataToRequest(enData, "en", enId);
-
-    console.log("저장할 KR payload:", krPayload);
-    console.log("저장할 EN payload:", enPayload);
-
     try {
-      await Promise.all([
-        api.post("/api/v1/event-promotion/contents/insert", krPayload),
-        api.post("/api/v1/event-promotion/contents/insert", enPayload),
-      ]);
-
-      alert("저장되었습니다.");
+      if (currentLang === 0) {
+        const krPayload = mapFormDataToRequest(krData, "ko", krId);
+        await api.post("/api/v1/event-promotion/contents/insert", krPayload);
+        alert("국문 저장 완료");
+      } else {
+        const enPayload = mapFormDataToRequest(enData, "en", enId);
+        await api.post("/api/v1/event-promotion/contents/insert", enPayload);
+        alert("영문 저장 완료");
+      }
       window.location.reload();
     } catch (error) {
-      console.error(" 저장 실패 상세:", error);
-      if (error.response) {
-        console.error("서버 응답:", error.response.data);
-      }
+      console.error("저장 오류:", error);
       alert("저장 중 오류가 발생했습니다.");
     }
   };

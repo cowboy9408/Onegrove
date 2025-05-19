@@ -40,7 +40,7 @@ export default function EventListPage() {
     const fetchData = async () => {
       try {
         const res = await api.get("/event-promotion/item");
-        const json = await res.json();
+        const json = res.data;
 
         if (json.success && Array.isArray(json.data)) {
           const rows = json.data.map((event, index) => {
@@ -50,16 +50,22 @@ export default function EventListPage() {
 
             return {
               originalIndex: index,
+              emId: event.emId,
+              ecId_ko: koItem.ecId || null,
+              ecId_en: enItem.ecId || null,
+
               occupancy: koItem.sort || 0,
               name: event.category || "-",
               language:
                 koItem.lang && enItem.lang ? "both" : koItem.lang ? "ko" : "en",
               ko_title: koItem.title || "-",
               en_title: enItem.title || "-",
-              email: event.status || "진행중",
+              situation: event.status || "진행중",
               status: koItem.showYn === "Y" ? "노출" : "비노출",
               created_user: koItem.createUser || "-",
               created_at: koItem.createDatetime || "-",
+
+              _id: `${event.emId}`,
             };
           });
 
@@ -189,84 +195,35 @@ export default function EventListPage() {
           </Button>
           <Button
             className="bg-black text-white hover:bg-gray-800"
-            onClick={() => {
-              const saved = localStorage.getItem("events");
-              if (!saved) return;
+            onClick={async () => {
+              if (checkedIds.length === 0) {
+                alert("삭제할 항목을 선택해주세요.");
+                return;
+              }
+
+              // 체크된 항목에서 실제 emId만 추출
+              const idsToDelete = data
+                .filter((item) => checkedIds.includes(item._id))
+                .map((item) => item.emId); // emId는 실제 백엔드 식별자
 
               try {
-                const parsed = JSON.parse(saved);
-
-                // 삭제 대상 ID 집합 만들기
-                const idsToDelete = new Set(
-                  data
-                    .filter((item) => checkedIds.includes(item._id))
-                    .map((item) => Number(item.originalIndex))
+                const res = await api.delete(
+                  "/api/v1/event-promotion/item/delete",
+                  {
+                    data: { checkArr: idsToDelete },
+                  }
                 );
 
-                // 실제 삭제
-                const updated = parsed.filter(
-                  (_, index) => !idsToDelete.has(index)
-                );
-                localStorage.setItem("events", JSON.stringify(updated));
-
-                // 삭제 후 바로 목록 재계산
-                const rows = updated.map((event, index) => {
-                  const ko = event.ko || {};
-                  const en = event.en || {};
-
-                  return {
-                    originalIndex: index,
-                    _id: `${index}`, // 여기서 다시 _id 보장
-                    occupancy: Number(ko.order) || 0,
-                    name: ko.category || "-",
-                    language:
-                      event.ko && event.en ? "both" : event.ko ? "ko" : "en",
-                    ko_title: ko.title || "-",
-                    en_title: en.title || "-",
-                    email: "진행중",
-                    status: ko.status === "active" ? "노출" : "비노출",
-                    created_user: "관리자",
-                    created_at: ko.created_at || "-",
-                  };
-                });
-
-                const filtered = rows.filter((row) => {
-                  const titleMatch =
-                    name === "" ||
-                    row.ko_title.includes(name) ||
-                    row.en_title.includes(name);
-                  const categoryMatch =
-                    category === "" || row.name === category;
-                  const visibilityMatch =
-                    visibility === "" || row.status === visibility;
-                  const dateMatch =
-                    (!dateRange.startDate ||
-                      new Date(row.created_at) >=
-                        new Date(dateRange.startDate)) &&
-                    (!dateRange.endDate ||
-                      new Date(row.created_at) <= new Date(dateRange.endDate));
-                  return (
-                    titleMatch && categoryMatch && visibilityMatch && dateMatch
-                  );
-                });
-
-                const sorted = filtered.sort(
-                  (a, b) => a.occupancy - b.occupancy
-                );
-                const start = 0;
-                const end = start + 10;
-                const sliced = sorted.slice(start, end).map((row, idx) => ({
-                  ...row,
-                  no: start + idx + 1,
-                }));
-
-                // UI 즉시 갱신
-                setData(sliced);
-                setTotal(filtered.length);
-                setCheckedIds([]);
-                setPage(1); // 또는 유지
+                if (res.status === 200) {
+                  alert("삭제가 완료되었습니다.");
+                  setCheckedIds([]);
+                  setPage(1); // 첫 페이지로 리셋
+                } else {
+                  alert("삭제 실패: 서버 오류");
+                }
               } catch (err) {
-                console.error("삭제 중 오류:", err);
+                console.error("삭제 요청 실패:", err);
+                alert("삭제 중 오류가 발생했습니다.");
               }
             }}
           >
@@ -300,7 +257,7 @@ export default function EventListPage() {
                 </div>
               ),
             },
-            { key: "email", label: "상태여부" },
+            { key: "situation", label: "상태여부" },
             { key: "status", label: "노출여부" },
             { key: "created_user", label: "등록자" },
             { key: "created_at", label: "등록일시" },

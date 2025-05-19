@@ -43,7 +43,6 @@ export default function BrandRegist() {
         thumbText: form.ceoName,
         content: form.description,
 
-        // 공통 필드도 현재 탭에서 가져옵니다
         category: form.office,
         thumbImg: form.mainImage,
         mainPcImg: form.pcImage,

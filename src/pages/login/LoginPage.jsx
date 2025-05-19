@@ -29,7 +29,7 @@ export default function LoginPage() {
     setName(res.name);
 
     localStorage.setItem("accessToken", res.accessToken);
-    localStorage.setItem("refreshToken", res.refreshToken); // 여기도 계속 null이면 응답에 없음
+    localStorage.setItem("refreshToken", res.refreshToken);
 
     navigate("/");
   };
@@ -37,7 +37,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4 font-sans dark:bg-white">
       <img
-        src="/src/img/ONE GROVE.png"
+        src="/public/img/ONE GROVE.png"
         alt="ONE GROVE 로고"
         className="mx-auto mb-10 h-20 w-auto"
       />

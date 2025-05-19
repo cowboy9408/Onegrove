@@ -51,9 +51,6 @@ const schema = z.object({
 export default function BannerForm({ data, setData }) {
   const titleId = useId();
   const subtitleId = useId();
-  const buttonId = useId();
-  const bgId = useId();
-  const colorId = useId();
   const urlId = useId();
 
   const methods = useForm({
@@ -157,50 +154,7 @@ export default function BannerForm({ data, setData }) {
               error={errors.banner?.image?.message}
             />
           </Row>
-          <Row className="pb-4">
-            <FormInput
-              id={buttonId}
-              label="버튼명"
-              fieldName={`banner.button`}
-              maxLength={100}
-              showDefaultInfo={true}
-              required
-              placeholder="버튼명을 입력해주세요."
-              {...register(`banner.button`)}
-              error={errors.banner?.button?.message}
-              onClear={() => resetField(`banner.button`)}
-            />
-          </Row>
-          <Row className="pb-4">
-            <Col>
-              <FormInput
-                id={bgId}
-                label="버튼배경색"
-                fieldName={`banner.bg`}
-                maxLength={6}
-                showDefaultInfo={true}
-                required
-                placeholder="버튼배경색을 입력해주세요."
-                {...register(`banner.bg`)}
-                error={errors.banner?.bg?.message}
-                onClear={() => resetField(`banner.bg`)}
-              />
-            </Col>
-            <Col>
-              <FormInput
-                id={colorId}
-                label="버튼글자색"
-                fieldName={`banner.color`}
-                maxLength={6}
-                showDefaultInfo={true}
-                required
-                placeholder="버튼글자색을 입력해주세요."
-                {...register(`banner.color`)}
-                error={errors.banner?.color?.message}
-                onClear={() => resetField(`banner.color`)}
-              />
-            </Col>
-          </Row>
+
           <Row className="pb-4">
             <FormInput
               id={urlId}
