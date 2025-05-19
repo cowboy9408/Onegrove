@@ -37,7 +37,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4 font-sans dark:bg-white">
       <img
-        src="/public/img/ONE GROVE.png"
+        src="/img/ONE GROVE.png"
         alt="ONE GROVE 로고"
         className="mx-auto mb-10 h-20 w-auto"
       />
