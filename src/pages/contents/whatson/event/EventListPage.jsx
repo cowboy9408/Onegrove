@@ -39,7 +39,9 @@ export default function EventListPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await api.get("/event-promotion/item");
+        const res = await api.get("/api/v1/event-promotion/item", {
+          withCredentials: true,
+        });
         const json = res.data;
 
         if (json.success && Array.isArray(json.data)) {

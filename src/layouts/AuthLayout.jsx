@@ -9,7 +9,6 @@ import { useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import { getRefreshAccessToken } from "@/api/user";
 
 function ContentArea() {
   const { isExpanded } = useSidebar();
@@ -48,25 +47,18 @@ export default function AuthLayout() {
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuth = () => {
       const token = Cookies.get("ACCESS_TOKEN");
       const route = findMatchingRoute(pathname);
 
       if (!token) {
-        try {
-          const refreshed = await getRefreshAccessToken();
-          setAccessToken(refreshed.accessToken, refreshed.permission);
-        } catch (err) {
-          console.error("토큰 리프레시 실패:", err);
-          removeAccessToken();
-          navigate("/login");
-          return;
-        }
+        removeAccessToken();
+        navigate("/login");
+        return;
       }
 
       if (!accessToken) {
-        navigate("/login");
-        return;
+        setAccessToken(token); // 쿠키에서 accessToken을 가져올 수도 있음
       }
 
       if (route?.permissions && !route.permissions.includes(permission)) {

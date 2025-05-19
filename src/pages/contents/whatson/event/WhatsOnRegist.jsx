@@ -131,9 +131,15 @@ export default function WhatsOnRegist() {
       const lang = currentLang === 0 ? "ko" : "en";
 
       try {
-        const res = await api.get("/api/v1/event-promotion/contents", {
-          params: { lang },
-        });
+        const res = await api.get(
+          "/api/v1/event-promotion/contents",
+          {
+            params: { lang },
+          },
+          {
+            withCredentials: true,
+          }
+        );
 
         const mapped = mapResponseToFormData(res.data.data);
 
