@@ -144,9 +144,7 @@ export default function WhatsOnRegist() {
           setEnId(res.data.data.id);
           setEnData(mapped);
         }
-      } catch (error) {
-        console.error("콘텐츠 불러오기 실패:", error);
-        alert("데이터를 불러오는 데 실패했습니다. 빈 폼으로 표시됩니다.");
+      } catch {
         if (lang === "ko") {
           setKrData(emptyData);
         } else {
