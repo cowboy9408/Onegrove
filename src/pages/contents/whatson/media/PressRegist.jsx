@@ -1,6 +1,6 @@
 import Section from "@/components/layout/Section";
 import Tabs, { TabPanel } from "@/components/layout/Tabs";
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import Button from "@/components/common/Button";
 import { useNavigate } from "react-router-dom";
 import api from "@/lib/apiClient";

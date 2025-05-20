@@ -254,8 +254,22 @@ export default function EventListPage() {
               label: "타이틀",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <div className="py-1">{row.ko_title}</div>
-                  <div className="py-1">{row.en_title}</div>
+                  <button
+                    className="text-black-600 underline"
+                    onClick={() =>
+                      navigate(`/contents/whatson/event/detail/${row.emId}`)
+                    }
+                  >
+                    {row.ko_title}
+                  </button>
+                  <button
+                    className="text-black-600 underline"
+                    onClick={() =>
+                      navigate(`/contents/whatson/event/detail/${row.emId}`)
+                    }
+                  >
+                    {row.en_title}
+                  </button>
                 </div>
               ),
             },

@@ -6,6 +6,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const api = axios.create({
   baseURL,
+  withCredentials: true,
 });
 
 // 요청 인터셉터: accessToken + 로딩 시작

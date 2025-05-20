@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, Controller } from "react-hook-form";
 import Button from "@/components/common/Button";
 import Upload from "@/components/common/Upload";
 import Select from "@/components/common/Select";
@@ -29,12 +29,10 @@ export default function TopContentForm({ data, setData }) {
   } = methods;
 
   useEffect(() => {
-    if (!data || data.length === 0) {
-      reset({ etc: [defaultItem] });
-    } else {
+    if (Array.isArray(data) && data.length > 0) {
       reset({ etc: data });
     }
-  }, [data, reset]);
+  }, []);
 
   const onSubmit = (formValues) => {
     setData(formValues.etc);
@@ -46,16 +44,22 @@ export default function TopContentForm({ data, setData }) {
         <FieldGroup name="etc">
           {({ fields, field, index, append, remove }) => (
             <Box
-              key={`${field.id}-${index}`}
+              key={`${field.id}`}
               className="mb-2 rounded-md border-2 border-gray-200"
             >
               <Title title={`■ Stories of One Grove 콘텐츠 ${index + 1}`} />
 
               <Row className="pb-4">
-                <Upload
+                <Controller
                   name={`etc.${index}.image`}
-                  label="이미지"
-                  error={errors.etc?.[index]?.image?.message}
+                  control={methods.control}
+                  render={({ field }) => (
+                    <Upload
+                      {...field}
+                      label="이미지"
+                      error={errors.etc?.[index]?.image?.message}
+                    />
+                  )}
                 />
               </Row>
 

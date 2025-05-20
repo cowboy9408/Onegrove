@@ -7,6 +7,8 @@ import { useController, useFormContext, useWatch } from "react-hook-form";
 
 export default function Upload({
   name,
+  value: externalValue,
+  onChange: externalOnChange,
   label = "파일 업로드",
   readOnly = false,
   accept = "image/*,video/*",
@@ -19,10 +21,14 @@ export default function Upload({
 }) {
   const inputRef = useRef(null);
   const wrapperRef = useRef(null);
-  const { control } = useFormContext();
+  const formContext = useFormContext();
+  const control = formContext?.control;
   const {
-    field: { value, onChange },
+    field: { value: fieldValue, onChange: fieldOnChange },
   } = useController({ name, control, defaultValue });
+
+  const value = externalValue ?? fieldValue;
+  const onChange = externalOnChange ?? fieldOnChange;
 
   const watchedValue = useWatch({
     control: control,
@@ -67,6 +73,7 @@ export default function Upload({
   }, [error]);
 
   const handleFileChange = async (e) => {
+    console.log("파일 선택됨:", e.target.files[0]);
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
 
@@ -126,7 +133,17 @@ export default function Upload({
   };
 
   const handleClick = () => {
-    if (!readOnly) inputRef.current?.click();
+    console.log("Upload 영역 클릭됨");
+    if (readOnly) {
+      console.log("읽기 전용 상태 - 클릭 무시");
+      return;
+    }
+
+    if (!inputRef.current) {
+      return;
+    }
+
+    inputRef.current.click();
   };
 
   const handleDelete = () => {
@@ -196,9 +213,12 @@ export default function Upload({
       <input
         ref={inputRef}
         type="file"
-        accept={accepted || accept}
+        accept={accepted}
         className="hidden"
-        onChange={handleFileChange}
+        onChange={(e) => {
+          console.log("파일 선택됨"); // 반드시 찍히는지 확인
+          handleFileChange(e);
+        }}
       />
 
       {error && (

@@ -53,6 +53,8 @@ import AffairListPage from "@/pages/admin/adminpage/AffairListPage";
 import AffairRegist from "@/pages/admin/adminpage/AffairRegist";
 import PopupRegist from "@/pages/popup/PopupRegist";
 import BrandDetail from "@/pages/retail/brand/BrandDetail";
+import PressDetail from "@/pages/contents/whatson/media/PressDetail";
+import EventDetail from "@/pages/contents/whatson/event/EventDetail";
 
 export const routeMeta = [
   {
@@ -272,6 +274,15 @@ export const routeMeta = [
                     hidden: true,
                     permissions: ["Admin", "User"],
                   },
+                  {
+                    uuid: "a3126b50-bd32-4d31-9241-b9a8a5ec6eb8",
+                    path: "/contents/whatson/event/detail/:eventId",
+                    group: "/contents/whatson/event/list",
+                    element: <EventDetail />,
+                    title: "Event & Promotion 상세",
+                    hidden: true,
+                    permissions: ["Admin", "User"],
+                  },
                 ],
               },
               {
@@ -324,6 +335,14 @@ export const routeMeta = [
                 path: "/contents/whatson/media/regist",
                 element: <PressRegist />,
                 title: "Press & Media 등록",
+                hidden: true,
+                permissions: ["Admin", "User"],
+              },
+              {
+                uuid: "e026f9a6-7337-45c3-8140-71f673cca0f9",
+                path: "/contents/whatson/media/:pmId",
+                element: <PressDetail />,
+                title: "Press & Media 상세",
                 hidden: true,
                 permissions: ["Admin", "User"],
               },

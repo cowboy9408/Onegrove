@@ -7,7 +7,7 @@ import Box from "@/components/layout/Box";
 import Row from "@/components/layout/Row";
 import Title from "@/components/layout/Title";
 import { useEffect } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, Controller } from "react-hook-form";
 
 const MAX_KV_LENGTH = 4;
 
@@ -21,15 +21,10 @@ export default function KeyVisualForm({ data, setData }) {
   const { handleSubmit, reset, resetField, register } = methods;
 
   useEffect(() => {
-    if (Array.isArray(data)) {
-      reset({
-        kv:
-          data.length > 0
-            ? data
-            : [{ type: "image", file: null, title: "", subtitle: "" }],
-      });
+    if (Array.isArray(data) && data.length > 0) {
+      reset({ kv: data });
     }
-  }, [data, reset]);
+  }, []); // 의존성 줄이기
 
   const onSubmit = (formValues) => {
     setData(formValues.kv);
@@ -46,7 +41,7 @@ export default function KeyVisualForm({ data, setData }) {
 
             return (
               <Box
-                key={`${field.id}-${index}`}
+                key={field.id}
                 className="mb-2 rounded-md border-2 border-gray-200"
               >
                 <Title title={`■ Key Visual 이미지 ${index + 1}`} />
@@ -64,10 +59,16 @@ export default function KeyVisualForm({ data, setData }) {
                 </Row>
 
                 <Row className="pb-4">
-                  <Upload
+                  <Controller
                     name={`kv.${index}.file`}
-                    label="파일"
-                    acceptWith={`kv.${index}.type`}
+                    control={methods.control}
+                    render={({ field }) => (
+                      <Upload
+                        {...field}
+                        label="파일"
+                        acceptWith={`kv.${index}.type`}
+                      />
+                    )}
                   />
                 </Row>
 

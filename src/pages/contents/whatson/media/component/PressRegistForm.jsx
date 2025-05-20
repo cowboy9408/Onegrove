@@ -1,15 +1,21 @@
-import { useEffect, useImperativeHandle, useState, forwardRef } from "react";
+import {
+  useEffect,
+  useImperativeHandle,
+  useState,
+  forwardRef,
+  useRef,
+} from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import Select from "@/components/common/Select";
 import Input from "@/components/common/Input";
 import Upload from "@/components/common/Upload";
 import Radio from "@/components/common/Radio";
 import Editor from "@/components/common/Editor";
-import DateRangePicker from "@/components/common/Datepicker";
+import Datepicker from "@/components/common/Datepicker";
 
 const PressRegistForm = forwardRef(({ data, setData, lang }, ref) => {
   const methods = useForm();
-
+  const [singleDate, setSingleDate] = useState(null);
   const { register, handleSubmit, setValue, getValues, watch } = methods;
 
   const [dateRange, setDateRange] = useState({
@@ -17,7 +23,7 @@ const PressRegistForm = forwardRef(({ data, setData, lang }, ref) => {
     endDate: data?.endDate ? new Date(data.endDate) : null,
   });
 
-  const editorRef = useState(null);
+  const editorRef = useRef(null);
 
   useEffect(() => {
     setValue("startDate", dateRange.startDate);
@@ -97,9 +103,10 @@ const PressRegistForm = forwardRef(({ data, setData, lang }, ref) => {
         {/* 발행일 */}
         <div>
           <p className="mb-2 text-sm font-medium text-gray-800">발행일</p>
-          <DateRangePicker
-            startDate={dateRange.startDate}
-            onChange={setDateRange}
+          <Datepicker
+            mode="single"
+            selectedDate={singleDate}
+            onSingleChange={(date) => setSingleDate(date)}
           />
         </div>
       </div>
