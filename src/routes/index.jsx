@@ -191,7 +191,7 @@ export const routeMeta = [
             uuid: "88722265-4bd6-4702-9dfd-07a9af8ac137",
             path: "/retail/brand/detail/:masterId",
             element: <BrandDetail />,
-            title: "입점 브랜드 관리",
+            title: "입점 브랜드 상세",
             hidden: true,
             permissions: ["Admin", "User"],
           },

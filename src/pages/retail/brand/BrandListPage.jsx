@@ -42,33 +42,35 @@ export default function BrandListPage() {
           params: {
             currentPage: page,
             category: category || undefined,
-            name: name || undefined,
+            brand: name || undefined,
             status: status || undefined,
           },
         });
 
         const rows = res.data.map((brand, idx) => {
-          const ko = brand.contentList.find((c) => c.lang === "KO") || {};
+          const ko = Array.isArray(brand.contentList)
+            ? brand.contentList.find((c) => c.lang?.toUpperCase() === "KO")
+            : null;
+          const en = Array.isArray(brand.contentList)
+            ? brand.contentList.find((c) => c.lang?.toUpperCase() === "EN")
+            : null;
+
+          console.log("ko.name 확인:", ko?.name);
+          console.log("en.name 확인:", en?.name);
+
           return {
             _id: String(brand.id),
             id: brand.id,
+            masterId: brand.id,
             no: brand.rownum || (page - 1) * size + idx + 1,
             category: brand.category || "-",
-            name: (
-              <button
-                className="text-black-600 underline"
-                onClick={() =>
-                  navigate(`/retail/brand/detail/${brand.masterId}`)
-                }
-              >
-                {ko.name || "-"}
-              </button>
-            ),
-            status: ko.useYn || "-",
-            created_at: ko.createDt?.split(" ")[0] || "-",
-            created_user: ko.createUser || "-",
-            updated_at: ko.updateDt?.split(" ")[0] || "-",
-            updated_user: ko.updateUser || "-",
+            ko_title: ko?.name || "-",
+            en_title: en?.name || "-",
+            status: ko?.useYn || "-",
+            created_at: ko?.createDt?.split(" ")[0] || "-",
+            created_user: ko?.createUser || "-",
+            updated_at: ko?.updateDt?.split(" ")[0] || "-",
+            updated_user: ko?.updateUser || "-",
           };
         });
 
@@ -191,7 +193,40 @@ export default function BrandListPage() {
           columns={[
             { key: "no", label: "번호" },
             { key: "category", label: "카테고리" },
-            { key: "name", label: "브랜드명" },
+            {
+              key: "language",
+              label: "언어",
+              render: () => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="py-1 font-medium">ko</div>
+                  <div className="py-1 font-medium">en</div>
+                </div>
+              ),
+            },
+            {
+              key: "title",
+              label: "브랜드명",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <button
+                    className="text-black-600 underline"
+                    onClick={() =>
+                      navigate(`/retail/brand/detail/${row.masterId}?lang=ko`)
+                    }
+                  >
+                    {row.ko_title}
+                  </button>
+                  <button
+                    className="text-black-600 underline"
+                    onClick={() =>
+                      navigate(`/retail/brand/detail/${row.masterId}?lang=en`)
+                    }
+                  >
+                    {row.en_title}
+                  </button>
+                </div>
+              ),
+            },
             { key: "status", label: "사용여부" },
             { key: "created_at", label: "등록일시" },
             { key: "created_user", label: "등록자" },

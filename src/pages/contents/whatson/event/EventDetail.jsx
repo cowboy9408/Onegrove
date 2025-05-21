@@ -3,13 +3,15 @@ import Tabs, { TabPanel } from "@/components/layout/Tabs";
 import { useEffect, useState, useRef } from "react";
 import EventRegistForm from "./components/EventRegistForm";
 import Button from "@/components/common/Button";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import api from "@/lib/apiClient";
 import useModal from "@/hooks/useModal";
 
 export default function EventDetail() {
-  const [currentLang, setCurrentLang] = useState(0); // 0 = 국문, 1 = 영문
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialLang = searchParams.get("lang") || "ko";
+  const [currentLang, setCurrentLang] = useState(initialLang === "ko" ? 0 : 1);
   const koFormRef = useRef();
   const enFormRef = useRef();
   const { showModal } = useModal();
@@ -139,7 +141,7 @@ export default function EventDetail() {
           { key: "kr", label: "국문" },
           { key: "en", label: "영문" },
         ]}
-        defaultIndex={0}
+        defaultIndex={currentLang}
         onTabChange={(index) => {
           // 탭 비활성화: 클릭 무시
           if (!loading) setCurrentLang(index);

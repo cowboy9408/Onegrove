@@ -257,7 +257,9 @@ export default function EventListPage() {
                   <button
                     className="text-black-600 underline"
                     onClick={() =>
-                      navigate(`/contents/whatson/event/detail/${row.emId}`)
+                      navigate(
+                        `/contents/whatson/event/detail/${row.emId}?lang=ko`
+                      )
                     }
                   >
                     {row.ko_title}
@@ -265,7 +267,9 @@ export default function EventListPage() {
                   <button
                     className="text-black-600 underline"
                     onClick={() =>
-                      navigate(`/contents/whatson/event/detail/${row.emId}`)
+                      navigate(
+                        `/contents/whatson/event/detail/${row.emId}?lang=en`
+                      )
                     }
                   >
                     {row.en_title}

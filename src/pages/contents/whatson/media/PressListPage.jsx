@@ -250,7 +250,7 @@ export default function PressListPage() {
                   <button
                     className="text-black-600 underline"
                     onClick={() =>
-                      navigate(`/contents/whatson/media/${row.pmId}`)
+                      navigate(`/contents/whatson/media/${row.pmId}?lang=ko`)
                     }
                   >
                     {row.ko_title}
@@ -258,7 +258,7 @@ export default function PressListPage() {
                   <button
                     className="text-black-600 underline"
                     onClick={() =>
-                      navigate(`/contents/whatson/media/${row.pmId}`)
+                      navigate(`/contents/whatson/media/${row.pmId}?lang=en`)
                     }
                   >
                     {row.en_title}

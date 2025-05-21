@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Tabs, { TabPanel } from "@/components/layout/Tabs";
 import Section from "@/components/layout/Section";
 import Button from "@/components/common/Button";
@@ -9,8 +9,9 @@ import api from "@/lib/apiClient";
 export default function PressDetail() {
   const navigate = useNavigate();
   const { pmId } = useParams();
-
-  const [currentLang, setCurrentLang] = useState(0); // 0 = 국문, 1 = 영문
+  const [searchParams] = useSearchParams();
+  const initialLang = searchParams.get("lang") || "ko";
+  const [currentLang, setCurrentLang] = useState(initialLang === "ko" ? 0 : 1);
   const koFormRef = useRef();
   const enFormRef = useRef();
 
@@ -70,7 +71,7 @@ export default function PressDetail() {
           { key: "ko", label: "국문" },
           { key: "en", label: "영문" },
         ]}
-        defaultIndex={0}
+        defaultIndex={currentLang}
         onTabChange={(index) => {
           if (!loading) setCurrentLang(index);
         }}
