@@ -75,7 +75,7 @@ const EventRegistForm = forwardRef(
             originalName: file.originalName || file.name,
             name: file.name,
             size: file.size,
-            extension: "." + file.name.split(".").pop(),
+            extension: "." + file.originalName.split(".").pop(),
             mime: file.type || "image/png",
             classification: null,
             path: `C:\\\\upload\\/test\\${file.name}`,
