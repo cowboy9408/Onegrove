@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import Input from "@/components/common/Input";
@@ -8,14 +9,44 @@ import Checkbox from "@/components/common/Checkbox";
 import NewInput from "@/components/common/NewInput";
 import Editor from "@/components/common/Editor";
 import useModal from "@/hooks/useModal";
+import api from "@/lib/apiClient";
 
 const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
+  const [categoryList, setCategoryList] = useState([]);
+  const [keywordList, setKeywordList] = useState([]);
   const methods = useForm({
     mode: "onChange",
   });
   const { control, register, setValue, watch, getValues } = methods;
+
+  
   const editorRef = useRef();
   const { showModal } = useModal();
+
+  useEffect(() => {
+    const fetchCategory = async () => {
+      try {
+        const res = await api.get("/api/v1/brand/category");
+        setCategoryList(res.data?.data || []);
+        // console.log("카테고리 목록:", res.data?.data);
+      } catch (err) {
+        console.error("카테고리 목록 불러오기 실패:", err);
+      }
+    };
+    fetchCategory(); 
+
+    const fetchKeyword = async () => {
+      try {
+        const res = await api.get("/api/v1/brand/keyword");
+        setKeywordList(res.data?.data || []);
+        console.log("키워드 목록:", res.data?.data);
+      } catch (err) {
+        console.error("키워드 목록 불러오기 실패:", err);
+      }
+    };
+    // fetchKeyword(); 
+    
+  }, []);
 
   const validateRequiredFields = () => {
     // const requiredImages = [
@@ -179,10 +210,11 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           render={({ field }) => (
             <Select label="카테고리" required {...field} disabled={readOnly}>
               <option value="">선택</option>
-              <option value="office1">카테고리1</option>
-              <option value="office2">카테고리2</option>
-              <option value="office3">카테고리3</option>
-              <option value="office4">카테고리4</option>
+              {categoryList.map((item) => (
+                <option key={item.code} value={item.code}>
+                  {item.value}
+                </option>
+              ))}
             </Select>
           )}
         />
@@ -201,26 +233,52 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
               };
 
               const options = [
-                "man",
-                "woman",
-                "lifewear",
-                "street",
-                "fashion",
-                "sportswear",
-                "spa",
-                "luxury",
-                "kids",
-                "beauty",
+                {
+                    "code": "key0101",
+                    "value": "Man"
+                },
+                {
+                    "code": "key0102",
+                    "value": "Woman"
+                },
+                {
+                    "code": "key0103",
+                    "value": "Lifewear"
+                },
+                {
+                    "code": "key0104",
+                    "value": "Street Fashion"
+                },
+                {
+                    "code": "key0105",
+                    "value": "Sportswear"
+                },
+                {
+                    "code": "key0106",
+                    "value": "SPA"
+                },
+                {
+                    "code": "key0107",
+                    "value": "Luxury"
+                },
+                {
+                    "code": "key0108",
+                    "value": "Kids"
+                },
+                {
+                    "code": "key0109",
+                    "value": "Beauty"
+                }
               ];
 
               return (
                 <div className="flex flex-wrap gap-4">
                   {options.map((keyword) => (
                     <Checkbox
-                      key={keyword}
-                      label={keyword}
-                      checked={field.value.includes(keyword)}
-                      onChange={() => handleToggle(keyword)}
+                      key={keyword.code}
+                      label={keyword.value}
+                      checked={field.value.includes(keyword.code)}
+                      onChange={() => handleToggle(keyword.code)}
                       disabled={readOnly}
                     />
                   ))}
