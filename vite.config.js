@@ -17,12 +17,12 @@ export default defineConfig({
     host: true,
     port: 5173,
     proxy: {
-      '/api': {
-        target: 'http://adminapi-dev.onegrove.kr',
+      "/api": {
+        target: "http://adminapi-dev.onegrove.kr",
         changeOrigin: true,
         secure: false,
-        cookieDomainRewrite: '',
+        cookieDomainRewrite: "",
       },
     },
-  }
+  },
 });

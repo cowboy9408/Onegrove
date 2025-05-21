@@ -34,17 +34,29 @@ export default function PressRegist() {
   });
 
   const handleSave = async () => {
+    console.log("handleSave 호출됨");
     const ref = currentLang === 0 ? koFormRef : enFormRef;
+    console.log("ref 상태:", ref.current);
+
     const form = await ref.current?.submit();
-    if (!form) return;
+    console.log("폼 결과:", form);
+
+    if (!form) {
+      console.warn("폼이 유효하지 않아서 저장 중단됨");
+      return;
+    }
 
     const payload = {
       lang: currentLang === 0 ? "ko" : "en",
+      category: form.category,
       title: form.title,
-      thumbImg: form.thumbImg,
+      thumbImg: form.imgPc?.path || "",
       showYn: form.status === "active" ? "Y" : "N",
       content: form.content1,
+      publish_date: form.publish_date,
     };
+
+    console.log("최종 전송 payload:", payload);
 
     try {
       await api.post("/api/v1/press/insert", payload);
