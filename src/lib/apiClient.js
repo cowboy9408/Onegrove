@@ -54,7 +54,11 @@ api.interceptors.response.use(
 
       try {
         const res = await axios.post(
+<<<<<<< HEAD
           `${baseURL}/api/v1/auth/refresh`,
+=======
+          `/api/v1/auth/refresh`,
+>>>>>>> f95e7a6 (리프레시토큰 만료되었을 경우 login 페이지로 리다이렉트)
           {},
           { withCredentials: true }
         );
@@ -71,6 +75,7 @@ api.interceptors.response.use(
 
         localStorage.removeItem("accessToken");
 
+<<<<<<< HEAD
         // 401 오류 또는 네트워크 오류일 경우 로그인 페이지로 이동
         const isNetworkError =
           refreshError.code === "ERR_NETWORK" ||
@@ -83,6 +88,16 @@ api.interceptors.response.use(
         if (isNetworkError || isUnauthorized) {
           window.location.href = "/login";
           return;
+=======
+        // ✅ 네트워크 오류 또는 서버가 죽은 경우: 로그인 페이지로 리다이렉트
+        if (
+          refreshError.code === "ERR_NETWORK" ||
+          refreshError.message.includes("Network Error") ||
+          refreshError.message.includes("ERR_CONNECTION_REFUSED")
+        ) {
+          window.location.href = "/login";
+          return; // 이후 요청 중단
+>>>>>>> f95e7a6 (리프레시토큰 만료되었을 경우 login 페이지로 리다이렉트)
         }
 
         refreshError.isAuthFailed = true;
