@@ -15,41 +15,68 @@ export default function PressDetail() {
   const koFormRef = useRef();
   const enFormRef = useRef();
 
-  const [koData, setKoData] = useState({});
-  const [enData, setEnData] = useState({});
+  const [koData, setKoData] = useState(null);
+  const [enData, setEnData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isReadOnly, setIsReadOnly] = useState(true);
 
-  // 상세 데이터 불러오기
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await api.get(`/api/v1/press/${pmId}`);
-        console.log("API 응답 전체:", res);
+        console.log("📡 API 응답 결과:", res.data);
 
-        const items = res.data?.data;
-        if (!Array.isArray(items)) {
-          console.warn("데이터 배열이 아님:", res.data);
-          return;
-        }
+        const list = Array.isArray(res.data?.data) ? res.data.data : [];
 
-        const ko = items.find((item) => item.lang === "ko");
-        const en = items.find((item) => item.lang === "en");
+        const ko = list.find((item) => item.lang === "ko") || null;
+        const en = list.find((item) => item.lang === "en") || null;
 
-        console.log("ko:", ko);
-        console.log("en:", en);
+        console.log("✅ koData:", ko);
+        console.log("✅ enData:", en);
 
-        setKoData(ko || {});
-        setEnData(en || {});
+        setKoData(ko);
+        setEnData(en);
         setLoading(false);
       } catch (err) {
-        console.error("데이터 불러오기 오류:", err);
+        console.error("📛 API 호출 실패:", err);
+        setKoData(null);
+        setEnData(null);
+        setLoading(false);
       }
     };
     fetchData();
   }, [pmId]);
 
-  // 저장하기
+  useEffect(() => {
+    if (!loading) {
+      const patchForm = (formRef, data) => {
+        if (!formRef || !data) return;
+        formRef.setValue("category", data.categoryCode || "");
+        formRef.setValue("title", data.title || "");
+        formRef.setValue("status", data.showYn === "Y" ? "active" : "inactive");
+        formRef.setValue("publish_date", data.publishDate || "");
+        formRef.setValue("imgPc", data.thumbImgPc || null);
+        formRef.setValue("imgMo", data.thumbImgMo || null);
+        formRef.setValue("content1", data.content || "");
+      };
+
+      patchForm(koFormRef.current, koData);
+      patchForm(enFormRef.current, enData);
+    }
+  }, [loading, koData, enData]);
+
+  useEffect(() => {
+    if (!loading) {
+      console.log("🧩 koFormRef.current:", koFormRef.current);
+      console.log("🧩 enFormRef.current:", enFormRef.current);
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    console.log("📦 KO 데이터:", koData);
+    console.log("📦 EN 데이터:", enData);
+  }, [koData, enData]);
+
   const handleSave = async () => {
     try {
       const activeRef = currentLang === 0 ? koFormRef : enFormRef;
@@ -58,19 +85,16 @@ export default function PressDetail() {
 
       const payload = {
         id: Number(pmId),
-        category: formValues.category,
         title: formValues.title,
-        thumbImgPc: formValues.imgPc?.path || null,
-        thumbImgMo: formValues.imgMo?.path || null,
+        thumbImg: formValues.imgPc,
         showYn: formValues.status === "active" ? "Y" : "N",
         content: formValues.content1,
-        publish_date: formValues.publish_date,
+        source: formValues.source,
+        updateUser: 2,
+        categoryCode: formValues.category,
+        publishDate: formValues.publish_date,
       };
 
-      console.log(
-        `[${currentLang === 0 ? "KO" : "EN"}] 수정 요청 데이터:`,
-        payload
-      );
       await api.put(`/api/v1/press/update`, payload);
 
       alert("수정이 완료되었습니다.");
@@ -99,7 +123,6 @@ export default function PressDetail() {
             <PressRegistForm
               ref={koFormRef}
               data={koData}
-              setData={setKoData}
               lang="ko"
               readOnly={isReadOnly}
             />
@@ -110,7 +133,6 @@ export default function PressDetail() {
             <PressRegistForm
               ref={enFormRef}
               data={enData}
-              setData={setEnData}
               lang="en"
               readOnly={isReadOnly}
             />

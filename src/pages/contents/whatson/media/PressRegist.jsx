@@ -35,8 +35,8 @@ export default function PressRegist() {
       lang: currentLang === 0 ? "ko" : "en",
       category: form.category,
       title: form.title,
-      thumbImgPc: form.thumbImgPc?.path || null,
-      thumbImgMo: form.thumbImgMo?.path || null,
+      thumbImgPc: form.thumbImgPc || null,
+      thumbImgMo: form.thumbImgMo || null,
       showYn: form.showYn,
       content: form.content,
       publish_date: form.publish_date,
@@ -46,10 +46,11 @@ export default function PressRegist() {
 
     try {
       await api.post("/api/v1/press/insert", payload);
-      alert("저장되었습니다.");
-      navigate("/contents/whatson/media");
     } catch (err) {
       console.error("저장 실패:", err);
+    } finally {
+      alert("저장되었습니다.");
+      navigate("/contents/whatson/media");
     }
   };
 
