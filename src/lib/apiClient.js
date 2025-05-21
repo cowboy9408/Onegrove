@@ -2,11 +2,8 @@ import axios from "axios";
 import { useAuthStore } from "@/store/authStore";
 import { useLoadingStore } from "@/store/loadingStore";
 
-// const baseURL = import.meta.env.VITE_API_BASE_URL;
-
-
+// 기본 axios 인스턴스 생성
 const api = axios.create({
-  // baseURL,
   withCredentials: true,
 });
 
@@ -19,7 +16,6 @@ api.interceptors.request.use(
       console.log("accessToken", token);
     }
 
-    // 로딩 시작
     const { startLoading } = useLoadingStore.getState();
     startLoading();
 
@@ -32,7 +28,7 @@ api.interceptors.request.use(
   }
 );
 
-// 응답 인터셉터: 정상 응답 또는 토큰 재발급 후 재요청
+// 응답 인터셉터
 api.interceptors.response.use(
   (response) => {
     const { endLoading } = useLoadingStore.getState();
@@ -45,7 +41,6 @@ api.interceptors.response.use(
 
     const originalRequest = error.config;
 
-    // 토큰 만료로 인한 401, 그리고 재시도 안 된 요청만 처리
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
@@ -56,12 +51,9 @@ api.interceptors.response.use(
 
       try {
         const res = await axios.post(
-          // `${baseURL}/api/v1/auth/refresh`,
           `/api/v1/auth/refresh`,
           {},
-          {
-            withCredentials: true, // 쿠키 자동 전송
-          }
+          { withCredentials: true }
         );
 
         const newAccessToken = res.data.accessToken;
@@ -74,11 +66,18 @@ api.interceptors.response.use(
       } catch (refreshError) {
         console.error("토큰 리프레시 실패:", refreshError);
 
-        // 여기서 로그인 강제 이동 제거
-
         localStorage.removeItem("accessToken");
 
-        // 토큰 만료 에러를 호출 측에서 판단하게 처리
+        // ✅ 네트워크 오류 또는 서버가 죽은 경우: 로그인 페이지로 리다이렉트
+        if (
+          refreshError.code === "ERR_NETWORK" ||
+          refreshError.message.includes("Network Error") ||
+          refreshError.message.includes("ERR_CONNECTION_REFUSED")
+        ) {
+          window.location.href = "/login";
+          return; // 이후 요청 중단
+        }
+
         refreshError.isAuthFailed = true;
         return Promise.reject(refreshError);
       }
