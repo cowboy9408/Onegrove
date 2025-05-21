@@ -3,8 +3,9 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Tabs, { TabPanel } from "@/components/layout/Tabs";
 import Section from "@/components/layout/Section";
 import Button from "@/components/common/Button";
-import BrandRegistForm from "./component/BrandRegistFom";
+import BrandRegistForm from "./component/BrandRegistForm";
 import api from "@/lib/apiClient";
+import { ko } from "date-fns/locale";
 
 export default function BrandDetail() {
   const navigate = useNavigate();
@@ -30,7 +31,6 @@ export default function BrandDetail() {
         setKoData(koData);
         setEnData(enData);
         setLoading(false);
-        setLoading(false);
       } catch (err) {
         console.error("브랜드 상세 로딩 실패:", err);
       }
@@ -39,12 +39,12 @@ export default function BrandDetail() {
   }, [masterId]);
 
   useEffect(() => {
-    if (!loading && koFormRef.current && enFormRef.current) {
-      const patchForm = (ref, data) => {
+    if (!loading) {
+      const patchForm = (locale, data) => {
         const formValues = {
-          companyName: data.name,
-          ceoName: data.thumbText,
-          phone: data.title,
+          brandName: data.name,
+          thumbText: data.thumbText,
+          title: data.title,
           subtitle: data.subTitle,
           office: data.category,
           useStatus: data.useYn === "Y" ? "active" : "inactive",
@@ -94,15 +94,34 @@ export default function BrandDetail() {
             },
           },
         };
+
+        console.log("폼에 설정할 데이터:", locale, formValues);
+        // Object.entries(formValues).forEach(([key, value]) => {
+        //   if (locale === "ko") {
+        //     koFormRef.current?.setValue?.(key, value);
+        //   }
+        //   if (locale === "en") {
+        //     enFormRef.current?.setValue?.(key, value);
+        //   }
+        // });
+        const formRef = locale === 'ko' ? koFormRef.current : enFormRef.current;
         Object.entries(formValues).forEach(([key, value]) => {
-          ref.current.setValue?.(key, value);
+          formRef?.setValue?.(key, value);
         });
       };
 
-      patchForm(koFormRef, koData);
-      patchForm(enFormRef, enData);
+      if (koFormRef.current && koData?.data) {
+        patchForm('ko', koData.data);
+      }
+      if (enFormRef.current && enData?.data) {
+        patchForm('en', enData.data);
+      }
+
+      console.log("koFormRef.current:", koFormRef.current);
+      console.log("enFormRef.current:", enFormRef.current);
+      
     }
-  }, [loading, koData, enData]);
+  }, [currentLang, koData, enData]);
 
   const handleSave = async () => {
     try {
@@ -189,7 +208,7 @@ export default function BrandDetail() {
           // 탭 비활성화: 클릭 무시
           if (!loading) setCurrentLang(index);
         }}
-        disabled={isReadOnly}
+        // disabled={isReadOnly}
       >
         <TabPanel>
           <BrandRegistForm ref={koFormRef} lang="ko" readOnly={isReadOnly} />

@@ -34,34 +34,34 @@ export default function PressRegist() {
   });
 
   const handleSave = async () => {
+    console.log("handleSave 호출됨");
     const ref = currentLang === 0 ? koFormRef : enFormRef;
+    console.log("ref 상태:", ref.current);
+
     const form = await ref.current?.submit();
-    if (!form) return;
+    console.log("폼 결과:", form);
+
+    if (!form) {
+      console.warn("폼이 유효하지 않아서 저장 중단됨");
+      return;
+    }
 
     const payload = {
-      eventId: null,
-      showYn: form.status === "active" ? "Y" : "N",
-      sort: Number(form.order),
       lang: currentLang === 0 ? "ko" : "en",
-      category: form.category || "ep0101",
+      category: form.category,
       title: form.title,
-      thumbImg: form.thumbImg,
-      imgBodyPc: form.imgBodyPc,
-      imgBodyMo: form.imgBodyMo,
-      imgPc: form.imgPc,
-      imgMo: form.imgMo,
+      thumbImg: form.imgPc?.path || "",
+      showYn: form.status === "active" ? "Y" : "N",
       content: form.content1,
-      description: form.content2,
-      startDate: form.startDate,
-      endDate: form.endDate,
-      brandId: form.lifestyle?.brand?.[0],
-      delYn: "N",
+      publish_date: form.publish_date,
     };
 
+    console.log("최종 전송 payload:", payload);
+
     try {
-      await api.post("/api/v1/event-promotion/item/insert", payload);
+      await api.post("/api/v1/press/insert", payload);
       alert("저장되었습니다.");
-      navigate("/contents/whatson/event/list");
+      navigate("/contents/whatson/media");
     } catch (err) {
       console.error("저장 실패", err);
       alert("저장 중 오류가 발생했습니다.");

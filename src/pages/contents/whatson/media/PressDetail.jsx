@@ -24,13 +24,26 @@ export default function PressDetail() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const koRes = await api.get(`/api/v1/press/${pmId}?lang=KO`);
-        const enRes = await api.get(`/api/v1/press/${pmId}?lang=EN`);
-        setKoData(koRes.data || {});
-        setEnData(enRes.data || {});
+        const res = await api.get(`/api/v1/press/${pmId}`);
+        console.log("API 응답 전체:", res);
+
+        const items = res.data?.data;
+        if (!Array.isArray(items)) {
+          console.warn("데이터 배열이 아님:", res.data);
+          return;
+        }
+
+        const ko = items.find((item) => item.lang === "ko");
+        const en = items.find((item) => item.lang === "en");
+
+        console.log("ko:", ko);
+        console.log("en:", en);
+
+        setKoData(ko || {});
+        setEnData(en || {});
         setLoading(false);
       } catch (err) {
-        console.error("기사 상세 조회 실패:", err);
+        console.error("데이터 불러오기 오류:", err);
       }
     };
     fetchData();
@@ -40,27 +53,31 @@ export default function PressDetail() {
   const handleSave = async () => {
     try {
       const activeRef = currentLang === 0 ? koFormRef : enFormRef;
-      const langCode = currentLang === 0 ? "KO" : "EN";
       const formValues = await activeRef.current?.submit?.();
       if (!formValues) return;
 
       const payload = {
-        ...formValues,
-        id: pmId,
-        lang: langCode,
-        status: formValues.status === "active" ? "Y" : "N",
-        startDate: formValues.startDate,
-        content1: formValues.content1,
+        id: Number(pmId),
+        category: formValues.category,
+        title: formValues.title,
+        thumbImgPc: formValues.imgPc?.path || null,
+        thumbImgMo: formValues.imgMo?.path || null,
+        showYn: formValues.status === "active" ? "Y" : "N",
+        content: formValues.content1,
+        publish_date: formValues.publish_date,
       };
 
-      console.log(`[${langCode}] 저장할 데이터:`, payload);
-      await api.put(`/api/v1/press/${pmId}`, payload);
+      console.log(
+        `[${currentLang === 0 ? "KO" : "EN"}] 수정 요청 데이터:`,
+        payload
+      );
+      await api.put(`/api/v1/press/update`, payload);
 
-      alert("저장 완료");
+      alert("수정이 완료되었습니다.");
       setIsReadOnly(true);
     } catch (err) {
-      console.error("저장 실패:", err);
-      alert("저장 중 오류 발생");
+      console.error("수정 실패:", err);
+      alert("수정 중 오류가 발생했습니다.");
     }
   };
 

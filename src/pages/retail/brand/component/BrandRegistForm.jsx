@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import Input from "@/components/common/Input";
@@ -8,44 +9,85 @@ import Checkbox from "@/components/common/Checkbox";
 import NewInput from "@/components/common/NewInput";
 import Editor from "@/components/common/Editor";
 import useModal from "@/hooks/useModal";
+import api from "@/lib/apiClient";
 
 const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
+  const [categoryList, setCategoryList] = useState([]);
+  const [keywordList, setKeywordList] = useState([]);
   const methods = useForm({
     mode: "onChange",
   });
   const { control, register, setValue, watch, getValues } = methods;
+
+  
   const editorRef = useRef();
   const { showModal } = useModal();
 
-  const validateRequiredFields = (form, content) => {
-    const requiredImages = [
-      form.mainImage,
-      form.pcImage,
-      form.moImage,
-      form.contentImage1,
-      form.contentImage2,
-      form.contentImage3,
-      form.contentImage4,
-      form.contentImage5,
-    ];
+  useEffect(() => {
+    const fetchCategory = async () => {
+      try {
+        const res = await api.get("/api/v1/brand/category");
+        setCategoryList(res.data?.data || []);
+        // console.log("카테고리 목록:", res.data?.data);
+      } catch (err) {
+        console.error("카테고리 목록 불러오기 실패:", err);
+      }
+    };
+    fetchCategory(); 
 
-    const hasEmptyImage = requiredImages.some((img) => !img?.name);
+    const fetchKeyword = async () => {
+      try {
+        const res = await api.get("/api/v1/brand/keyword");
+        setKeywordList(res.data?.data || []);
+        console.log("키워드 목록:", res.data?.data);
+      } catch (err) {
+        console.error("키워드 목록 불러오기 실패:", err);
+      }
+    };
+    // fetchKeyword(); 
+    
+  }, []);
 
-    const days = ["월", "화", "수", "목", "금", "토", "일"];
-    const hasEmptyTime = days.some((day) => !form.openingHours?.[day]?.time);
+  const validateRequiredFields = () => {
+    // const requiredImages = [
+    //   form.mainImage,
+    //   form.pcImage,
+    //   form.moImage,
+    //   form.contentImage1,
+    //   form.contentImage2,
+    //   form.contentImage3,
+    //   form.contentImage4,
+    //   form.contentImage5,
+    //   form.pcBodyImage,
+    //   form.moBodyImage,
+    // ];
 
-    const isMissing =
-      !form.companyName ||
-      !form.office ||
-      !form.ceoName ||
-      !form.phone ||
-      !form.storeLocation ||
-      !content ||
-      hasEmptyImage ||
-      hasEmptyTime;
+    // const hasEmptyImage = requiredImages.some((img) => !img?.name);
 
-    if (isMissing) return "필수 항목을 모두 입력해주세요.";
+    // const days = ["월", "화", "수", "목", "금", "토", "일"];
+    // const hasEmptyTime = days.some((day) => {
+    //   const info = form.openingHours?.[day] || {};
+    //   return !info.time;
+    // });
 
+    // const needBreakTime =
+    //   !form.openingHours?.breakTime?.none &&
+    //   !form.openingHours?.breakTime?.time;
+
+    // const isMissing =
+    //   !form.brandName ||
+    //   !form.office ||
+    //   !form.phone ||
+    //   !form.storeLocation ||
+    //   !form.thumbText ||
+    //   !form.title ||
+    //   !form.subTitle ||
+    //   !content?.trim() ||
+    //   hasEmptyImage ||
+    //   hasEmptyTime;
+    // needBreakTime;
+
+    // if (isMissing) return "필수 항목을 모두 입력해주세요.";
     return null;
   };
 
@@ -53,6 +95,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
     submit: async () => {
       const values = getValues();
       const content = await editorRef.current?.getContent?.();
+
       console.log("[submit] 수집된 값:", values);
       console.log("[submit] 에디터 내용:", content);
       console.log("폼 값:", values);
@@ -60,11 +103,31 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
 
       const message = validateRequiredFields(values, content);
       if (message) {
-        console.warn("유효성 검사 실패:", message);
-        showModal({
-          title: "입력 확인",
-          message: message,
-        });
+        // const requiredImages = [
+        //   form.mainImage,
+        //   form.pcImage,
+        //   form.moImage,
+        //   form.contentImage1,
+        //   form.contentImage2,
+        //   form.contentImage3,
+        //   form.contentImage4,
+        //   form.contentImage5,
+        //   form.pcBodyImage,
+        //   form.moBodyImage,
+        // ];
+
+        // console.warn("유효성 검사 실패:", message);
+        // console.log(
+        //   "이미지 필드:",
+        //   requiredImages.map((i) => i?.name || "없음")
+        // );
+        // console.log("운영시간:", values.openingHours);
+        // console.log("에디터 content.trim():", content?.trim());
+
+        // showModal({
+        //   title: "입력 확인",
+        //   message: message,
+        // });
         return null;
       }
 
@@ -98,6 +161,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
         contentImage5: toImageMeta(values.contentImage5),
       };
     },
+    setValue,
   }));
 
   return (
@@ -112,7 +176,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
               maxLength={50}
               showDefaultInfo
               required
-              {...register("companyName", { required: true })}
+              {...register("brandName", { required: true })}
               disabled={readOnly}
             />
           </div>
@@ -147,10 +211,11 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           render={({ field }) => (
             <Select label="카테고리" required {...field} disabled={readOnly}>
               <option value="">선택</option>
-              <option value="office1">카테고리1</option>
-              <option value="office2">카테고리2</option>
-              <option value="office3">카테고리3</option>
-              <option value="office4">카테고리4</option>
+              {categoryList.map((item) => (
+                <option key={item.code} value={item.code}>
+                  {item.value}
+                </option>
+              ))}
             </Select>
           )}
         />
@@ -169,26 +234,52 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
               };
 
               const options = [
-                "man",
-                "woman",
-                "lifewear",
-                "street",
-                "fashion",
-                "sportswear",
-                "spa",
-                "luxury",
-                "kids",
-                "beauty",
+                {
+                    "code": "key0101",
+                    "value": "Man"
+                },
+                {
+                    "code": "key0102",
+                    "value": "Woman"
+                },
+                {
+                    "code": "key0103",
+                    "value": "Lifewear"
+                },
+                {
+                    "code": "key0104",
+                    "value": "Street Fashion"
+                },
+                {
+                    "code": "key0105",
+                    "value": "Sportswear"
+                },
+                {
+                    "code": "key0106",
+                    "value": "SPA"
+                },
+                {
+                    "code": "key0107",
+                    "value": "Luxury"
+                },
+                {
+                    "code": "key0108",
+                    "value": "Kids"
+                },
+                {
+                    "code": "key0109",
+                    "value": "Beauty"
+                }
               ];
 
               return (
                 <div className="flex flex-wrap gap-4">
                   {options.map((keyword) => (
                     <Checkbox
-                      key={keyword}
-                      label={keyword}
-                      checked={field.value.includes(keyword)}
-                      onChange={() => handleToggle(keyword)}
+                      key={keyword.code}
+                      label={keyword.value}
+                      checked={field.value.includes(keyword.code)}
+                      onChange={() => handleToggle(keyword.code)}
                       disabled={readOnly}
                     />
                   ))}
@@ -210,7 +301,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           maxLength={200}
           showDefaultInfo
           required
-          {...register("companyName", { required: true })}
+          {...register("thumbText", { required: true })}
           disabled={readOnly}
         />
         <Input
@@ -218,7 +309,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           maxLength={50}
           showDefaultInfo
           required
-          {...register("companyName", { required: true })}
+          {...register("title", { required: true })}
           disabled={readOnly}
         />
         <Input
@@ -226,7 +317,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           maxLength={500}
           showDefaultInfo
           required
-          {...register("companyName", { required: true })}
+          {...register("subTitle", { required: true })}
           disabled={readOnly}
         />
 
