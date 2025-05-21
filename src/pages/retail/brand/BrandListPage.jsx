@@ -31,11 +31,25 @@ export default function BrandListPage() {
   const [checkedIds, setCheckedIds] = useState([]);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
+  const [categoryList, setCategoryList] = useState([]);
 
   const size = 10;
   const nameId = useId();
 
   useEffect(() => {
+    const fetchCategory = async () => {
+      try {
+        const res = await api.get("/api/v1/brand/category");
+        setCategoryList(res.data?.data || []);
+        console.log("카테고리 목록:", res.data?.data);
+      } catch (err) {
+        console.error("카테고리 목록 불러오기 실패:", err);
+      }
+    };
+
+    fetchCategory();
+
+
     const fetchBrands = async () => {
       try {
         const res = await api.get("/api/v1/brand", {
@@ -122,8 +136,12 @@ export default function BrandListPage() {
                 onChange={(e) => setSearchCategory(e.target.value)}
               >
                 <option value="">전체</option>
-                <option value="office1">카테고리1</option>
-                <option value="office2">카테고리2</option>
+
+                {categoryList.map((item) => (
+                  <option key={item.code} value={item.code}>
+                    {item.value}
+                  </option>
+                ))}
               </Select>
             </Col>
 
