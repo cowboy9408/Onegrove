@@ -39,29 +39,17 @@ export default function PressRegist() {
     if (!form) return;
 
     const payload = {
-      eventId: null,
-      showYn: form.status === "active" ? "Y" : "N",
-      sort: Number(form.order),
       lang: currentLang === 0 ? "ko" : "en",
-      category: form.category || "ep0101",
       title: form.title,
       thumbImg: form.thumbImg,
-      imgBodyPc: form.imgBodyPc,
-      imgBodyMo: form.imgBodyMo,
-      imgPc: form.imgPc,
-      imgMo: form.imgMo,
+      showYn: form.status === "active" ? "Y" : "N",
       content: form.content1,
-      description: form.content2,
-      startDate: form.startDate,
-      endDate: form.endDate,
-      brandId: form.lifestyle?.brand?.[0],
-      delYn: "N",
     };
 
     try {
-      await api.post("/api/v1/event-promotion/item/insert", payload);
+      await api.post("/api/v1/press/insert", payload);
       alert("저장되었습니다.");
-      navigate("/contents/whatson/event/list");
+      navigate("/contents/whatson/media");
     } catch (err) {
       console.error("저장 실패", err);
       alert("저장 중 오류가 발생했습니다.");
