@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Tabs, { TabPanel } from "@/components/layout/Tabs";
 import Section from "@/components/layout/Section";
 import Button from "@/components/common/Button";
-import BrandRegistForm from "./component/BrandRegistFom";
+import BrandRegistForm from "./component/BrandRegistForm";
 import { useNavigate } from "react-router-dom";
 import api from "@/lib/apiClient";
 import useModal from "@/hooks/useModal";

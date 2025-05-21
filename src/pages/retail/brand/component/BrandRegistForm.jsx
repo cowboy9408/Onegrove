@@ -161,6 +161,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
         contentImage5: toImageMeta(values.contentImage5),
       };
     },
+    setValue,
   }));
 
   return (
