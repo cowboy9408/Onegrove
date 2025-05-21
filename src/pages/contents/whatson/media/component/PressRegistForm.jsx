@@ -47,17 +47,29 @@ const PressRegistForm = forwardRef(({ data, setData, lang }, ref) => {
       const isValid = await methods.trigger();
       if (!isValid) return null;
 
-      const editorHtml = await editorRef.current?.getContent();
       const values = getValues();
+      const content = await editorRef.current?.getContent();
 
       if (!values.publish_date) {
         alert("발행일을 선택해주세요.");
         return null;
       }
 
+      const toImageMeta = (file) => {
+        return {
+          path: file?.path || "",
+          classification: "press&media",
+        };
+      };
+
       return {
-        ...getValues(),
-        content1: editorHtml,
+        category: values.category,
+        title: values.title,
+        thumbImgPc: toImageMeta(values.imgPc),
+        thumbImgMo: toImageMeta(values.imgMo),
+        showYn: values.status === "active" ? "Y" : "N",
+        content: content,
+        publish_date: values.publish_date,
       };
     },
   }));

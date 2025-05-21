@@ -15,56 +15,26 @@ export default function PressRegist() {
   const { showModal } = useModal();
 
   // 국문 상태
-  const [koData, setKoData] = useState({
-    keyVisual: [],
-    whatsOn: {},
-    lifestyle: {},
-    work: {},
-    etc: [],
-    banner: {},
-  });
+  const [koData, setKoData] = useState({});
   // 영문 상태
-  const [enData, setEnData] = useState({
-    keyVisual: [],
-    whatsOn: {},
-    lifestyle: {},
-    work: {},
-    etc: [],
-    banner: {},
-  });
+  const [enData, setEnData] = useState({});
 
   const handleSave = async () => {
-    console.log("handleSave 호출됨");
     const ref = currentLang === 0 ? koFormRef : enFormRef;
-    console.log("ref 상태:", ref.current);
-
     const form = await ref.current?.submit();
-    console.log("폼 결과:", form);
-
-    if (!form) {
-      console.warn("폼이 유효하지 않아서 저장 중단됨");
-      return;
-    }
+    if (!form) return;
 
     const payload = {
       lang: currentLang === 0 ? "ko" : "en",
-      category: form.category,
-      title: form.title,
-      thumbImg: form.imgPc?.path || "",
-      showYn: form.status === "active" ? "Y" : "N",
-      content: form.content1,
-      publish_date: form.publish_date,
+      ...form,
     };
-
-    console.log("최종 전송 payload:", payload);
-
+    console.log("최종 payload:", JSON.stringify(payload, null, 2));
     try {
       await api.post("/api/v1/press/insert", payload);
       alert("저장되었습니다.");
       navigate("/contents/whatson/media");
     } catch (err) {
-      console.error("저장 실패", err);
-      alert("저장 중 오류가 발생했습니다.");
+      console.error("저장 실패:", err);
     }
   };
 
