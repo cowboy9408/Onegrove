@@ -24,13 +24,26 @@ export default function PressDetail() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const koRes = await api.get(`/api/v1/press/${pmId}?lang=KO`);
-        const enRes = await api.get(`/api/v1/press/${pmId}?lang=EN`);
-        setKoData(koRes.data || {});
-        setEnData(enRes.data || {});
+        const res = await api.get(`/api/v1/press/${pmId}`);
+        console.log("API 응답 전체:", res);
+
+        const items = res.data?.data;
+        if (!Array.isArray(items)) {
+          console.warn("데이터 배열이 아님:", res.data);
+          return;
+        }
+
+        const ko = items.find((item) => item.lang === "ko");
+        const en = items.find((item) => item.lang === "en");
+
+        console.log("ko:", ko);
+        console.log("en:", en);
+
+        setKoData(ko || {});
+        setEnData(en || {});
         setLoading(false);
       } catch (err) {
-        console.error("기사 상세 조회 실패:", err);
+        console.error("데이터 불러오기 오류:", err);
       }
     };
     fetchData();
@@ -45,12 +58,13 @@ export default function PressDetail() {
 
       const payload = {
         id: Number(pmId),
+        category: formValues.category,
         title: formValues.title,
-        thumbImg: formValues.thumbImg,
+        thumbImgPc: formValues.imgPc?.path || null,
+        thumbImgMo: formValues.imgMo?.path || null,
         showYn: formValues.status === "active" ? "Y" : "N",
         content: formValues.content1,
-        source: formValues.source,
-        updateUser: 2,
+        publish_date: formValues.publish_date,
       };
 
       console.log(

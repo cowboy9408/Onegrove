@@ -18,6 +18,7 @@ export default function Upload({
   error,
   required = false,
   defaultValue = null, // { name, size, url }
+  classification = "default",
 }) {
   const inputRef = useRef(null);
   const wrapperRef = useRef(null);
@@ -79,6 +80,7 @@ export default function Upload({
 
     const formData = new FormData();
     formData.append("file", selectedFile);
+    formData.append("classification", classification);
 
     //  1. preview URL 생성
     const blobUrl = URL.createObjectURL(selectedFile);
@@ -103,6 +105,8 @@ export default function Upload({
       });
 
       const result = res.data;
+      console.log("업로드 응답 result:", result);
+
       const isReplace = !!value; // 기존에 파일이 있었는지 확인
 
       if (result.name && result.path) {
@@ -116,7 +120,6 @@ export default function Upload({
           classification: null,
           path: result.path,
           status: isReplace ? "E" : "C",
-          url: result.url || previewUrl,
         });
       } else {
         console.error("파일 업로드 실패", result);

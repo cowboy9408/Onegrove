@@ -15,15 +15,14 @@ import Datepicker from "@/components/common/Datepicker";
 import api from "@/lib/apiClient";
 
 const PressRegistForm = forwardRef(({ data, setData, lang }, ref) => {
-  const methods = useForm();
+  const methods = useForm({
+    defaultValues: {
+      status: "active",
+    },
+  });
   const [singleDate, setSingleDate] = useState(null);
   const [categoryList, setCategoryList] = useState([]);
   const { register, handleSubmit, setValue, getValues, watch } = methods;
-
-  const [dateRange, setDateRange] = useState({
-    startDate: data?.startDate ? new Date(data.startDate) : null,
-    endDate: data?.endDate ? new Date(data.endDate) : null,
-  });
 
   const editorRef = useRef(null);
 
@@ -39,10 +38,9 @@ const PressRegistForm = forwardRef(({ data, setData, lang }, ref) => {
 
     fetchCategory();
   }, []);
-
   useEffect(() => {
-    setValue("startDate", dateRange.startDate);
-  }, [dateRange]);
+    register("publish_date", { required: true });
+  }, [register]);
 
   useImperativeHandle(ref, () => ({
     submit: async () => {
@@ -50,6 +48,12 @@ const PressRegistForm = forwardRef(({ data, setData, lang }, ref) => {
       if (!isValid) return null;
 
       const editorHtml = await editorRef.current?.getContent();
+      const values = getValues();
+
+      if (!values.publish_date) {
+        alert("발행일을 선택해주세요.");
+        return null;
+      }
 
       return {
         ...getValues(),
@@ -86,10 +90,20 @@ const PressRegistForm = forwardRef(({ data, setData, lang }, ref) => {
           />
 
           {/* 업로드 1 */}
-          <Upload name="imgPc" label="PC 썸네일 이미지" required />
+          <Upload
+            name="imgPc"
+            label="PC 썸네일 이미지"
+            required
+            classification="press&media"
+          />
 
           {/* 업로드 2 */}
-          <Upload name="imgMo" label="모바일 썸네일 이미지" required />
+          <Upload
+            name="imgMo"
+            label="모바일 썸네일 이미지"
+            required
+            classification="press&media"
+          />
 
           {/* 노출 여부 */}
           <div>
@@ -124,7 +138,11 @@ const PressRegistForm = forwardRef(({ data, setData, lang }, ref) => {
             <Datepicker
               mode="single"
               selectedDate={singleDate}
-              onSingleChange={(date) => setSingleDate(date)}
+              onSingleChange={(date) => {
+                setSingleDate(date);
+                const isoDate = date.toISOString().split("T")[0];
+                setValue("publish_date", isoDate);
+              }}
             />
           </div>
         </div>
