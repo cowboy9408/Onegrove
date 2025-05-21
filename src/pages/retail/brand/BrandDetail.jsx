@@ -110,6 +110,14 @@ export default function BrandDetail() {
         };
 
         console.log("폼에 설정할 데이터:", locale, formValues);
+        // Object.entries(formValues).forEach(([key, value]) => {
+        //   if (locale === "ko") {
+        //     koFormRef.current?.setValue?.(key, value);
+        //   }
+        //   if (locale === "en") {
+        //     enFormRef.current?.setValue?.(key, value);
+        //   }
+        // });
         const formRef = locale === "ko" ? koFormRef.current : enFormRef.current;
         Object.entries(formValues).forEach(([key, value]) => {
           formRef?.setValue?.(key, value);
