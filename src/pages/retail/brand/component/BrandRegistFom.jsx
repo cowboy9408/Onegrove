@@ -17,35 +17,46 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
   const editorRef = useRef();
   const { showModal } = useModal();
 
-  const validateRequiredFields = (form, content) => {
-    const requiredImages = [
-      form.mainImage,
-      form.pcImage,
-      form.moImage,
-      form.contentImage1,
-      form.contentImage2,
-      form.contentImage3,
-      form.contentImage4,
-      form.contentImage5,
-    ];
+  const validateRequiredFields = () => {
+    // const requiredImages = [
+    //   form.mainImage,
+    //   form.pcImage,
+    //   form.moImage,
+    //   form.contentImage1,
+    //   form.contentImage2,
+    //   form.contentImage3,
+    //   form.contentImage4,
+    //   form.contentImage5,
+    //   form.pcBodyImage,
+    //   form.moBodyImage,
+    // ];
 
-    const hasEmptyImage = requiredImages.some((img) => !img?.name);
+    // const hasEmptyImage = requiredImages.some((img) => !img?.name);
 
-    const days = ["월", "화", "수", "목", "금", "토", "일"];
-    const hasEmptyTime = days.some((day) => !form.openingHours?.[day]?.time);
+    // const days = ["월", "화", "수", "목", "금", "토", "일"];
+    // const hasEmptyTime = days.some((day) => {
+    //   const info = form.openingHours?.[day] || {};
+    //   return !info.time;
+    // });
 
-    const isMissing =
-      !form.companyName ||
-      !form.office ||
-      !form.ceoName ||
-      !form.phone ||
-      !form.storeLocation ||
-      !content ||
-      hasEmptyImage ||
-      hasEmptyTime;
+    // const needBreakTime =
+    //   !form.openingHours?.breakTime?.none &&
+    //   !form.openingHours?.breakTime?.time;
 
-    if (isMissing) return "필수 항목을 모두 입력해주세요.";
+    // const isMissing =
+    //   !form.brandName ||
+    //   !form.office ||
+    //   !form.phone ||
+    //   !form.storeLocation ||
+    //   !form.thumbText ||
+    //   !form.title ||
+    //   !form.subTitle ||
+    //   !content?.trim() ||
+    //   hasEmptyImage ||
+    //   hasEmptyTime;
+    // needBreakTime;
 
+    // if (isMissing) return "필수 항목을 모두 입력해주세요.";
     return null;
   };
 
@@ -53,6 +64,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
     submit: async () => {
       const values = getValues();
       const content = await editorRef.current?.getContent?.();
+
       console.log("[submit] 수집된 값:", values);
       console.log("[submit] 에디터 내용:", content);
       console.log("폼 값:", values);
@@ -60,11 +72,31 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
 
       const message = validateRequiredFields(values, content);
       if (message) {
-        console.warn("유효성 검사 실패:", message);
-        showModal({
-          title: "입력 확인",
-          message: message,
-        });
+        // const requiredImages = [
+        //   form.mainImage,
+        //   form.pcImage,
+        //   form.moImage,
+        //   form.contentImage1,
+        //   form.contentImage2,
+        //   form.contentImage3,
+        //   form.contentImage4,
+        //   form.contentImage5,
+        //   form.pcBodyImage,
+        //   form.moBodyImage,
+        // ];
+
+        // console.warn("유효성 검사 실패:", message);
+        // console.log(
+        //   "이미지 필드:",
+        //   requiredImages.map((i) => i?.name || "없음")
+        // );
+        // console.log("운영시간:", values.openingHours);
+        // console.log("에디터 content.trim():", content?.trim());
+
+        // showModal({
+        //   title: "입력 확인",
+        //   message: message,
+        // });
         return null;
       }
 
@@ -112,7 +144,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
               maxLength={50}
               showDefaultInfo
               required
-              {...register("companyName", { required: true })}
+              {...register("brandName", { required: true })}
               disabled={readOnly}
             />
           </div>
@@ -210,7 +242,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           maxLength={200}
           showDefaultInfo
           required
-          {...register("companyName", { required: true })}
+          {...register("thumbText", { required: true })}
           disabled={readOnly}
         />
         <Input
@@ -218,7 +250,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           maxLength={50}
           showDefaultInfo
           required
-          {...register("companyName", { required: true })}
+          {...register("title", { required: true })}
           disabled={readOnly}
         />
         <Input
@@ -226,7 +258,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           maxLength={500}
           showDefaultInfo
           required
-          {...register("companyName", { required: true })}
+          {...register("subTitle", { required: true })}
           disabled={readOnly}
         />
 
