@@ -40,27 +40,30 @@ export default function PressDetail() {
   const handleSave = async () => {
     try {
       const activeRef = currentLang === 0 ? koFormRef : enFormRef;
-      const langCode = currentLang === 0 ? "KO" : "EN";
       const formValues = await activeRef.current?.submit?.();
       if (!formValues) return;
 
       const payload = {
-        ...formValues,
-        id: pmId,
-        lang: langCode,
-        status: formValues.status === "active" ? "Y" : "N",
-        startDate: formValues.startDate,
-        content1: formValues.content1,
+        id: Number(pmId),
+        title: formValues.title,
+        thumbImg: formValues.thumbImg,
+        showYn: formValues.status === "active" ? "Y" : "N",
+        content: formValues.content1,
+        source: formValues.source,
+        updateUser: 2,
       };
 
-      console.log(`[${langCode}] 저장할 데이터:`, payload);
-      await api.put(`/api/v1/press/${pmId}`, payload);
+      console.log(
+        `[${currentLang === 0 ? "KO" : "EN"}] 수정 요청 데이터:`,
+        payload
+      );
+      await api.put(`/api/v1/press/update`, payload);
 
-      alert("저장 완료");
+      alert("수정이 완료되었습니다.");
       setIsReadOnly(true);
     } catch (err) {
-      console.error("저장 실패:", err);
-      alert("저장 중 오류 발생");
+      console.error("수정 실패:", err);
+      alert("수정 중 오류가 발생했습니다.");
     }
   };
 
