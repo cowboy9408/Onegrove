@@ -37,8 +37,6 @@ export default function PressRegist() {
 
     try {
       await api.post("/api/v1/press/insert", payload);
-      alert("저장되었습니다.");
-      navigate("/contents/whatson/media");
     } catch (err) {
       console.error("저장 실패:", err);
       alert("저장에 실패했습니다. 입력값을 확인해주세요.");
