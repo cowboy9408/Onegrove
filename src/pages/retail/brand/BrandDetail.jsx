@@ -5,6 +5,7 @@ import Section from "@/components/layout/Section";
 import Button from "@/components/common/Button";
 import BrandRegistForm from "./component/BrandRegistForm";
 import api from "@/lib/apiClient";
+import { ko } from "date-fns/locale";
 
 export default function BrandDetail() {
   const navigate = useNavigate();
