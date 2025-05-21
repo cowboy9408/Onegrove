@@ -54,7 +54,7 @@ api.interceptors.response.use(
 
       try {
         const res = await axios.post(
-          `${baseURL}/api/v1/auth/refresh`, // ✅ 절대 URL
+          `${baseURL}/api/v1/auth/refresh`,
           {},
           { withCredentials: true }
         );
@@ -71,12 +71,16 @@ api.interceptors.response.use(
 
         localStorage.removeItem("accessToken");
 
-        // ✅ 네트워크 문제일 경우 로그인으로 리디렉션
-        if (
+        // 401 오류 또는 네트워크 오류일 경우 로그인 페이지로 이동
+        const isNetworkError =
           refreshError.code === "ERR_NETWORK" ||
           refreshError.message.includes("Network Error") ||
-          refreshError.message.includes("ERR_CONNECTION_REFUSED")
-        ) {
+          refreshError.message.includes("ERR_CONNECTION_REFUSED");
+
+        const isUnauthorized =
+          refreshError.response?.status === 401;
+
+        if (isNetworkError || isUnauthorized) {
           window.location.href = "/login";
           return;
         }

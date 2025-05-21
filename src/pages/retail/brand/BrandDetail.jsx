@@ -19,8 +19,19 @@ export default function BrandDetail() {
   const [enData, setEnData] = useState({});
   const [loading, setLoading] = useState(true);
   const [isReadOnly, setIsReadOnly] = useState(true); // 읽기 전용
+  const [categoryList, setCategoryList] = useState([]);
 
   useEffect(() => {
+    const fetchCategory = async () => {
+      try {
+        const res = await api.get("/api/v1/brand/category");
+        setCategoryList(res.data?.data || []);
+        // console.log("카테고리 목록:", res.data?.data);
+      } catch (err) {
+        console.error("카테고리 목록 불러오기 실패:", err);
+      }
+    };
+    fetchCategory(); 
     const fetchData = async () => {
       try {
         const koRes = await api.get(`/api/v1/brand/detail/${masterId}/KO`);
@@ -41,12 +52,17 @@ export default function BrandDetail() {
   useEffect(() => {
     if (!loading) {
       const patchForm = (locale, data) => {
+
+        const matchedCategory = categoryList.find(
+          (item) => item.value === data.category
+        );
+
         const formValues = {
           brandName: data.name,
           thumbText: data.thumbText,
           title: data.title,
-          subtitle: data.subTitle,
-          office: data.category,
+          subTitle: data.subTitle,
+          office: matchedCategory.code || "",
           useStatus: data.useYn === "Y" ? "active" : "inactive",
           description: data.content,
           keywords: data.keywordList?.map((k) => k.keyword) || [],
@@ -96,14 +112,6 @@ export default function BrandDetail() {
         };
 
         console.log("폼에 설정할 데이터:", locale, formValues);
-        // Object.entries(formValues).forEach(([key, value]) => {
-        //   if (locale === "ko") {
-        //     koFormRef.current?.setValue?.(key, value);
-        //   }
-        //   if (locale === "en") {
-        //     enFormRef.current?.setValue?.(key, value);
-        //   }
-        // });
         const formRef = locale === 'ko' ? koFormRef.current : enFormRef.current;
         Object.entries(formValues).forEach(([key, value]) => {
           formRef?.setValue?.(key, value);
@@ -130,7 +138,9 @@ export default function BrandDetail() {
       console.log("KO 폼 데이터:", koValues);
       console.log("EN 폼 데이터:", enValues);
 
-      if (!koValues || !enValues) return;
+      console.log("return test:", !koValues && !enValues);
+
+      if (!koValues && !enValues) return;
 
       const saveOne = async (data, lang) => {
         const payload = {

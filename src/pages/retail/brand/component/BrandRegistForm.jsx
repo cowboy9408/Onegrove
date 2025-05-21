@@ -49,45 +49,6 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
   }, []);
 
   const validateRequiredFields = () => {
-    // const requiredImages = [
-    //   form.mainImage,
-    //   form.pcImage,
-    //   form.moImage,
-    //   form.contentImage1,
-    //   form.contentImage2,
-    //   form.contentImage3,
-    //   form.contentImage4,
-    //   form.contentImage5,
-    //   form.pcBodyImage,
-    //   form.moBodyImage,
-    // ];
-
-    // const hasEmptyImage = requiredImages.some((img) => !img?.name);
-
-    // const days = ["월", "화", "수", "목", "금", "토", "일"];
-    // const hasEmptyTime = days.some((day) => {
-    //   const info = form.openingHours?.[day] || {};
-    //   return !info.time;
-    // });
-
-    // const needBreakTime =
-    //   !form.openingHours?.breakTime?.none &&
-    //   !form.openingHours?.breakTime?.time;
-
-    // const isMissing =
-    //   !form.brandName ||
-    //   !form.office ||
-    //   !form.phone ||
-    //   !form.storeLocation ||
-    //   !form.thumbText ||
-    //   !form.title ||
-    //   !form.subTitle ||
-    //   !content?.trim() ||
-    //   hasEmptyImage ||
-    //   hasEmptyTime;
-    // needBreakTime;
-
-    // if (isMissing) return "필수 항목을 모두 입력해주세요.";
     return null;
   };
 
@@ -103,31 +64,6 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
 
       const message = validateRequiredFields(values, content);
       if (message) {
-        // const requiredImages = [
-        //   form.mainImage,
-        //   form.pcImage,
-        //   form.moImage,
-        //   form.contentImage1,
-        //   form.contentImage2,
-        //   form.contentImage3,
-        //   form.contentImage4,
-        //   form.contentImage5,
-        //   form.pcBodyImage,
-        //   form.moBodyImage,
-        // ];
-
-        // console.warn("유효성 검사 실패:", message);
-        // console.log(
-        //   "이미지 필드:",
-        //   requiredImages.map((i) => i?.name || "없음")
-        // );
-        // console.log("운영시간:", values.openingHours);
-        // console.log("에디터 content.trim():", content?.trim());
-
-        // showModal({
-        //   title: "입력 확인",
-        //   message: message,
-        // });
         return null;
       }
 
@@ -140,7 +76,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           originalName: file.originalName || file.name,
           name: file.name,
           size: file.size,
-          extension: "." + file.name.split(".").pop(),
+          extension: "." + file.originalName.split(".").pop(),
           mime: file.type || "image/png",
           classification: null,
           path: `C:\\\\upload\\/test\\${file.name}`,
@@ -500,3 +436,4 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
 });
 
 export default BrandRegistForm;
+
