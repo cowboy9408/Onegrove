@@ -35,7 +35,11 @@ export default function Datepicker({
       <div className="relative">
         <DatePicker
           selected={startDate}
-          onChange={(date) => onRangeChange({ startDate: date, endDate })}
+          onChange={(date) => {
+            if (typeof onRangeChange === "function") {
+              onRangeChange({ startDate: date, endDate });
+            }
+          }}
           selectsStart
           startDate={startDate}
           endDate={endDate}
@@ -52,7 +56,11 @@ export default function Datepicker({
       <div className="relative">
         <DatePicker
           selected={endDate}
-          onChange={(date) => onRangeChange({ startDate, endDate: date })}
+          onChange={(date) => {
+            if (typeof onRangeChange === "function") {
+              onRangeChange({ startDate, endDate: date });
+            }
+          }}
           selectsEnd
           startDate={startDate}
           endDate={endDate}

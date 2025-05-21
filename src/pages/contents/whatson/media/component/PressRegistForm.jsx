@@ -40,6 +40,8 @@ const PressRegistForm = forwardRef(({ data, setData, lang }, ref) => {
   }, []);
   useEffect(() => {
     register("publish_date", { required: true });
+    register("imgPc");
+    register("imgMo");
   }, [register]);
 
   useImperativeHandle(ref, () => ({
@@ -50,23 +52,24 @@ const PressRegistForm = forwardRef(({ data, setData, lang }, ref) => {
       const values = getValues();
       const content = await editorRef.current?.getContent();
 
+      const imgPc = getValues("imgPc");
+      const imgMo = getValues("imgMo");
+
       if (!values.publish_date) {
         alert("발행일을 선택해주세요.");
         return null;
       }
 
-      const toImageMeta = (file) => {
-        return {
-          path: file?.path || "",
-          classification: "press&media",
-        };
+      const getImageFileObject = (file) => {
+        if (!file?.path) return null;
+        return { path: file.path }; // CommonFile 형식에 맞춤
       };
 
       return {
         category: values.category,
         title: values.title,
-        thumbImgPc: toImageMeta(values.imgPc),
-        thumbImgMo: toImageMeta(values.imgMo),
+        thumbImgPc: getImageFileObject(imgPc),
+        thumbImgMo: getImageFileObject(imgMo),
         showYn: values.status === "active" ? "Y" : "N",
         content: content,
         publish_date: values.publish_date,

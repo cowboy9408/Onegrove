@@ -10,8 +10,9 @@ import Row from "@/components/layout/Row";
 import Col from "@/components/layout/Col";
 import BrandList from "@/components/modal/BrandList";
 import useModal from "@/hooks/useModal";
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { forwardRef, useImperativeHandle } from "react";
+import api from "@/lib/apiClient";
 
 const EventRegistForm = forwardRef(
   ({ setData, lang, readOnly = false }, ref) => {
@@ -33,6 +34,23 @@ const EventRegistForm = forwardRef(
       startDate: null,
       endDate: null,
     });
+    const [categoryOptions, setCategoryOptions] = useState([]);
+
+    useEffect(() => {
+      // 카테고리 불러오기
+      const fetchCategories = async () => {
+        try {
+          const res = await api.get("/api/v1/event-promotion/item/category");
+          if (res.data?.success) {
+            setCategoryOptions(res.data.data);
+          }
+        } catch (err) {
+          console.error("카테고리 로딩 실패", err);
+        }
+      };
+
+      fetchCategories();
+    }, []);
 
     useImperativeHandle(ref, () => ({
       submit: async () => {
@@ -44,18 +62,18 @@ const EventRegistForm = forwardRef(
         const content2 = await editorRef2.current?.getContent?.();
 
         const isMissingRequired = () => {
-          if (!data.category) return true;
-          if (!data.title) return true;
-          if (!data.thumbnail?.name) return true;
-          if (!data.banner?.name) return true;
-          if (!data.extraImage?.name) return true;
-          if (!content1) return true;
-          if (!dateRange.startDate || !dateRange.endDate) return true;
-          if (!brands.length) return true;
-          if (!data.pcImage?.name) return true;
-          if (!data.mobileImage?.name) return true;
-          if (!content2) return true;
-          return false;
+          // if (!data.category) return true;
+          // if (!data.title) return true;
+          // if (!data.thumbnail?.name) return true;
+          // if (!data.banner?.name) return true;
+          // if (!data.extraImage?.name) return true;
+          // if (!content1) return true;
+          // if (!dateRange.startDate || !dateRange.endDate) return true;
+          // if (!brands.length) return true;
+          // if (!data.pcImage?.name) return true;
+          // if (!data.mobileImage?.name) return true;
+          // if (!content2) return true;
+          // return false;
         };
 
         if (isMissingRequired()) {
@@ -70,12 +88,17 @@ const EventRegistForm = forwardRef(
 
         const toImageMeta = (file) => {
           if (!file || !file.name) return null;
+
+          const originalName = file.originalName || file.name;
+          const extMatch = originalName.match(/\.\w+$/); // 정규식으로 확장자 추출
+          const extension = extMatch ? extMatch[0] : ".jpg"; // 확장자 없으면 기본값
+
           return {
             id: null,
-            originalName: file.originalName || file.name,
+            originalName,
             name: file.name,
             size: file.size,
-            extension: "." + file.name.split(".").pop(),
+            extension: extension.toLowerCase(),
             mime: file.type || "image/png",
             classification: null,
             path: `C:\\\\upload\\/test\\${file.name}`,
@@ -117,8 +140,11 @@ const EventRegistForm = forwardRef(
                   disabled={readOnly}
                 >
                   <option value="">선택</option>
-                  <option value="프로모션">프로모션</option>
-                  <option value="이벤트">이벤트</option>
+                  {categoryOptions.map((item) => (
+                    <option key={item.code} value={item.code}>
+                      {item.value}
+                    </option>
+                  ))}
                 </Select>
               )}
             />
@@ -192,7 +218,7 @@ const EventRegistForm = forwardRef(
             startDate={dateRange.startDate}
             endDate={dateRange.endDate}
             disabled={readOnly}
-            onChange={({ startDate, endDate }) =>
+            onRangeChange={({ startDate, endDate }) =>
               setDateRange({ startDate, endDate })
             }
           />

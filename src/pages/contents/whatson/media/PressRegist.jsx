@@ -24,11 +24,26 @@ export default function PressRegist() {
     const form = await ref.current?.submit();
     if (!form) return;
 
+    // const toImageMeta = (file) => {
+    //   return {
+    //     path: file?.path || null,
+    //     classification: "press&media",
+    //   };
+    // };
+
     const payload = {
       lang: currentLang === 0 ? "ko" : "en",
-      ...form,
+      category: form.category,
+      title: form.title,
+      thumbImgPc: form.thumbImgPc?.path || null,
+      thumbImgMo: form.thumbImgMo?.path || null,
+      showYn: form.showYn,
+      content: form.content,
+      publish_date: form.publish_date,
     };
-    console.log("최종 payload:", JSON.stringify(payload, null, 2));
+
+    console.log("전송 payload:", JSON.stringify(payload, null, 2));
+
     try {
       await api.post("/api/v1/press/insert", payload);
       alert("저장되었습니다.");

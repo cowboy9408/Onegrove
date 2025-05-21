@@ -1,6 +1,6 @@
 import Section from "@/components/layout/Section";
 import Tabs, { TabPanel } from "@/components/layout/Tabs";
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import EventRegistForm from "./components/EventRegistForm";
 import Button from "@/components/common/Button";
 import { useNavigate } from "react-router-dom";
@@ -15,24 +15,9 @@ export default function EventRegist() {
   const { showModal } = useModal();
 
   // 국문 상태
-  const [koData, setKoData] = useState({
-    keyVisual: [],
-    whatsOn: {},
-    lifestyle: {},
-    work: {},
-    etc: [],
-    banner: {},
-  });
+  const [koData, setKoData] = useState({});
   // 영문 상태
-  const [enData, setEnData] = useState({
-    keyVisual: [],
-    whatsOn: {},
-    lifestyle: {},
-    work: {},
-    etc: [],
-    banner: {},
-  });
-
+  const [enData, setEnData] = useState({});
   const handleSave = async () => {
     const ref = currentLang === 0 ? koFormRef : enFormRef;
     const form = await ref.current?.submit();
@@ -40,7 +25,7 @@ export default function EventRegist() {
 
     const payload = {
       eventId: null,
-      showYn: form.status === "active" ? "Y" : "N",
+      showYn: "Y",
       sort: Number(form.order),
       lang: currentLang === 0 ? "ko" : "en",
       category: form.category || "ep0101",
@@ -52,11 +37,14 @@ export default function EventRegist() {
       imgMo: form.imgMo,
       content: form.content1,
       description: form.content2,
-      startDate: form.startDate,
-      endDate: form.endDate,
-      brandId: form.lifestyle?.brand?.[0],
+      startDate: new Date(form.startDate).toISOString(),
+      endDate: new Date(form.endDate).toISOString(),
+      brandId: Array.isArray(form.lifestyle?.brand)
+        ? form.lifestyle.brand[0]
+        : form.lifestyle?.brand,
       delYn: "N",
     };
+    console.log("전송할 payload:", payload);
 
     try {
       await api.post("/api/v1/event-promotion/item/insert", payload);
