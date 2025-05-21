@@ -2,10 +2,11 @@ import axios from "axios";
 import { useAuthStore } from "@/store/authStore";
 import { useLoadingStore } from "@/store/loadingStore";
 
-const baseURL = import.meta.env.VITE_API_BASE_URL;
+// const baseURL = import.meta.env.VITE_API_BASE_URL;
+
 
 const api = axios.create({
-  baseURL,
+  // baseURL,
   withCredentials: true,
 });
 
@@ -55,7 +56,8 @@ api.interceptors.response.use(
 
       try {
         const res = await axios.post(
-          `${baseURL}/api/v1/auth/refresh`,
+          // `${baseURL}/api/v1/auth/refresh`,
+          `/api/v1/auth/refresh`,
           {},
           {
             withCredentials: true, // 쿠키 자동 전송
