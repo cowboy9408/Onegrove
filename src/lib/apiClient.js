@@ -2,12 +2,15 @@ import axios from "axios";
 import { useAuthStore } from "@/store/authStore";
 import { useLoadingStore } from "@/store/loadingStore";
 
-// 기본 axios 인스턴스 생성
+// 환경변수에서 baseURL 불러오기
+const baseURL = import.meta.env.VITE_API_BASE_URL;
+
 const api = axios.create({
+  baseURL,
   withCredentials: true,
 });
 
-// 요청 인터셉터: accessToken + 로딩 시작
+// 요청 인터셉터
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
@@ -51,7 +54,7 @@ api.interceptors.response.use(
 
       try {
         const res = await axios.post(
-          `/api/v1/auth/refresh`,
+          `${baseURL}/api/v1/auth/refresh`,
           {},
           { withCredentials: true }
         );
@@ -68,14 +71,18 @@ api.interceptors.response.use(
 
         localStorage.removeItem("accessToken");
 
-        // ✅ 네트워크 오류 또는 서버가 죽은 경우: 로그인 페이지로 리다이렉트
-        if (
+        // 401 오류 또는 네트워크 오류일 경우 로그인 페이지로 이동
+        const isNetworkError =
           refreshError.code === "ERR_NETWORK" ||
           refreshError.message.includes("Network Error") ||
-          refreshError.message.includes("ERR_CONNECTION_REFUSED")
-        ) {
+          refreshError.message.includes("ERR_CONNECTION_REFUSED");
+
+        const isUnauthorized =
+          refreshError.response?.status === 401;
+
+        if (isNetworkError || isUnauthorized) {
           window.location.href = "/login";
-          return; // 이후 요청 중단
+          return;
         }
 
         refreshError.isAuthFailed = true;
