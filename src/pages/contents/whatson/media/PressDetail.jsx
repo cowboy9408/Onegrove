@@ -151,8 +151,8 @@ export default function PressDetail() {
       size: file.size,
       extension: "." + (file.originalName || file.name).split(".").pop(),
       mime: file.type || "image/png",
-      classification: "press&media",
-      path: `C:\\upload\\test\\${file.name}`, // 백엔드 경로 규칙 맞춰주세요
+      classification: "press-media",
+      path: file.path,
       status: null,
     };
   };
@@ -172,9 +172,11 @@ export default function PressDetail() {
         };
 
         console.log(` 전송할 payload:`, payload);
+        console.log("payload.thumbImgPc:", payload.thumbImgPc);
 
         const res = await api.post("/api/v1/press/update", payload);
         console.log(` 응답 결과:`, res.data);
+        console.log("업데이트 응답:", res.data);
       };
 
       if (currentLang === 0) {
@@ -212,22 +214,71 @@ export default function PressDetail() {
       >
         <TabPanel>
           {!loading && (
-            <PressRegistForm
-              ref={koFormRef}
-              data={koData}
-              lang="ko"
-              readOnly={isReadOnly}
-            />
+            <>
+              {/* 썸네일 이미지 미리보기 */}
+              {koData?.thumbImgPc?.path && (
+                <div className="mb-4">
+                  <p className="text-sm font-medium">PC 썸네일</p>
+                  <img
+                    src={encodeURI(koData.thumbImgPc.path)}
+                    alt="PC 썸네일"
+                    className="h-32 border object-contain"
+                  />
+                </div>
+              )}
+              {koData?.thumbImgMo?.path && (
+                <div className="mb-4">
+                  <p className="text-sm font-medium">모바일 썸네일</p>
+                  <img
+                    src={encodeURI(koData.thumbImgMo.path)}
+                    alt="모바일 썸네일"
+                    className="h-32 border object-contain"
+                  />
+                </div>
+              )}
+
+              <PressRegistForm
+                ref={koFormRef}
+                data={koData}
+                lang="ko"
+                readOnly={isReadOnly}
+              />
+            </>
           )}
         </TabPanel>
+
         <TabPanel>
           {!loading && (
-            <PressRegistForm
-              ref={enFormRef}
-              data={enData}
-              lang="en"
-              readOnly={isReadOnly}
-            />
+            <>
+              {/* 썸네일 이미지 미리보기 */}
+              {enData?.thumbImgPc?.path && (
+                <div className="mb-4">
+                  <p className="text-sm font-medium">PC 썸네일</p>
+                  <img
+                    src={encodeURI(enData.thumbImgPc.path)}
+                    alt="PC 썸네일"
+                    className="h-32 border object-contain"
+                  />
+                </div>
+              )}
+              {enData?.thumbImgMo?.path && (
+                <div className="mb-4">
+                  <p className="text-sm font-medium">모바일 썸네일</p>
+                  <img
+                    src={encodeURI(enData.thumbImgMo.path)}
+                    alt="모바일 썸네일"
+                    className="h-32 border object-contain"
+                  />
+                </div>
+              )}
+
+              <PressRegistForm
+                ref={enFormRef}
+                data={enData}
+                lang="en"
+                readOnly={isReadOnly}
+              />
+            </>
           )}
         </TabPanel>
       </Tabs>
