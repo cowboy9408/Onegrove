@@ -17,7 +17,8 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://adminapi-dev.onegrove.kr",
+        // target: "http://adminapi-dev.onegrove.kr",
+        target: "http://localhost:8081",
         changeOrigin: true,
         secure: false,
         cookieDomainRewrite: "",
