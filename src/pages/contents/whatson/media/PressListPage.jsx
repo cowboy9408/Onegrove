@@ -94,7 +94,7 @@ export default function PressListPage() {
           const sliced = sorted.slice(start, end).map((row, idx) => ({
             ...row,
             no: start + idx + 1,
-            _id: `${row.originalIndex}`, // 또는 UUID 등도 가능
+            _id: `${row.pmId}`,
           }));
 
           setData(sliced);
@@ -219,9 +219,11 @@ export default function PressListPage() {
   // }, [page, name, category, visibility, dateRange, refreshKey]);
 
   const handleCheck = (id, checked) => {
-    setCheckedIds((prev) =>
-      checked ? [...prev, id] : prev.filter((v) => v !== id)
-    );
+    setCheckedIds((prev) => {
+      const newChecked = checked ? [...prev, id] : prev.filter((v) => v !== id);
+      console.log("현재 체크된 _id 목록:", newChecked);
+      return newChecked;
+    });
   };
 
   return (
@@ -316,13 +318,13 @@ export default function PressListPage() {
               );
               if (!confirm) return;
 
-              const idsToDelete = data
-                .filter((item) => checkedIds.includes(item._id))
-                .map((item) => item.pmId);
+              const idsToDelete = checkedIds.map((id) => Number(id));
+
+              console.log("삭제할 pmId 목록:", idsToDelete);
 
               try {
                 const res = await api.post("/api/v1/press/delete", {
-                  data: { checkArr: idsToDelete },
+                  checkArr: idsToDelete,
                 });
 
                 if (res.status === 200) {

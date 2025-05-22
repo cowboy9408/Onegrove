@@ -49,7 +49,6 @@ export default function BrandListPage() {
 
     fetchCategory();
 
-
     const fetchBrands = async () => {
       try {
         const res = await api.get("/api/v1/brand", {
