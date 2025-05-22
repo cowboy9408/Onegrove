@@ -62,8 +62,8 @@ export default function PressListPage() {
               en_title: enItem.title || "-",
               situation: "-", // status 없음
               status: koItem.showYn === "Y" ? "노출" : "비노출",
-              created_user: koItem.createUser || "-",
-              created_at: koItem.createDatetime || "-",
+              created_user: koItem.createUser || enItem.createUser || "-",
+              created_at: koItem.createDatetime || enItem.createDatetime || "-",
 
               _id: `${entry.pmId}`,
             };
