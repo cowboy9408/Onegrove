@@ -5,7 +5,6 @@ import Section from "@/components/layout/Section";
 import Button from "@/components/common/Button";
 import BrandRegistForm from "./component/BrandRegistForm";
 import api from "@/lib/apiClient";
-import { ko } from "date-fns/locale";
 
 export default function BrandDetail() {
   const navigate = useNavigate();
@@ -145,7 +144,27 @@ export default function BrandDetail() {
           ...data,
           lang,
           id: data.id,
+          name: data.brandName,
+          category: data.office,
           contentId: data.contentId,
+          content: data.description,
+          title: data.title,
+          subTitle: data.subTitle,
+          thumbText: data.thumbText,
+          thumbImg: data.mainImage,
+          mainPcImg: data.pcImage,
+          mainMoImg: data.moImage,
+          contentImg1: data.contentImage1,
+          contentImg2: data.contentImage2,
+          contentImg3: data.contentImage3,
+          contentImg4: data.contentImage4,
+          contentImg5: data.contentImage5,
+          pcBodyImage: data.pcBodyImage,
+          moBodyImage: data.moBodyImage,
+          brandTel: data.storePhone,
+          brandLocation: data.storeLocation,
+          homeUrl: data.homepageUrl || "",
+          mainImg: data.mainImage,
           useYn: data.useStatus === "active" ? "Y" : "N",
           homeUrlNew: data.homepageNewTab ? "Y" : "N",
           instagramNew: data.sns?.instagram?.newWindow ? "Y" : "N",
@@ -180,23 +199,23 @@ export default function BrandDetail() {
         };
         console.log(`[${lang}] 서버에 보낼 데이터:`, payload);
 
-        const res = await api.put("/api/v1/brand/update", payload);
+        const res = await api.post("/api/v1/brand/update", payload);
         console.log("응답 결과:", res.data);
       };
 
       if (currentLang === 0) {
         const koValues = await koFormRef.current?.submit?.();
-        console.log("KO 폼 데이터:", koValues);
         if (!koValues) return;
+        console.log("KO 폼 데이터:", koValues);
         await saveOne(koValues, "KO");
       } else {
         const enValues = await enFormRef.current?.submit?.();
-        console.log("EN 폼 데이터:", enValues);
         if (!enValues) return;
+        console.log("EN 폼 데이터:", enValues);
         await saveOne(enValues, "EN");
       }
 
-      alert("저장 완료");
+      alert("브랜드 정보가 수정되었습니다.");
       setIsReadOnly(true); // 다시 읽기 전용으로 전환
     } catch (err) {
       console.error("저장 실패:", err);
