@@ -52,11 +52,19 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
 
   useImperativeHandle(ref, () => ({
     submit: async () => {
-      const values = getValues();
+      const values = {
+        ...getValues(),
+        imgPc: watch("imgPc"),
+        imgMo: watch("imgMo"),
+      };
+
       const content = await editorRef.current?.getContent?.();
 
       const toImageMeta = (file) => {
-        if (!file || !file.name) return null;
+        if (!file || !file.name || !file.path) {
+          console.warn("이미지 path 누락:", file);
+          return null;
+        }
 
         return {
           id: null,
@@ -65,11 +73,12 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
           size: file.size,
           extension: "." + (file.originalName || file.name).split(".").pop(),
           mime: file.type || "image/png",
-          classification: "press&media",
-          path: `C:\\upload\\test\\${file.name}`,
+          classification: "press-media",
+          path: file.path,
           status: null,
         };
       };
+      console.log("submit() values.imgPc:", values.imgPc);
 
       if (!values.imgPc || !values.imgMo) {
         alert("PC, 모바일 썸네일 이미지를 모두 등록해주세요.");
