@@ -141,6 +141,22 @@ export default function PressDetail() {
     console.log(" EN 데이터:", enData);
   }, [koData, enData]);
 
+  const toImageMeta = (file) => {
+    if (!file || !file.name) return null;
+
+    return {
+      id: null,
+      originalName: file.originalName || file.name,
+      name: file.name,
+      size: file.size,
+      extension: "." + (file.originalName || file.name).split(".").pop(),
+      mime: file.type || "image/png",
+      classification: "press&media",
+      path: `C:\\upload\\test\\${file.name}`, // 백엔드 경로 규칙 맞춰주세요
+      status: null,
+    };
+  };
+
   const handleSave = async () => {
     try {
       const saveOne = async (data) => {
@@ -148,8 +164,8 @@ export default function PressDetail() {
           id: data.id,
           category: data.category,
           title: data.title,
-          thumbImgPc: data.thumbImgPc?.path || null,
-          thumbImgMo: data.thumbImgMo?.path || null,
+          thumbImgPc: toImageMeta(data.thumbImgPc),
+          thumbImgMo: toImageMeta(data.thumbImgMo),
           showYn: data.showYn,
           content: data.content,
           publishDate: data.publishDate,
