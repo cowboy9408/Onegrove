@@ -39,7 +39,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
       setValue("category", data.categoryCode || "");
       setValue("title", data.title || "");
       setValue("status", data.showYn === "Y" ? "active" : "inactive");
-      setValue("publish_date", data.publishDate || "");
+      setValue("publishDate", data.publishDate || "");
       setValue("imgPc", data.thumbImgPc || null);
       setValue("imgMo", data.thumbImgMo || null);
       editorRef.current?.setContent?.(data.content || "");
@@ -84,7 +84,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
         thumbImgMo: toImageMeta(values.imgMo),
         showYn: values.status === "active" ? "Y" : "N",
         content: content || "",
-        publish_date: values.publish_date || null,
+        publishDate: values.publishDate || null,
       };
     },
     setValue: (key, value) => {
@@ -172,7 +172,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
             onSingleChange={(date) => {
               setSingleDate(date);
               const isoDate = date.toISOString().split("T")[0];
-              setValue("publish_date", isoDate);
+              setValue("publishDate", isoDate);
             }}
             readOnly={readOnly}
           />
