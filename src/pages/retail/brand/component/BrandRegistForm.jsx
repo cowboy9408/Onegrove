@@ -19,7 +19,10 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
   });
   const { control, register, setValue, watch, getValues } = methods;
 
+<<<<<<< HEAD
   
+=======
+>>>>>>> origin/byeongjun
   const editorRef = useRef();
   const { showModal } = useModal();
 
@@ -33,7 +36,11 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
         console.error("카테고리 목록 불러오기 실패:", err);
       }
     };
+<<<<<<< HEAD
     fetchCategory(); 
+=======
+    fetchCategory();
+>>>>>>> origin/byeongjun
 
     const fetchKeyword = async () => {
       try {
@@ -44,8 +51,12 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
         console.error("키워드 목록 불러오기 실패:", err);
       }
     };
+<<<<<<< HEAD
     // fetchKeyword(); 
     
+=======
+    // fetchKeyword();
+>>>>>>> origin/byeongjun
   }, []);
 
   const validateRequiredFields = () => {
@@ -171,6 +182,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
 
               const options = [
                 {
+<<<<<<< HEAD
                     "code": "key0101",
                     "value": "Man"
                 },
@@ -206,6 +218,43 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
                     "code": "key0109",
                     "value": "Beauty"
                 }
+=======
+                  code: "key0101",
+                  value: "Man",
+                },
+                {
+                  code: "key0102",
+                  value: "Woman",
+                },
+                {
+                  code: "key0103",
+                  value: "Lifewear",
+                },
+                {
+                  code: "key0104",
+                  value: "Street Fashion",
+                },
+                {
+                  code: "key0105",
+                  value: "Sportswear",
+                },
+                {
+                  code: "key0106",
+                  value: "SPA",
+                },
+                {
+                  code: "key0107",
+                  value: "Luxury",
+                },
+                {
+                  code: "key0108",
+                  value: "Kids",
+                },
+                {
+                  code: "key0109",
+                  value: "Beauty",
+                },
+>>>>>>> origin/byeongjun
               ];
 
               return (

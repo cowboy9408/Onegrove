@@ -24,17 +24,24 @@ export default function PressRegist() {
     const form = await ref.current?.submit();
     if (!form) return;
 
-    const payload = {
-      lang: currentLang === 0 ? "ko" : "en",
-      ...form,
-    };
-    console.log("최종 payload:", JSON.stringify(payload, null, 2));
+    // const toImageMeta = (file) => {
+    //   return {
+    //     path: file?.path || null,
+    //     classification: "press&media",
+    //   };
+    // };
+
+    const payload = form;
+
+    console.log("최종 payload", JSON.stringify(payload, null, 2));
+
     try {
       await api.post("/api/v1/press/insert", payload);
       alert("저장되었습니다.");
       navigate("/contents/whatson/media");
     } catch (err) {
       console.error("저장 실패:", err);
+      alert("저장에 실패했습니다. 입력값을 확인해주세요.");
     }
   };
 

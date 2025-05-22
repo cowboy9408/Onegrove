@@ -23,7 +23,7 @@ export default function PressListPage() {
     startDate: null,
     endDate: null,
   });
-
+  const [refreshKey, setRefreshKey] = useState(0);
   const [name, setName] = useState(searchParams.get("name") || "");
   const [page, setPage] = useState(searchParams.get("page") || 1);
   const [data, setData] = useState([]);
@@ -36,11 +36,123 @@ export default function PressListPage() {
 
   const size = 10;
 
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const res = await api.get("/api/v1/press");
+  //       const json = res.data;
+
+  //       if (json.success && Array.isArray(json.data)) {
+  //         const rows = json.data.map((entry, index) => {
+  //           const items = entry.press || [];
+  //           const koItem = items.find((i) => i.lang === "ko") || {};
+  //           const enItem = items.find((i) => i.lang === "en") || {};
+
+  //           return {
+  //             originalIndex: index,
+  //             pmId: entry.pmId,
+  //             pid_ko: koItem.pid || null,
+  //             pid_en: enItem.pid || null,
+
+  //             occupancy: entry.rownum || 0,
+  //             name: "-", // 백엔드 데이터에 category 없음
+  //             language:
+  //               koItem.lang && enItem.lang ? "both" : koItem.lang ? "ko" : "en",
+  //             ko_title: koItem.title || "-",
+  //             en_title: enItem.title || "-",
+  //             situation: "-", // status 없음
+  //             status: koItem.showYn === "Y" ? "노출" : "비노출",
+  //             created_user: koItem.createUser || "-",
+  //             created_at: koItem.createDatetime || "-",
+
+  //             _id: `${entry.pmId}`,
+  //           };
+  //         });
+
+  //         // 검색 필터링
+  //         const filtered = rows.filter((row) => {
+  //           const titleMatch =
+  //             name === "" ||
+  //             row.ko_title.includes(name) ||
+  //             row.en_title.includes(name);
+  //           const categoryMatch = category === "" || row.name === category;
+  //           const visibilityMatch =
+  //             visibility === "" || row.status === visibility;
+  //           const dateMatch =
+  //             (!dateRange.startDate ||
+  //               new Date(row.created_at) >= new Date(dateRange.startDate)) &&
+  //             (!dateRange.endDate ||
+  //               new Date(row.created_at) <= new Date(dateRange.endDate));
+
+  //           return titleMatch && categoryMatch && visibilityMatch && dateMatch;
+  //         });
+
+  //         const sorted = filtered.sort((a, b) => a.occupancy - b.occupancy);
+
+  //         const start = (page - 1) * size;
+  //         const end = start + size;
+  //         const sliced = sorted.slice(start, end).map((row, idx) => ({
+  //           ...row,
+  //           no: start + idx + 1,
+  //           _id: `${row.originalIndex}`, // 또는 UUID 등도 가능
+  //         }));
+
+  //         setData(sliced);
+  //         setTotal(filtered.length);
+  //       }
+  //     } catch (err) {
+  //       console.error("프레스 목록 API 호출 실패:", err);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [page, name, category, visibility, dateRange, refreshKey]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await api.get("/api/v1/press");
-        const json = res.data;
+        // ✅ 목업 데이터 생성
+        const mockData = [
+          {
+            pmId: 2,
+            rownum: 1,
+            press: [
+              {
+                pid: 101,
+                lang: "ko",
+                title: "한국어 제목",
+                showYn: "Y",
+                createUser: "관리자",
+                createDatetime: "2024-01-01",
+              },
+              {
+                pid: 102,
+                lang: "en",
+                title: "English Title",
+                showYn: "Y",
+                createUser: "Admin",
+                createDatetime: "2024-01-01",
+              },
+            ],
+          },
+          {
+            pmId: 3,
+            rownum: 2,
+            press: [
+              {
+                pid: 103,
+                lang: "ko",
+                title: "다른 제목",
+                showYn: "N",
+                createUser: "운영자",
+                createDatetime: "2024-01-02",
+              },
+            ],
+          },
+        ];
+
+        //
+        const json = { success: true, data: mockData };
 
         if (json.success && Array.isArray(json.data)) {
           const rows = json.data.map((entry, index) => {
@@ -55,21 +167,20 @@ export default function PressListPage() {
               pid_en: enItem.pid || null,
 
               occupancy: entry.rownum || 0,
-              name: "-", // 백엔드 데이터에 category 없음
+              name: "-", // 카테고리 없음
               language:
                 koItem.lang && enItem.lang ? "both" : koItem.lang ? "ko" : "en",
               ko_title: koItem.title || "-",
               en_title: enItem.title || "-",
-              situation: "-", // status 없음
+              situation: "-",
               status: koItem.showYn === "Y" ? "노출" : "비노출",
               created_user: koItem.createUser || "-",
               created_at: koItem.createDatetime || "-",
-
-              _id: `${entry.pmId}`,
+              _id: `${entry.pmId}`, // 중요: pmId 사용해야 삭제 가능
             };
           });
 
-          // 검색 필터링
+          // 🔍 필터링 및 정렬
           const filtered = rows.filter((row) => {
             const titleMatch =
               name === "" ||
@@ -88,25 +199,24 @@ export default function PressListPage() {
           });
 
           const sorted = filtered.sort((a, b) => a.occupancy - b.occupancy);
-
           const start = (page - 1) * size;
           const end = start + size;
           const sliced = sorted.slice(start, end).map((row, idx) => ({
             ...row,
             no: start + idx + 1,
-            _id: `${row.originalIndex}`, // 또는 UUID 등도 가능
+            _id: `${row.pmId}`, //
           }));
 
           setData(sliced);
           setTotal(filtered.length);
         }
       } catch (err) {
-        console.error("프레스 목록 API 호출 실패:", err);
+        console.error("프레스 목록 로딩 실패:", err);
       }
     };
 
     fetchData();
-  }, [page, name, category, visibility, dateRange]);
+  }, [page, name, category, visibility, dateRange, refreshKey]);
 
   const handleCheck = (id, checked) => {
     setCheckedIds((prev) =>
@@ -201,6 +311,11 @@ export default function PressListPage() {
                 return;
               }
 
+              const confirm = window.confirm(
+                "선택한 프레스 콘텐츠를 삭제하시겠습니까?"
+              );
+              if (!confirm) return;
+
               const idsToDelete = data
                 .filter((item) => checkedIds.includes(item._id))
                 .map((item) => item.pmId);
@@ -213,7 +328,8 @@ export default function PressListPage() {
                 if (res.status === 200) {
                   alert("삭제가 완료되었습니다.");
                   setCheckedIds([]);
-                  setPage(1); // 첫 페이지로 리셋
+                  setPage(1);
+                  setRefreshKey((prev) => prev + 1); // 목록 새로고침
                 } else {
                   alert("삭제 실패: 서버 오류");
                 }
