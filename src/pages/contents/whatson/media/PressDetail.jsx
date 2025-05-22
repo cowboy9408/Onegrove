@@ -20,80 +20,14 @@ export default function PressDetail() {
   const [loading, setLoading] = useState(true);
   const [isReadOnly, setIsReadOnly] = useState(true);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const res = await api.get(`/api/v1/press/${pmId}`);
-  //       console.log("API 응답 결과:", res.data);
-
-  //       const list = Array.isArray(res.data?.data) ? res.data.data : [];
-
-  //       const ko = list.find((item) => item.lang === "ko") || null;
-  //       const en = list.find((item) => item.lang === "en") || null;
-
-  //       console.log("koData:", ko);
-  //       console.log("enData:", en);
-
-  //       setKoData(ko);
-  //       setEnData(en);
-  //       setLoading(false);
-  //     } catch (err) {
-  //       console.error("API 호출 실패:", err);
-  //       setKoData(null);
-  //       setEnData(null);
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchData();
-  // }, [pmId]);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        //const res = await api.get(`/api/v1/press/${pmId}`);
-        //       console.log("API 응답 결과:", res.data);
-        const mockData = {
-          success: true,
-          message: "조회되었습니다.",
-          data: [
-            {
-              id: 2,
-              pressId: 3,
-              lang: "ko",
-              categoryCode: "pm0102",
-              categoryValue: "Media",
-              title: "123123",
-              thumbImgPc: null,
-              thumbImgMo: null,
-              showYn: "Y",
-              content: "에디터 내용",
-              publishDate: "2025-05-20",
-              createUser: "테스트",
-              createDatetime: "2025-05-08",
-              updateUser: null,
-              updateDatetime: null,
-            },
-            {
-              id: 3,
-              pressId: 3,
-              lang: "en",
-              categoryCode: "pm0102",
-              categoryValue: "Media",
-              title: "제목 수정",
-              thumbImgPc: null,
-              thumbImgMo: null,
-              showYn: "N",
-              content: "내용~!@~!@~!@",
-              publishDate: "2025-05-20",
-              createUser: "테스트",
-              createDatetime: "2025-05-08",
-              updateUser: "테스트",
-              updateDatetime: "2025-05-14",
-            },
-          ],
-        };
-        //const list = Array.isArray(res.data?.data) ? res.data.data : [];
-        const list = mockData.data;
+        const res = await api.get(`/api/v1/press/${pmId}`);
+        console.log("API 응답 결과:", res.data);
+
+        const list = Array.isArray(res.data?.data) ? res.data.data : [];
+
         const ko = list.find((item) => item.lang === "ko") || null;
         const en = list.find((item) => item.lang === "en") || null;
 
@@ -104,12 +38,78 @@ export default function PressDetail() {
         setEnData(en);
         setLoading(false);
       } catch (err) {
-        console.error("테스트용 데이터 처리 실패:", err);
+        console.error("API 호출 실패:", err);
+        setKoData(null);
+        setEnData(null);
+        setLoading(false);
       }
     };
-
     fetchData();
   }, [pmId]);
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       //const res = await api.get(`/api/v1/press/${pmId}`);
+  //       //       console.log("API 응답 결과:", res.data);
+  //       const mockData = {
+  //         success: true,
+  //         message: "조회되었습니다.",
+  //         data: [
+  //           {
+  //             id: 2,
+  //             pressId: 3,
+  //             lang: "ko",
+  //             categoryCode: "pm0102",
+  //             categoryValue: "Media",
+  //             title: "123123",
+  //             thumbImgPc: null,
+  //             thumbImgMo: null,
+  //             showYn: "Y",
+  //             content: "에디터 내용",
+  //             publishDate: "2025-05-20",
+  //             createUser: "테스트",
+  //             createDatetime: "2025-05-08",
+  //             updateUser: null,
+  //             updateDatetime: null,
+  //           },
+  //           {
+  //             id: 3,
+  //             pressId: 3,
+  //             lang: "en",
+  //             categoryCode: "pm0102",
+  //             categoryValue: "Media",
+  //             title: "제목 수정",
+  //             thumbImgPc: null,
+  //             thumbImgMo: null,
+  //             showYn: "N",
+  //             content: "내용~!@~!@~!@",
+  //             publishDate: "2025-05-20",
+  //             createUser: "테스트",
+  //             createDatetime: "2025-05-08",
+  //             updateUser: "테스트",
+  //             updateDatetime: "2025-05-14",
+  //           },
+  //         ],
+  //       };
+  //       //const list = Array.isArray(res.data?.data) ? res.data.data : [];
+  //       const list = mockData.data;
+  //       const ko = list.find((item) => item.lang === "ko") || null;
+  //       const en = list.find((item) => item.lang === "en") || null;
+
+  //       console.log("koData:", ko);
+  //       console.log("enData:", en);
+
+  //       setKoData(ko);
+  //       setEnData(en);
+  //       setLoading(false);
+  //     } catch (err) {
+  //       console.error("테스트용 데이터 처리 실패:", err);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [pmId]);
 
   useEffect(() => {
     if (!loading) {
@@ -118,7 +118,7 @@ export default function PressDetail() {
         formRef.setValue("category", data.categoryCode || "");
         formRef.setValue("title", data.title || "");
         formRef.setValue("status", data.showYn === "Y" ? "active" : "inactive");
-        formRef.setValue("publish_date", data.publishDate || "");
+        formRef.setValue("publishDate", data.publishDate || "");
         formRef.setValue("imgPc", data.thumbImgPc || null);
         formRef.setValue("imgMo", data.thumbImgMo || null);
         formRef.setValue("content1", data.content || "");
@@ -143,24 +143,22 @@ export default function PressDetail() {
 
   const handleSave = async () => {
     try {
-      const saveOne = async (data, lang) => {
+      const saveOne = async (data) => {
         const payload = {
           id: data.id,
-          pressId: Number(pmId),
-          lang,
           category: data.category,
           title: data.title,
-          thumbImgPc: data.imgPc,
-          thumbImgMo: data.imgMo,
-          showYn: data.status === "active" ? "Y" : "N",
-          content: data.content1,
-          publish_date: data.publish_date,
+          thumbImgPc: data.thumbImgPc?.path || null,
+          thumbImgMo: data.thumbImgMo?.path || null,
+          showYn: data.showYn,
+          content: data.content,
+          publishDate: data.publishDate,
         };
 
-        console.log(`[${lang}] 전송할 payload:`, payload);
+        console.log(` 전송할 payload:`, payload);
 
-        const res = await api.put("/api/v1/press/update", payload);
-        console.log(`[${lang}] 응답 결과:`, res.data);
+        const res = await api.post("/api/v1/press/update", payload);
+        console.log(` 응답 결과:`, res.data);
       };
 
       if (currentLang === 0) {
