@@ -31,26 +31,17 @@ export default function PressRegist() {
     //   };
     // };
 
-    const payload = {
-      lang: currentLang === 0 ? "ko" : "en",
-      category: form.category,
-      title: form.title,
-      thumbImgPc: form.thumbImgPc || null,
-      thumbImgMo: form.thumbImgMo || null,
-      showYn: form.showYn,
-      content: form.content,
-      publish_date: form.publish_date,
-    };
+    const payload = form;
 
-    console.log("전송 payload:", JSON.stringify(payload, null, 2));
+    console.log("최종 payload", JSON.stringify(payload, null, 2));
 
     try {
       await api.post("/api/v1/press/insert", payload);
-    } catch (err) {
-      console.error("저장 실패:", err);
-    } finally {
       alert("저장되었습니다.");
       navigate("/contents/whatson/media");
+    } catch (err) {
+      console.error("저장 실패:", err);
+      alert("저장에 실패했습니다. 입력값을 확인해주세요.");
     }
   };
 

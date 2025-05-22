@@ -20,30 +20,94 @@ export default function PressDetail() {
   const [loading, setLoading] = useState(true);
   const [isReadOnly, setIsReadOnly] = useState(true);
 
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const res = await api.get(`/api/v1/press/${pmId}`);
+  //       console.log("API 응답 결과:", res.data);
+
+  //       const list = Array.isArray(res.data?.data) ? res.data.data : [];
+
+  //       const ko = list.find((item) => item.lang === "ko") || null;
+  //       const en = list.find((item) => item.lang === "en") || null;
+
+  //       console.log("koData:", ko);
+  //       console.log("enData:", en);
+
+  //       setKoData(ko);
+  //       setEnData(en);
+  //       setLoading(false);
+  //     } catch (err) {
+  //       console.error("API 호출 실패:", err);
+  //       setKoData(null);
+  //       setEnData(null);
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchData();
+  // }, [pmId]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await api.get(`/api/v1/press/${pmId}`);
-        console.log("📡 API 응답 결과:", res.data);
-
-        const list = Array.isArray(res.data?.data) ? res.data.data : [];
-
+        //const res = await api.get(`/api/v1/press/${pmId}`);
+        //       console.log("API 응답 결과:", res.data);
+        const mockData = {
+          success: true,
+          message: "조회되었습니다.",
+          data: [
+            {
+              id: 2,
+              pressId: 3,
+              lang: "ko",
+              categoryCode: "pm0102",
+              categoryValue: "Media",
+              title: "123123",
+              thumbImgPc: null,
+              thumbImgMo: null,
+              showYn: "Y",
+              content: "에디터 내용",
+              publishDate: "2025-05-20",
+              createUser: "테스트",
+              createDatetime: "2025-05-08",
+              updateUser: null,
+              updateDatetime: null,
+            },
+            {
+              id: 3,
+              pressId: 3,
+              lang: "en",
+              categoryCode: "pm0102",
+              categoryValue: "Media",
+              title: "제목 수정",
+              thumbImgPc: null,
+              thumbImgMo: null,
+              showYn: "N",
+              content: "내용~!@~!@~!@",
+              publishDate: "2025-05-20",
+              createUser: "테스트",
+              createDatetime: "2025-05-08",
+              updateUser: "테스트",
+              updateDatetime: "2025-05-14",
+            },
+          ],
+        };
+        //const list = Array.isArray(res.data?.data) ? res.data.data : [];
+        const list = mockData.data;
         const ko = list.find((item) => item.lang === "ko") || null;
         const en = list.find((item) => item.lang === "en") || null;
 
-        console.log("✅ koData:", ko);
-        console.log("✅ enData:", en);
+        console.log("koData:", ko);
+        console.log("enData:", en);
 
         setKoData(ko);
         setEnData(en);
         setLoading(false);
       } catch (err) {
-        console.error("📛 API 호출 실패:", err);
-        setKoData(null);
-        setEnData(null);
-        setLoading(false);
+        console.error("테스트용 데이터 처리 실패:", err);
       }
     };
+
     fetchData();
   }, [pmId]);
 
@@ -67,41 +131,55 @@ export default function PressDetail() {
 
   useEffect(() => {
     if (!loading) {
-      console.log("🧩 koFormRef.current:", koFormRef.current);
-      console.log("🧩 enFormRef.current:", enFormRef.current);
+      console.log("koFormRef.current:", koFormRef.current);
+      console.log("enFormRef.current:", enFormRef.current);
     }
   }, [loading]);
 
   useEffect(() => {
-    console.log("📦 KO 데이터:", koData);
-    console.log("📦 EN 데이터:", enData);
+    console.log(" KO 데이터:", koData);
+    console.log(" EN 데이터:", enData);
   }, [koData, enData]);
 
   const handleSave = async () => {
     try {
-      const activeRef = currentLang === 0 ? koFormRef : enFormRef;
-      const formValues = await activeRef.current?.submit?.();
-      if (!formValues) return;
+      const saveOne = async (data, lang) => {
+        const payload = {
+          id: data.id,
+          pressId: Number(pmId),
+          lang,
+          category: data.category,
+          title: data.title,
+          thumbImgPc: data.imgPc,
+          thumbImgMo: data.imgMo,
+          showYn: data.status === "active" ? "Y" : "N",
+          content: data.content1,
+          publish_date: data.publish_date,
+        };
 
-      const payload = {
-        id: Number(pmId),
-        title: formValues.title,
-        thumbImg: formValues.imgPc,
-        showYn: formValues.status === "active" ? "Y" : "N",
-        content: formValues.content1,
-        source: formValues.source,
-        updateUser: 2,
-        categoryCode: formValues.category,
-        publishDate: formValues.publish_date,
+        console.log(`[${lang}] 전송할 payload:`, payload);
+
+        const res = await api.put("/api/v1/press/update", payload);
+        console.log(`[${lang}] 응답 결과:`, res.data);
       };
 
-      await api.put(`/api/v1/press/update`, payload);
+      if (currentLang === 0) {
+        const koValues = await koFormRef.current?.submit?.();
+        console.log("KO 폼 데이터:", koValues);
+        if (!koValues) return;
+        await saveOne(koValues, "ko");
+      } else {
+        const enValues = await enFormRef.current?.submit?.();
+        console.log("EN 폼 데이터:", enValues);
+        if (!enValues) return;
+        await saveOne(enValues, "en");
+      }
 
-      alert("수정이 완료되었습니다.");
+      alert("저장 완료");
       setIsReadOnly(true);
     } catch (err) {
-      console.error("수정 실패:", err);
-      alert("수정 중 오류가 발생했습니다.");
+      console.error("저장 실패:", err);
+      alert("저장 실패. 다시 시도해주세요.");
     }
   };
 

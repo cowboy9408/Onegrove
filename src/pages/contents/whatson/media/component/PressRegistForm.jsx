@@ -34,7 +34,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
   }, []);
 
   useEffect(() => {
-    console.log("🛠️ 받은 data:", data);
+    console.log("받은 data:", data);
     if (data && Object.keys(data).length > 0) {
       setValue("category", data.categoryCode || "");
       setValue("title", data.title || "");
@@ -46,7 +46,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
       if (data.publishDate) {
         setSingleDate(new Date(data.publishDate));
       }
-      console.log("📌 값 세팅 완료");
+      console.log("값 세팅 완료");
     }
   }, [data]);
 
@@ -55,9 +55,36 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
       const values = getValues();
       const content = await editorRef.current?.getContent?.();
 
+      const toImageMeta = (file) => {
+        if (!file || !file.name) return null;
+
+        return {
+          id: null,
+          originalName: file.originalName || file.name,
+          name: file.name,
+          size: file.size,
+          extension: "." + (file.originalName || file.name).split(".").pop(),
+          mime: file.type || "image/png",
+          classification: "press&media",
+          path: `C:\\upload\\test\\${file.name}`,
+          status: null,
+        };
+      };
+
+      if (!values.imgPc || !values.imgMo) {
+        alert("PC, 모바일 썸네일 이미지를 모두 등록해주세요.");
+        return null;
+      }
+
       return {
-        ...values,
-        content1: content,
+        lang,
+        category: values.category || "",
+        title: values.title || "",
+        thumbImgPc: toImageMeta(values.imgPc),
+        thumbImgMo: toImageMeta(values.imgMo),
+        showYn: values.status === "active" ? "Y" : "N",
+        content: content || "",
+        publish_date: values.publish_date || null,
       };
     },
     setValue: (key, value) => {
