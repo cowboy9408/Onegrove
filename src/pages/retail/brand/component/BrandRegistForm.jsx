@@ -273,7 +273,20 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
         <p className="text-sm font-medium">
           메인 내용<span className="text-red-500">*</span>
         </p>
-        <Editor ref={editorRef} readOnly={readOnly} />
+
+        <Controller
+          name="description"
+          control={control}
+          render={({ field }) => (
+            <Editor
+              ref={editorRef}
+              readOnly={readOnly}
+              initialContent={field.value}
+              // initialContent={existingBrandData?.description} // HTML 형태의 string
+            />
+          )}
+        />
+        
 
         <Upload
           name="contentImage1"
