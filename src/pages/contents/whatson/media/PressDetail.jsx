@@ -15,69 +15,171 @@ export default function PressDetail() {
   const koFormRef = useRef();
   const enFormRef = useRef();
 
-  const [koData, setKoData] = useState({});
-  const [enData, setEnData] = useState({});
+  const [koData, setKoData] = useState(null);
+  const [enData, setEnData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isReadOnly, setIsReadOnly] = useState(true);
 
-  // 상세 데이터 불러오기
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const res = await api.get(`/api/v1/press/${pmId}`);
+  //       console.log("API 응답 결과:", res.data);
+
+  //       const list = Array.isArray(res.data?.data) ? res.data.data : [];
+
+  //       const ko = list.find((item) => item.lang === "ko") || null;
+  //       const en = list.find((item) => item.lang === "en") || null;
+
+  //       console.log("koData:", ko);
+  //       console.log("enData:", en);
+
+  //       setKoData(ko);
+  //       setEnData(en);
+  //       setLoading(false);
+  //     } catch (err) {
+  //       console.error("API 호출 실패:", err);
+  //       setKoData(null);
+  //       setEnData(null);
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchData();
+  // }, [pmId]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await api.get(`/api/v1/press/${pmId}`);
-        console.log("API 응답 전체:", res);
+        //const res = await api.get(`/api/v1/press/${pmId}`);
+        //       console.log("API 응답 결과:", res.data);
+        const mockData = {
+          success: true,
+          message: "조회되었습니다.",
+          data: [
+            {
+              id: 2,
+              pressId: 3,
+              lang: "ko",
+              categoryCode: "pm0102",
+              categoryValue: "Media",
+              title: "123123",
+              thumbImgPc: null,
+              thumbImgMo: null,
+              showYn: "Y",
+              content: "에디터 내용",
+              publishDate: "2025-05-20",
+              createUser: "테스트",
+              createDatetime: "2025-05-08",
+              updateUser: null,
+              updateDatetime: null,
+            },
+            {
+              id: 3,
+              pressId: 3,
+              lang: "en",
+              categoryCode: "pm0102",
+              categoryValue: "Media",
+              title: "제목 수정",
+              thumbImgPc: null,
+              thumbImgMo: null,
+              showYn: "N",
+              content: "내용~!@~!@~!@",
+              publishDate: "2025-05-20",
+              createUser: "테스트",
+              createDatetime: "2025-05-08",
+              updateUser: "테스트",
+              updateDatetime: "2025-05-14",
+            },
+          ],
+        };
+        //const list = Array.isArray(res.data?.data) ? res.data.data : [];
+        const list = mockData.data;
+        const ko = list.find((item) => item.lang === "ko") || null;
+        const en = list.find((item) => item.lang === "en") || null;
 
-        const items = res.data?.data;
-        if (!Array.isArray(items)) {
-          console.warn("데이터 배열이 아님:", res.data);
-          return;
-        }
+        console.log("koData:", ko);
+        console.log("enData:", en);
 
-        const ko = items.find((item) => item.lang === "ko");
-        const en = items.find((item) => item.lang === "en");
-
-        console.log("ko:", ko);
-        console.log("en:", en);
-
-        setKoData(ko || {});
-        setEnData(en || {});
+        setKoData(ko);
+        setEnData(en);
         setLoading(false);
       } catch (err) {
-        console.error("데이터 불러오기 오류:", err);
+        console.error("테스트용 데이터 처리 실패:", err);
       }
     };
+
     fetchData();
   }, [pmId]);
 
-  // 저장하기
-  const handleSave = async () => {
-    try {
-      const activeRef = currentLang === 0 ? koFormRef : enFormRef;
-      const formValues = await activeRef.current?.submit?.();
-      if (!formValues) return;
-
-      const payload = {
-        id: Number(pmId),
-        category: formValues.category,
-        title: formValues.title,
-        thumbImgPc: formValues.imgPc?.path || null,
-        thumbImgMo: formValues.imgMo?.path || null,
-        showYn: formValues.status === "active" ? "Y" : "N",
-        content: formValues.content1,
-        publish_date: formValues.publish_date,
+  useEffect(() => {
+    if (!loading) {
+      const patchForm = (formRef, data) => {
+        if (!formRef || !data) return;
+        formRef.setValue("category", data.categoryCode || "");
+        formRef.setValue("title", data.title || "");
+        formRef.setValue("status", data.showYn === "Y" ? "active" : "inactive");
+        formRef.setValue("publish_date", data.publishDate || "");
+        formRef.setValue("imgPc", data.thumbImgPc || null);
+        formRef.setValue("imgMo", data.thumbImgMo || null);
+        formRef.setValue("content1", data.content || "");
       };
 
-      console.log(
-        `[${currentLang === 0 ? "KO" : "EN"}] 수정 요청 데이터:`,
-        payload
-      );
-      await api.put(`/api/v1/press/update`, payload);
+      patchForm(koFormRef.current, koData);
+      patchForm(enFormRef.current, enData);
+    }
+  }, [loading, koData, enData]);
 
-      alert("수정이 완료되었습니다.");
+  useEffect(() => {
+    if (!loading) {
+      console.log("koFormRef.current:", koFormRef.current);
+      console.log("enFormRef.current:", enFormRef.current);
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    console.log(" KO 데이터:", koData);
+    console.log(" EN 데이터:", enData);
+  }, [koData, enData]);
+
+  const handleSave = async () => {
+    try {
+      const saveOne = async (data, lang) => {
+        const payload = {
+          id: data.id,
+          pressId: Number(pmId),
+          lang,
+          category: data.category,
+          title: data.title,
+          thumbImgPc: data.imgPc,
+          thumbImgMo: data.imgMo,
+          showYn: data.status === "active" ? "Y" : "N",
+          content: data.content1,
+          publish_date: data.publish_date,
+        };
+
+        console.log(`[${lang}] 전송할 payload:`, payload);
+
+        const res = await api.put("/api/v1/press/update", payload);
+        console.log(`[${lang}] 응답 결과:`, res.data);
+      };
+
+      if (currentLang === 0) {
+        const koValues = await koFormRef.current?.submit?.();
+        console.log("KO 폼 데이터:", koValues);
+        if (!koValues) return;
+        await saveOne(koValues, "ko");
+      } else {
+        const enValues = await enFormRef.current?.submit?.();
+        console.log("EN 폼 데이터:", enValues);
+        if (!enValues) return;
+        await saveOne(enValues, "en");
+      }
+
+      alert("저장 완료");
       setIsReadOnly(true);
     } catch (err) {
-      console.error("수정 실패:", err);
-      alert("수정 중 오류가 발생했습니다.");
+      console.error("저장 실패:", err);
+      alert("저장 실패. 다시 시도해주세요.");
     }
   };
 
@@ -99,7 +201,6 @@ export default function PressDetail() {
             <PressRegistForm
               ref={koFormRef}
               data={koData}
-              setData={setKoData}
               lang="ko"
               readOnly={isReadOnly}
             />
@@ -110,7 +211,6 @@ export default function PressDetail() {
             <PressRegistForm
               ref={enFormRef}
               data={enData}
-              setData={setEnData}
               lang="en"
               readOnly={isReadOnly}
             />

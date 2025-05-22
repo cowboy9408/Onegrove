@@ -31,7 +31,7 @@ export default function BrandDetail() {
         console.error("카테고리 목록 불러오기 실패:", err);
       }
     };
-    fetchCategory(); 
+    fetchCategory();
     const fetchData = async () => {
       try {
         const koRes = await api.get(`/api/v1/brand/detail/${masterId}/KO`);
@@ -52,7 +52,6 @@ export default function BrandDetail() {
   useEffect(() => {
     if (!loading) {
       const patchForm = (locale, data) => {
-
         const matchedCategory = categoryList.find(
           (item) => item.value === data.category
         );
@@ -112,22 +111,21 @@ export default function BrandDetail() {
         };
 
         console.log("폼에 설정할 데이터:", locale, formValues);
-        const formRef = locale === 'ko' ? koFormRef.current : enFormRef.current;
+        const formRef = locale === "ko" ? koFormRef.current : enFormRef.current;
         Object.entries(formValues).forEach(([key, value]) => {
           formRef?.setValue?.(key, value);
         });
       };
 
       if (koFormRef.current && koData?.data) {
-        patchForm('ko', koData.data);
+        patchForm("ko", koData.data);
       }
       if (enFormRef.current && enData?.data) {
-        patchForm('en', enData.data);
+        patchForm("en", enData.data);
       }
 
       console.log("koFormRef.current:", koFormRef.current);
       console.log("enFormRef.current:", enFormRef.current);
-      
     }
   }, [currentLang, koData, enData]);
 
