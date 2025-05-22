@@ -58,6 +58,7 @@ export default function Upload({
       setPreviewUrl(value.url);
 
       // status가 없다면 R로 설정 (유지 상태)
+      console.log("value.status:", value.status);
       if (!value.status) {
         onChange({
           ...value,
