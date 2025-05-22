@@ -77,8 +77,7 @@ api.interceptors.response.use(
           refreshError.message.includes("Network Error") ||
           refreshError.message.includes("ERR_CONNECTION_REFUSED");
 
-        const isUnauthorized =
-          refreshError.response?.status === 401;
+        const isUnauthorized = refreshError.response?.status === 401;
 
         if (isNetworkError || isUnauthorized) {
           window.location.href = "/login";

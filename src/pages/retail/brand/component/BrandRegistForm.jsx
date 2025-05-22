@@ -434,4 +434,3 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
 });
 
 export default BrandRegistForm;
-
