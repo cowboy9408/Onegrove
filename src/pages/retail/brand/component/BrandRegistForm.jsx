@@ -67,6 +67,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
 
       // 이미지 메타데이터 변환 함수
       const toImageMeta = (file) => {
+        console.log("toImageMeta file:", file);
         if (!file || !file.name) return null;
 
         return {
@@ -238,7 +239,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           {...register("thumbText", { required: true })}
           disabled={readOnly}
         />
-        <Input
+        {/* <Input
           label="대타이틀"
           maxLength={50}
           showDefaultInfo
@@ -253,7 +254,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           required
           {...register("subTitle", { required: true })}
           disabled={readOnly}
-        />
+        /> */}
 
         {/* 이미지 업로드 */}
         <Upload

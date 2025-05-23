@@ -44,21 +44,6 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
     ...(initialContent ? { initialContent } : {}),
   });
 
-  // ✅ 초기 HTML을 BlockNote 문서로 변환하여 세팅
-  useEffect(() => {
-    const setInitialContent = async () => {
-      if (initialContent && typeof initialContent === "string") {
-        try {
-          await editor.replaceDocumentFromHTML(initialContent);
-        } catch (err) {
-          console.error("초기 HTML 파싱 실패:", err);
-        }
-      }
-    };
-
-    setInitialContent();
-  }, [initialContent, editor]);
-
   useImperativeHandle(ref, () => ({
     getContent: async () => await editor.blocksToFullHTML(editor.document),
   }));
@@ -68,6 +53,14 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
       filterSuggestionItems(getDefaultReactSlashMenuItems(editor), query);
   }, [editor]);
 
+  // ✅ 초기 HTML을 BlockNote 문서로 변환하여 세팅
+  useEffect(() => {
+    async function loadInitialHTML() {
+      const blocks = await editor.tryParseHTMLToBlocks(initialContent);
+      editor.replaceBlocks(editor.document, blocks);
+    }
+    loadInitialHTML();
+  }, [initialContent, editor]);
   return (
     <div>
       <BlockNoteView
