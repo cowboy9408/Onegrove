@@ -57,7 +57,7 @@ export default function BrandDetail() {
 
         const formValues = {
           brandName: data.name,
-          thumbText: data.thumbText,
+          thumbText: data.thumbTxt,
           // title: data.title,
           // subTitle: data.subTitle,
           office: matchedCategory.code || "",
@@ -151,14 +151,14 @@ export default function BrandDetail() {
         const payload = {
           ...data,
           lang,
-          id: data.id,
+          id: masterId,
           name: data.brandName,
           category: data.office,
-          contentId: data.contentId,
+          contentId: masterId,
           content: data.description,
           title: data.title,
           subTitle: data.subTitle,
-          thumbText: data.thumbText,
+          thumbText: data.thumbTxt,
           thumbImg: data.mainImage,
           mainPcImg: data.pcImage,
           mainMoImg: data.moImage,
