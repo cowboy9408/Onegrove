@@ -99,7 +99,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
     },
     setValue: (key, value) => {
       setValue(key, value);
-      if (key === "content1" && editorRef.current) {
+      if (key === "content" && editorRef.current) {
         editorRef.current.setContent?.(value);
       }
     },
@@ -173,7 +173,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
           <p className="mb-2 text-sm font-medium text-gray-800">내용</p>
           {/* <Editor ref={editorRef} readOnly={readOnly} /> */}
           <Controller
-            name="description"
+            name="content"
             control={control}
             render={({ field }) => (
               <Editor
