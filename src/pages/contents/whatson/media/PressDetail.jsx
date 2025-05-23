@@ -176,7 +176,7 @@ export default function PressDetail() {
 
   const handleSave = async () => {
     try {
-      const saveOne = async (data, original) => {
+      const saveOne = async (data, original = {}) => {
         const payload = {
           id: data.id,
           category: data.category,
@@ -187,6 +187,8 @@ export default function PressDetail() {
           content: data.content,
           publishDate: data.publishDate,
         };
+
+        console.log("저장 payload:", payload);
 
         console.log(` 전송할 payload:`, payload);
         console.log("payload.thumbImgPc:", payload.thumbImgPc);
@@ -200,12 +202,28 @@ export default function PressDetail() {
         const koValues = await koFormRef.current?.submit?.();
         console.log("KO 폼 데이터:", koValues);
         if (!koValues) return;
-        await saveOne({ ...koValues, id: koData?.id }, koData);
+        await saveOne(
+          {
+            ...koValues,
+            id: koData?.id ?? null,
+            pressId: enData?.pressId ?? null, // 영문 데이터가 이미 있으면 거기서 pressId 추출
+            lang: "ko",
+          },
+          koData || {}
+        );
       } else {
         const enValues = await enFormRef.current?.submit?.();
         console.log("EN 폼 데이터:", enValues);
         if (!enValues) return;
-        await saveOne({ ...enValues, id: enData?.id }, enData);
+        await saveOne(
+          {
+            ...enValues,
+            id: enData?.id ?? null, // 기존 ID가 없으면 null
+            pressId: koData?.pressId ?? null, // 국문이 있다면 그 pressId 사용
+            lang: "en", // 영문임을 명시
+          },
+          enData || {}
+        );
       }
 
       alert("저장 완료");
