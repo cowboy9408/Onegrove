@@ -67,14 +67,14 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
         }
 
         return {
-          id: null,
           originalName: file.originalName || file.name,
           name: file.name,
           size: file.size,
           extension: "." + (file.originalName || file.name).split(".").pop(),
           mime: file.type || "image/png",
-          classification: "press-media",
+          classification: file.classification ?? "press-media",
           path: file.path,
+          // status: file.status ?? "R",
           status: null,
         };
       };

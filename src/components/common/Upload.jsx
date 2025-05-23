@@ -18,7 +18,7 @@ export default function Upload({
   error,
   required = false,
   defaultValue = null, // { name, size, url }
-  classification = "default",
+  classification = null,
 }) {
   const inputRef = useRef(null);
   const wrapperRef = useRef(null);
@@ -118,7 +118,7 @@ export default function Upload({
           size: result.size,
           extension: "." + selectedFile.name.split(".").pop(),
           mime: result.mime || selectedFile.type,
-          classification: null,
+          classification,
           path: result.path,
           status: isReplace ? "E" : "C",
         });
