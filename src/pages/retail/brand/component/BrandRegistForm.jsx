@@ -43,7 +43,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
         console.error("키워드 목록 불러오기 실패:", err);
       }
     };
-    // fetchKeyword();
+    fetchKeyword();
   }, []);
 
   const validateRequiredFields = () => {
@@ -210,7 +210,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
 
               return (
                 <div className="flex flex-wrap gap-4">
-                  {options.map((keyword) => (
+                  {keywordList.map((keyword) => (
                     <Checkbox
                       key={keyword.code}
                       label={keyword.value}

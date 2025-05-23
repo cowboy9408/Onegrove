@@ -81,10 +81,14 @@ export default function BrandListPage() {
             en_title: en?.name || "-",
             ko_status: ko?.useYn || "-",
             en_status: en?.useYn || "-",
-            created_at: ko?.createDt?.split(" ")[0] || "-",
-            created_user: ko?.createUser || "-",
-            updated_at: ko?.updateDt?.split(" ")[0] || "-",
-            updated_user: ko?.updateUser || "-",
+            ko_created_at: ko?.createDt?.split(" ")[0] || "-",
+            en_created_at: en?.createDt?.split(" ")[0] || "-",
+            ko_created_user: ko?.createUser || "-",
+            en_created_user: en?.createUser || "-",
+            ko_updated_at: ko?.updateDt?.split(" ")[0] || "-",
+            en_updated_at: en?.updateDt?.split(" ")[0] || "-",
+            ko_updated_user: ko?.updateUser || "-",
+            en_updated_user: en?.updateUser || "-",
           };
         });
 
@@ -231,7 +235,11 @@ export default function BrandListPage() {
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
                   {row.ko_title === "-" ? (
-                    <p className="text-black-600 p-2 text-left">-</p>
+                    <p className="text-black-600 p-2 text-left"
+                      onClick={() =>
+                        navigate(`/retail/brand/detail/${row.masterId}?lang=ko`)
+                      }
+                    >-</p>
                   ) : (
                     <button
                       className="text-black-600 underline p-2 text-left"
@@ -243,7 +251,11 @@ export default function BrandListPage() {
                     </button>
                   )}
                   {row.en_title === "-" ? (
-                    <p className="text-black-600 p-2 text-left">-</p>
+                    <p className="text-black-600 p-2 text-left"
+                      onClick={() =>
+                        navigate(`/retail/brand/detail/${row.masterId}?lang=en`)
+                      }
+                    >-</p>
                   ) : (
                     <button
                       className="text-black-600 underline p-2  text-left"
@@ -274,10 +286,62 @@ export default function BrandListPage() {
                 </div>
               ),
             },
-            { key: "created_at", label: "등록일시" },
-            { key: "created_user", label: "등록자" },
-            { key: "updated_at", label: "수정일시" },
-            { key: "updated_user", label: "수정자" },
+            {
+              key: "created_at",
+              label: "등록일시",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <p className="text-black-600 p-2 text-center">
+                    {row.ko_created_at}
+                  </p>
+                  <p className="text-black-600 p-2 text-center">
+                    {row.en_created_at}
+                  </p>
+                </div>
+              ),
+            },
+            {
+              key: "created_user",
+              label: "등록자",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <p className="text-black-600 p-2 text-center">
+                    {row.ko_created_user}
+                  </p>
+                  <p className="text-black-600 p-2 text-center">
+                    {row.en_created_user}
+                  </p>
+                </div>
+              ),
+            },
+            {
+              key: "updated_at",
+              label: "수정일시",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <p className="text-black-600 p-2 text-center">
+                    {row.ko_updated_at}
+                  </p>
+                  <p className="text-black-600 p-2 text-center">
+                    {row.en_updated_at}
+                  </p>
+                </div>
+              ),
+            },
+            {
+              key: "updated_user",
+              label: "수정자",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <p className="text-black-600 p-2 text-center">
+                    {row.ko_updated_user}
+                  </p>
+                  <p className="text-black-600 p-2 text-center">
+                    {row.en_updated_user}
+                  </p>
+                </div>
+              ),
+            },
           ]}
           data={data}
           checkable
