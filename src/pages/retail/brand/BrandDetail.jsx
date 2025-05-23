@@ -17,7 +17,7 @@ export default function BrandDetail() {
   const [koData, setKoData] = useState({});
   const [enData, setEnData] = useState({});
   const [loading, setLoading] = useState(true);
-  const [isReadOnly, setIsReadOnly] = useState(true); // 읽기 전용
+  const [isReadOnly, setIsReadOnly] = useState(false); // 읽기 전용
   const [categoryList, setCategoryList] = useState([]);
 
   useEffect(() => {
@@ -257,7 +257,7 @@ export default function BrandDetail() {
       }
 
       alert("브랜드 정보가 수정되었습니다.");
-      setIsReadOnly(true); // 다시 읽기 전용으로 전환
+      // setIsReadOnly(true); // 다시 읽기 전용으로 전환
     } catch (err) {
       console.error("저장 실패:", err);
       alert("저장 실패. 다시 시도해주세요.");
@@ -293,7 +293,7 @@ export default function BrandDetail() {
           </Button>
         ) : (
           <Button onClick={handleSave} theme="primary">
-            저장
+            수정
           </Button>
         )}
         <Button onClick={() => navigate("/retail/brand")}>목록</Button>
