@@ -71,16 +71,17 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
         if (!file || !file.name) return null;
 
         return {
-          id: null,
           originalName: file.originalName || file.name,
           name: file.name,
           size: file.size,
-          extension: "." + file.originalName.split(".").pop(),
+          extension: "." + (file.originalName || file.name).split(".").pop(),
           mime: file.type || "image/png",
-          classification: null,
-          path: `C:\\\\upload\\/test\\${file.name}`,
-          status: null,
+          classification: file.classification ?? "brand",
+          path: file.path,
+          status: file.status ?? "R",
+          // status: null,
         };
+          
       };
 
       return {
@@ -228,6 +229,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           name="mainImage"
           label="썸네일 이미지"
           required
+          classification="brand"
           preview
           readOnly={readOnly}
         />
@@ -261,12 +263,14 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           name="pcImage"
           label="PC 본문 이미지"
           required
+          classification="brand"
           readOnly={readOnly}
         />
         <Upload
           name="moImage"
           label="MO 본문 이미지"
           required
+          classification="brand"
           readOnly={readOnly}
         />
 
@@ -293,42 +297,35 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           name="contentImage1"
           label="본문 이미지 1"
           required
+          classification="brand"
           readOnly={readOnly}
         />
         <Upload
           name="contentImage2"
           label="본문 이미지 2"
           required
+          classification="brand"
           readOnly={readOnly}
         />
         <Upload
           name="contentImage3"
           label="본문 이미지 3"
           required
+          classification="brand"
           readOnly={readOnly}
         />
         <Upload
           name="contentImage4"
           label="본문 이미지 4"
           required
+          classification="brand"
           readOnly={readOnly}
         />
         <Upload
           name="contentImage5"
           label="본문 이미지 5"
           required
-          readOnly={readOnly}
-        />
-        <Upload
-          name="pcBodyImage"
-          label="PC 본문 이미지"
-          required
-          readOnly={readOnly}
-        />
-        <Upload
-          name="moBodyImage"
-          label="MO 본문 이미지"
-          required
+          classification="brand"
           readOnly={readOnly}
         />
 

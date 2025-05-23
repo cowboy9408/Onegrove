@@ -91,6 +91,9 @@ export default function Upload({
     formData.append("file", selectedFile);
     formData.append("classification", classification);
 
+
+    console.log("업로드할 파일:", selectedFile);
+
     //  1. preview URL 생성
     const blobUrl = URL.createObjectURL(selectedFile);
     setPreviewUrl(blobUrl);
@@ -106,6 +109,8 @@ export default function Upload({
     });
 
     try {
+
+      console.log("업로드할 form:", formData); 
       const res = await api.post("/api/v1/file/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
