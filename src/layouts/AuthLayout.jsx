@@ -53,6 +53,9 @@ export default function AuthLayout() {
 
       if (!token) {
         removeAccessToken();
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("auth-storage");
+        localStorage.removeItem("refreshToken");
         navigate("/login");
         return;
       }
