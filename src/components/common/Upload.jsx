@@ -104,14 +104,20 @@ export default function Upload({
         withCredentials: true,
       });
 
+      console.log("업로드 전체 응답:", res);
+      console.log("업로드 응답 .data:", res.data);
+      console.log("업로드 응답 .data.data:", res.data?.data);
+
       const result = res.data;
       console.log("Upload 응답 result:", result);
+      console.log("업로드 응답 result:", result);
 
-      const isReplace = !!value; // 기존에 파일이 있었는지 확인
+      const isReplace = !!value?.id; // 기존 값이 있는지 판단
+      const isNew = !isReplace;
 
       if (result.name && result.path) {
         onChange({
-          id: result.id,
+          id: result.id ?? null,
           originalName: selectedFile.name,
           name: result.name,
           size: result.size,
@@ -119,7 +125,7 @@ export default function Upload({
           mime: result.mime || selectedFile.type,
           classification: null,
           path: result.path ?? value?.path ?? "",
-          status: isReplace ? "E" : "C",
+          status: isNew ? "C" : "E", //신규 등록이면 반드시 C
         });
       } else {
         console.error("파일 업로드 실패", result);

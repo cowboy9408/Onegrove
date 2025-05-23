@@ -57,7 +57,8 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
         imgPc: watch("imgPc"),
         imgMo: watch("imgMo"),
       };
-
+      console.log("📦 submit() values.imgPc:", values.imgPc);
+      console.log("📦 submit() values.imgMo:", values.imgMo);
       const content = await editorRef.current?.getContent?.();
 
       const toImageMeta = (file) => {
@@ -67,7 +68,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
         }
 
         return {
-          id: null,
+          id: file.id ?? null,
           originalName: file.originalName || file.name,
           name: file.name,
           size: file.size,
@@ -75,7 +76,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
           mime: file.type || "image/png",
           classification: "press-media",
           path: file.path,
-          status: null,
+          status: file.status ?? "C",
         };
       };
       console.log("submit() values.imgPc:", values.imgPc);
@@ -137,6 +138,8 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
           required
           classification="press&media"
           readOnly={readOnly}
+          value={watch("imgPc")}
+          onChange={(file) => setValue("imgPc", file)}
         />
 
         <Upload
@@ -145,6 +148,8 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
           required
           classification="press&media"
           readOnly={readOnly}
+          value={watch("imgMo")}
+          onChange={(file) => setValue("imgMo", file)}
         />
 
         <div>

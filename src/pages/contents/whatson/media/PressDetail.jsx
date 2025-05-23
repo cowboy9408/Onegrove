@@ -179,6 +179,8 @@ export default function PressDetail() {
       const saveOne = async (data, original = {}) => {
         const payload = {
           id: data.id,
+          pressId: data.pressId,
+          lang: data.lang,
           category: data.category,
           title: data.title,
           thumbImgPc: toImageMeta(data.thumbImgPc, original.thumbImgPc),
@@ -189,13 +191,14 @@ export default function PressDetail() {
         };
 
         console.log("저장 payload:", payload);
-
-        console.log(` 전송할 payload:`, payload);
         console.log("payload.thumbImgPc:", payload.thumbImgPc);
 
-        const res = await api.post("/api/v1/press/update", payload);
-        console.log(` 응답 결과:`, res.data);
-        console.log("업데이트 응답:", res.data);
+        const apiUrl = data.id
+          ? "/api/v1/press/update"
+          : "/api/v1/press/insert";
+        const res = await api.post(apiUrl, payload);
+
+        console.log("응답 결과:", res.data);
       };
 
       if (currentLang === 0) {
@@ -228,7 +231,7 @@ export default function PressDetail() {
 
       alert("저장 완료");
       setIsReadOnly(true);
-      navigate("/contents/whatson/media?refresh=" + Date.now()); // ✅ 리스트 갱신도 함께
+      navigate("/contents/whatson/media?refresh=" + Date.now());
     } catch (err) {
       console.error("저장 실패:", err);
       alert("저장 실패. 다시 시도해주세요.");
