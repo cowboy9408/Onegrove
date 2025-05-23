@@ -109,6 +109,11 @@ export default function BrandDetail() {
           },
         };
 
+        // bcId가 있는 경우에만 contentId 추가
+        if (data.bcId !== undefined && data.bcId !== null) {
+          formValues.bcId = data.bcId;
+        }
+
         console.log("폼에 설정할 데이터:", locale, formValues);
         // Object.entries(formValues).forEach(([key, value]) => {
         //   if (locale === "ko") {

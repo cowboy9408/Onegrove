@@ -38,7 +38,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
       try {
         const res = await api.get("/api/v1/brand/keyword");
         setKeywordList(res.data?.data || []);
-        console.log("키워드 목록:", res.data?.data);
+        // console.log("키워드 목록:", res.data?.data);
       } catch (err) {
         console.error("키워드 목록 불러오기 실패:", err);
       }
