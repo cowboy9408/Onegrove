@@ -55,7 +55,7 @@ export default function PressListPage() {
               pid_en: enItem.pid || null,
 
               occupancy: entry.rownum || 0,
-              name: "-", // 백엔드 데이터에 category 없음
+              name: entry.categoryValue || "-",
               language:
                 koItem.lang && enItem.lang ? "both" : koItem.lang ? "ko" : "en",
               ko_title: koItem.title || "-",

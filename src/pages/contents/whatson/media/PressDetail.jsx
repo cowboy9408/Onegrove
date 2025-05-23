@@ -115,20 +115,20 @@ export default function PressDetail() {
     if (!loading) {
       const patchForm = (formRef, data) => {
         if (!formRef || !data) return;
-        // const patchImageMeta = (img) =>
-        //   img?.path
-        //     ? {
-        //         ...img,
-        //         status: "R",
-        //       }
-        //     : null;
+        const patchImageMeta = (img) =>
+          img?.path
+            ? {
+                ...img,
+                status: "R",
+              }
+            : null;
 
         formRef.setValue("category", data.categoryCode || "");
         formRef.setValue("title", data.title || "");
         formRef.setValue("status", data.showYn === "Y" ? "active" : "inactive");
         formRef.setValue("publishDate", data.publishDate || "");
-        formRef.setValue("imgPc", data.thumbImgPc);
-        formRef.setValue("imgMo", data.thumbImgMo);
+        formRef.setValue("imgPc", patchImageMeta(data.thumbImgPc));
+        formRef.setValue("imgMo", patchImageMeta(data.thumbImgMo));
         formRef.setValue("content1", data.content || "");
       };
 
@@ -161,8 +161,12 @@ export default function PressDetail() {
       mime: file.type || "image/png",
       classification: file.classification ?? "press-media",
       path: file.path,
-      // status: file.status ?? "R",
-      status: null,
+      status:
+        file.status !== undefined && file.status !== null
+          ? file.status
+          : file.changed
+            ? "E"
+            : "R",
     };
   };
 
