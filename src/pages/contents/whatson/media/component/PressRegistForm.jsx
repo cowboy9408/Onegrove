@@ -170,7 +170,17 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
 
         <div>
           <p className="mb-2 text-sm font-medium text-gray-800">내용</p>
-          <Editor ref={editorRef} readOnly={readOnly} />
+          <Controller
+            name="description"
+            render={({ field }) => (
+              <Editor
+                ref={editorRef}
+                readOnly={readOnly}
+                initialContent={field.value}
+                // initialContent={existingBrandData?.description} // HTML 형태의 string
+              />
+            )}
+          />
         </div>
 
         <div>
