@@ -57,18 +57,9 @@ export default function Upload({
 
     if (value.path) {
       setPreviewUrl(value.path);
-    } else if (value.url) {
-      setPreviewUrl(value.url);
-    }
-
-    if (value.name && value.size) {
-      setLocalFile({ name: value.name, size: value.size });
-    }
-
-    if (!value.status && (value.path || value.url)) {
-      onChange({
-        ...value,
-        status: "R",
+      setLocalFile({
+        name: value.name,
+        size: value.size,
       });
     }
   }, [value]);
@@ -88,7 +79,6 @@ export default function Upload({
     formData.append("file", selectedFile);
     formData.append("classification", classification);
 
-
     console.log("업로드할 파일:", selectedFile);
 
     //  1. preview URL 생성
@@ -106,8 +96,7 @@ export default function Upload({
     });
 
     try {
-
-      console.log("업로드할 form:", formData); 
+      console.log("업로드할 form:", formData);
       const res = await api.post("/api/v1/file/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -129,7 +118,7 @@ export default function Upload({
           extension: "." + selectedFile.name.split(".").pop(),
           mime: result.mime || selectedFile.type,
           classification: null,
-          path: result.path,
+          path: result.path ?? value?.path ?? "",
           status: isReplace ? "E" : "C",
         });
       } else {
