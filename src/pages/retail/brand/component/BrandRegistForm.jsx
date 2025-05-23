@@ -78,8 +78,8 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           mime: file.type || "image/png",
           classification: file.classification ?? "brand",
           path: file.path,
-          // status: file.status ?? "R",
-          status: null,
+          status: file.status ?? "R",
+          // status: null,
         };
           
       };
@@ -229,6 +229,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           name="mainImage"
           label="썸네일 이미지"
           required
+          classification="brand"
           preview
           readOnly={readOnly}
         />
@@ -262,12 +263,14 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           name="pcImage"
           label="PC 본문 이미지"
           required
+          classification="brand"
           readOnly={readOnly}
         />
         <Upload
           name="moImage"
           label="MO 본문 이미지"
           required
+          classification="brand"
           readOnly={readOnly}
         />
 
@@ -294,30 +297,35 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           name="contentImage1"
           label="본문 이미지 1"
           required
+          classification="brand"
           readOnly={readOnly}
         />
         <Upload
           name="contentImage2"
           label="본문 이미지 2"
           required
+          classification="brand"
           readOnly={readOnly}
         />
         <Upload
           name="contentImage3"
           label="본문 이미지 3"
           required
+          classification="brand"
           readOnly={readOnly}
         />
         <Upload
           name="contentImage4"
           label="본문 이미지 4"
           required
+          classification="brand"
           readOnly={readOnly}
         />
         <Upload
           name="contentImage5"
           label="본문 이미지 5"
           required
+          classification="brand"
           readOnly={readOnly}
         />
 
