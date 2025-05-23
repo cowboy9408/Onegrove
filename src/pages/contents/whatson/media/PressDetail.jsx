@@ -200,27 +200,27 @@ export default function PressDetail() {
 
       if (currentLang === 0) {
         const koValues = await koFormRef.current?.submit?.();
-        console.log("KO 폼 데이터:", koValues);
         if (!koValues) return;
+
         await saveOne(
           {
             ...koValues,
             id: koData?.id ?? null,
-            pressId: enData?.pressId ?? null, // 영문 데이터가 이미 있으면 거기서 pressId 추출
+            pressId: koData?.pressId ?? enData?.pressId ?? null,
             lang: "ko",
           },
           koData || {}
         );
       } else {
         const enValues = await enFormRef.current?.submit?.();
-        console.log("EN 폼 데이터:", enValues);
         if (!enValues) return;
+
         await saveOne(
           {
             ...enValues,
-            id: enData?.id ?? null, // 기존 ID가 없으면 null
-            pressId: koData?.pressId ?? null, // 국문이 있다면 그 pressId 사용
-            lang: "en", // 영문임을 명시
+            id: enData?.id ?? null,
+            pressId: koData?.pressId ?? null,
+            lang: "en",
           },
           enData || {}
         );
@@ -228,6 +228,7 @@ export default function PressDetail() {
 
       alert("저장 완료");
       setIsReadOnly(true);
+      navigate("/contents/whatson/media?refresh=" + Date.now()); // ✅ 리스트 갱신도 함께
     } catch (err) {
       console.error("저장 실패:", err);
       alert("저장 실패. 다시 시도해주세요.");

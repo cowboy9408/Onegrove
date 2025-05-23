@@ -14,6 +14,9 @@ export default function Header() {
 
   const handleLogout = () => {
     removeAccessToken();
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("auth-storage");
+    localStorage.removeItem("refreshToken");
     navigate("/login");
   };
 

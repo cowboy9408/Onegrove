@@ -67,15 +67,15 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
         }
 
         return {
+          id: null,
           originalName: file.originalName || file.name,
           name: file.name,
           size: file.size,
           extension: "." + (file.originalName || file.name).split(".").pop(),
           mime: file.type || "image/png",
-          classification: file.classification ?? "press-media",
+          classification: "press-media",
           path: file.path,
-          status: file.status ?? "R",
-          // status: null,
+          status: null,
         };
       };
       console.log("submit() values.imgPc:", values.imgPc);
@@ -135,7 +135,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
           name="imgPc"
           label="PC 썸네일 이미지"
           required
-          classification="press-media"
+          classification="press&media"
           readOnly={readOnly}
         />
 
@@ -143,7 +143,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
           name="imgMo"
           label="모바일 썸네일 이미지"
           required
-          classification="press-media"
+          classification="press&media"
           readOnly={readOnly}
         />
 
