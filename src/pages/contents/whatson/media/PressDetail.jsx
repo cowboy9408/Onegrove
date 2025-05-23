@@ -149,14 +149,13 @@ export default function PressDetail() {
     console.log(" EN 데이터:", enData);
   }, [koData, enData]);
 
-  const toImageMeta = (file) => {
-    if (!file || !file.name || !file.path) {
-      console.warn("이미지 path 누락:", file);
-      return null;
+  const toImageMeta = (file, original) => {
+    if (!file || !file.name) {
+      return original || null;
     }
 
     return {
-      id: file.id ?? null,
+      id: file.id || null,
       originalName: file.originalName || file.name,
       name: file.name,
       size: file.size,
@@ -175,13 +174,13 @@ export default function PressDetail() {
 
   const handleSave = async () => {
     try {
-      const saveOne = async (data) => {
+      const saveOne = async (data, original) => {
         const payload = {
           id: data.id,
           category: data.category,
           title: data.title,
-          thumbImgPc: toImageMeta(data.thumbImgPc),
-          thumbImgMo: toImageMeta(data.thumbImgMo),
+          thumbImgPc: toImageMeta(data.thumbImgPc, original.thumbImgPc),
+          thumbImgMo: toImageMeta(data.thumbImgMo, original.thumbImgMo),
           showYn: data.showYn,
           content: data.content,
           publishDate: data.publishDate,
@@ -199,12 +198,12 @@ export default function PressDetail() {
         const koValues = await koFormRef.current?.submit?.();
         console.log("KO 폼 데이터:", koValues);
         if (!koValues) return;
-        await saveOne(koValues, "ko");
+        await saveOne(koValues, koData);
       } else {
         const enValues = await enFormRef.current?.submit?.();
         console.log("EN 폼 데이터:", enValues);
         if (!enValues) return;
-        await saveOne(enValues, "en");
+        await saveOne(enValues, enData);
       }
 
       alert("저장 완료");
