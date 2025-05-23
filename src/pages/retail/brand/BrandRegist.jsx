@@ -38,8 +38,8 @@ export default function BrandRegist() {
       const payload = {
         lang: currentLang === 0 ? "KO" : "EN",
         name: form.brandName,
-        title: form.title,
-        subTitle: form.subTitle,
+        // title: form.title,
+        // subTitle: form.subTitle,
         thumbText: form.thumbText,
         content: form.description,
 
