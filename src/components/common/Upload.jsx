@@ -105,13 +105,13 @@ export default function Upload({
       });
 
       const result = res.data;
-      console.log("업로드 응답 result:", result);
+      console.log("Upload 응답 result:", result);
 
       const isReplace = !!value; // 기존에 파일이 있었는지 확인
 
       if (result.name && result.path) {
         onChange({
-          id: null,
+          id: result.id,
           originalName: selectedFile.name,
           name: result.name,
           size: result.size,
