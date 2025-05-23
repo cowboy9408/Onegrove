@@ -129,10 +129,8 @@ export default function PressDetail() {
         formRef.setValue("publishDate", data.publishDate || "");
         formRef.setValue("imgPc", patchImageMeta(data.thumbImgPc));
         formRef.setValue("imgMo", patchImageMeta(data.thumbImgMo));
-        formRef.setValue("content", data.content || "");
+        formRef.setValue("content1", data.content || "");
       };
-
-      console.log(koFormRef.current, koData);
 
       patchForm(koFormRef.current, koData);
       patchForm(enFormRef.current, enData);
@@ -155,7 +153,6 @@ export default function PressDetail() {
     const base = file || original;
     if (!base) return null;
 
-    console.log("file check : ", base, file?.status);
     const originalName = base.originalName || base.name || "";
     const extension = base.extension || "." + originalName.split(".").pop();
 
@@ -168,7 +165,12 @@ export default function PressDetail() {
       mime: base.mime || "image/jpeg",
       classification: base.classification || "press-media",
       path: base.path || null,
-      status: base?.status ? "E" : "R", // 수정 안 하면 R
+      status:
+        base.status !== undefined && base.status !== null
+          ? base.status
+          : file?.changed
+            ? "E"
+            : "R", // 수정 안 하면 R
     };
   };
 
