@@ -136,6 +136,29 @@ export default function BrandDetail() {
     }
   }, [currentLang, koData, enData]);
 
+  const toImageMeta = (file, original) => {
+    if (!file || !file.name) {
+      return original || null;
+    }
+
+    return {
+      id: file.id || null,
+      originalName: file.originalName || file.name,
+      name: file.name,
+      size: file.size,
+      extension: "." + (file.originalName || file.name).split(".").pop(),
+      mime: file.type || "image/png",
+      classification: file.classification ?? "press-media",
+      path: file.path,
+      status:
+        file.status !== undefined && file.status !== null
+          ? file.status
+          : file.changed
+            ? "E"
+            : "R",
+    };
+  };
+
   const handleSave = async () => {
     try {
       const koValues = await koFormRef.current?.submit?.();
@@ -147,32 +170,31 @@ export default function BrandDetail() {
 
       if (!koValues && !enValues) return;
 
-      const saveOne = async (data, lang) => {
+      const saveOne = async (data, lang, original) => {
         const payload = {
           ...data,
-          lang,
+          lang : lang,
           id: masterId,
           name: data.brandName,
           category: data.office,
-          contentId: masterId,
           content: data.description,
           title: data.title,
           subTitle: data.subTitle,
           thumbText: data.thumbTxt || data.thumbText || "",
-          thumbImg: data.mainImage,
-          mainPcImg: data.pcImage,
-          mainMoImg: data.moImage,
-          contentImg1: data.contentImage1,
-          contentImg2: data.contentImage2,
-          contentImg3: data.contentImage3,
-          contentImg4: data.contentImage4,
-          contentImg5: data.contentImage5,
-          pcBodyImage: data.pcBodyImage,
-          moBodyImage: data.moBodyImage,
+          thumbImg: toImageMeta(data.mainImage, original.mainImage),
+          mainPcImg: toImageMeta(data.pcImage, original.pcImage),
+          mainMoImg: toImageMeta(data.moImage, original.moImage),
+          contentImg1: toImageMeta(data.contentImage1, original.contentImage1),
+          contentImg2: toImageMeta(data.contentImage2, original.contentImage2),
+          contentImg3: toImageMeta(data.contentImage3, original.contentImage3),
+          contentImg4: toImageMeta(data.contentImage4, original.contentImage4),
+          contentImg5: toImageMeta(data.contentImage5, original.contentImage5),
+          pcBodyImage: toImageMeta(data.pcBodyImage, original.pcBodyImage),
+          moBodyImage: toImageMeta(data.moBodyImage, original.moBodyImage),
           brandTel: data.storePhone,
           brandLocation: data.storeLocation,
           homeUrl: data.homepageUrl || "",
-          mainImg: data.mainImage,
+          mainImg: toImageMeta(data.mainImage, original.mainImage),
           useYn: data.useStatus === "active" ? "Y" : "N",
           homeUrlNew: data.homepageNewTab ? "Y" : "N",
           instagramNew: data.sns?.instagram?.newWindow ? "Y" : "N",
@@ -205,6 +227,12 @@ export default function BrandDetail() {
             delYn: "N",
           })),
         };
+
+        // bcId가 있는 경우에만 contentId 추가
+        if (data.bcId !== undefined && data.bcId !== null) {
+          payload.contentId = data.bcId;
+        }
+
         console.log(`[${lang}] 서버에 보낼 데이터:`, payload);
 
         const res = await api.post("/api/v1/brand/update", payload);
@@ -215,12 +243,12 @@ export default function BrandDetail() {
         const koValues = await koFormRef.current?.submit?.();
         if (!koValues) return;
         console.log("KO 폼 데이터:", koValues);
-        await saveOne(koValues, "KO");
+        await saveOne(koValues, "KO", koData.data);
       } else {
         const enValues = await enFormRef.current?.submit?.();
         if (!enValues) return;
-        console.log("EN 폼 데이터:", enValues);
-        await saveOne(enValues, "EN");
+        console.log("EN 폼 데이터:", enValues, "EN", enData.data);
+        await saveOne(enValues, "EN", enData.data);
       }
 
       alert("브랜드 정보가 수정되었습니다.");
