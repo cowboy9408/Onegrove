@@ -87,7 +87,9 @@ export default function PressListPage() {
             return titleMatch && categoryMatch && visibilityMatch && dateMatch;
           });
 
-          const sorted = filtered.sort((a, b) => a.occupancy - b.occupancy);
+          const sorted = filtered.sort(
+            (a, b) => new Date(b.created_at) - new Date(a.created_at)
+          );
 
           const start = (page - 1) * size;
           const end = start + size;
