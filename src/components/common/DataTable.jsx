@@ -32,11 +32,11 @@ export default function DataTable({
             )}
             {columns.map((col) => (
               <th
-              key={col.key}
-              className="px-4 py-3 border-r border-gray-200 dark:border-gray-700 last:border-r-0"
-            >
-              {col.label}
-            </th>
+                key={col.key}
+                className="border-r border-gray-200 px-4 py-3 last:border-r-0 dark:border-gray-700"
+              >
+                {col.label}
+              </th>
             ))}
           </tr>
         </thead>
@@ -55,19 +55,19 @@ export default function DataTable({
               const isChecked = checkedIds.includes(row._id);
               return (
                 <tr
-  key={idx}
-  className={`${(checkable || link.base) && "cursor-pointer"} hover:bg-gray-50 dark:hover:bg-gray-900`}
-  onClick={(e) => {
-    if (e.target.tagName === "INPUT") return;
-    if (!checkable && link) {
-      navigate(`${link.base}/${row[link.path]}`);
-    } else if (checkable) {
-      onCheck(row._id, !isChecked);
-    }
-  }}
->
+                  key={idx}
+                  className={`${(checkable || link.base) && "cursor-pointer"} hover:bg-gray-50 dark:hover:bg-gray-900`}
+                  onClick={(e) => {
+                    if (e.target.tagName === "INPUT") return;
+                    if (!checkable && link) {
+                      navigate(`${link.base}/${row[link.path]}`);
+                    } else if (checkable) {
+                      onCheck(row._id, !isChecked);
+                    }
+                  }}
+                >
                   {checkable && (
-                    <td className="px-4 py-3 border-r border-gray-200 dark:border-gray-700">
+                    <td className="border-r border-gray-200 px-4 py-3 dark:border-gray-700">
                       <input
                         type="checkbox"
                         checked={isChecked}
@@ -77,13 +77,13 @@ export default function DataTable({
                     </td>
                   )}
                   {columns.map((col) => (
-  <td
-  key={col.key}
-  className="px-4 py-3 whitespace-nowrap border-r border-gray-100 dark:border-gray-800 last:border-r-0"
->
-  {col.render ? col.render(row) : row[col.key]}
-</td>
-))}
+                    <td
+                      key={col.key}
+                      className="border-r border-gray-100 px-4 py-2 whitespace-nowrap last:border-r-0 dark:border-gray-800"
+                    >
+                      {col.render ? col.render(row) : row[col.key]}
+                    </td>
+                  ))}
                 </tr>
               );
             })

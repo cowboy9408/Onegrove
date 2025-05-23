@@ -129,8 +129,10 @@ export default function PressDetail() {
         formRef.setValue("publishDate", data.publishDate || "");
         formRef.setValue("imgPc", patchImageMeta(data.thumbImgPc));
         formRef.setValue("imgMo", patchImageMeta(data.thumbImgMo));
-        formRef.setValue("content1", data.content || "");
+        formRef.setValue("content", data.content || "");
       };
+
+      console.log(koFormRef.current, koData);
 
       patchForm(koFormRef.current, koData);
       patchForm(enFormRef.current, enData);
@@ -149,39 +151,36 @@ export default function PressDetail() {
     console.log(" EN 데이터:", enData);
   }, [koData, enData]);
 
-  const toImageMeta = (file) => {
-    if (!file || !file.name || !file.path) {
-      console.warn("이미지 path 누락:", file);
-      return null;
-    }
+  const toImageMeta = (file, original) => {
+    const base = file || original;
+    if (!base) return null;
+
+    console.log("file check : ", base, file?.status);
+    const originalName = base.originalName || base.name || "";
+    const extension = base.extension || "." + originalName.split(".").pop();
 
     return {
-      id: file.id ?? null,
-      originalName: file.originalName || file.name,
-      name: file.name,
-      size: file.size,
-      extension: "." + (file.originalName || file.name).split(".").pop(),
-      mime: file.type || "image/png",
-      classification: file.classification ?? "press-media",
-      path: file.path,
-      status:
-        file.status !== undefined && file.status !== null
-          ? file.status
-          : file.changed
-            ? "E"
-            : "R",
+      id: base.id ?? null,
+      originalName: originalName,
+      name: base.name ?? originalName,
+      size: base.size ?? 0,
+      extension: extension,
+      mime: base.mime || "image/jpeg",
+      classification: base.classification || "press-media",
+      path: base.path || null,
+      status: base?.status ? "E" : "R", // 수정 안 하면 R
     };
   };
 
   const handleSave = async () => {
     try {
-      const saveOne = async (data) => {
+      const saveOne = async (data, original) => {
         const payload = {
           id: data.id,
           category: data.category,
           title: data.title,
-          thumbImgPc: toImageMeta(data.thumbImgPc),
-          thumbImgMo: toImageMeta(data.thumbImgMo),
+          thumbImgPc: toImageMeta(data.thumbImgPc, original.thumbImgPc),
+          thumbImgMo: toImageMeta(data.thumbImgMo, original.thumbImgMo),
           showYn: data.showYn,
           content: data.content,
           publishDate: data.publishDate,
@@ -199,12 +198,12 @@ export default function PressDetail() {
         const koValues = await koFormRef.current?.submit?.();
         console.log("KO 폼 데이터:", koValues);
         if (!koValues) return;
-        await saveOne(koValues, "ko");
+        await saveOne({ ...koValues, id: koData?.id }, koData);
       } else {
         const enValues = await enFormRef.current?.submit?.();
         console.log("EN 폼 데이터:", enValues);
         if (!enValues) return;
-        await saveOne(enValues, "en");
+        await saveOne({ ...enValues, id: enData?.id }, enData);
       }
 
       alert("저장 완료");
@@ -265,7 +264,11 @@ export default function PressDetail() {
             저장
           </Button>
         )}
-        <Button onClick={() => navigate("/contents/whatson/media")}>
+        <Button
+          onClick={() =>
+            navigate("/contents/whatson/media?refresh=" + Date.now())
+          }
+        >
           목록
         </Button>
       </div>

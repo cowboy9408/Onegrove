@@ -5,7 +5,7 @@ import {
   forwardRef,
   useRef,
 } from "react";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, Controller } from "react-hook-form";
 import Select from "@/components/common/Select";
 import Input from "@/components/common/Input";
 import Upload from "@/components/common/Upload";
@@ -16,7 +16,7 @@ import api from "@/lib/apiClient";
 
 const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
   const methods = useForm({ mode: "onChange" });
-  const { register, setValue, getValues, watch } = methods;
+  const { register, setValue, getValues, watch, control } = methods;
   const [singleDate, setSingleDate] = useState(null);
   const [categoryList, setCategoryList] = useState([]);
   const editorRef = useRef();
@@ -86,6 +86,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
       }
 
       return {
+        id: data?.id,
         lang,
         category: values.category || "",
         title: values.title || "",
@@ -98,7 +99,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
     },
     setValue: (key, value) => {
       setValue(key, value);
-      if (key === "content1" && editorRef.current) {
+      if (key === "content" && editorRef.current) {
         editorRef.current.setContent?.(value);
       }
     },
@@ -170,7 +171,19 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
 
         <div>
           <p className="mb-2 text-sm font-medium text-gray-800">내용</p>
-          <Editor ref={editorRef} readOnly={readOnly} />
+          {/* <Editor ref={editorRef} readOnly={readOnly} /> */}
+          <Controller
+            name="content"
+            control={control}
+            render={({ field }) => (
+              <Editor
+                ref={editorRef}
+                readOnly={readOnly}
+                initialContent={field.value}
+                // initialContent={existingBrandData?.description} // HTML 형태의 string
+              />
+            )}
+          />
         </div>
 
         <div>

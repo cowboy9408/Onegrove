@@ -108,6 +108,13 @@ export default function PressListPage() {
     fetchData();
   }, [page, name, category, visibility, dateRange, refreshKey]);
 
+  useEffect(() => {
+    const refreshParam = searchParams.get("refresh");
+    if (refreshParam) {
+      setRefreshKey((prev) => prev + 1); // 강제 새로고침 트리거
+    }
+  }, [searchParams]);
+
   // useEffect(() => {
   //   const fetchData = async () => {
   //     try {
