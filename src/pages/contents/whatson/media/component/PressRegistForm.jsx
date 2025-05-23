@@ -99,7 +99,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
     },
     setValue: (key, value) => {
       setValue(key, value);
-      if (key === "content1" && editorRef.current) {
+      if (key === "content" && editorRef.current) {
         editorRef.current.setContent?.(value);
       }
     },
