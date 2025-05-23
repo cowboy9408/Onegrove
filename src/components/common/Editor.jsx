@@ -56,8 +56,14 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
   // ✅ 초기 HTML을 BlockNote 문서로 변환하여 세팅
   useEffect(() => {
     async function loadInitialHTML() {
-      const blocks = await editor.tryParseHTMLToBlocks(initialContent);
-      editor.replaceBlocks(editor.document, blocks);
+      if (typeof initialContent === "string" && initialContent.trim()) {
+        try {
+          const blocks = await editor.tryParseHTMLToBlocks(initialContent);
+          editor.replaceBlocks(editor.document, blocks);
+        } catch (err) {
+          console.error("HTML to blocks 변환 실패:", err);
+        }
+      }
     }
     loadInitialHTML();
   }, [initialContent, editor]);

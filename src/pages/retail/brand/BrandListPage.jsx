@@ -79,7 +79,8 @@ export default function BrandListPage() {
             category: brand.category || "-",
             ko_title: ko?.name || "-",
             en_title: en?.name || "-",
-            status: ko?.useYn || "-",
+            ko_status: ko?.useYn || "-",
+            en_status: en?.useYn || "-",
             created_at: ko?.createDt?.split(" ")[0] || "-",
             created_user: ko?.createUser || "-",
             updated_at: ko?.updateDt?.split(" ")[0] || "-",
@@ -107,17 +108,21 @@ export default function BrandListPage() {
     const confirm = window.confirm("선택한 브랜드를 삭제하시겠습니까?");
     if (!confirm) return;
 
-    try {
-      await Promise.all(
-        checkedIds.map((id) => api.delete(`/brands/${id}`)) // 삭제 관련 api 확인 필요
-      );
+    const idsToDelete = checkedIds.map((id) => Number(id));
+    console.log("삭제할 pmId 목록:", idsToDelete);
 
-      setCheckedIds([]);
-      setPage(1);
-      setName("");
-      setCategory("");
-      setStatus("");
-      setRefreshKey((prev) => prev + 1);
+    try {
+      const res = await api.post("/api/v1/brand/delete", checkedIds.map((id) => Number(id))
+    );
+
+      if (res.status === 200) {
+        alert("삭제가 완료되었습니다.");
+        setCheckedIds([]);
+        setPage(1);
+        setRefreshKey((prev) => prev + 1); // 목록 새로고침
+      } else {
+        alert("삭제 실패: 서버 오류");
+      }
     } catch (err) {
       console.error("삭제 실패:", err);
     }
@@ -225,26 +230,50 @@ export default function BrandListPage() {
               label: "브랜드명",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <button
-                    className="text-black-600 underline"
-                    onClick={() =>
-                      navigate(`/retail/brand/detail/${row.masterId}?lang=ko`)
-                    }
-                  >
-                    {row.ko_title}
-                  </button>
-                  <button
-                    className="text-black-600 underline"
-                    onClick={() =>
-                      navigate(`/retail/brand/detail/${row.masterId}?lang=en`)
-                    }
-                  >
-                    {row.en_title}
-                  </button>
+                  {row.ko_title === "-" ? (
+                    <p className="text-black-600 p-2 text-left">-</p>
+                  ) : (
+                    <button
+                      className="text-black-600 underline p-2 text-left"
+                      onClick={() =>
+                        navigate(`/retail/brand/detail/${row.masterId}?lang=ko`)
+                      }
+                    >
+                      {row.ko_title}
+                    </button>
+                  )}
+                  {row.en_title === "-" ? (
+                    <p className="text-black-600 p-2 text-left">-</p>
+                  ) : (
+                    <button
+                      className="text-black-600 underline p-2  text-left"
+                      onClick={() =>
+                        navigate(`/retail/brand/detail/${row.masterId}?lang=en`)
+                      }
+                    >
+                      {row.en_title}
+                    </button>
+                  )}
+                  {row.ko_title === "-" && row.en_title === "-" ? (
+                    <p className="text-black-600 p-2 text-left">-</p>
+                  ) : null}
                 </div>
               ),
             },
-            { key: "status", label: "사용여부" },
+            {
+              key: "status",
+              label: "사용여부",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <p className="text-black-600 p-2 text-center">
+                    {row.ko_status}
+                  </p>
+                  <p className="text-black-600 p-2 text-center">
+                    {row.en_status}
+                  </p>
+                </div>
+              ),
+            },
             { key: "created_at", label: "등록일시" },
             { key: "created_user", label: "등록자" },
             { key: "updated_at", label: "수정일시" },

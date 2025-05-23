@@ -53,6 +53,9 @@ export default function AuthLayout() {
 
       if (!token) {
         removeAccessToken();
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("auth-storage");
+        localStorage.removeItem("refreshToken");
         navigate("/login");
         return;
       }
@@ -62,7 +65,12 @@ export default function AuthLayout() {
       }
 
       if (route?.permissions && !route.permissions.includes(permission)) {
-        navigate("/403");
+        removeAccessToken();
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("auth-storage");
+        localStorage.removeItem("refreshToken");
+        navigate("/login");
+        // navigate("/403");
         return;
       }
 
