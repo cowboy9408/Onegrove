@@ -18,7 +18,7 @@ export default function Upload({
   error,
   required = false,
   defaultValue = null, // { name, size, url }
-  classification = null,
+  classification = "default",
 }) {
   const inputRef = useRef(null);
   const wrapperRef = useRef(null);
@@ -55,20 +55,17 @@ export default function Upload({
   useEffect(() => {
     if (!value) return;
 
-    // 1. preview URL 설정 (CDN 경로 or local blob)
-    if (value.url) {
-      setPreviewUrl(value.url); // 로컬 업로드 된 이미지 (blob)
-    } else if (value.path) {
-      setPreviewUrl(value.path); // CDN 경로 (상세 조회 시)
+    if (value.path) {
+      setPreviewUrl(value.path);
+    } else if (value.url) {
+      setPreviewUrl(value.url);
     }
 
-    // 2. 로컬 파일 정보 저장
     if (value.name && value.size) {
       setLocalFile({ name: value.name, size: value.size });
     }
 
-    // 3. status 기본값 처리 (null일 경우만 R로)
-    if (value.status == null && value.path) {
+    if (!value.status && (value.path || value.url)) {
       onChange({
         ...value,
         status: "R",
@@ -91,6 +88,9 @@ export default function Upload({
     formData.append("file", selectedFile);
     formData.append("classification", classification);
 
+
+    console.log("업로드할 파일:", selectedFile);
+
     //  1. preview URL 생성
     const blobUrl = URL.createObjectURL(selectedFile);
     setPreviewUrl(blobUrl);
@@ -106,6 +106,8 @@ export default function Upload({
     });
 
     try {
+
+      console.log("업로드할 form:", formData); 
       const res = await api.post("/api/v1/file/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -116,26 +118,7 @@ export default function Upload({
       const result = res.data;
       console.log("업로드 응답 result:", result);
 
-      const isReplace =
-        !!value &&
-        (selectedFile.name !== value.originalName ||
-          selectedFile.size !== value.size);
-
-      console.log("기존 value.originalName:", value?.originalName);
-      console.log("새 selectedFile.name:", selectedFile.name);
-      console.log("isReplace 여부:", isReplace);
-
-      console.log("최종 전송할 파일 객체:", {
-        id: null,
-        originalName: selectedFile.name,
-        name: result.name,
-        size: result.size,
-        extension: "." + selectedFile.name.split(".").pop(),
-        mime: result.mime || selectedFile.type,
-        classification,
-        path: result.path,
-        status: isReplace ? "E" : "C",
-      });
+      const isReplace = !!value; // 기존에 파일이 있었는지 확인
 
       if (result.name && result.path) {
         onChange({
@@ -145,7 +128,7 @@ export default function Upload({
           size: result.size,
           extension: "." + selectedFile.name.split(".").pop(),
           mime: result.mime || selectedFile.type,
-          classification,
+          classification: null,
           path: result.path,
           status: isReplace ? "E" : "C",
         });

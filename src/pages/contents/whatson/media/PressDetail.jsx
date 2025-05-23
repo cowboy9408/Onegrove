@@ -150,10 +150,13 @@ export default function PressDetail() {
   }, [koData, enData]);
 
   const toImageMeta = (file) => {
-    if (!file || !file.name) return null;
+    if (!file || !file.name || !file.path) {
+      console.warn("이미지 path 누락:", file);
+      return null;
+    }
 
     return {
-      id: null,
+      id: file.id ?? null,
       originalName: file.originalName || file.name,
       name: file.name,
       size: file.size,
@@ -228,28 +231,6 @@ export default function PressDetail() {
         <TabPanel>
           {!loading && (
             <>
-              {/* 썸네일 이미지 미리보기 */}
-              {koData?.thumbImgPc?.path && (
-                <div className="mb-4">
-                  <p className="text-sm font-medium">PC 썸네일</p>
-                  <img
-                    src={encodeURI(koData.thumbImgPc.path)}
-                    alt="PC 썸네일"
-                    className="h-32 border object-contain"
-                  />
-                </div>
-              )}
-              {koData?.thumbImgMo?.path && (
-                <div className="mb-4">
-                  <p className="text-sm font-medium">모바일 썸네일</p>
-                  <img
-                    src={encodeURI(koData.thumbImgMo.path)}
-                    alt="모바일 썸네일"
-                    className="h-32 border object-contain"
-                  />
-                </div>
-              )}
-
               <PressRegistForm
                 ref={koFormRef}
                 data={koData}
@@ -263,28 +244,6 @@ export default function PressDetail() {
         <TabPanel>
           {!loading && (
             <>
-              {/* 썸네일 이미지 미리보기 */}
-              {enData?.thumbImgPc?.path && (
-                <div className="mb-4">
-                  <p className="text-sm font-medium">PC 썸네일</p>
-                  <img
-                    src={encodeURI(enData.thumbImgPc.path)}
-                    alt="PC 썸네일"
-                    className="h-32 border object-contain"
-                  />
-                </div>
-              )}
-              {enData?.thumbImgMo?.path && (
-                <div className="mb-4">
-                  <p className="text-sm font-medium">모바일 썸네일</p>
-                  <img
-                    src={encodeURI(enData.thumbImgMo.path)}
-                    alt="모바일 썸네일"
-                    className="h-32 border object-contain"
-                  />
-                </div>
-              )}
-
               <PressRegistForm
                 ref={enFormRef}
                 data={enData}
