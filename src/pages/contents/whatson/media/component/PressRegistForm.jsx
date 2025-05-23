@@ -173,7 +173,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
           <p className="mb-2 text-sm font-medium text-gray-800">내용</p>
           {/* <Editor ref={editorRef} readOnly={readOnly} /> */}
           <Controller
-            name="description"
+            name="content"
             control={control}
             render={({ field }) => (
               <Editor
