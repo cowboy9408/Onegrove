@@ -150,25 +150,27 @@ export default function PressDetail() {
   }, [koData, enData]);
 
   const toImageMeta = (file, original) => {
-    if (!file || !file.name) {
-      return original || null;
-    }
+    const base = file || original;
+    if (!base) return null;
+
+    const originalName = base.originalName || base.name || "";
+    const extension = base.extension || "." + originalName.split(".").pop();
 
     return {
-      id: file.id || null,
-      originalName: file.originalName || file.name,
-      name: file.name,
-      size: file.size,
-      extension: "." + (file.originalName || file.name).split(".").pop(),
-      mime: file.type || "image/png",
-      classification: file.classification ?? "press-media",
-      path: file.path,
+      id: base.id ?? null,
+      originalName: originalName,
+      name: base.name ?? originalName,
+      size: base.size ?? 0,
+      extension: extension,
+      mime: base.mime || "image/jpeg",
+      classification: base.classification || "press-media",
+      path: base.path || null,
       status:
-        file.status !== undefined && file.status !== null
-          ? file.status
-          : file.changed
+        base.status !== undefined && base.status !== null
+          ? base.status
+          : file?.changed
             ? "E"
-            : "R",
+            : "R", // 수정 안 하면 R
     };
   };
 
@@ -198,12 +200,12 @@ export default function PressDetail() {
         const koValues = await koFormRef.current?.submit?.();
         console.log("KO 폼 데이터:", koValues);
         if (!koValues) return;
-        await saveOne(koValues, koData);
+        await saveOne({ ...koValues, id: koData?.id }, koData);
       } else {
         const enValues = await enFormRef.current?.submit?.();
         console.log("EN 폼 데이터:", enValues);
         if (!enValues) return;
-        await saveOne(enValues, enData);
+        await saveOne({ ...enValues, id: enData?.id }, enData);
       }
 
       alert("저장 완료");
@@ -264,7 +266,11 @@ export default function PressDetail() {
             저장
           </Button>
         )}
-        <Button onClick={() => navigate("/contents/whatson/media")}>
+        <Button
+          onClick={() =>
+            navigate("/contents/whatson/media?refresh=" + Date.now())
+          }
+        >
           목록
         </Button>
       </div>

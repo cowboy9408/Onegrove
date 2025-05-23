@@ -86,6 +86,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
       }
 
       return {
+        id: data?.id,
         lang,
         category: values.category || "",
         title: values.title || "",
