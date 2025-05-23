@@ -246,7 +246,7 @@ export default function PressDetail() {
         onTabChange={(index) => {
           if (!loading) setCurrentLang(index);
         }}
-        disabled={isReadOnly}
+        // disabled={isReadOnly}
       >
         <TabPanel>
           {!loading && (
@@ -255,7 +255,7 @@ export default function PressDetail() {
                 ref={koFormRef}
                 data={koData}
                 lang="ko"
-                readOnly={isReadOnly}
+                // readOnly={isReadOnly}
               />
             </>
           )}
@@ -268,7 +268,7 @@ export default function PressDetail() {
                 ref={enFormRef}
                 data={enData}
                 lang="en"
-                readOnly={isReadOnly}
+                // readOnly={isReadOnly}
               />
             </>
           )}
@@ -276,15 +276,10 @@ export default function PressDetail() {
       </Tabs>
 
       <div className="flex justify-end gap-4 px-6 pb-6">
-        {isReadOnly ? (
-          <Button onClick={() => setIsReadOnly(false)} theme="primary">
-            수정
-          </Button>
-        ) : (
-          <Button onClick={handleSave} theme="primary">
-            저장
-          </Button>
-        )}
+        <Button onClick={handleSave} theme="primary">
+          저장
+        </Button>
+
         <Button
           onClick={() =>
             navigate("/contents/whatson/media?refresh=" + Date.now())
