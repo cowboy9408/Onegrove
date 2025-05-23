@@ -82,7 +82,7 @@ api.interceptors.response.use(
         const isUnauthorized = refreshError.response?.status === 401;
 
         if (isNetworkError || isUnauthorized) {
-          window.location.href = "/login";
+          // window.location.href = "/login";
           return;
         }
 
