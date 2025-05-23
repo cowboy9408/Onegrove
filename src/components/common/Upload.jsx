@@ -18,7 +18,7 @@ export default function Upload({
   error,
   required = false,
   defaultValue = null, // { name, size, url }
-  classification = "default",
+  classification = null,
 }) {
   const inputRef = useRef(null);
   const wrapperRef = useRef(null);
@@ -53,17 +53,26 @@ export default function Upload({
   const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
-    if (value?.name && value?.size && value?.url) {
-      setLocalFile({ name: value.name, size: value.size });
-      setPreviewUrl(value.url);
+    if (!value) return;
 
-      // status가 없다면 R로 설정 (유지 상태)
-      if (!value.status) {
-        onChange({
-          ...value,
-          status: "R",
-        });
-      }
+    // 1. preview URL 설정 (CDN 경로 or local blob)
+    if (value.url) {
+      setPreviewUrl(value.url); // 로컬 업로드 된 이미지 (blob)
+    } else if (value.path) {
+      setPreviewUrl(value.path); // CDN 경로 (상세 조회 시)
+    }
+
+    // 2. 로컬 파일 정보 저장
+    if (value.name && value.size) {
+      setLocalFile({ name: value.name, size: value.size });
+    }
+
+    // 3. status 기본값 처리 (null일 경우만 R로)
+    if (value.status == null && value.path) {
+      onChange({
+        ...value,
+        status: "R",
+      });
     }
   }, [value]);
 
@@ -107,7 +116,26 @@ export default function Upload({
       const result = res.data;
       console.log("업로드 응답 result:", result);
 
-      const isReplace = !!value; // 기존에 파일이 있었는지 확인
+      const isReplace =
+        !!value &&
+        (selectedFile.name !== value.originalName ||
+          selectedFile.size !== value.size);
+
+      console.log("기존 value.originalName:", value?.originalName);
+      console.log("새 selectedFile.name:", selectedFile.name);
+      console.log("isReplace 여부:", isReplace);
+
+      console.log("최종 전송할 파일 객체:", {
+        id: null,
+        originalName: selectedFile.name,
+        name: result.name,
+        size: result.size,
+        extension: "." + selectedFile.name.split(".").pop(),
+        mime: result.mime || selectedFile.type,
+        classification,
+        path: result.path,
+        status: isReplace ? "E" : "C",
+      });
 
       if (result.name && result.path) {
         onChange({
@@ -117,7 +145,7 @@ export default function Upload({
           size: result.size,
           extension: "." + selectedFile.name.split(".").pop(),
           mime: result.mime || selectedFile.type,
-          classification: null,
+          classification,
           path: result.path,
           status: isReplace ? "E" : "C",
         });
