@@ -58,8 +58,8 @@ export default function BrandDetail() {
         const formValues = {
           brandName: data.name,
           thumbText: data.thumbText,
-          title: data.title,
-          subTitle: data.subTitle,
+          // title: data.title,
+          // subTitle: data.subTitle,
           office: matchedCategory.code || "",
           useStatus: data.useYn === "Y" ? "active" : "inactive",
           description: data.content,
