@@ -53,17 +53,23 @@ export default function Upload({
   const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
-    if (value?.name && value?.size && value?.url) {
-      setLocalFile({ name: value.name, size: value.size });
-      setPreviewUrl(value.url);
+    if (!value) return;
 
-      // status가 없다면 R로 설정 (유지 상태)
-      if (!value.status) {
-        onChange({
-          ...value,
-          status: "R",
-        });
-      }
+    if (value.path) {
+      setPreviewUrl(value.path);
+    } else if (value.url) {
+      setPreviewUrl(value.url);
+    }
+
+    if (value.name && value.size) {
+      setLocalFile({ name: value.name, size: value.size });
+    }
+
+    if (!value.status && (value.path || value.url)) {
+      onChange({
+        ...value,
+        status: "R",
+      });
     }
   }, [value]);
 
@@ -82,6 +88,9 @@ export default function Upload({
     formData.append("file", selectedFile);
     formData.append("classification", classification);
 
+
+    console.log("업로드할 파일:", selectedFile);
+
     //  1. preview URL 생성
     const blobUrl = URL.createObjectURL(selectedFile);
     setPreviewUrl(blobUrl);
@@ -97,6 +106,8 @@ export default function Upload({
     });
 
     try {
+
+      console.log("업로드할 form:", formData); 
       const res = await api.post("/api/v1/file/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
