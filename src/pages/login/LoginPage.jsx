@@ -1,6 +1,6 @@
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
-import { useId, useState } from "react";
+import { useId, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
 import Checkbox from "@/components/common/Checkbox";
@@ -33,6 +33,13 @@ export default function LoginPage() {
 
     navigate("/");
   };
+
+  useEffect(() => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("auth-storage");
+    localStorage.removeItem("refreshToken");
+  }
+  , []);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4 font-sans dark:bg-white">
