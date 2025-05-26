@@ -19,10 +19,14 @@ export default function Datepicker({
         <DatePicker
           selected={selectedDate}
           onChange={onSingleChange}
+          timeFormat="HH:mm"
+          timeIntervals={10} // 10분 간격
+          dateFormat="yyyy-MM-dd HH:mm"
           placeholderText="날짜 선택"
           disabled={disabled}
           className="w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none"
         />
+
         <FaCalendarAlt className="pointer-events-none absolute top-3 right-2 text-gray-400" />
       </div>
     );
@@ -43,6 +47,9 @@ export default function Datepicker({
           selectsStart
           startDate={startDate}
           endDate={endDate}
+          timeFormat="HH:mm"
+          timeIntervals={10}
+          dateFormat="yyyy-MM-dd HH:mm"
           placeholderText="시작일"
           disabled={disabled}
           className="w-32 rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none"
@@ -64,7 +71,10 @@ export default function Datepicker({
           selectsEnd
           startDate={startDate}
           endDate={endDate}
-          minDate={startDate}
+          minDate={startDate} // 종료일은 시작일보다 뒤여야 함
+          timeFormat="HH:mm"
+          timeIntervals={10}
+          dateFormat="yyyy-MM-dd HH:mm"
           placeholderText="종료일"
           disabled={disabled}
           className="w-32 rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none"

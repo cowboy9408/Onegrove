@@ -57,6 +57,18 @@ export default function EventDetail() {
     if (!loading) {
       const patchForm = (formRef, data) => {
         if (!formRef || !data) return;
+
+        const ensurePath = (img) => {
+          if (!img || img.path) return img;
+          if (img.originalName) {
+            return {
+              ...img,
+              path: `https://d2md7choov3drl.cloudfront.net/event-promotion/${img.originalName}`,
+            };
+          }
+          return img;
+        };
+
         const patchImageMeta = (img) =>
           img?.path
             ? {
@@ -65,16 +77,32 @@ export default function EventDetail() {
               }
             : null;
 
-        formRef.setValue("category", data.categoryCode || "");
+        formRef.setValue("category", data.category || data.categoryCode || "");
         formRef.setValue("title", data.title || "");
         formRef.setValue("status", data.showYn === "Y" ? "active" : "inactive");
         formRef.setValue("publishDate", data.publishDate || "");
-        formRef.setValue("thumbImg", patchImageMeta(data.thumbImg));
-        formRef.setValue("imgBodyPc", patchImageMeta(data.imgBodyPc));
-        formRef.setValue("imgBodyMo", patchImageMeta(data.imgBodyMo));
-        formRef.setValue("imgPc", patchImageMeta(data.imgPc));
-        formRef.setValue("imgMo", patchImageMeta(data.imgPc));
+        formRef.setValue("thumbImg", patchImageMeta(ensurePath(data.thumbImg)));
+        formRef.setValue(
+          "imgBodyPc",
+          patchImageMeta(ensurePath(data.imgBodyPc))
+        );
+        formRef.setValue(
+          "imgBodyMo",
+          patchImageMeta(ensurePath(data.imgBodyMo))
+        );
+        formRef.setValue("imgPc", patchImageMeta(ensurePath(data.imgPc)));
+        formRef.setValue("imgMo", patchImageMeta(ensurePath(data.imgMo)));
         formRef.setValue("content", data.content || "");
+        formRef.setValue("description", data.description || "");
+        formRef.setValue(
+          "startDate",
+          data.startDate ? new Date(data.startDate) : null
+        );
+        formRef.setValue(
+          "endDate",
+          data.endDate ? new Date(data.endDate) : null
+        );
+        formRef.setValue("brandId", data.brandId ?? null);
       };
 
       patchForm(koFormRef.current, koData);
@@ -109,7 +137,7 @@ export default function EventDetail() {
       extension: extension,
       mime: base.mime || "image/jpeg",
       classification: base.classification || "event-promotion",
-      path: base.path || null,
+      path: base.path || "",
       status:
         base.status !== undefined && base.status !== null
           ? base.status
@@ -137,8 +165,16 @@ export default function EventDetail() {
           showYn: data.showYn,
           content: data.content,
           description: data.description || "",
-          startDate: data.startDate?.toISOString() || null,
-          endDate: data.endDate?.toISOString() || null,
+          startDate:
+            (typeof data.startDate === "string"
+              ? new Date(data.startDate)
+              : data.startDate
+            )?.toISOString() || null,
+          endDate:
+            (typeof data.endDate === "string"
+              ? new Date(data.endDate)
+              : data.endDate
+            )?.toISOString() || null,
           brandId: data.brandId ?? null,
           delYn: "N",
         };
