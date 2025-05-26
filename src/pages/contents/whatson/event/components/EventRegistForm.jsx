@@ -72,7 +72,7 @@ const EventRegistForm = forwardRef(
 
         // 브랜드 정보도 세팅
         if (data.brandId) {
-          setBrands([{ _id: data.brandId, brand: "선택된 브랜드" }]); // 실제 brand 명칭 불러올 수 있으면 여기에.
+          setBrands([{ _id: data.brandId, brand: "선택된 브랜드" }]);
         }
 
         console.log("값 세팅 완료");
