@@ -290,7 +290,9 @@ export default function EventListPage() {
                   <button
                     className="text-black-600 underline"
                     onClick={() =>
-                      navigate(`/contents/whatson/media/${row.emId}?lang=ko`)
+                      navigate(
+                        `/contents/whatson/event/list/${row.emId}?lang=ko`
+                      )
                     }
                   >
                     {row.ko_title}
@@ -298,7 +300,9 @@ export default function EventListPage() {
                   <button
                     className="text-black-600 underline"
                     onClick={() =>
-                      navigate(`/contents/whatson/media/${row.emId}?lang=en`)
+                      navigate(
+                        `/contents/whatson/event/list/${row.emId}?lang=en`
+                      )
                     }
                   >
                     {row.en_title}

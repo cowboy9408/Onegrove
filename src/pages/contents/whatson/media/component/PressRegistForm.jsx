@@ -131,6 +131,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
           label="제목"
           {...register("title", { required: true })}
           disabled={readOnly}
+          required
         />
 
         <Upload
@@ -174,7 +175,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
             <Radio
               name="status"
               value="inactive"
-              label="비노출"
+              label="미노출"
               checked={watch("status") === "inactive"}
               onChange={() => setValue("status", "inactive")}
               disabled={readOnly}

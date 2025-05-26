@@ -253,7 +253,7 @@ export const routeMeta = [
                     path: "/contents/whatson/event/main",
                     element: <WhatsOnRegist />,
                     title: "Event&Promotion 콘텐츠",
-                    hidden: false,
+                    hidden: true,
                     permissions: ["Admin", "User"],
                   },
 
@@ -261,7 +261,7 @@ export const routeMeta = [
                     uuid: "d37ccd54-b4bb-4980-b259-2905f47dcc3f",
                     path: "/contents/whatson/event/list",
                     element: <EventListPage />,
-                    title: "Event & Promotion 리스트",
+                    title: "Event & Promotion",
                     hidden: false,
                     permissions: ["Admin", "User"],
                   },
@@ -276,8 +276,8 @@ export const routeMeta = [
                   },
                   {
                     uuid: "a3126b50-bd32-4d31-9241-b9a8a5ec6eb8",
-                    path: "/contents/whatson/event/detail/:eventId",
-                    group: "/contents/whatson/event/list/:emId",
+                    path: "/contents/whatson/event/list/:emId",
+                    group: "/contents/whatson/event/list/",
                     element: <EventDetail />,
                     title: "Event & Promotion 상세",
                     hidden: true,

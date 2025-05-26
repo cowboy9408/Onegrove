@@ -18,9 +18,10 @@ import Col from "@/components/layout/Col";
 import BrandList from "@/components/modal/BrandList";
 import useModal from "@/hooks/useModal";
 import api from "@/lib/apiClient";
+import Textarea from "@/components/common/Textarea";
 
 const EventRegistForm = forwardRef(
-  ({ setData, lang, readOnly = false }, ref) => {
+  ({ data, setData, lang, readOnly = false }, ref) => {
     const methods = useForm({ mode: "onChange" });
     const { register, setValue, getValues, watch, control } = methods;
     const editorRef1 = useRef();
@@ -49,6 +50,35 @@ const EventRegistForm = forwardRef(
       fetchCategories();
     }, []);
 
+    useEffect(() => {
+      console.log("받은 data:", data);
+      if (data && Object.keys(data).length > 0) {
+        setValue("category", data.category || "");
+        setValue("title", data.title || "");
+        setValue("status", data.showYn === "Y" ? "active" : "inactive");
+        setValue("order", data.sort || 1);
+        setValue("thumbImg", data.thumbImg || null);
+        setValue("imgBodyPc", data.imgBodyPc || null);
+        setValue("imgBodyMo", data.imgBodyMo || null);
+        setValue("imgPc", data.imgPc || null);
+        setValue("imgMo", data.imgMo || null);
+        editorRef1.current?.setContent?.(data.content || "");
+        editorRef2.current?.setContent?.(data.description || "");
+
+        setDateRange({
+          startDate: data.startDate ? new Date(data.startDate) : null,
+          endDate: data.endDate ? new Date(data.endDate) : null,
+        });
+
+        // 브랜드 정보도 세팅
+        if (data.brandId) {
+          setBrands([{ _id: data.brandId, brand: "선택된 브랜드" }]); // 실제 brand 명칭 불러올 수 있으면 여기에.
+        }
+
+        console.log("값 세팅 완료");
+      }
+    }, [data]);
+
     useImperativeHandle(ref, () => ({
       submit: async () => {
         const values = {
@@ -58,9 +88,10 @@ const EventRegistForm = forwardRef(
           imgBodyMo: watch("imgBodyMo"),
           imgPc: watch("imgPc"),
           imgMo: watch("imgMo"),
+          description: watch("description"),
         };
         const content = await editorRef1.current?.getContent?.();
-        const description = await editorRef2.current?.getContent?.();
+        const description = watch("description");
 
         console.log("검사 대상 값들:", {
           title: values.title,
@@ -88,7 +119,7 @@ const EventRegistForm = forwardRef(
           !values.imgPc ||
           !values.imgMo ||
           !content?.trim() ||
-          !description?.trim() ||
+          //        // !description?.trim() ||
           brands.length === 0
         ) {
           alert("모든 필수 항목을 입력해주세요.");
@@ -134,7 +165,7 @@ const EventRegistForm = forwardRef(
         }
 
         return {
-          eventId: null,
+          eventId: data?.id,
           lang,
           showYn: values.status === "active" ? "Y" : "N",
           sort: Number(values.order) || 1,
@@ -147,14 +178,15 @@ const EventRegistForm = forwardRef(
           imgMo: toImageMeta(values.imgMo),
           content: content || "",
           description: description || "",
-          startDate: dateRange.startDate,
-          endDate: dateRange.endDate,
+          startDate: dateRange.startDate?.toISOString() || null,
+          endDate: dateRange.endDate?.toISOString() || null,
           brandId: brands[0]?._id,
           delYn: "N",
         };
       },
+      setValue,
     }));
-
+    console.log("brands", brands);
     return (
       <FormProvider {...methods}>
         <form className="space-y-6 p-6">
@@ -339,7 +371,7 @@ const EventRegistForm = forwardRef(
             name="imgPc"
             label="PC 이미지"
             required
-            classification="press&media"
+            classification="event-promotion"
             readOnly={readOnly}
             value={watch("imgPc")}
             onChange={(file) => {
@@ -350,7 +382,7 @@ const EventRegistForm = forwardRef(
           <Upload
             name="imgMo"
             label="모바일 이미지"
-            classification="press&media"
+            classification="event-promotion"
             required
             readOnly={readOnly}
             value={watch("imgMo")}
@@ -361,10 +393,15 @@ const EventRegistForm = forwardRef(
           />
 
           {/* 내용 에디터 2 */}
-          <p className="text-sm font-medium">
-            디스크립션<span className="text-red-500">*</span>
-          </p>
-          <Editor ref={editorRef2} readOnly={readOnly} />
+          <Textarea
+            id="description"
+            name="description"
+            label="디스크립션"
+            value={watch("description")}
+            onChange={(e) => setValue("description", e.target.value)}
+            required
+            maxLength={130}
+          />
         </form>
       </FormProvider>
     );
