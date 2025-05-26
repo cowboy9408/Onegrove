@@ -254,7 +254,7 @@ export default function BrandDetail() {
 
         console.log(`[${lang}] 서버에 보낼 데이터:`, payload);
 
-        const apiUrl = data.bmId
+        const apiUrl = (data.bcId !== undefined && data.bcId !== null)
           ? "/api/v1/brand/update"
           : "/api/v1/brand/insert";
         const res = await api.post(apiUrl, payload);
