@@ -53,16 +53,19 @@ export default function Upload({
   const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
-    if (!value) return;
-
-    if (value.path) {
-      setPreviewUrl(value.path);
-      setLocalFile({
-        name: value.name,
-        size: value.size,
-      });
+    if (!value || !value.path || value.url === null) {
+      setPreviewUrl(null);
+      setLocalFile(null);
+      return;
     }
-  }, [value]);
+
+    // 각 필드별로 분리
+    setPreviewUrl(value.path);
+    setLocalFile({
+      name: value.name,
+      size: value.size,
+    });
+  }, [value?.path, value?.name, name]);
 
   useEffect(() => {
     if (error && wrapperRef.current) {
@@ -71,9 +74,15 @@ export default function Upload({
   }, [error]);
 
   const handleFileChange = async (e) => {
-    console.log("파일 선택됨:", e.target.files[0]);
     const selectedFile = e.target.files[0];
-    if (!selectedFile) return;
+    console.log("[Upload] 업로드 필드:", name);
+
+    e.target.value = null;
+
+    if (!selectedFile) {
+      console.warn("파일이 선택되지 않았습니다.");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("file", selectedFile);
@@ -116,17 +125,20 @@ export default function Upload({
       const isNew = !isReplace;
 
       if (result.name && result.path) {
-        onChange({
+        const uploadedFile = {
           id: result.id ?? null,
           originalName: selectedFile.name,
           name: result.name,
           size: result.size,
           extension: "." + selectedFile.name.split(".").pop(),
           mime: result.mime || selectedFile.type,
-          classification: null,
-          path: result.path ?? value?.path ?? "",
+          classification: classification,
+          path: result.path,
           status: isNew ? "C" : "E", //신규 등록이면 반드시 C
-        });
+          field: name,
+        };
+        console.log("서버 업로드 완료:", name, uploadedFile);
+        onChange(uploadedFile);
       } else {
         console.error("파일 업로드 실패", result);
       }
@@ -220,6 +232,7 @@ export default function Upload({
       </div>
 
       <input
+        key={name}
         ref={inputRef}
         type="file"
         accept={accepted}

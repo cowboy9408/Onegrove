@@ -189,7 +189,16 @@ export default function PressDetail() {
           content: data.content,
           publishDate: data.publishDate,
         };
-
+        console.log("저장 요청 - PC:", data.thumbImgPc);
+        console.log("저장 요청 - MO:", data.thumbImgMo);
+        console.log(
+          "변환된 PC:",
+          toImageMeta(data.thumbImgPc, original.thumbImgPc)
+        );
+        console.log(
+          "변환된 MO:",
+          toImageMeta(data.thumbImgMo, original.thumbImgMo)
+        );
         console.log("저장 payload:", payload);
         console.log("payload.thumbImgPc:", payload.thumbImgPc);
 

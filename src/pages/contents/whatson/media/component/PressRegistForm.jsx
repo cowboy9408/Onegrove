@@ -57,8 +57,8 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
         imgPc: watch("imgPc"),
         imgMo: watch("imgMo"),
       };
-      console.log("📦 submit() values.imgPc:", values.imgPc);
-      console.log("📦 submit() values.imgMo:", values.imgMo);
+      console.log("최종 imgPc:", values.imgPc);
+      console.log("최종 imgMo:", values.imgMo);
       const content = await editorRef.current?.getContent?.();
 
       const toImageMeta = (file) => {
@@ -133,23 +133,30 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
         />
 
         <Upload
+          key={`imgPc-upload`}
           name="imgPc"
           label="PC 썸네일 이미지"
           required
           classification="press&media"
           readOnly={readOnly}
           value={watch("imgPc")}
-          onChange={(file) => setValue("imgPc", file)}
+          onChange={(file) => {
+            console.log("PC 이미지 등록됨:", file);
+            setValue("imgPc", file);
+          }}
         />
 
         <Upload
           name="imgMo"
           label="모바일 썸네일 이미지"
-          required
           classification="press&media"
+          required
           readOnly={readOnly}
           value={watch("imgMo")}
-          onChange={(file) => setValue("imgMo", file)}
+          onChange={(file) => {
+            console.log("모바일 이미지 업로드됨:", file);
+            setValue("imgMo", file);
+          }}
         />
 
         <div>
