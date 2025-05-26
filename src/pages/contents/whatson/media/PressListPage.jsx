@@ -25,7 +25,7 @@ export default function PressListPage() {
   });
   const [refreshKey, setRefreshKey] = useState(0);
   const [name, setName] = useState(searchParams.get("name") || "");
-  const [page, setPage] = useState(searchParams.get("page") || 1);
+  const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
 
@@ -53,7 +53,6 @@ export default function PressListPage() {
               pmId: entry.pmId,
               pid_ko: koItem.pid || null,
               pid_en: enItem.pid || null,
-
               occupancy: entry.rownum || 0,
               name: entry.categoryValue || "-",
               language:
@@ -61,10 +60,14 @@ export default function PressListPage() {
               ko_title: koItem.title || "-",
               en_title: enItem.title || "-",
               situation: "-", // status 없음
-              status: koItem.showYn === "Y" ? "노출" : "비노출",
-              created_user: koItem.createUser || enItem.createUser || "-",
-              created_at: koItem.createDatetime || enItem.createDatetime || "-",
+              status_ko: koItem.showYn === "Y" ? "노출" : "미노출",
+              status_en: enItem.showYn === "Y" ? "노출" : "미노출",
 
+              created_user_ko: koItem.createUser || "-",
+              created_user_en: enItem.createUser || "-",
+
+              created_at_ko: koItem.createDatetime || "-",
+              created_at_en: enItem.createDatetime || "-",
               _id: `${entry.pmId}`,
             };
           });
@@ -87,12 +90,29 @@ export default function PressListPage() {
             return titleMatch && categoryMatch && visibilityMatch && dateMatch;
           });
 
-          const sorted = filtered.sort(
-            (a, b) => new Date(b.created_at) - new Date(a.created_at)
-          );
+          function parseValidDate(str) {
+            if (!str || str === "-") return new Date("1970-01-01");
+            return new Date(str);
+          }
+
+          const sorted = filtered.sort((a, b) => {
+            const dateA = parseValidDate(a.created_at_ko || a.created_at_en);
+            const dateB = parseValidDate(b.created_at_ko || b.created_at_en);
+            return dateB - dateA; // 최신순
+          });
 
           const start = (page - 1) * size;
           const end = start + size;
+          console.log("총 필터링된 데이터:", filtered.length);
+          console.log(
+            "현재 페이지:",
+            page,
+            "시작 인덱스:",
+            start,
+            "끝 인덱스:",
+            end
+          );
+          console.log("원본 데이터 총 개수:", json.data.length);
           const sliced = sorted.slice(start, end).map((row, idx) => ({
             ...row,
             no: start + idx + 1,
@@ -189,7 +209,7 @@ export default function PressListPage() {
   //           };
   //         });
 
-  //         // 🔍 필터링 및 정렬
+  //         // 필터링 및 정렬
   //         const filtered = rows.filter((row) => {
   //           const titleMatch =
   //             name === "" ||
@@ -340,6 +360,7 @@ export default function PressListPage() {
                   alert("삭제가 완료되었습니다.");
                   setCheckedIds([]);
                   setPage(1);
+                  setSearchParams({ name, category, visibility, page: 1 });
                   setRefreshKey((prev) => prev + 1); // 목록 새로고침
                 } else {
                   alert("삭제 실패: 서버 오류");
@@ -393,9 +414,36 @@ export default function PressListPage() {
                 </div>
               ),
             },
-            { key: "status", label: "노출여부" },
-            { key: "created_user", label: "등록자" },
-            { key: "created_at", label: "등록일시" },
+            {
+              key: "status",
+              label: "노출여부",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="py-1">{row.status_ko}</div>
+                  <div className="py-1">{row.status_en}</div>
+                </div>
+              ),
+            },
+            {
+              key: "created_user",
+              label: "등록자",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="py-1">{row.created_user_ko}</div>
+                  <div className="py-1">{row.created_user_en}</div>
+                </div>
+              ),
+            },
+            {
+              key: "created_at",
+              label: "등록일시",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="py-1">{row.created_at_ko}</div>
+                  <div className="py-1">{row.created_at_en}</div>
+                </div>
+              ),
+            },
           ]}
           data={data}
           link={{ base: "/admin", path: "no" }}
@@ -406,7 +454,10 @@ export default function PressListPage() {
         <Pagination
           current={page}
           totalPages={Math.ceil(total / size)}
-          onChange={(page) => setPage(page)}
+          onChange={(page) => {
+            setPage(page);
+            setSearchParams({ name, category, visibility, page });
+          }}
         />
       </ResultSection>
     </div>

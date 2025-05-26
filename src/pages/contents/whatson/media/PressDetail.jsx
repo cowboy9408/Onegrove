@@ -129,7 +129,7 @@ export default function PressDetail() {
         formRef.setValue("publishDate", data.publishDate || "");
         formRef.setValue("imgPc", patchImageMeta(data.thumbImgPc));
         formRef.setValue("imgMo", patchImageMeta(data.thumbImgMo));
-        formRef.setValue("content1", data.content || "");
+        formRef.setValue("content", data.content || "");
       };
 
       patchForm(koFormRef.current, koData);
@@ -176,9 +176,11 @@ export default function PressDetail() {
 
   const handleSave = async () => {
     try {
-      const saveOne = async (data, original) => {
+      const saveOne = async (data, original = {}) => {
         const payload = {
           id: data.id,
+          pressId: data.pressId,
+          lang: data.lang,
           category: data.category,
           title: data.title,
           thumbImgPc: toImageMeta(data.thumbImgPc, original.thumbImgPc),
@@ -187,13 +189,25 @@ export default function PressDetail() {
           content: data.content,
           publishDate: data.publishDate,
         };
-
-        console.log(` 전송할 payload:`, payload);
+        console.log("저장 요청 - PC:", data.thumbImgPc);
+        console.log("저장 요청 - MO:", data.thumbImgMo);
+        console.log(
+          "변환된 PC:",
+          toImageMeta(data.thumbImgPc, original.thumbImgPc)
+        );
+        console.log(
+          "변환된 MO:",
+          toImageMeta(data.thumbImgMo, original.thumbImgMo)
+        );
+        console.log("저장 payload:", payload);
         console.log("payload.thumbImgPc:", payload.thumbImgPc);
 
-        const res = await api.post("/api/v1/press/update", payload);
-        console.log(` 응답 결과:`, res.data);
-        console.log("업데이트 응답:", res.data);
+        const apiUrl = data.id
+          ? "/api/v1/press/update"
+          : "/api/v1/press/insert";
+        const res = await api.post(apiUrl, payload);
+
+        console.log("응답 결과:", res.data);
       };
 
       if (currentLang === 0) {
@@ -226,7 +240,7 @@ export default function PressDetail() {
 
       alert("저장 완료");
       setIsReadOnly(true);
-      navigate("/contents/whatson/media?refresh=" + Date.now()); // ✅ 리스트 갱신도 함께
+      navigate("/contents/whatson/media?refresh=" + Date.now());
     } catch (err) {
       console.error("저장 실패:", err);
       alert("저장 실패. 다시 시도해주세요.");
@@ -244,7 +258,7 @@ export default function PressDetail() {
         onTabChange={(index) => {
           if (!loading) setCurrentLang(index);
         }}
-        disabled={isReadOnly}
+        // disabled={isReadOnly}
       >
         <TabPanel>
           {!loading && (
@@ -253,8 +267,38 @@ export default function PressDetail() {
                 ref={koFormRef}
                 data={koData}
                 lang="ko"
-                readOnly={isReadOnly}
+                // readOnly={isReadOnly}
               />
+              <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
+                <tbody>
+                  <tr>
+                    <th className="w-32 border bg-gray-100 px-4 py-2">
+                      등록일시
+                    </th>
+                    <td className="border px-4 py-2">
+                      {koData?.createDatetime || "-"}
+                    </td>
+                    <th className="w-32 border bg-gray-100 px-4 py-2">
+                      등록자
+                    </th>
+                    <td className="border px-4 py-2">
+                      {koData?.createUser || "-"}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className="border bg-gray-100 px-4 py-2">수정일시</th>
+                    <td className="border px-4 py-2">
+                      {koData?.updateDatetime || "-"}
+                    </td>
+                    <th className="border bg-gray-100 px-4 py-2">
+                      최근 수정자
+                    </th>
+                    <td className="border px-4 py-2">
+                      {koData?.updateUser || "-"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </>
           )}
         </TabPanel>
@@ -266,23 +310,48 @@ export default function PressDetail() {
                 ref={enFormRef}
                 data={enData}
                 lang="en"
-                readOnly={isReadOnly}
+                // readOnly={isReadOnly}
               />
+              <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
+                <tbody>
+                  <tr>
+                    <th className="w-32 border bg-gray-100 px-4 py-2">
+                      등록일시
+                    </th>
+                    <td className="border px-4 py-2">
+                      {enData?.createDatetime || "-"}
+                    </td>
+                    <th className="w-32 border bg-gray-100 px-4 py-2">
+                      등록자
+                    </th>
+                    <td className="border px-4 py-2">
+                      {enData?.createUser || "-"}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className="border bg-gray-100 px-4 py-2">수정일시</th>
+                    <td className="border px-4 py-2">
+                      {enData?.updateDatetime || "-"}
+                    </td>
+                    <th className="border bg-gray-100 px-4 py-2">
+                      최근 수정자
+                    </th>
+                    <td className="border px-4 py-2">
+                      {enData?.updateUser || "-"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </>
           )}
         </TabPanel>
       </Tabs>
 
       <div className="flex justify-end gap-4 px-6 pb-6">
-        {isReadOnly ? (
-          <Button onClick={() => setIsReadOnly(false)} theme="primary">
-            수정
-          </Button>
-        ) : (
-          <Button onClick={handleSave} theme="primary">
-            저장
-          </Button>
-        )}
+        <Button onClick={handleSave} theme="primary">
+          저장
+        </Button>
+
         <Button
           onClick={() =>
             navigate("/contents/whatson/media?refresh=" + Date.now())

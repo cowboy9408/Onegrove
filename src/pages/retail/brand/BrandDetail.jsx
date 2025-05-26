@@ -17,7 +17,7 @@ export default function BrandDetail() {
   const [koData, setKoData] = useState({});
   const [enData, setEnData] = useState({});
   const [loading, setLoading] = useState(true);
-  const [isReadOnly, setIsReadOnly] = useState(true); // 읽기 전용
+  const [isReadOnly, setIsReadOnly] = useState(false); // 읽기 전용
   const [categoryList, setCategoryList] = useState([]);
 
   useEffect(() => {
@@ -124,8 +124,20 @@ export default function BrandDetail() {
         //   }
         // });
         const formRef = locale === "ko" ? koFormRef.current : enFormRef.current;
+
+        const patchImageMeta = (img) =>
+          img?.path
+            ? {
+                ...img,
+                status: "R",
+              }
+            : null;
         Object.entries(formValues).forEach(([key, value]) => {
-          formRef?.setValue?.(key, value);
+          if (key.includes("Image")) {
+            formRef?.setValue?.(key, patchImageMeta(value));
+          } else {
+            formRef?.setValue?.(key, value);
+          }
         });
       };
 
@@ -240,7 +252,11 @@ export default function BrandDetail() {
 
         console.log(`[${lang}] 서버에 보낼 데이터:`, payload);
 
-        const res = await api.post("/api/v1/brand/update", payload);
+        const apiUrl = data.bmId
+          ? "/api/v1/brand/update"
+          : "/api/v1/brand/insert";
+        const res = await api.post(apiUrl, payload);
+        
         console.log("응답 결과:", res.data);
       };
 
@@ -257,7 +273,7 @@ export default function BrandDetail() {
       }
 
       alert("브랜드 정보가 수정되었습니다.");
-      setIsReadOnly(true); // 다시 읽기 전용으로 전환
+      // setIsReadOnly(true); // 다시 읽기 전용으로 전환
     } catch (err) {
       console.error("저장 실패:", err);
       alert("저장 실패. 다시 시도해주세요.");
@@ -293,7 +309,7 @@ export default function BrandDetail() {
           </Button>
         ) : (
           <Button onClick={handleSave} theme="primary">
-            저장
+            수정
           </Button>
         )}
         <Button onClick={() => navigate("/retail/brand")}>목록</Button>

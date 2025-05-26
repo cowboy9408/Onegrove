@@ -53,16 +53,19 @@ export default function Upload({
   const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
-    if (!value) return;
-
-    if (value.path) {
-      setPreviewUrl(value.path);
-      setLocalFile({
-        name: value.name,
-        size: value.size,
-      });
+    if (!value || !value.path || value.url === null) {
+      setPreviewUrl(null);
+      setLocalFile(null);
+      return;
     }
-  }, [value]);
+
+    // 각 필드별로 분리
+    setPreviewUrl(value.path);
+    setLocalFile({
+      name: value.name,
+      size: value.size,
+    });
+  }, [value?.path, value?.name, name]);
 
   useEffect(() => {
     if (error && wrapperRef.current) {
@@ -71,9 +74,20 @@ export default function Upload({
   }, [error]);
 
   const handleFileChange = async (e) => {
-    console.log("파일 선택됨:", e.target.files[0]);
     const selectedFile = e.target.files[0];
-    if (!selectedFile) return;
+    console.log("[Upload] 업로드 필드:", name);
+
+    e.target.value = null;
+
+    if (!selectedFile) {
+      console.warn("파일이 선택되지 않았습니다.");
+      return;
+    }
+    const maxSize = 20 * 1024 * 1024; // 20MB
+    if (selectedFile.size > maxSize) {
+      alert("20MB가 넘는 이미지는 등록할 수 없습니다.");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("file", selectedFile);
@@ -104,23 +118,32 @@ export default function Upload({
         withCredentials: true,
       });
 
+      console.log("업로드 전체 응답:", res);
+      console.log("업로드 응답 .data:", res.data);
+      console.log("업로드 응답 .data.data:", res.data?.data);
+
       const result = res.data;
       console.log("Upload 응답 result:", result);
+      console.log("업로드 응답 result:", result);
 
-      const isReplace = !!value; // 기존에 파일이 있었는지 확인
+      const isReplace = !!value?.id; // 기존 값이 있는지 판단
+      const isNew = !isReplace;
 
       if (result.name && result.path) {
-        onChange({
-          id: result.id,
+        const uploadedFile = {
+          id: result.id ?? null,
           originalName: selectedFile.name,
           name: result.name,
           size: result.size,
           extension: "." + selectedFile.name.split(".").pop(),
           mime: result.mime || selectedFile.type,
-          classification: null,
-          path: result.path ?? value?.path ?? "",
-          status: isReplace ? "E" : "C",
-        });
+          classification: classification,
+          path: result.path,
+          status: isNew ? "C" : "E", //신규 등록이면 반드시 C
+          field: name,
+        };
+        console.log("서버 업로드 완료:", name, uploadedFile);
+        onChange(uploadedFile);
       } else {
         console.error("파일 업로드 실패", result);
       }
@@ -214,6 +237,7 @@ export default function Upload({
       </div>
 
       <input
+        key={name}
         ref={inputRef}
         type="file"
         accept={accepted}
