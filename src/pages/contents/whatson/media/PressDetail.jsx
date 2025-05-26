@@ -129,7 +129,7 @@ export default function PressDetail() {
         formRef.setValue("publishDate", data.publishDate || "");
         formRef.setValue("imgPc", patchImageMeta(data.thumbImgPc));
         formRef.setValue("imgMo", patchImageMeta(data.thumbImgMo));
-        formRef.setValue("content1", data.content || "");
+        formRef.setValue("content", data.content || "");
       };
 
       patchForm(koFormRef.current, koData);
