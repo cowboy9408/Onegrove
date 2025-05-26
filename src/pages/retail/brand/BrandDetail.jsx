@@ -124,8 +124,20 @@ export default function BrandDetail() {
         //   }
         // });
         const formRef = locale === "ko" ? koFormRef.current : enFormRef.current;
+
+        const patchImageMeta = (img) =>
+          img?.path
+            ? {
+                ...img,
+                status: "R",
+              }
+            : null;
         Object.entries(formValues).forEach(([key, value]) => {
-          formRef?.setValue?.(key, value);
+          if (key.includes("Image")) {
+            formRef?.setValue?.(key, patchImageMeta(value));
+          } else {
+            formRef?.setValue?.(key, value);
+          }
         });
       };
 
@@ -240,7 +252,11 @@ export default function BrandDetail() {
 
         console.log(`[${lang}] 서버에 보낼 데이터:`, payload);
 
-        const res = await api.post("/api/v1/brand/update", payload);
+        const apiUrl = data.bmId
+          ? "/api/v1/brand/update"
+          : "/api/v1/brand/insert";
+        const res = await api.post(apiUrl, payload);
+        
         console.log("응답 결과:", res.data);
       };
 

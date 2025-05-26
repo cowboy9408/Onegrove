@@ -357,7 +357,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
           {["instagram", "facebook", "youtube", "twitter"].map((sns) => (
             <div key={sns} className="flex items-center gap-4">
               <NewInput
-                label={sns}
+                label={sns === "twitter" ? "X" : sns}
                 disabled={readOnly}
                 {...register(`sns.${sns}.url`)}
                 width="w-[500px]"
