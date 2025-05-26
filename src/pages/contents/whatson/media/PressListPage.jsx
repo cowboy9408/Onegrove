@@ -25,7 +25,7 @@ export default function PressListPage() {
   });
   const [refreshKey, setRefreshKey] = useState(0);
   const [name, setName] = useState(searchParams.get("name") || "");
-  const [page, setPage] = useState(searchParams.get("page") || 1);
+  const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
 
@@ -53,7 +53,6 @@ export default function PressListPage() {
               pmId: entry.pmId,
               pid_ko: koItem.pid || null,
               pid_en: enItem.pid || null,
-
               occupancy: entry.rownum || 0,
               name: entry.categoryValue || "-",
               language:
@@ -61,10 +60,14 @@ export default function PressListPage() {
               ko_title: koItem.title || "-",
               en_title: enItem.title || "-",
               situation: "-", // status 없음
-              status: koItem.showYn === "Y" ? "노출" : "비노출",
-              created_user: koItem.createUser || enItem.createUser || "-",
-              created_at: koItem.createDatetime || enItem.createDatetime || "-",
+              status_ko: koItem.showYn === "Y" ? "노출" : "미노출",
+              status_en: enItem.showYn === "Y" ? "노출" : "미노출",
 
+              created_user_ko: koItem.createUser || "-",
+              created_user_en: enItem.createUser || "-",
+
+              created_at_ko: koItem.createDatetime || "-",
+              created_at_en: enItem.createDatetime || "-",
               _id: `${entry.pmId}`,
             };
           });
@@ -393,9 +396,36 @@ export default function PressListPage() {
                 </div>
               ),
             },
-            { key: "status", label: "노출여부" },
-            { key: "created_user", label: "등록자" },
-            { key: "created_at", label: "등록일시" },
+            {
+              key: "status",
+              label: "노출여부",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="py-1">{row.status_ko}</div>
+                  <div className="py-1">{row.status_en}</div>
+                </div>
+              ),
+            },
+            {
+              key: "created_user",
+              label: "등록자",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="py-1">{row.created_user_ko}</div>
+                  <div className="py-1">{row.created_user_en}</div>
+                </div>
+              ),
+            },
+            {
+              key: "created_at",
+              label: "등록일시",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="py-1">{row.created_at_ko}</div>
+                  <div className="py-1">{row.created_at_en}</div>
+                </div>
+              ),
+            },
           ]}
           data={data}
           link={{ base: "/admin", path: "no" }}
