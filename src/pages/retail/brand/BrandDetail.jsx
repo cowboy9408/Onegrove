@@ -178,7 +178,7 @@ export default function BrandDetail() {
       const saveOne = async (data, lang, original) => {
         const payload = {
           ...data,
-          lang : lang,
+          lang: lang,
           id: masterId,
           name: data.brandName,
           category: data.office,

@@ -277,7 +277,7 @@ export const routeMeta = [
                   {
                     uuid: "a3126b50-bd32-4d31-9241-b9a8a5ec6eb8",
                     path: "/contents/whatson/event/detail/:eventId",
-                    group: "/contents/whatson/event/list",
+                    group: "/contents/whatson/event/list/:emId",
                     element: <EventDetail />,
                     title: "Event & Promotion 상세",
                     hidden: true,

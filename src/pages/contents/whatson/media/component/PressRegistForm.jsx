@@ -59,6 +59,7 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
       };
       console.log("최종 imgPc:", values.imgPc);
       console.log("최종 imgMo:", values.imgMo);
+
       const content = await editorRef.current?.getContent?.();
 
       const toImageMeta = (file) => {

@@ -20,23 +20,9 @@ export default function EventDetail() {
   const [loading, setLoading] = useState(true);
 
   // 국문 상태
-  const [koData, setKoData] = useState({
-    keyVisual: [],
-    whatsOn: {},
-    lifestyle: {},
-    work: {},
-    etc: [],
-    banner: {},
-  });
+  const [koData, setKoData] = useState({});
   // 영문 상태
-  const [enData, setEnData] = useState({
-    keyVisual: [],
-    whatsOn: {},
-    lifestyle: {},
-    work: {},
-    etc: [],
-    banner: {},
-  });
+  const [enData, setEnData] = useState({});
 
   const patchForm = (ref, data) => {
     if (!data || !ref.current) return;

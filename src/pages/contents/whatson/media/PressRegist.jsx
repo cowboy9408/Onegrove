@@ -13,6 +13,7 @@ export default function PressRegist() {
   const koFormRef = useRef();
   const enFormRef = useRef();
   const { showModal } = useModal();
+  const formRef = useRef();
 
   // 국문 상태
   const [koData, setKoData] = useState({});
@@ -22,7 +23,8 @@ export default function PressRegist() {
   const handleSave = async () => {
     const ref = currentLang === 0 ? koFormRef : enFormRef;
     const form = await ref.current?.submit?.();
-
+    const payload = await formRef.current?.submit();
+    console.log("payload:", payload);
     //
     if (!form) {
       alert(
