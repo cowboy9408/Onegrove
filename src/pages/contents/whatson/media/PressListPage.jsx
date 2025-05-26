@@ -90,12 +90,29 @@ export default function PressListPage() {
             return titleMatch && categoryMatch && visibilityMatch && dateMatch;
           });
 
-          const sorted = filtered.sort(
-            (a, b) => new Date(b.created_at) - new Date(a.created_at)
-          );
+          function parseValidDate(str) {
+            if (!str || str === "-") return new Date("1970-01-01");
+            return new Date(str);
+          }
+
+          const sorted = filtered.sort((a, b) => {
+            const dateA = parseValidDate(a.created_at_ko || a.created_at_en);
+            const dateB = parseValidDate(b.created_at_ko || b.created_at_en);
+            return dateB - dateA; // 최신순
+          });
 
           const start = (page - 1) * size;
           const end = start + size;
+          console.log("총 필터링된 데이터:", filtered.length);
+          console.log(
+            "현재 페이지:",
+            page,
+            "시작 인덱스:",
+            start,
+            "끝 인덱스:",
+            end
+          );
+          console.log("원본 데이터 총 개수:", json.data.length);
           const sliced = sorted.slice(start, end).map((row, idx) => ({
             ...row,
             no: start + idx + 1,
@@ -192,7 +209,7 @@ export default function PressListPage() {
   //           };
   //         });
 
-  //         // 🔍 필터링 및 정렬
+  //         // 필터링 및 정렬
   //         const filtered = rows.filter((row) => {
   //           const titleMatch =
   //             name === "" ||
@@ -343,6 +360,7 @@ export default function PressListPage() {
                   alert("삭제가 완료되었습니다.");
                   setCheckedIds([]);
                   setPage(1);
+                  setSearchParams({ name, category, visibility, page: 1 });
                   setRefreshKey((prev) => prev + 1); // 목록 새로고침
                 } else {
                   alert("삭제 실패: 서버 오류");
@@ -436,7 +454,10 @@ export default function PressListPage() {
         <Pagination
           current={page}
           totalPages={Math.ceil(total / size)}
-          onChange={(page) => setPage(page)}
+          onChange={(page) => {
+            setPage(page);
+            setSearchParams({ name, category, visibility, page });
+          }}
         />
       </ResultSection>
     </div>
