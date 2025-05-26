@@ -83,6 +83,11 @@ export default function Upload({
       console.warn("파일이 선택되지 않았습니다.");
       return;
     }
+    const maxSize = 20 * 1024 * 1024; // 20MB
+    if (selectedFile.size > maxSize) {
+      alert("20MB가 넘는 이미지는 등록할 수 없습니다.");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("file", selectedFile);
