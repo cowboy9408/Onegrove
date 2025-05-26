@@ -129,7 +129,7 @@ export default function PressDetail() {
         formRef.setValue("publishDate", data.publishDate || "");
         formRef.setValue("imgPc", patchImageMeta(data.thumbImgPc));
         formRef.setValue("imgMo", patchImageMeta(data.thumbImgMo));
-        formRef.setValue("content1", data.content || "");
+        formRef.setValue("content", data.content || "");
       };
 
       patchForm(koFormRef.current, koData);
@@ -269,6 +269,36 @@ export default function PressDetail() {
                 lang="ko"
                 // readOnly={isReadOnly}
               />
+              <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
+                <tbody>
+                  <tr>
+                    <th className="w-32 border bg-gray-100 px-4 py-2">
+                      등록일시
+                    </th>
+                    <td className="border px-4 py-2">
+                      {koData?.createDatetime || "-"}
+                    </td>
+                    <th className="w-32 border bg-gray-100 px-4 py-2">
+                      등록자
+                    </th>
+                    <td className="border px-4 py-2">
+                      {koData?.createUser || "-"}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className="border bg-gray-100 px-4 py-2">수정일시</th>
+                    <td className="border px-4 py-2">
+                      {koData?.updateDatetime || "-"}
+                    </td>
+                    <th className="border bg-gray-100 px-4 py-2">
+                      최근 수정자
+                    </th>
+                    <td className="border px-4 py-2">
+                      {koData?.updateUser || "-"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </>
           )}
         </TabPanel>
@@ -282,6 +312,36 @@ export default function PressDetail() {
                 lang="en"
                 // readOnly={isReadOnly}
               />
+              <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
+                <tbody>
+                  <tr>
+                    <th className="w-32 border bg-gray-100 px-4 py-2">
+                      등록일시
+                    </th>
+                    <td className="border px-4 py-2">
+                      {enData?.createDatetime || "-"}
+                    </td>
+                    <th className="w-32 border bg-gray-100 px-4 py-2">
+                      등록자
+                    </th>
+                    <td className="border px-4 py-2">
+                      {enData?.createUser || "-"}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className="border bg-gray-100 px-4 py-2">수정일시</th>
+                    <td className="border px-4 py-2">
+                      {enData?.updateDatetime || "-"}
+                    </td>
+                    <th className="border bg-gray-100 px-4 py-2">
+                      최근 수정자
+                    </th>
+                    <td className="border px-4 py-2">
+                      {enData?.updateUser || "-"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </>
           )}
         </TabPanel>

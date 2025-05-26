@@ -14,7 +14,9 @@ const MAX_KV_LENGTH = 4;
 export default function KeyVisualForm({ data, setData }) {
   const methods = useForm({
     defaultValues: {
-      kv: [{ type: "image", title: "", subtitle: "" }],
+      kv: [
+        { type: "image", title: "", subtitle: "", file1: null, file2: null },
+      ],
     },
   });
 
@@ -60,12 +62,25 @@ export default function KeyVisualForm({ data, setData }) {
 
                 <Row className="pb-4">
                   <Controller
-                    name={`kv.${index}.file`}
+                    name={`kv.${index}.file1`}
                     control={methods.control}
                     render={({ field }) => (
                       <Upload
                         {...field}
-                        label="파일"
+                        label="PC 이미지"
+                        acceptWith={`kv.${index}.type`}
+                      />
+                    )}
+                  />
+                </Row>
+                <Row className="pb-4">
+                  <Controller
+                    name={`kv.${index}.file2`}
+                    control={methods.control}
+                    render={({ field }) => (
+                      <Upload
+                        {...field}
+                        label="MO 이미지"
                         acceptWith={`kv.${index}.type`}
                       />
                     )}
