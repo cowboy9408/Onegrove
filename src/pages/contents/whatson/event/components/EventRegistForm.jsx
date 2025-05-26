@@ -1,3 +1,10 @@
+import {
+  useEffect,
+  useState,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
@@ -10,22 +17,13 @@ import Row from "@/components/layout/Row";
 import Col from "@/components/layout/Col";
 import BrandList from "@/components/modal/BrandList";
 import useModal from "@/hooks/useModal";
-import { useEffect, useState, useRef } from "react";
-import { forwardRef, useImperativeHandle } from "react";
 import api from "@/lib/apiClient";
+import Textarea from "@/components/common/Textarea";
 
 const EventRegistForm = forwardRef(
-  ({ setData, lang, readOnly = false }, ref) => {
-    const methods = useForm(); // 전체 객체는 유지
-    const {
-      control,
-      register,
-      setValue,
-      watch,
-      trigger,
-      getValues,
-      handleSubmit,
-    } = methods;
+  ({ data, setData, lang, readOnly = false }, ref) => {
+    const methods = useForm({ mode: "onChange" });
+    const { register, setValue, getValues, watch, control } = methods;
     const editorRef1 = useRef();
     const editorRef2 = useRef();
     const [brands, setBrands] = useState([]);
@@ -52,79 +50,146 @@ const EventRegistForm = forwardRef(
       fetchCategories();
     }, []);
 
+    useEffect(() => {
+      console.log("받은 data:", data);
+      if (data && Object.keys(data).length > 0) {
+        setValue("category", data.category || "");
+        setValue("title", data.title || "");
+        setValue("status", data.showYn === "Y" ? "active" : "inactive");
+        setValue("order", data.sort || 1);
+        setValue("thumbImg", data.thumbImg || null);
+        setValue("imgBodyPc", data.imgBodyPc || null);
+        setValue("imgBodyMo", data.imgBodyMo || null);
+        setValue("imgPc", data.imgPc || null);
+        setValue("imgMo", data.imgMo || null);
+        editorRef1.current?.setContent?.(data.content || "");
+        editorRef2.current?.setContent?.(data.description || "");
+
+        setDateRange({
+          startDate: data.startDate ? new Date(data.startDate) : null,
+          endDate: data.endDate ? new Date(data.endDate) : null,
+        });
+
+        // 브랜드 정보도 세팅
+        if (data.brandId) {
+          setBrands([{ _id: data.brandId, brand: "선택된 브랜드" }]); // 실제 brand 명칭 불러올 수 있으면 여기에.
+        }
+
+        console.log("값 세팅 완료");
+      }
+    }, [data]);
+
     useImperativeHandle(ref, () => ({
       submit: async () => {
-        const isValid = await trigger();
-        if (!isValid) return null;
-
-        const data = getValues();
-        const content1 = await editorRef1.current?.getContent?.();
-        const content2 = await editorRef2.current?.getContent?.();
-
-        const isMissingRequired = () => {
-          // if (!data.category) return true;
-          // if (!data.title) return true;
-          // if (!data.thumbnail?.name) return true;
-          // if (!data.banner?.name) return true;
-          // if (!data.extraImage?.name) return true;
-          // if (!content1) return true;
-          // if (!dateRange.startDate || !dateRange.endDate) return true;
-          // if (!brands.length) return true;
-          // if (!data.pcImage?.name) return true;
-          // if (!data.mobileImage?.name) return true;
-          // if (!content2) return true;
-          // return false;
+        const values = {
+          ...getValues(),
+          thumbImg: watch("thumbImg"),
+          imgBodyPc: watch("imgBodyPc"),
+          imgBodyMo: watch("imgBodyMo"),
+          imgPc: watch("imgPc"),
+          imgMo: watch("imgMo"),
+          description: watch("description"),
         };
+        const content = await editorRef1.current?.getContent?.();
+        const description = watch("description");
 
-        if (isMissingRequired()) {
-          console.log("필수 항목 누락됨");
-          showModal({
-            title: "입력 확인",
-            message: "필수 항목을 모두 입력해주세요.",
-            showCancel: false,
-          });
+        console.log("검사 대상 값들:", {
+          title: values.title,
+          category: values.category,
+          startDate: dateRange?.startDate,
+          endDate: dateRange?.endDate,
+          thumbImg: values.thumbImg,
+          imgBodyPc: values.imgBodyPc,
+          imgBodyMo: values.imgBodyMo,
+          imgPc: values.imgPc,
+          imgMo: values.imgMo,
+          content,
+          description,
+          brands,
+        });
+
+        if (
+          !values.title?.trim() ||
+          !values.category ||
+          !dateRange.startDate ||
+          !dateRange.endDate ||
+          !values.thumbImg ||
+          !values.imgBodyPc ||
+          !values.imgBodyMo ||
+          !values.imgPc ||
+          !values.imgMo ||
+          !content?.trim() ||
+          //        // !description?.trim() ||
+          brands.length === 0
+        ) {
+          alert("모든 필수 항목을 입력해주세요.");
           return null;
         }
 
         const toImageMeta = (file) => {
-          if (!file || !file.name) return null;
-
-          const originalName = file.originalName || file.name;
-          const extMatch = originalName.match(/\.\w+$/); // 정규식으로 확장자 추출
-          const extension = extMatch ? extMatch[0] : ".jpg"; // 확장자 없으면 기본값
+          if (!file || !file.name || !file.path) {
+            console.warn("이미지 path 누락:", file);
+            return null;
+          }
 
           return {
-            id: null,
-            originalName,
+            id: file.id ?? null,
+            originalName: file.originalName || file.name,
             name: file.name,
             size: file.size,
-            extension: extension.toLowerCase(),
+            extension: "." + (file.originalName || file.name).split(".").pop(),
             mime: file.type || "image/png",
-            classification: null,
-            path: `C:\\\\upload\\/test\\${file.name}`,
-            status: null,
+            classification: "event-promotion",
+            path: file.path,
+            status: file.status ?? "C",
           };
         };
 
-        return {
-          ...data,
-          brandIds: brands.map((e) => e._id),
-          content1,
-          content2,
-          ...dateRange,
+        // 필수 체크
+        if (
+          !values.title?.trim() ||
+          !values.category ||
+          !dateRange.startDate ||
+          !dateRange.endDate ||
+          !watch("thumbImg") ||
+          !watch("imgBodyPc") ||
+          !watch("imgBodyMo") ||
+          !watch("imgPc") ||
+          !watch("imgMo") ||
+          !content?.trim() ||
+          !description?.trim() ||
+          brands.length === 0
+        ) {
+          alert("모든 필수 항목을 입력해주세요.");
+          return null;
+        }
 
-          thumbImg: toImageMeta(data.thumbnail),
-          imgBodyPc: toImageMeta(data.banner),
-          imgBodyMo: toImageMeta(data.extraImage),
-          imgPc: toImageMeta(data.pcImage),
-          imgMo: toImageMeta(data.mobileImage),
+        return {
+          eventId: data?.id,
+          lang,
+          showYn: values.status === "active" ? "Y" : "N",
+          sort: Number(values.order) || 1,
+          category: values.category,
+          title: values.title || "",
+          thumbImg: toImageMeta(values.thumbImg),
+          imgBodyPc: toImageMeta(values.imgBodyPc),
+          imgBodyMo: toImageMeta(values.imgBodyMo),
+          imgPc: toImageMeta(values.imgPc),
+          imgMo: toImageMeta(values.imgMo),
+          content: content || "",
+          description: description || "",
+          startDate: dateRange.startDate?.toISOString() || null,
+          endDate: dateRange.endDate?.toISOString() || null,
+          brandId: brands[0]?._id,
+          delYn: "N",
         };
       },
+      setValue,
     }));
-
+    console.log("brands", brands);
     return (
       <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(() => {})} className="space-y-6 p-6">
+        <form className="space-y-6 p-6">
           {/* 카테고리 + 노출 여부 */}
           <div className="flex items-end justify-between">
             <Controller
@@ -187,22 +252,43 @@ const EventRegistForm = forwardRef(
 
           {/* 파일 업로드 */}
           <Upload
-            name="thumbnail"
+            key={`thumbImg-upload`}
+            name="thumbImg"
             label="썸네일 이미지"
             required
+            classification="event-promotion"
             readOnly={readOnly}
+            value={watch("thumbImg")}
+            onChange={(file) => {
+              console.log("썸네일 이미지 등록됨:", file);
+              setValue("thumbImg", file);
+            }}
           />
           <Upload
-            name="banner"
+            key={`imgBodyPc-upload`}
+            name="imgBodyPc"
             label="PC 본문 이미지"
             required
+            classification="event-promotion"
             readOnly={readOnly}
+            value={watch("imgBodyPc")}
+            onChange={(file) => {
+              console.log("pc 본문 이미지 등록됨:", file);
+              setValue("imgBodyPc", file);
+            }}
           />
           <Upload
-            name="extraImage"
-            label="모바일 본문 이미지"
+            key={`imgBodyMo-upload`}
+            name="imgBodyMo"
+            label="MO 본문 이미지"
             required
+            classification="event-promotion"
             readOnly={readOnly}
+            value={watch("imgBodyMo")}
+            onChange={(file) => {
+              console.log("mo 본문 이미지 등록됨:", file);
+              setValue("imgBodyMo", file);
+            }}
           />
           {/* 상세 내용 에디터 1 */}
           <p className="text-sm font-medium">
@@ -281,23 +367,41 @@ const EventRegistForm = forwardRef(
 
           {/* 파일 업로드 2 */}
           <Upload
-            name="pcImage"
+            key={`imgPc-upload`}
+            name="imgPc"
             label="PC 이미지"
             required
+            classification="event-promotion"
             readOnly={readOnly}
+            value={watch("imgPc")}
+            onChange={(file) => {
+              console.log("PC 이미지 등록됨:", file);
+              setValue("imgPc", file);
+            }}
           />
           <Upload
-            name="mobileImage"
+            name="imgMo"
             label="모바일 이미지"
+            classification="event-promotion"
             required
             readOnly={readOnly}
+            value={watch("imgMo")}
+            onChange={(file) => {
+              console.log("모바일 이미지 업로드됨:", file);
+              setValue("imgMo", file);
+            }}
           />
 
           {/* 내용 에디터 2 */}
-          <p className="text-sm font-medium">
-            디스크립션<span className="text-red-500">*</span>
-          </p>
-          <Editor ref={editorRef2} readOnly={readOnly} />
+          <Textarea
+            id="description"
+            name="description"
+            label="디스크립션"
+            value={watch("description")}
+            onChange={(e) => setValue("description", e.target.value)}
+            required
+            maxLength={130}
+          />
         </form>
       </FormProvider>
     );
