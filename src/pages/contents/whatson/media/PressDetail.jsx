@@ -176,9 +176,11 @@ export default function PressDetail() {
 
   const handleSave = async () => {
     try {
-      const saveOne = async (data, original) => {
+      const saveOne = async (data, original = {}) => {
         const payload = {
           id: data.id,
+          pressId: data.pressId,
+          lang: data.lang,
           category: data.category,
           title: data.title,
           thumbImgPc: toImageMeta(data.thumbImgPc, original.thumbImgPc),
@@ -187,13 +189,25 @@ export default function PressDetail() {
           content: data.content,
           publishDate: data.publishDate,
         };
-
-        console.log(` 전송할 payload:`, payload);
+        console.log("저장 요청 - PC:", data.thumbImgPc);
+        console.log("저장 요청 - MO:", data.thumbImgMo);
+        console.log(
+          "변환된 PC:",
+          toImageMeta(data.thumbImgPc, original.thumbImgPc)
+        );
+        console.log(
+          "변환된 MO:",
+          toImageMeta(data.thumbImgMo, original.thumbImgMo)
+        );
+        console.log("저장 payload:", payload);
         console.log("payload.thumbImgPc:", payload.thumbImgPc);
 
-        const res = await api.post("/api/v1/press/update", payload);
-        console.log(` 응답 결과:`, res.data);
-        console.log("업데이트 응답:", res.data);
+        const apiUrl = data.id
+          ? "/api/v1/press/update"
+          : "/api/v1/press/insert";
+        const res = await api.post(apiUrl, payload);
+
+        console.log("응답 결과:", res.data);
       };
 
       if (currentLang === 0) {
@@ -226,7 +240,7 @@ export default function PressDetail() {
 
       alert("저장 완료");
       setIsReadOnly(true);
-      navigate("/contents/whatson/media?refresh=" + Date.now()); // ✅ 리스트 갱신도 함께
+      navigate("/contents/whatson/media?refresh=" + Date.now());
     } catch (err) {
       console.error("저장 실패:", err);
       alert("저장 실패. 다시 시도해주세요.");
@@ -244,7 +258,7 @@ export default function PressDetail() {
         onTabChange={(index) => {
           if (!loading) setCurrentLang(index);
         }}
-        disabled={isReadOnly}
+        // disabled={isReadOnly}
       >
         <TabPanel>
           {!loading && (
@@ -253,7 +267,7 @@ export default function PressDetail() {
                 ref={koFormRef}
                 data={koData}
                 lang="ko"
-                readOnly={isReadOnly}
+                // readOnly={isReadOnly}
               />
             </>
           )}
@@ -266,7 +280,7 @@ export default function PressDetail() {
                 ref={enFormRef}
                 data={enData}
                 lang="en"
-                readOnly={isReadOnly}
+                // readOnly={isReadOnly}
               />
             </>
           )}
@@ -274,15 +288,10 @@ export default function PressDetail() {
       </Tabs>
 
       <div className="flex justify-end gap-4 px-6 pb-6">
-        {isReadOnly ? (
-          <Button onClick={() => setIsReadOnly(false)} theme="primary">
-            수정
-          </Button>
-        ) : (
-          <Button onClick={handleSave} theme="primary">
-            저장
-          </Button>
-        )}
+        <Button onClick={handleSave} theme="primary">
+          저장
+        </Button>
+
         <Button
           onClick={() =>
             navigate("/contents/whatson/media?refresh=" + Date.now())
