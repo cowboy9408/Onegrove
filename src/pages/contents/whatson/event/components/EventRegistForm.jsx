@@ -10,7 +10,7 @@ import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
 import Radio from "@/components/common/Radio";
 import Upload from "@/components/common/Upload";
-import DateRangePicker from "@/components/common/Datepicker";
+import Datepicker from "@/components/common/Datepicker";
 import Editor from "@/components/common/Editor";
 import Button from "@/components/common/Button";
 import Row from "@/components/layout/Row";
@@ -19,6 +19,7 @@ import BrandList from "@/components/modal/BrandList";
 import useModal from "@/hooks/useModal";
 import api from "@/lib/apiClient";
 import Textarea from "@/components/common/Textarea";
+import "react-datepicker/dist/react-datepicker.css";
 
 const EventRegistForm = forwardRef(
   ({ data, setData, lang, readOnly = false }, ref) => {
@@ -28,10 +29,10 @@ const EventRegistForm = forwardRef(
     const editorRef2 = useRef();
     const [brands, setBrands] = useState([]);
     const { showModal } = useModal();
-    const [dateRange, setDateRange] = useState({
-      startDate: null,
-      endDate: null,
-    });
+    const [startDate, setStartDate] = useState(null);
+    const [startTime, setStartTime] = useState("00:00");
+    const [endDate, setEndDate] = useState(null);
+    const [endTime, setEndTime] = useState("00:00");
     const [categoryOptions, setCategoryOptions] = useState([]);
 
     useEffect(() => {
@@ -65,17 +66,21 @@ const EventRegistForm = forwardRef(
         editorRef1.current?.setContent?.(data.content || "");
         editorRef2.current?.setContent?.(data.description || "");
 
-        setDateRange({
-          startDate: data.startDate ? new Date(data.startDate) : null,
-          endDate: data.endDate ? new Date(data.endDate) : null,
-        });
-
         // 브랜드 정보도 세팅
         if (data.brandId) {
-          setBrands([{ _id: data.brandId, brand: "선택된 브랜드" }]); // 실제 brand 명칭 불러올 수 있으면 여기에.
+          setBrands([{ _id: data.brandId, brand: "선택된 브랜드" }]);
         }
 
         console.log("값 세팅 완료");
+      }
+    }, [data]);
+
+    useEffect(() => {
+      if (data?.startDate) {
+        setStartDate(new Date(data.startDate));
+      }
+      if (data?.endDate) {
+        setEndDate(new Date(data.endDate));
       }
     }, [data]);
 
@@ -96,8 +101,8 @@ const EventRegistForm = forwardRef(
         console.log("검사 대상 값들:", {
           title: values.title,
           category: values.category,
-          startDate: dateRange?.startDate,
-          endDate: dateRange?.endDate,
+          startDate: startDate,
+          endDate: endDate,
           thumbImg: values.thumbImg,
           imgBodyPc: values.imgBodyPc,
           imgBodyMo: values.imgBodyMo,
@@ -111,8 +116,8 @@ const EventRegistForm = forwardRef(
         if (
           !values.title?.trim() ||
           !values.category ||
-          !dateRange.startDate ||
-          !dateRange.endDate ||
+          !startDate ||
+          !endDate ||
           !values.thumbImg ||
           !values.imgBodyPc ||
           !values.imgBodyMo ||
@@ -149,8 +154,8 @@ const EventRegistForm = forwardRef(
         if (
           !values.title?.trim() ||
           !values.category ||
-          !dateRange.startDate ||
-          !dateRange.endDate ||
+          !startDate ||
+          !endDate ||
           !watch("thumbImg") ||
           !watch("imgBodyPc") ||
           !watch("imgBodyMo") ||
@@ -165,7 +170,7 @@ const EventRegistForm = forwardRef(
         }
 
         return {
-          eventId: data?.id,
+          eventId: data?.id ?? null,
           lang,
           showYn: values.status === "active" ? "Y" : "N",
           sort: Number(values.order) || 1,
@@ -178,9 +183,9 @@ const EventRegistForm = forwardRef(
           imgMo: toImageMeta(values.imgMo),
           content: content || "",
           description: description || "",
-          startDate: dateRange.startDate?.toISOString() || null,
-          endDate: dateRange.endDate?.toISOString() || null,
-          brandId: brands[0]?._id,
+          startDate: startDate?.toISOString() || null,
+          endDate: endDate?.toISOString() || null,
+          brandId: brands[0]?._id ?? null,
           delYn: "N",
         };
       },
@@ -297,17 +302,55 @@ const EventRegistForm = forwardRef(
           <Editor ref={editorRef1} readOnly={readOnly} />
 
           {/* 날짜 선택 */}
-          <p className="text-sm font-medium">
-            이벤트 기간<span className="text-red-500">*</span>
+          <p className="min-w-[80px] text-sm font-medium text-gray-800">
+            이벤트 기간<span className="ml-1 text-red-500">*</span>
           </p>
-          <DateRangePicker
-            startDate={dateRange.startDate}
-            endDate={dateRange.endDate}
-            disabled={readOnly}
-            onRangeChange={({ startDate, endDate }) =>
-              setDateRange({ startDate, endDate })
-            }
-          />
+
+          {/* 시작 날짜 + 시간 */}
+          <div className="flex items-center gap-4">
+            {/* 시작 날짜 + 시간 */}
+            <div className="flex items-center gap-2">
+              <Datepicker
+                mode="single"
+                selectedDate={startDate}
+                onSingleChange={(date) => {
+                  setStartDate(date);
+                  setValue("startDate", date?.toISOString());
+                }}
+                readOnly={readOnly}
+              />
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="rounded border px-2 py-1"
+                disabled={readOnly}
+              />
+            </div>
+
+            {/* ~ 기호 */}
+            <span className="font-bold">~</span>
+
+            {/* 종료 날짜 + 시간 */}
+            <div className="flex items-center gap-2">
+              <Datepicker
+                mode="single"
+                selectedDate={endDate}
+                onSingleChange={(date) => {
+                  setEndDate(date);
+                  setValue("endDate", date?.toISOString());
+                }}
+                readOnly={readOnly}
+              />
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className="rounded border px-2 py-1"
+                disabled={readOnly}
+              />
+            </div>
+          </div>
 
           {/* 브랜드 선택 */}
           <Row className="pb-4">
@@ -392,7 +435,7 @@ const EventRegistForm = forwardRef(
             }}
           />
 
-          {/* 내용 에디터 2 */}
+          {/* 내용 텍스트 공간 */}
           <Textarea
             id="description"
             name="description"

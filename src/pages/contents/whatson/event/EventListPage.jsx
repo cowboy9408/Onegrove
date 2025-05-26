@@ -68,6 +68,7 @@ export default function EventListPage() {
 
               created_at_ko: koItem.createDatetime || "-",
               created_at_en: enItem.createDatetime || "-",
+              created_at: koItem.createDatetime || enItem.createDatetime || "-",
               _id: `${entry.emId}`,
             };
           });
@@ -92,15 +93,22 @@ export default function EventListPage() {
 
           function parseValidDate(str) {
             if (!str || str === "-") return new Date("1970-01-01");
-            return new Date(str);
+            const date = new Date(str);
+            return isNaN(date.getTime()) ? new Date("1970-01-01") : date;
           }
 
           const sorted = filtered.sort((a, b) => {
             const dateA = parseValidDate(a.created_at_ko || a.created_at_en);
             const dateB = parseValidDate(b.created_at_ko || b.created_at_en);
-            return dateB - dateA; // 최신순
+            return dateB - dateA; // 최신순 (최근 날짜가 먼저)
           });
-
+          console.log(
+            "원시 데이터 createDatetime들",
+            json.data.map((entry) => ({
+              ko: entry.items?.find((i) => i.lang === "ko")?.createDatetime,
+              en: entry.items?.find((i) => i.lang === "en")?.createDatetime,
+            }))
+          );
           const start = (page - 1) * size;
           const end = start + size;
           console.log("총 필터링된 데이터:", filtered.length);
