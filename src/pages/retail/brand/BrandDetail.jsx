@@ -154,25 +154,27 @@ export default function BrandDetail() {
   }, [currentLang, koData, enData]);
 
   const toImageMeta = (file, original) => {
-    if (!file || !file.name) {
-      return original || null;
-    }
+    const base = file || original;
+    if (!base) return null;
+
+    const originalName = base.originalName || base.name || "";
+    const extension = base.extension || "." + originalName.split(".").pop();
 
     return {
-      id: file.id || null,
-      originalName: file.originalName || file.name,
-      name: file.name,
-      size: file.size,
-      extension: "." + (file.originalName || file.name).split(".").pop(),
-      mime: file.type || "image/png",
-      classification: file.classification ?? "press-media",
-      path: file.path,
+      id: base.id ?? null,
+      originalName: originalName,
+      name: base.name ?? originalName,
+      size: base.size ?? 0,
+      extension: extension,
+      mime: base.mime || "image/jpeg",
+      classification: base.classification || "press-media",
+      path: base.path || null,
       status:
-        file.status !== undefined && file.status !== null
-          ? file.status
-          : file.changed
+        base.status !== undefined && base.status !== null
+          ? base.status
+          : file?.changed
             ? "E"
-            : "R",
+            : "R", // 수정 안 하면 R
     };
   };
 
