@@ -227,14 +227,14 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
 
         <Upload
           name="mainImage"
-          label="썸네일 이미지"
+          label="리스트 이미지"
           required
           classification="brand"
           preview
           readOnly={readOnly}
         />
         <Input
-          label="썸네일 텍스트"
+          label="리스트 Hover 텍스트"
           maxLength={200}
           showDefaultInfo
           required
@@ -261,14 +261,14 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
         {/* 이미지 업로드 */}
         <Upload
           name="pcImage"
-          label="PC 본문 이미지"
+          label="PC 상세 KV 이미지"
           required
           classification="brand"
           readOnly={readOnly}
         />
         <Upload
           name="moImage"
-          label="MO 본문 이미지"
+          label="MO 상세 KV 이미지"
           required
           classification="brand"
           readOnly={readOnly}
@@ -337,42 +337,18 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
             {...register("homepageUrl")}
             width="w-[550px]"
           />
-          <Controller
-            name="homepageNewTab"
-            control={control}
-            render={({ field }) => (
-              <Checkbox
-                label="새 창"
-                disabled={readOnly}
-                checked={field.value}
-                onChange={(e) => field.onChange(e.target.checked)}
-              />
-            )}
-          />
         </div>
 
         {/* SNS URL */}
         <div className="w-[800px] space-y-3 rounded-md border border-black p-4">
           <p className="text-sm font-medium">SNS URL</p>
-          {["instagram", "facebook", "youtube", "twitter"].map((sns) => (
+          {["instagram", "facebook", "youtube", "twitter", "blog"].map((sns) => (
             <div key={sns} className="flex items-center gap-4">
               <NewInput
-                label={sns === "twitter" ? "X" : sns}
+                label={sns === "twitter" ? "X(twitter)" : sns}
                 disabled={readOnly}
                 {...register(`sns.${sns}.url`)}
                 width="w-[500px]"
-              />
-              <Controller
-                name={`sns.${sns}.newWindow`}
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    label="새 창"
-                    checked={field.value}
-                    onChange={(e) => field.onChange(e.target.checked)}
-                    disabled={readOnly}
-                  />
-                )}
               />
             </div>
           ))}
