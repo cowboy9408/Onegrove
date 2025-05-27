@@ -53,7 +53,6 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
       filterSuggestionItems(getDefaultReactSlashMenuItems(editor), query);
   }, [editor]);
 
-  // ✅ 초기 HTML을 BlockNote 문서로 변환하여 세팅
   useEffect(() => {
     async function loadInitialHTML() {
       if (typeof initialContent === "string" && initialContent.trim()) {
