@@ -237,6 +237,12 @@ const EventRegistForm = forwardRef(
         };
       },
       setValue,
+      setDescription: (desc) => {
+        setValue("description", desc);
+      },
+      setContent: (html) => {
+        editorRef1.current?.setContent?.(html);
+      },
     }));
     console.log("brands", brands);
     return (

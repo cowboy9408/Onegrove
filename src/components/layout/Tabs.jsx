@@ -1,7 +1,11 @@
 import React, { useState, Children, cloneElement } from "react";
 
 export function TabPanel({ children, isActive, className = "" }) {
-  return isActive ? <div className={`${className}`}>{children}</div> : null;
+  return (
+    <div className={`${className} ${isActive ? "block" : "hidden"}`}>
+      {children}
+    </div>
+  );
 }
 
 export default function Tabs({
