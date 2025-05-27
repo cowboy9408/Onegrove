@@ -101,7 +101,7 @@ const insertAdditionalItem = (editor) => ({
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 22px 텍스트사이즈를 입력합니다.", styles: { } }],
+      content: [{ type: "text", text: "폰트사이즈 22px 텍스트사이즈를 입력합니다.", class: "f22" }],
     }),
   aliases: ["textStyle22", "hw"],
   group: "textStyle",
@@ -115,7 +115,7 @@ const insertAdditionalItem2 = (editor) => ({
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 20px 텍스트사이즈를 입력합니다.", styles: { } }],
+      content: [{ type: "text", text: "폰트사이즈 20px 텍스트사이즈를 입력합니다.", class: "f20" }],
     }),
   aliases: ["textStyle20", "hw"],
   group: "textStyle",
@@ -129,7 +129,7 @@ const insertAdditionalItem3 = (editor) => ({
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 18px 텍스트사이즈를 입력합니다.", styles: { } }],
+      content: [{ type: "text", text: "폰트사이즈 18px 텍스트사이즈를 입력합니다.", class: "f18" }],
     }),
   aliases: ["textStyle18", "hw"],
   group: "textStyle",
@@ -138,40 +138,13 @@ const insertAdditionalItem3 = (editor) => ({
   description: "텍스트사이즈 18px을 입력합니다.",
 });
 
+
 const insertAdditionalItem4 = (editor) => ({
-  title: "텍스트사이즈 16px",
+  title: "텍스트사이즈 17px",
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 16px 텍스트사이즈를 입력합니다.", styles: { } }],
-    }),
-  aliases: ["textStyle16", "hw"],
-  group: "textStyle",
-  icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: "폰트사이즈 16px 텍스트사이즈를 입력합니다.",
-  description: "텍스트사이즈 16px을 입력합니다.",
-});
-
-const insertAdditionalItem5 = (editor) => ({
-  title: "텍스트사이즈 14px",
-  onItemClick: () =>
-    insertOrUpdateBlock(editor, {
-      type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 14px 텍스트사이즈를 입력합니다.", styles: { } }],
-    }),
-  aliases: ["textStyle14", "hw"],
-  group: "textStyle",
-  icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: "폰트사이즈 14px 텍스트사이즈를 입력합니다.",
-  description: "텍스트사이즈 14px을 입력합니다.",
-});
-
-const insertAdditionalItem6 = (editor) => ({
-  title: "텍스트사이즈 13px",
-  onItemClick: () =>
-    insertOrUpdateBlock(editor, {
-      type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 13px 텍스트사이즈를 입력합니다.", styles: { } }],
+      content: [{ type: "text", text: "폰트사이즈 13px 텍스트사이즈를 입력합니다.", class: "f17" }],
     }),
   aliases: ["textStyle13", "hw"],
   group: "textStyle",
@@ -180,12 +153,40 @@ const insertAdditionalItem6 = (editor) => ({
   description: "텍스트사이즈 13px을 입력합니다.",
 });
 
+const insertAdditionalItem5 = (editor) => ({
+  title: "텍스트사이즈 16px",
+  onItemClick: () =>
+    insertOrUpdateBlock(editor, {
+      type: "paragraph",
+      content: [{ type: "text", text: "폰트사이즈 16px 텍스트사이즈를 입력합니다.", class: "f16" }],
+    }),
+  aliases: ["textStyle16", "hw"],
+  group: "textStyle",
+  icon: <HiOutlineGlobeAlt size={18} />,
+  subtext: "폰트사이즈 16px 텍스트사이즈를 입력합니다.",
+  description: "텍스트사이즈 16px을 입력합니다.",
+});
+
+const insertAdditionalItem6 = (editor) => ({
+  title: "텍스트사이즈 14px",
+  onItemClick: () =>
+    insertOrUpdateBlock(editor, {
+      type: "paragraph",
+      content: [{ type: "text", text: "폰트사이즈 14px 텍스트사이즈를 입력합니다.", class: "f14" }],
+    }),
+  aliases: ["textStyle14", "hw"],
+  group: "textStyle",
+  icon: <HiOutlineGlobeAlt size={18} />,
+  subtext: "폰트사이즈 14px 텍스트사이즈를 입력합니다.",
+  description: "텍스트사이즈 14px을 입력합니다.",
+});
+
 const insertAdditionalItem7 = (editor) => ({
   title: "텍스트사이즈 12px",
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 12px 텍스트사이즈를 입력합니다.", styles: { } }],
+      content: [{ type: "text", text: "폰트사이즈 12px 텍스트사이즈를 입력합니다.", class: "f12" }],
     }),
   aliases: ["textStyle12", "hw"],
   group: "textStyle",
@@ -193,6 +194,35 @@ const insertAdditionalItem7 = (editor) => ({
   subtext: "폰트사이즈 12px 텍스트사이즈를 입력합니다.",
   description: "텍스트사이즈 12px을 입력합니다.",
 });
+
+const insertAdditionalItem8 = (editor) => ({
+  title: "텍스트사이즈 10px",
+  onItemClick: () =>
+    insertOrUpdateBlock(editor, {
+      type: "paragraph",
+      content: [{ type: "text", text: "폰트사이즈 10px 텍스트사이즈를 입력합니다.", class: "f10" }],
+    }),
+  aliases: ["textStyle10", "hw"],
+  group: "textStyle",
+  icon: <HiOutlineGlobeAlt size={18} />,
+  subtext: "폰트사이즈 10px 텍스트사이즈를 입력합니다.",
+  description: "텍스트사이즈 10px을 입력합니다.",
+});
+
+const insertAdditionalItem9 = (editor) => ({
+  title: "캡션 텍스트",
+  onItemClick: () =>
+    insertOrUpdateBlock(editor, {
+      type: "paragraph",
+      content: [{ type: "text", text: "캡션 텍스트 입력합니다.", class: "f10" }],
+    }),
+  aliases: ["textStyle12", "hw"],
+  group: "textStyle",
+  icon: <HiOutlineGlobeAlt size={18} />,
+  subtext: "캡션 텍스트를 입력합니다.",
+  description: "캡션 텍스트를 입력합니다.",
+});
+
 
 const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
   const { isDarkMode } = useTheme();
@@ -225,6 +255,8 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
         insertAdditionalItem5(editor),
         insertAdditionalItem6(editor),
         insertAdditionalItem7(editor),
+        insertAdditionalItem8(editor),
+        insertAdditionalItem9(editor),
         ...defaultItems];
       return filterSuggestionItems(customItems, query);
     };
