@@ -102,6 +102,8 @@ export default function EventDetail() {
         formRef.setValue("imgMo", patchImageMeta(ensurePath(data.imgMo)));
         formRef.setValue("content", data.content || "");
         formRef.setValue("description", data.description || "");
+        formRef.setDescription?.(data.description || "");
+        formRef.setContent?.(data.content || "");
         formRef.setValue(
           "startDate",
           data.startDate ? parseLocalDateTime(data.startDate) : null
@@ -249,21 +251,89 @@ export default function EventDetail() {
         }}
       >
         <TabPanel>
-          <EventRegistForm
-            ref={koFormRef}
-            data={koData}
-            setData={setKoData}
-            lang="ko"
-          />
+          {!loading && (
+            <>
+              <EventRegistForm
+                ref={koFormRef}
+                data={koData}
+                setData={setKoData}
+                lang="ko"
+              />
+              <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
+                <tbody>
+                  <tr>
+                    <th className="w-32 border bg-gray-100 px-4 py-2">
+                      등록일시
+                    </th>
+                    <td className="border px-4 py-2">
+                      {koData?.createDatetime || "-"}
+                    </td>
+                    <th className="w-32 border bg-gray-100 px-4 py-2">
+                      등록자
+                    </th>
+                    <td className="border px-4 py-2">
+                      {koData?.createUser || "-"}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className="border bg-gray-100 px-4 py-2">수정일시</th>
+                    <td className="border px-4 py-2">
+                      {koData?.updateDatetime || "-"}
+                    </td>
+                    <th className="border bg-gray-100 px-4 py-2">
+                      최근 수정자
+                    </th>
+                    <td className="border px-4 py-2">
+                      {koData?.updateUser || "-"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </>
+          )}
         </TabPanel>
 
         <TabPanel>
-          <EventRegistForm
-            ref={enFormRef}
-            data={enData}
-            setData={setEnData}
-            lang="en"
-          />
+          {!loading && (
+            <>
+              <EventRegistForm
+                ref={enFormRef}
+                data={enData}
+                setData={setEnData}
+                lang="en"
+              />
+              <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
+                <tbody>
+                  <tr>
+                    <th className="w-32 border bg-gray-100 px-4 py-2">
+                      등록일시
+                    </th>
+                    <td className="border px-4 py-2">
+                      {enData?.createDatetime || "-"}
+                    </td>
+                    <th className="w-32 border bg-gray-100 px-4 py-2">
+                      등록자
+                    </th>
+                    <td className="border px-4 py-2">
+                      {enData?.createUser || "-"}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className="border bg-gray-100 px-4 py-2">수정일시</th>
+                    <td className="border px-4 py-2">
+                      {enData?.updateDatetime || "-"}
+                    </td>
+                    <th className="border bg-gray-100 px-4 py-2">
+                      최근 수정자
+                    </th>
+                    <td className="border px-4 py-2">
+                      {enData?.updateUser || "-"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </>
+          )}
         </TabPanel>
       </Tabs>
       <div className="flex justify-end gap-4 px-6 pb-6">

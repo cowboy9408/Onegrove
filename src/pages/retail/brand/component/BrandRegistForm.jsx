@@ -67,21 +67,22 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
 
       // 이미지 메타데이터 변환 함수
       const toImageMeta = (file) => {
-        console.log("toImageMeta file:", file);
-        if (!file || !file.name) return null;
+        if (!file || !file.name || !file.path) {
+          console.warn("이미지 path 누락:", file);
+          return null;
+        }
 
         return {
+          id: file.id ?? null,
           originalName: file.originalName || file.name,
           name: file.name,
           size: file.size,
           extension: "." + (file.originalName || file.name).split(".").pop(),
           mime: file.type || "image/png",
-          classification: file.classification ?? "brand",
+          classification: "brand",
           path: file.path,
-          status: file.status ?? "R",
-          // status: null,
+          status: file.status ?? "C",
         };
-          
       };
 
       return {
@@ -168,45 +169,6 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
                   : [...field.value, value];
                 field.onChange(newValue);
               };
-
-              const options = [
-                {
-                  code: "key0101",
-                  value: "Man",
-                },
-                {
-                  code: "key0102",
-                  value: "Woman",
-                },
-                {
-                  code: "key0103",
-                  value: "Lifewear",
-                },
-                {
-                  code: "key0104",
-                  value: "Street Fashion",
-                },
-                {
-                  code: "key0105",
-                  value: "Sportswear",
-                },
-                {
-                  code: "key0106",
-                  value: "SPA",
-                },
-                {
-                  code: "key0107",
-                  value: "Luxury",
-                },
-                {
-                  code: "key0108",
-                  value: "Kids",
-                },
-                {
-                  code: "key0109",
-                  value: "Beauty",
-                },
-              ];
 
               return (
                 <div className="flex flex-wrap gap-4">
