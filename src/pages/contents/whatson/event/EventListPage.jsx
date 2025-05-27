@@ -54,6 +54,18 @@ export default function EventListPage() {
   }, []);
 
   useEffect(() => {
+    const paramStart = searchParams.get("startDate");
+    const paramEnd = searchParams.get("endDate");
+
+    if (paramStart || paramEnd) {
+      setDateRange({
+        startDate: paramStart ? new Date(paramStart) : null,
+        endDate: paramEnd ? new Date(paramEnd) : null,
+      });
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await api.get("/api/v1/event-promotion/item");
@@ -102,18 +114,27 @@ export default function EventListPage() {
               row.status_ko === (visibility === "Y" ? "노출" : "미노출") ||
               row.status_en === (visibility === "Y" ? "노출" : "미노출");
 
-            function parseValidDate(str) {
-              if (!str || str === "-") return null;
-              const date = new Date(str);
-              return isNaN(date.getTime()) ? null : date;
+            function parseDateOnly(input) {
+              const date = new Date(input);
+              if (isNaN(date.getTime())) return null;
+              return new Date(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate()
+              );
             }
 
-            const rowDate = parseValidDate(row.created_at);
+            const rowDate = parseDateOnly(row.created_at);
+            const startDateOnly = dateRange.startDate
+              ? parseDateOnly(dateRange.startDate)
+              : null;
+            const endDateOnly = dateRange.endDate
+              ? parseDateOnly(dateRange.endDate)
+              : null;
+
             const dateMatch =
-              (!dateRange.startDate ||
-                (rowDate && rowDate >= new Date(dateRange.startDate))) &&
-              (!dateRange.endDate ||
-                (rowDate && rowDate <= new Date(dateRange.endDate)));
+              (!startDateOnly || (rowDate && rowDate >= startDateOnly)) &&
+              (!endDateOnly || (rowDate && rowDate <= endDateOnly));
 
             return titleMatch && categoryMatch && visibilityMatch && dateMatch;
           });
@@ -203,9 +224,10 @@ export default function EventListPage() {
             <DateRangePicker
               startDate={dateRange.startDate}
               endDate={dateRange.endDate}
-              onChange={({ startDate, endDate }) =>
-                setDateRange({ startDate, endDate })
-              }
+              onRangeChange={({ startDate, endDate }) => {
+                console.log("날짜 선택됨:", startDate, endDate);
+                setDateRange({ startDate, endDate });
+              }}
             />
             <Col>
               <Input
@@ -241,7 +263,18 @@ export default function EventListPage() {
               <Button
                 onClick={() => {
                   setPage(1);
-                  setSearchParams({ name, category, visibility, page: 1 });
+                  setSearchParams({
+                    name,
+                    category,
+                    visibility,
+                    page: 1,
+                    ...(dateRange.startDate && {
+                      startDate: dateRange.startDate.toISOString(),
+                    }),
+                    ...(dateRange.endDate && {
+                      endDate: dateRange.endDate.toISOString(),
+                    }),
+                  });
                 }}
               >
                 검색

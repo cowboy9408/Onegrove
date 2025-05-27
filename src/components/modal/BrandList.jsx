@@ -7,24 +7,46 @@ import Box from "../layout/Box";
 import Col from "../layout/Col";
 import Row from "../layout/Row";
 import useModal from "@/hooks/useModal";
-
-
+import api from "@/lib/apiClient";
 
 export default function BrandList({ selected = [], onConfirm, closeModal }) {
-  const [items, setItems] = useState([]);
-  const [checked, setChecked] = useState(selected.map(String));
-  const { showModal } = useModal(); // 
-  
+  const [items, setItems] = useState([]); // 전체 목록
+  const [filteredItems, setFilteredItems] = useState([]); // 검색 결과
+  const [checked, setChecked] = useState(selected.map(String)); // 체크된 ID (문자열로 변환)
+  const [keyword, setKeyword] = useState(""); // 검색어
+  const { showModal } = useModal();
 
   useEffect(() => {
-    // TODO: Fetch DATA
-    setItems([
-      { _id: 1, category: "Lifewear", brand: "Uniqlo" },
-      { _id: 2, category: "Woman", brand: "SHESMISS" },
-    ]);
+    const fetchBrands = async () => {
+      try {
+        const res = await api.get("/api/v1/event-promotion/item/brand?lang=ko");
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          const parsed = res.data.data.map((item) => ({
+            _id: String(item.id),
+            id: item.id,
+            category: item.category || "-",
+            brandName: item.brandName || "-",
+          }));
+
+          setItems(parsed);
+          setFilteredItems(parsed);
+        }
+      } catch (err) {
+        console.error("브랜드 목록 불러오기 실패:", err);
+      }
+    };
+
+    fetchBrands();
   }, []);
 
-  
+  const handleSearch = () => {
+    const kw = keyword.trim().toLowerCase();
+    const result = items.filter((item) =>
+      item.brandName.toLowerCase().includes(kw)
+    );
+    setFilteredItems(result);
+  };
+
   return (
     <>
       <div className="h-96 overflow-y-scroll">
@@ -33,29 +55,38 @@ export default function BrandList({ selected = [], onConfirm, closeModal }) {
             <Col>
               <Select label="대표 카테고리" topLabel={false}>
                 <option value="">전체</option>
-                <option value="">통합</option>
               </Select>
             </Col>
             <Col>
-              <Input label="브랜드명" topLabel={false} />
+              <Input
+                label="브랜드명"
+                topLabel={false}
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+              />
             </Col>
             <Col className="self-end">
-              <Button className={"h-12 w-full"}>검색</Button>
+              <Button className="h-12 w-full" onClick={handleSearch}>
+                검색
+              </Button>
             </Col>
           </Row>
         </Box>
+
         <DataTable
           columns={[
             { key: "category", label: "대표 카테고리" },
-            { key: "brand", label: "브랜드명" },
-            
+            { key: "brandName", label: "브랜드명" },
           ]}
-          data={items}
+          data={filteredItems}
+          rowKey="key"
           checkable
           checkedIds={checked}
           onCheck={(id, isChecked) => {
+            console.log("체크된 id:", id, "체크 상태:", isChecked);
+            const idStr = String(id);
             setChecked((prev) =>
-              isChecked ? [...prev, id] : prev.filter((v) => v !== id)
+              isChecked ? [...prev, idStr] : prev.filter((v) => v !== idStr)
             );
           }}
         />
@@ -63,32 +94,39 @@ export default function BrandList({ selected = [], onConfirm, closeModal }) {
 
       <div className="flex justify-center gap-3 pt-3">
         <button
-          className="cursor-pointer rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+          className="rounded-md border px-4 py-2 text-sm text-gray-700"
           onClick={() => setChecked([])}
         >
           초기화
         </button>
         <button
-  className="cursor-pointer rounded-md bg-black px-4 py-2 text-sm text-white transition hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-300"
-  onClick={() => {
-    const selectedBrands = items.filter((item) => checked.includes(item._id));
+          className="rounded-md bg-black px-4 py-2 text-sm text-white"
+          onClick={() => {
+            const selectedBrands = items.filter((item) =>
+              checked.includes(item._id)
+            );
 
-    if (selectedBrands.length > 1) {
-      showModal({
-        title: "안내",
-        children: <p>브랜드는 1개만 선택 가능합니다.</p>,
-        showCancel: false,
-      });
-      return;
-    }
+            if (selectedBrands.length > 1) {
+              showModal({
+                title: "안내",
+                children: <p>브랜드는 1개만 선택 가능합니다.</p>,
+                showCancel: false,
+              });
+              return;
+            }
 
-    // 공통 컴포넌트는 선택된 값만 전달!
-    onConfirm?.(selectedBrands); // 
-    closeModal();
-  }}
->
-  추가
-</button>
+            onConfirm?.(
+              selectedBrands.map((b) => ({
+                _id: String(b.id), // 서버로 보낼 brandId
+                brand: b.brandName, // 화면 표시용
+              }))
+            );
+
+            closeModal();
+          }}
+        >
+          추가
+        </button>
       </div>
     </>
   );
