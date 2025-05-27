@@ -22,6 +22,7 @@ import {
 } from "@blocknote/xl-multi-column";
 import { HiOutlineGlobeAlt } from "react-icons/hi";
 
+
 // 파일 업로드 핸들러
 async function uploadFile(selectedFile) {
 
