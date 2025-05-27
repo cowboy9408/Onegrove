@@ -53,6 +53,14 @@ export default function EventDetail() {
     fetchData();
   }, [emId]);
 
+  const parseLocalDateTime = (str) => {
+    if (!str) return null;
+    const [datePart, timePart] = str.split("T"); // ex: "2025-05-27", "14:00"
+    const [year, month, day] = datePart.split("-").map(Number);
+    const [hour, minute] = timePart.split(":").map(Number);
+    return new Date(year, month - 1, day, hour, minute);
+  };
+
   useEffect(() => {
     if (!loading) {
       const patchForm = (formRef, data) => {
@@ -96,11 +104,11 @@ export default function EventDetail() {
         formRef.setValue("description", data.description || "");
         formRef.setValue(
           "startDate",
-          data.startDate ? new Date(data.startDate) : null
+          data.startDate ? parseLocalDateTime(data.startDate) : null
         );
         formRef.setValue(
           "endDate",
-          data.endDate ? new Date(data.endDate) : null
+          data.endDate ? parseLocalDateTime(data.endDate) : null
         );
         formRef.setValue("brandId", data.brandId ?? null);
       };

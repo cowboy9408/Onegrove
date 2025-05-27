@@ -100,20 +100,29 @@ export default function PressListPage() {
               row.status_ko === (visibility === "Y" ? "노출" : "미노출") ||
               row.status_en === (visibility === "Y" ? "노출" : "미노출");
 
-            function parseValidDate(str) {
-              if (!str || str === "-") return null;
-              const date = new Date(str);
-              return isNaN(date.getTime()) ? null : date;
+            function parseDateOnly(input) {
+              const date = new Date(input);
+              if (isNaN(date.getTime())) return null;
+              return new Date(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate()
+              );
             }
 
-            const rowDate = parseValidDate(
+            const rowDate = parseDateOnly(
               row.created_at_ko || row.created_at_en
             );
+            const startDateOnly = dateRange.startDate
+              ? parseDateOnly(dateRange.startDate)
+              : null;
+            const endDateOnly = dateRange.endDate
+              ? parseDateOnly(dateRange.endDate)
+              : null;
+
             const dateMatch =
-              (!dateRange.startDate ||
-                (rowDate && rowDate >= new Date(dateRange.startDate))) &&
-              (!dateRange.endDate ||
-                (rowDate && rowDate <= new Date(dateRange.endDate)));
+              (!startDateOnly || (rowDate && rowDate >= startDateOnly)) &&
+              (!endDateOnly || (rowDate && rowDate <= endDateOnly));
 
             return titleMatch && categoryMatch && visibilityMatch && dateMatch;
           });
@@ -306,7 +315,7 @@ export default function PressListPage() {
             <DateRangePicker
               startDate={dateRange.startDate}
               endDate={dateRange.endDate}
-              onChange={({ startDate, endDate }) =>
+              onRangeChange={({ startDate, endDate }) =>
                 setDateRange({ startDate, endDate })
               }
             />

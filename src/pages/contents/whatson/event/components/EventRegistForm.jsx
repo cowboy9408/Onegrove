@@ -52,6 +52,30 @@ const EventRegistForm = forwardRef(
     }, []);
 
     useEffect(() => {
+      const fetchBrandName = async () => {
+        const brandId = watch("brandId"); // watch는 즉시 값 반영이 어려울 수 있으므로 변수로 추출
+        if (!brandId) return;
+
+        try {
+          const res = await api.get(
+            "/api/v1/event-promotion/item/brand?lang=ko"
+          );
+          const brandList = res.data?.data ?? [];
+
+          const found = brandList.find((b) => String(b.id) === String(brandId));
+
+          if (found) {
+            setBrands([{ _id: found.id, brand: found.brandName }]);
+          }
+        } catch (err) {
+          console.error("브랜드 정보 불러오기 실패", err);
+        }
+      };
+
+      fetchBrandName();
+    }, [watch("brandId")]);
+
+    useEffect(() => {
       console.log("받은 data:", data);
       if (data && Object.keys(data).length > 0) {
         setValue("category", data.category || "");
@@ -77,10 +101,22 @@ const EventRegistForm = forwardRef(
 
     useEffect(() => {
       if (data?.startDate) {
-        setStartDate(new Date(data.startDate));
+        const start = new Date(data.startDate);
+        setStartDate(start);
+
+        // 시간 문자열로 변환 (ex: "09:30")
+        const hh = String(start.getHours()).padStart(2, "0");
+        const mm = String(start.getMinutes()).padStart(2, "0");
+        setStartTime(`${hh}:${mm}`);
       }
+
       if (data?.endDate) {
-        setEndDate(new Date(data.endDate));
+        const end = new Date(data.endDate);
+        setEndDate(end);
+
+        const hh = String(end.getHours()).padStart(2, "0");
+        const mm = String(end.getMinutes()).padStart(2, "0");
+        setEndTime(`${hh}:${mm}`);
       }
     }, [data]);
 
@@ -95,8 +131,19 @@ const EventRegistForm = forwardRef(
           imgMo: watch("imgMo"),
           description: watch("description"),
         };
-        const content = getValues("content");
+        const content = await editorRef1.current?.getContent?.();
         const description = watch("description");
+
+        const [startHour, startMin] = startTime.split(":").map(Number);
+        const [endHour, endMin] = endTime.split(":").map(Number);
+
+        const start = new Date(startDate);
+        start.setHours(startHour, startMin, 0, 0);
+        const startDateStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-${String(start.getDate()).padStart(2, "0")}T${String(startHour).padStart(2, "0")}:${String(startMin).padStart(2, "0")}`;
+
+        const end = new Date(endDate);
+        end.setHours(endHour, endMin, 0, 0);
+        const endDateStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")}T${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
 
         console.log("검사 대상 값들:", {
           title: values.title,
@@ -183,8 +230,8 @@ const EventRegistForm = forwardRef(
           imgMo: toImageMeta(values.imgMo),
           content: content || "",
           description: description || "",
-          startDate: startDate?.toISOString() || null,
-          endDate: endDate?.toISOString() || null,
+          startDate: startDateStr,
+          endDate: endDateStr,
           brandId: brands[0]?._id ?? null,
           delYn: "N",
         };
@@ -394,10 +441,9 @@ const EventRegistForm = forwardRef(
                           setBrands(result);
                           setValue(
                             "lifestyle.brand",
-                            result.map((e) => e._id)
+                            result.map((b) => b.id)
                           );
 
-                          // 먼저 브랜드 선택 모달 닫기
                           closeModal();
 
                           // 이후 모달 충돌 방지를 위해 setTimeout으로 알림 모달 띄움
