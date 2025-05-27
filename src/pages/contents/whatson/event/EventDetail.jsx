@@ -102,6 +102,8 @@ export default function EventDetail() {
         formRef.setValue("imgMo", patchImageMeta(ensurePath(data.imgMo)));
         formRef.setValue("content", data.content || "");
         formRef.setValue("description", data.description || "");
+        formRef.setDescription?.(data.description || "");
+        formRef.setContent?.(data.content || "");
         formRef.setValue(
           "startDate",
           data.startDate ? parseLocalDateTime(data.startDate) : null
