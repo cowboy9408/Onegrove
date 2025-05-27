@@ -15,122 +15,215 @@ export default function EventDetail() {
   const koFormRef = useRef();
   const enFormRef = useRef();
   const { showModal } = useModal();
-  const { eventId } = useParams();
+  const { emId } = useParams();
+
   const [isReadOnly, setIsReadOnly] = useState(true);
   const [loading, setLoading] = useState(true);
 
   // 국문 상태
-  const [koData, setKoData] = useState({
-    keyVisual: [],
-    whatsOn: {},
-    lifestyle: {},
-    work: {},
-    etc: [],
-    banner: {},
-  });
+  const [koData, setKoData] = useState({});
   // 영문 상태
-  const [enData, setEnData] = useState({
-    keyVisual: [],
-    whatsOn: {},
-    lifestyle: {},
-    work: {},
-    etc: [],
-    banner: {},
-  });
-
-  const patchForm = (ref, data) => {
-    if (!data || !ref.current) return;
-    const formValues = {
-      title: data.title,
-      category: data.category,
-      status: data.showYn === "Y" ? "active" : "inactive",
-      order: data.sort,
-      thumbImg: data.thumbImg,
-      imgBodyPc: data.imgBodyPc,
-      imgBodyMo: data.imgBodyMo,
-      imgPc: data.imgPc,
-      imgMo: data.imgMo,
-      content1: data.content,
-      content2: data.description,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      lifestyle: { brand: [data.brandId] },
-    };
-
-    Object.entries(formValues).forEach(([key, value]) => {
-      ref.current.setValue?.(key, value);
-    });
-  };
-
-  const saveOne = async (form, lang) => {
-    const payload = {
-      id: form.id,
-      eventId: Number(eventId),
-      showYn: form.status === "active" ? "Y" : "N",
-      sort: Number(form.order),
-      lang,
-      category: form.category || "ep0101",
-      title: form.title,
-      thumbImg: form.thumbImg,
-      imgBodyPc: form.imgBodyPc,
-      imgBodyMo: form.imgBodyMo,
-      imgPc: form.imgPc,
-      imgMo: form.imgMo,
-      content: form.content1,
-      description: form.content2,
-      startDate: form.startDate,
-      endDate: form.endDate,
-      brandId: form.lifestyle?.brand?.[0],
-      delYn: "N",
-    };
-
-    try {
-      await api.post("/api/v1/event-promotion/item/update", payload);
-    } catch (err) {
-      console.error("수정 실패", err);
-      throw err;
-    }
-  };
+  const [enData, setEnData] = useState({});
+  const defaultEventId = 1;
 
   useEffect(() => {
-    if (!eventId) return;
-
-    const fetchDetail = async () => {
+    const fetchData = async () => {
       try {
-        const res = await api.get(`/api/v1/event-promotion/item/${eventId}`, {
-          withCredentials: true,
-        });
+        const res = await api.get(`/api/v1/event-promotion/item/${emId}`);
+        console.log("API 응답 결과:", res.data);
 
-        const items = res.data?.data || [];
+        const list = Array.isArray(res.data?.data) ? res.data.data : [];
 
-        const koItem = items.find((item) => item.lang === "ko");
-        const enItem = items.find((item) => item.lang === "en");
+        const ko = list.find((item) => item.lang === "ko") || null;
+        const en = list.find((item) => item.lang === "en") || null;
 
-        patchForm(koFormRef, koItem);
-        patchForm(enFormRef, enItem);
+        console.log("koData:", ko);
+        console.log("enData:", en);
+
+        setKoData(ko);
+        setEnData(en);
+        setLoading(false);
       } catch (err) {
-        console.error("이벤트 상세 조회 실패:", err);
-        alert("인증 정보가 없거나 접근이 거부되었습니다.");
+        console.error("API 호출 실패:", err);
+        setKoData(null);
+        setEnData(null);
+        setLoading(false);
       }
     };
+    fetchData();
+  }, [emId]);
 
-    fetchDetail();
-  }, [eventId]);
+  useEffect(() => {
+    if (!loading) {
+      const patchForm = (formRef, data) => {
+        if (!formRef || !data) return;
 
-  useEffect;
+        const ensurePath = (img) => {
+          if (!img || img.path) return img;
+          if (img.originalName) {
+            return {
+              ...img,
+              path: `https://d2md7choov3drl.cloudfront.net/event-promotion/${img.originalName}`,
+            };
+          }
+          return img;
+        };
+
+        const patchImageMeta = (img) =>
+          img?.path
+            ? {
+                ...img,
+                status: "R",
+              }
+            : null;
+
+        formRef.setValue("category", data.category || data.categoryCode || "");
+        formRef.setValue("title", data.title || "");
+        formRef.setValue("status", data.showYn === "Y" ? "active" : "inactive");
+        formRef.setValue("publishDate", data.publishDate || "");
+        formRef.setValue("thumbImg", patchImageMeta(ensurePath(data.thumbImg)));
+        formRef.setValue(
+          "imgBodyPc",
+          patchImageMeta(ensurePath(data.imgBodyPc))
+        );
+        formRef.setValue(
+          "imgBodyMo",
+          patchImageMeta(ensurePath(data.imgBodyMo))
+        );
+        formRef.setValue("imgPc", patchImageMeta(ensurePath(data.imgPc)));
+        formRef.setValue("imgMo", patchImageMeta(ensurePath(data.imgMo)));
+        formRef.setValue("content", data.content || "");
+        formRef.setValue("description", data.description || "");
+        formRef.setValue(
+          "startDate",
+          data.startDate ? new Date(data.startDate) : null
+        );
+        formRef.setValue(
+          "endDate",
+          data.endDate ? new Date(data.endDate) : null
+        );
+        formRef.setValue("brandId", data.brandId ?? null);
+      };
+
+      patchForm(koFormRef.current, koData);
+      patchForm(enFormRef.current, enData);
+    }
+  }, [loading, koData, enData]);
+
+  useEffect(() => {
+    if (!loading) {
+      console.log("koFormRef.current:", koFormRef.current);
+      console.log("enFormRef.current:", enFormRef.current);
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    console.log(" KO 데이터:", koData);
+    console.log(" EN 데이터:", enData);
+  }, [koData, enData]);
+
+  const toImageMeta = (file, original) => {
+    const base = file || original;
+    if (!base) return null;
+
+    const originalName = base.originalName || base.name || "";
+    const extension = base.extension || "." + originalName.split(".").pop();
+
+    return {
+      id: base.id ?? null,
+      originalName: originalName,
+      name: base.name ?? originalName,
+      size: base.size ?? 0,
+      extension: extension,
+      mime: base.mime || "image/jpeg",
+      classification: base.classification || "event-promotion",
+      path: base.path || "",
+      status:
+        base.status !== undefined && base.status !== null
+          ? base.status
+          : file?.changed
+            ? "E"
+            : "R", // 수정 안 하면 R
+    };
+  };
 
   const handleSave = async () => {
-    const ref = currentLang === 0 ? koFormRef : enFormRef;
-    const form = await ref.current?.submit?.();
-    if (!form) return;
-
     try {
-      await saveOne(form, currentLang === 0 ? "ko" : "en");
-      alert("저장되었습니다.");
-      navigate("/contents/whatson/event/list");
+      const saveOne = async (data, original = {}) => {
+        const isInsert = !data.id;
+        const payload = {
+          ...(isInsert ? {} : { id: data.id }),
+          eventId: koData?.eventId ?? enData?.eventId ?? defaultEventId,
+          lang: data.lang,
+          category: data.category,
+          title: data.title,
+          thumbImg: toImageMeta(data.thumbImg, original.thumbImg),
+          imgBodyPc: toImageMeta(data.imgBodyPc, original.imgBodyPc),
+          imgBodyMo: toImageMeta(data.imgBodyMo, original.imgBodyMo),
+          imgPc: toImageMeta(data.imgPc, original.imgPc),
+          imgMo: toImageMeta(data.imgMo, original.imgMo),
+          showYn: data.showYn,
+          content: data.content,
+          description: data.description || "",
+          startDate:
+            (typeof data.startDate === "string"
+              ? new Date(data.startDate)
+              : data.startDate
+            )?.toISOString() || null,
+          endDate:
+            (typeof data.endDate === "string"
+              ? new Date(data.endDate)
+              : data.endDate
+            )?.toISOString() || null,
+          brandId: data.brandId ?? null,
+          delYn: "N",
+        };
+
+        console.log("저장 payload:", payload);
+
+        const apiUrl =
+          data?.id != null
+            ? "/api/v1/event-promotion/item/update"
+            : "/api/v1/event-promotion/item/insert";
+        const res = await api.post(apiUrl, payload);
+
+        console.log("응답 결과:", res.data);
+      };
+
+      if (currentLang === 0) {
+        const koValues = await koFormRef.current?.submit?.();
+        if (!koValues) return;
+
+        await saveOne(
+          {
+            ...koValues,
+            id: koData?.id ?? null,
+            eventId: koData?.eventId ?? enData?.eventId ?? null,
+            lang: "ko",
+          },
+          koData || {}
+        );
+      } else {
+        const enValues = await enFormRef.current?.submit?.();
+        if (!enValues) return;
+
+        await saveOne(
+          {
+            ...enValues,
+            id: enData?.id ?? null,
+            eventId: koData?.eventId ?? null,
+            lang: "en",
+          },
+          enData || {}
+        );
+      }
+
+      alert("저장 완료");
+      setIsReadOnly(true);
+      navigate("/contents/whatson/event/list?refresh=" + Date.now());
     } catch (err) {
-      console.error("저장 실패", err);
-      alert("저장 중 오류가 발생했습니다.");
+      console.error("저장 실패:", err);
+      alert("저장 실패. 다시 시도해주세요.");
     }
   };
 
@@ -146,7 +239,6 @@ export default function EventDetail() {
           // 탭 비활성화: 클릭 무시
           if (!loading) setCurrentLang(index);
         }}
-        disabled={isReadOnly}
       >
         <TabPanel>
           <EventRegistForm
@@ -154,7 +246,6 @@ export default function EventDetail() {
             data={koData}
             setData={setKoData}
             lang="ko"
-            readOnly={isReadOnly}
           />
         </TabPanel>
 
@@ -164,30 +255,26 @@ export default function EventDetail() {
             data={enData}
             setData={setEnData}
             lang="en"
-            readOnly={isReadOnly}
           />
         </TabPanel>
       </Tabs>
       <div className="flex justify-end gap-4 px-6 pb-6">
-        {isReadOnly ? (
-          <Button onClick={() => setIsReadOnly(false)}>수정</Button>
-        ) : (
-          <Button
-            onClick={() =>
-              showModal({
-                title: "저장 확인",
-                message: "저장하시겠습니까?",
-                showCancel: true,
-                onConfirm: async () => {
-                  await handleSave();
-                  setIsReadOnly(true); // 저장 후 다시 읽기 전용
-                },
-              })
-            }
-          >
-            저장
-          </Button>
-        )}
+        <Button
+          onClick={() =>
+            showModal({
+              title: "저장 확인",
+              message: "저장하시겠습니까?",
+              showCancel: true,
+              onConfirm: async () => {
+                await handleSave();
+                setIsReadOnly(true); // 저장 후 다시 읽기 전용
+              },
+            })
+          }
+        >
+          저장
+        </Button>
+
         <Button
           type="button"
           className="bg-gray-200"
@@ -196,7 +283,8 @@ export default function EventDetail() {
               title: "이동 확인",
               message: "이전 페이지로 돌아갈 경우 입려한 정보가 사라집니다.",
               showCancel: true,
-              onConfirm: () => navigate("/contents/whatson/event/list"),
+              onConfirm: () =>
+                navigate("/contents/whatson/event/list?refresh=" + Date.now()),
             })
           }
         >

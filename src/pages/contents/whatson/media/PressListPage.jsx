@@ -28,13 +28,29 @@ export default function PressListPage() {
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
-
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState(""); // 현재 선택된 카테고리
+  const [categoryList, setCategoryList] = useState([]); // API로 받은 카테고리 목록
   const [visibility, setVisibility] = useState("");
 
   const nameId = useId();
 
   const size = 10;
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get("/api/v1/press/category");
+        const result = res.data?.data;
+        if (Array.isArray(result)) {
+          setCategoryList(result);
+        }
+      } catch (err) {
+        console.error("카테고리 불러오기 실패:", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -80,12 +96,24 @@ export default function PressListPage() {
               row.en_title.includes(name);
             const categoryMatch = category === "" || row.name === category;
             const visibilityMatch =
-              visibility === "" || row.status === visibility;
+              visibility === "" ||
+              row.status_ko === (visibility === "Y" ? "노출" : "미노출") ||
+              row.status_en === (visibility === "Y" ? "노출" : "미노출");
+
+            function parseValidDate(str) {
+              if (!str || str === "-") return null;
+              const date = new Date(str);
+              return isNaN(date.getTime()) ? null : date;
+            }
+
+            const rowDate = parseValidDate(
+              row.created_at_ko || row.created_at_en
+            );
             const dateMatch =
               (!dateRange.startDate ||
-                new Date(row.created_at) >= new Date(dateRange.startDate)) &&
+                (rowDate && rowDate >= new Date(dateRange.startDate))) &&
               (!dateRange.endDate ||
-                new Date(row.created_at) <= new Date(dateRange.endDate));
+                (rowDate && rowDate <= new Date(dateRange.endDate)));
 
             return titleMatch && categoryMatch && visibilityMatch && dateMatch;
           });
@@ -267,8 +295,11 @@ export default function PressListPage() {
                 onChange={(e) => setCategory(e.target.value)}
               >
                 <option value="">전체</option>
-                <option value="이벤트">이벤트</option>
-                <option value="프로모션">프로모션</option>
+                {categoryList.map((cat) => (
+                  <option key={cat.code} value={cat.value}>
+                    {cat.value}
+                  </option>
+                ))}
               </Select>
             </Col>
             <p className="text-sm font-medium">게시글 등록일</p>

@@ -1,39 +1,38 @@
+import {
+  useEffect,
+  useState,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
 import Radio from "@/components/common/Radio";
 import Upload from "@/components/common/Upload";
-import DateRangePicker from "@/components/common/Datepicker";
+import Datepicker from "@/components/common/Datepicker";
 import Editor from "@/components/common/Editor";
 import Button from "@/components/common/Button";
 import Row from "@/components/layout/Row";
 import Col from "@/components/layout/Col";
 import BrandList from "@/components/modal/BrandList";
 import useModal from "@/hooks/useModal";
-import { useEffect, useState, useRef } from "react";
-import { forwardRef, useImperativeHandle } from "react";
 import api from "@/lib/apiClient";
+import Textarea from "@/components/common/Textarea";
+import "react-datepicker/dist/react-datepicker.css";
 
 const EventRegistForm = forwardRef(
-  ({ setData, lang, readOnly = false }, ref) => {
-    const methods = useForm(); // 전체 객체는 유지
-    const {
-      control,
-      register,
-      setValue,
-      watch,
-      trigger,
-      getValues,
-      handleSubmit,
-    } = methods;
+  ({ data, setData, lang, readOnly = false }, ref) => {
+    const methods = useForm({ mode: "onChange" });
+    const { register, setValue, getValues, watch, control } = methods;
     const editorRef1 = useRef();
     const editorRef2 = useRef();
     const [brands, setBrands] = useState([]);
     const { showModal } = useModal();
-    const [dateRange, setDateRange] = useState({
-      startDate: null,
-      endDate: null,
-    });
+    const [startDate, setStartDate] = useState(null);
+    const [startTime, setStartTime] = useState("00:00");
+    const [endDate, setEndDate] = useState(null);
+    const [endTime, setEndTime] = useState("00:00");
     const [categoryOptions, setCategoryOptions] = useState([]);
 
     useEffect(() => {
@@ -52,79 +51,150 @@ const EventRegistForm = forwardRef(
       fetchCategories();
     }, []);
 
+    useEffect(() => {
+      console.log("받은 data:", data);
+      if (data && Object.keys(data).length > 0) {
+        setValue("category", data.category || "");
+        setValue("title", data.title || "");
+        setValue("status", data.showYn === "Y" ? "active" : "inactive");
+        setValue("order", data.sort || 1);
+        setValue("thumbImg", data.thumbImg || null);
+        setValue("imgBodyPc", data.imgBodyPc || null);
+        setValue("imgBodyMo", data.imgBodyMo || null);
+        setValue("imgPc", data.imgPc || null);
+        setValue("imgMo", data.imgMo || null);
+        editorRef1.current?.setContent?.(data.content || "");
+        editorRef2.current?.setContent?.(data.description || "");
+
+        // 브랜드 정보도 세팅
+        if (data.brandId) {
+          setBrands([{ _id: data.brandId, brand: "선택된 브랜드" }]);
+        }
+
+        console.log("값 세팅 완료");
+      }
+    }, [data]);
+
+    useEffect(() => {
+      if (data?.startDate) {
+        setStartDate(new Date(data.startDate));
+      }
+      if (data?.endDate) {
+        setEndDate(new Date(data.endDate));
+      }
+    }, [data]);
+
     useImperativeHandle(ref, () => ({
       submit: async () => {
-        const isValid = await trigger();
-        if (!isValid) return null;
-
-        const data = getValues();
-        const content1 = await editorRef1.current?.getContent?.();
-        const content2 = await editorRef2.current?.getContent?.();
-
-        const isMissingRequired = () => {
-          // if (!data.category) return true;
-          // if (!data.title) return true;
-          // if (!data.thumbnail?.name) return true;
-          // if (!data.banner?.name) return true;
-          // if (!data.extraImage?.name) return true;
-          // if (!content1) return true;
-          // if (!dateRange.startDate || !dateRange.endDate) return true;
-          // if (!brands.length) return true;
-          // if (!data.pcImage?.name) return true;
-          // if (!data.mobileImage?.name) return true;
-          // if (!content2) return true;
-          // return false;
+        const values = {
+          ...getValues(),
+          thumbImg: watch("thumbImg"),
+          imgBodyPc: watch("imgBodyPc"),
+          imgBodyMo: watch("imgBodyMo"),
+          imgPc: watch("imgPc"),
+          imgMo: watch("imgMo"),
+          description: watch("description"),
         };
+        const content = getValues("content");
+        const description = watch("description");
 
-        if (isMissingRequired()) {
-          console.log("필수 항목 누락됨");
-          showModal({
-            title: "입력 확인",
-            message: "필수 항목을 모두 입력해주세요.",
-            showCancel: false,
-          });
+        console.log("검사 대상 값들:", {
+          title: values.title,
+          category: values.category,
+          startDate: startDate,
+          endDate: endDate,
+          thumbImg: values.thumbImg,
+          imgBodyPc: values.imgBodyPc,
+          imgBodyMo: values.imgBodyMo,
+          imgPc: values.imgPc,
+          imgMo: values.imgMo,
+          content,
+          description,
+          brands,
+        });
+
+        if (
+          !values.title?.trim() ||
+          !values.category ||
+          !startDate ||
+          !endDate ||
+          !values.thumbImg ||
+          !values.imgBodyPc ||
+          !values.imgBodyMo ||
+          !values.imgPc ||
+          !values.imgMo ||
+          !content?.trim() ||
+          //        // !description?.trim() ||
+          brands.length === 0
+        ) {
+          alert("모든 필수 항목을 입력해주세요.");
           return null;
         }
 
         const toImageMeta = (file) => {
-          if (!file || !file.name) return null;
-
-          const originalName = file.originalName || file.name;
-          const extMatch = originalName.match(/\.\w+$/); // 정규식으로 확장자 추출
-          const extension = extMatch ? extMatch[0] : ".jpg"; // 확장자 없으면 기본값
+          if (!file || !file.name || !file.path) {
+            console.warn("이미지 path 누락:", file);
+            return null;
+          }
 
           return {
-            id: null,
-            originalName,
+            id: file.id ?? null,
+            originalName: file.originalName || file.name,
             name: file.name,
             size: file.size,
-            extension: extension.toLowerCase(),
+            extension: "." + (file.originalName || file.name).split(".").pop(),
             mime: file.type || "image/png",
-            classification: null,
-            path: `C:\\\\upload\\/test\\${file.name}`,
-            status: null,
+            classification: "event-promotion",
+            path: file.path,
+            status: file.status ?? "C",
           };
         };
 
-        return {
-          ...data,
-          brandIds: brands.map((e) => e._id),
-          content1,
-          content2,
-          ...dateRange,
+        // 필수 체크
+        if (
+          !values.title?.trim() ||
+          !values.category ||
+          !startDate ||
+          !endDate ||
+          !watch("thumbImg") ||
+          !watch("imgBodyPc") ||
+          !watch("imgBodyMo") ||
+          !watch("imgPc") ||
+          !watch("imgMo") ||
+          !content?.trim() ||
+          !description?.trim() ||
+          brands.length === 0
+        ) {
+          alert("모든 필수 항목을 입력해주세요.");
+          return null;
+        }
 
-          thumbImg: toImageMeta(data.thumbnail),
-          imgBodyPc: toImageMeta(data.banner),
-          imgBodyMo: toImageMeta(data.extraImage),
-          imgPc: toImageMeta(data.pcImage),
-          imgMo: toImageMeta(data.mobileImage),
+        return {
+          eventId: data?.id ?? null,
+          lang,
+          showYn: values.status === "active" ? "Y" : "N",
+          sort: Number(values.order) || 1,
+          category: values.category,
+          title: values.title || "",
+          thumbImg: toImageMeta(values.thumbImg),
+          imgBodyPc: toImageMeta(values.imgBodyPc),
+          imgBodyMo: toImageMeta(values.imgBodyMo),
+          imgPc: toImageMeta(values.imgPc),
+          imgMo: toImageMeta(values.imgMo),
+          content: content || "",
+          description: description || "",
+          startDate: startDate?.toISOString() || null,
+          endDate: endDate?.toISOString() || null,
+          brandId: brands[0]?._id ?? null,
+          delYn: "N",
         };
       },
+      setValue,
     }));
-
+    console.log("brands", brands);
     return (
       <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(() => {})} className="space-y-6 p-6">
+        <form className="space-y-6 p-6">
           {/* 카테고리 + 노출 여부 */}
           <div className="flex items-end justify-between">
             <Controller
@@ -187,41 +257,111 @@ const EventRegistForm = forwardRef(
 
           {/* 파일 업로드 */}
           <Upload
-            name="thumbnail"
+            key={`thumbImg-upload`}
+            name="thumbImg"
             label="썸네일 이미지"
             required
+            classification="event-promotion"
             readOnly={readOnly}
+            value={watch("thumbImg")}
+            onChange={(file) => {
+              console.log("썸네일 이미지 등록됨:", file);
+              setValue("thumbImg", file);
+            }}
           />
           <Upload
-            name="banner"
+            key={`imgBodyPc-upload`}
+            name="imgBodyPc"
             label="PC 본문 이미지"
             required
+            classification="event-promotion"
             readOnly={readOnly}
+            value={watch("imgBodyPc")}
+            onChange={(file) => {
+              console.log("pc 본문 이미지 등록됨:", file);
+              setValue("imgBodyPc", file);
+            }}
           />
           <Upload
-            name="extraImage"
-            label="모바일 본문 이미지"
+            key={`imgBodyMo-upload`}
+            name="imgBodyMo"
+            label="MO 본문 이미지"
             required
+            classification="event-promotion"
             readOnly={readOnly}
+            value={watch("imgBodyMo")}
+            onChange={(file) => {
+              console.log("mo 본문 이미지 등록됨:", file);
+              setValue("imgBodyMo", file);
+            }}
           />
           {/* 상세 내용 에디터 1 */}
           <p className="text-sm font-medium">
             상세 내용<span className="text-red-500">*</span>
           </p>
-          <Editor ref={editorRef1} readOnly={readOnly} />
+          <Controller
+            name="content"
+            control={control}
+            render={({ field }) => (
+              <Editor
+                ref={editorRef1}
+                readOnly={readOnly}
+                initialContent={field.value}
+                onChange={(val) => field.onChange(val)} // 에디터 내부 값 변경을 폼과 동기화
+              />
+            )}
+          />
 
           {/* 날짜 선택 */}
-          <p className="text-sm font-medium">
-            이벤트 기간<span className="text-red-500">*</span>
+          <p className="min-w-[80px] text-sm font-medium text-gray-800">
+            이벤트 기간<span className="ml-1 text-red-500">*</span>
           </p>
-          <DateRangePicker
-            startDate={dateRange.startDate}
-            endDate={dateRange.endDate}
-            disabled={readOnly}
-            onRangeChange={({ startDate, endDate }) =>
-              setDateRange({ startDate, endDate })
-            }
-          />
+
+          {/* 시작 날짜 + 시간 */}
+          <div className="flex items-center gap-4">
+            {/* 시작 날짜 + 시간 */}
+            <div className="flex items-center gap-2">
+              <Datepicker
+                mode="single"
+                selectedDate={startDate}
+                onSingleChange={(date) => {
+                  setStartDate(date);
+                  setValue("startDate", date?.toISOString());
+                }}
+                readOnly={readOnly}
+              />
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="rounded border px-2 py-1"
+                disabled={readOnly}
+              />
+            </div>
+
+            {/* ~ 기호 */}
+            <span className="font-bold">~</span>
+
+            {/* 종료 날짜 + 시간 */}
+            <div className="flex items-center gap-2">
+              <Datepicker
+                mode="single"
+                selectedDate={endDate}
+                onSingleChange={(date) => {
+                  setEndDate(date);
+                  setValue("endDate", date?.toISOString());
+                }}
+                readOnly={readOnly}
+              />
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className="rounded border px-2 py-1"
+                disabled={readOnly}
+              />
+            </div>
+          </div>
 
           {/* 브랜드 선택 */}
           <Row className="pb-4">
@@ -281,23 +421,41 @@ const EventRegistForm = forwardRef(
 
           {/* 파일 업로드 2 */}
           <Upload
-            name="pcImage"
+            key={`imgPc-upload`}
+            name="imgPc"
             label="PC 이미지"
             required
+            classification="event-promotion"
             readOnly={readOnly}
+            value={watch("imgPc")}
+            onChange={(file) => {
+              console.log("PC 이미지 등록됨:", file);
+              setValue("imgPc", file);
+            }}
           />
           <Upload
-            name="mobileImage"
+            name="imgMo"
             label="모바일 이미지"
+            classification="event-promotion"
             required
             readOnly={readOnly}
+            value={watch("imgMo")}
+            onChange={(file) => {
+              console.log("모바일 이미지 업로드됨:", file);
+              setValue("imgMo", file);
+            }}
           />
 
-          {/* 내용 에디터 2 */}
-          <p className="text-sm font-medium">
-            디스크립션<span className="text-red-500">*</span>
-          </p>
-          <Editor ref={editorRef2} readOnly={readOnly} />
+          {/* 내용 텍스트 공간 */}
+          <Textarea
+            id="description"
+            name="description"
+            label="디스크립션"
+            value={watch("description")}
+            onChange={(e) => setValue("description", e.target.value)}
+            required
+            maxLength={130}
+          />
         </form>
       </FormProvider>
     );

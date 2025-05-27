@@ -20,39 +20,25 @@ export default function EventRegist() {
   const [enData, setEnData] = useState({});
   const handleSave = async () => {
     const ref = currentLang === 0 ? koFormRef : enFormRef;
-    const form = await ref.current?.submit();
-    if (!form) return;
-
-    const payload = {
-      eventId: null,
-      showYn: "Y",
-      sort: Number(form.order),
-      lang: currentLang === 0 ? "ko" : "en",
-      category: form.category || "ep0101",
-      title: form.title,
-      thumbImg: form.thumbImg,
-      imgBodyPc: form.imgBodyPc,
-      imgBodyMo: form.imgBodyMo,
-      imgPc: form.imgPc,
-      imgMo: form.imgMo,
-      content: form.content1,
-      description: form.content2,
-      startDate: new Date(form.startDate).toISOString(),
-      endDate: new Date(form.endDate).toISOString(),
-      brandId: Array.isArray(form.lifestyle?.brand)
-        ? form.lifestyle.brand[0]
-        : form.lifestyle?.brand,
-      delYn: "N",
-    };
-    console.log("전송할 payload:", payload);
+    const form = await ref.current?.submit?.();
+    console.log("payload:", form);
+    //
+    if (!form) {
+      alert(
+        currentLang === 0
+          ? "국문 탭 입력을 확인해주세요."
+          : "영문 탭 입력을 확인해주세요."
+      );
+      return;
+    }
 
     try {
-      await api.post("/api/v1/event-promotion/item/insert", payload);
-      alert("저장되었습니다.");
+      await api.post("/api/v1/event-promotion/item/insert", form);
+      alert(currentLang === 0 ? "국문 저장 완료" : "영문 저장 완료");
       navigate("/contents/whatson/event/list");
     } catch (err) {
-      console.error("저장 실패", err);
-      alert("저장 중 오류가 발생했습니다.");
+      console.error("저장 실패:", err);
+      alert("저장에 실패했습니다. 입력값을 확인해주세요.");
     }
   };
 
@@ -103,7 +89,7 @@ export default function EventRegist() {
           onClick={() =>
             showModal({
               title: "이동 확인",
-              message: "이전 페이지로 돌아갈 경우 입려한 정보가 사라집니다.",
+              message: "이전 페이지로 돌아갈 경우 입력한 정보가 사라집니다.",
               showCancel: true,
               onConfirm: () => navigate("/contents/whatson/event/list"),
             })
