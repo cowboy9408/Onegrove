@@ -1,5 +1,6 @@
 import useTheme from "@/hooks/useTheme";
 import { useEffect, useMemo, forwardRef, useImperativeHandle } from "react";
+import api from "@/lib/apiClient";
 import {
   BlockNoteSchema,
   filterSuggestionItems,
@@ -22,15 +23,76 @@ import {
 import { HiOutlineGlobeAlt } from "react-icons/hi";
 
 // 파일 업로드 핸들러
-async function uploadFile(file) {
-  const body = new FormData();
-  body.append("file", file);
-  const ret = await fetch("/api/blocknote/upload", {
-    method: "POST",
-    body: body,
-  });
-  return (await ret.json()).url;
-}
+async function uploadFile(selectedFile) {
+
+  console.log("[Upload] 업로드 필드:", selectedFile);
+
+  let classification = "default"; // 기본 분류 설정 editor?
+
+  if (!selectedFile) {
+    console.warn("파일이 선택되지 않았습니다.");
+    return;
+  }
+  const maxSize = 20 * 1024 * 1024; // 20MB
+  if (selectedFile.size > maxSize) {
+    alert("20MB가 넘는 이미지는 등록할 수 없습니다.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", selectedFile);
+  formData.append("classification", classification);
+
+  console.log("업로드할 파일:", selectedFile);
+
+  try {
+    console.log("업로드할 form:", formData);
+    const res = await api.post("/api/v1/file/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      withCredentials: true,
+    });
+
+    console.log("업로드 전체 응답:", res);
+    console.log("업로드 응답 .data:", res.data);
+    console.log("업로드 응답 .data.data:", res.data?.data);
+
+    const result = res.data;
+    console.log("Upload 응답 result:", result);
+    console.log("업로드 응답 result:", result);
+
+
+    if (result.name && result.path) {
+      const uploadedFile = {
+        id: result.id ?? null,
+        originalName: selectedFile.name,
+        name: result.name,
+        size: result.size,
+        extension: "." + selectedFile.name.split(".").pop(),
+        mime: result.mime || selectedFile.type,
+        classification: classification,
+        path: result.path,
+        status: "C", //신규 등록이면 반드시 C
+        field: result.name,
+      };
+      console.log("서버 업로드 완료:", result.name, uploadedFile);
+
+      return await result.path;
+    } else {
+      console.error("파일 업로드 실패", result);
+    }
+    
+  } catch (err) {
+    if (err.isAuthFailed) {
+      alert("세션이 만료되었습니다. 다시 로그인해주세요.");
+      // 필요시 로그인 모달 오픈 등 UI 처리
+    } else {
+      console.error("파일 업로드 에러", err);
+      alert("파일 업로드 중 문제가 발생했습니다.");
+    }
+  }
+};
 
 
 const insertAdditionalItem = (editor) => ({
@@ -38,12 +100,12 @@ const insertAdditionalItem = (editor) => ({
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 22px 텍스트사이즈을 입력합니다.", styles: { } }],
+      content: [{ type: "text", text: "폰트사이즈 22px 텍스트사이즈를 입력합니다.", styles: { } }],
     }),
   aliases: ["textStyle22", "hw"],
   group: "textStyle",
   icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: "폰트사이즈 22px 텍스트사이즈을 입력합니다.",
+  subtext: "폰트사이즈 22px 텍스트사이즈를 입력합니다.",
   description: "텍스트사이즈 22px을 입력합니다.",
 });
 
@@ -52,12 +114,12 @@ const insertAdditionalItem2 = (editor) => ({
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 20px 텍스트사이즈을 입력합니다.", styles: { } }],
+      content: [{ type: "text", text: "폰트사이즈 20px 텍스트사이즈를 입력합니다.", styles: { } }],
     }),
   aliases: ["textStyle20", "hw"],
   group: "textStyle",
   icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: "폰트사이즈 20px 텍스트사이즈을 입력합니다.",
+  subtext: "폰트사이즈 20px 텍스트사이즈를 입력합니다.",
   description: "텍스트사이즈 20px을 입력합니다.",
 });
 
@@ -66,12 +128,12 @@ const insertAdditionalItem3 = (editor) => ({
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 18px 텍스트사이즈을 입력합니다.", styles: { } }],
+      content: [{ type: "text", text: "폰트사이즈 18px 텍스트사이즈를 입력합니다.", styles: { } }],
     }),
   aliases: ["textStyle18", "hw"],
   group: "textStyle",
   icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: "폰트사이즈 18px 텍스트사이즈을 입력합니다.",
+  subtext: "폰트사이즈 18px 텍스트사이즈를 입력합니다.",
   description: "텍스트사이즈 18px을 입력합니다.",
 });
 
@@ -80,12 +142,12 @@ const insertAdditionalItem4 = (editor) => ({
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 16px 텍스트사이즈을 입력합니다.", styles: { } }],
+      content: [{ type: "text", text: "폰트사이즈 16px 텍스트사이즈를 입력합니다.", styles: { } }],
     }),
   aliases: ["textStyle16", "hw"],
   group: "textStyle",
   icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: "폰트사이즈 16px 텍스트사이즈을 입력합니다.",
+  subtext: "폰트사이즈 16px 텍스트사이즈를 입력합니다.",
   description: "텍스트사이즈 16px을 입력합니다.",
 });
 
@@ -94,12 +156,12 @@ const insertAdditionalItem5 = (editor) => ({
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 14px 텍스트사이즈을 입력합니다.", styles: { } }],
+      content: [{ type: "text", text: "폰트사이즈 14px 텍스트사이즈를 입력합니다.", styles: { } }],
     }),
   aliases: ["textStyle14", "hw"],
   group: "textStyle",
   icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: "폰트사이즈 14px 텍스트사이즈을 입력합니다.",
+  subtext: "폰트사이즈 14px 텍스트사이즈를 입력합니다.",
   description: "텍스트사이즈 14px을 입력합니다.",
 });
 
@@ -108,12 +170,12 @@ const insertAdditionalItem6 = (editor) => ({
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 13px 텍스트사이즈을 입력합니다.", styles: { } }],
+      content: [{ type: "text", text: "폰트사이즈 13px 텍스트사이즈를 입력합니다.", styles: { } }],
     }),
   aliases: ["textStyle13", "hw"],
   group: "textStyle",
   icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: "폰트사이즈 13px 텍스트사이즈을 입력합니다.",
+  subtext: "폰트사이즈 13px 텍스트사이즈를 입력합니다.",
   description: "텍스트사이즈 13px을 입력합니다.",
 });
 
@@ -122,12 +184,12 @@ const insertAdditionalItem7 = (editor) => ({
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 12px 텍스트사이즈을 입력합니다.", styles: { } }],
+      content: [{ type: "text", text: "폰트사이즈 12px 텍스트사이즈를 입력합니다.", styles: { } }],
     }),
   aliases: ["textStyle12", "hw"],
   group: "textStyle",
   icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: "폰트사이즈 12px 텍스트사이즈을 입력합니다.",
+  subtext: "폰트사이즈 12px 텍스트사이즈를 입력합니다.",
   description: "텍스트사이즈 12px을 입력합니다.",
 });
 
