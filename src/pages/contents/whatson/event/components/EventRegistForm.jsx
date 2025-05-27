@@ -95,7 +95,7 @@ const EventRegistForm = forwardRef(
           imgMo: watch("imgMo"),
           description: watch("description"),
         };
-        const content = await editorRef1.current?.getContent?.();
+        const content = getValues("content");
         const description = watch("description");
 
         console.log("검사 대상 값들:", {
@@ -299,7 +299,18 @@ const EventRegistForm = forwardRef(
           <p className="text-sm font-medium">
             상세 내용<span className="text-red-500">*</span>
           </p>
-          <Editor ref={editorRef1} readOnly={readOnly} />
+          <Controller
+            name="content"
+            control={control}
+            render={({ field }) => (
+              <Editor
+                ref={editorRef1}
+                readOnly={readOnly}
+                initialContent={field.value}
+                onChange={(val) => field.onChange(val)} // 에디터 내부 값 변경을 폼과 동기화
+              />
+            )}
+          />
 
           {/* 날짜 선택 */}
           <p className="min-w-[80px] text-sm font-medium text-gray-800">
