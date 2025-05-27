@@ -17,7 +17,7 @@ export default function BrandDetail() {
   const [koData, setKoData] = useState({});
   const [enData, setEnData] = useState({});
   const [loading, setLoading] = useState(true);
-  const [isReadOnly, setIsReadOnly] = useState(true); // 읽기 전용
+  const [isReadOnly, setIsReadOnly] = useState(false); // 읽기 전용
   const [categoryList, setCategoryList] = useState([]);
 
   useEffect(() => {
@@ -124,8 +124,20 @@ export default function BrandDetail() {
         //   }
         // });
         const formRef = locale === "ko" ? koFormRef.current : enFormRef.current;
+
+        const patchImageMeta = (img) =>
+          img?.path
+            ? {
+                ...img,
+                status: "R",
+              }
+            : null;
         Object.entries(formValues).forEach(([key, value]) => {
-          formRef?.setValue?.(key, value);
+          if (key.includes("Image")) {
+            formRef?.setValue?.(key, patchImageMeta(value));
+          } else {
+            formRef?.setValue?.(key, value);
+          }
         });
       };
 
@@ -142,25 +154,27 @@ export default function BrandDetail() {
   }, [currentLang, koData, enData]);
 
   const toImageMeta = (file, original) => {
-    if (!file || !file.name) {
-      return original || null;
-    }
+    const base = file || original;
+    if (!base) return null;
+
+    const originalName = base.originalName || base.name || "";
+    const extension = base.extension || "." + originalName.split(".").pop();
 
     return {
-      id: file.id || null,
-      originalName: file.originalName || file.name,
-      name: file.name,
-      size: file.size,
-      extension: "." + (file.originalName || file.name).split(".").pop(),
-      mime: file.type || "image/png",
-      classification: file.classification ?? "press-media",
-      path: file.path,
+      id: base.id ?? null,
+      originalName: originalName,
+      name: base.name ?? originalName,
+      size: base.size ?? 0,
+      extension: extension,
+      mime: base.mime || "image/jpeg",
+      classification: base.classification || "press-media",
+      path: base.path || null,
       status:
-        file.status !== undefined && file.status !== null
-          ? file.status
-          : file.changed
+        base.status !== undefined && base.status !== null
+          ? base.status
+          : file?.changed
             ? "E"
-            : "R",
+            : "R", // 수정 안 하면 R
     };
   };
 
@@ -240,7 +254,11 @@ export default function BrandDetail() {
 
         console.log(`[${lang}] 서버에 보낼 데이터:`, payload);
 
-        const res = await api.post("/api/v1/brand/update", payload);
+        const apiUrl = (data.bcId !== undefined && data.bcId !== null)
+          ? "/api/v1/brand/update"
+          : "/api/v1/brand/insert";
+        const res = await api.post(apiUrl, payload);
+        
         console.log("응답 결과:", res.data);
       };
 
@@ -257,7 +275,7 @@ export default function BrandDetail() {
       }
 
       alert("브랜드 정보가 수정되었습니다.");
-      setIsReadOnly(true); // 다시 읽기 전용으로 전환
+      // setIsReadOnly(true); // 다시 읽기 전용으로 전환
     } catch (err) {
       console.error("저장 실패:", err);
       alert("저장 실패. 다시 시도해주세요.");
@@ -293,7 +311,7 @@ export default function BrandDetail() {
           </Button>
         ) : (
           <Button onClick={handleSave} theme="primary">
-            저장
+            수정
           </Button>
         )}
         <Button onClick={() => navigate("/retail/brand")}>목록</Button>
