@@ -24,7 +24,6 @@ import { HiOutlineGlobeAlt } from "react-icons/hi";
 
 // 파일 업로드 핸들러
 async function uploadFile(selectedFile) {
-
   console.log("[Upload] 업로드 필드:", selectedFile);
 
   let classification = "default"; // 기본 분류 설정 editor?
@@ -62,7 +61,6 @@ async function uploadFile(selectedFile) {
     console.log("Upload 응답 result:", result);
     console.log("업로드 응답 result:", result);
 
-
     if (result.name && result.path) {
       const uploadedFile = {
         id: result.id ?? null,
@@ -82,7 +80,6 @@ async function uploadFile(selectedFile) {
     } else {
       console.error("파일 업로드 실패", result);
     }
-    
   } catch (err) {
     if (err.isAuthFailed) {
       alert("세션이 만료되었습니다. 다시 로그인해주세요.");
@@ -92,15 +89,20 @@ async function uploadFile(selectedFile) {
       alert("파일 업로드 중 문제가 발생했습니다.");
     }
   }
-};
-
+}
 
 const insertAdditionalItem = (editor) => ({
   title: "텍스트사이즈 22px",
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 22px 텍스트사이즈를 입력합니다.", styles: { } }],
+      content: [
+        {
+          type: "text",
+          text: "폰트사이즈 22px 텍스트사이즈를 입력합니다.",
+          styles: {},
+        },
+      ],
     }),
   aliases: ["textStyle22", "hw"],
   group: "textStyle",
@@ -114,7 +116,13 @@ const insertAdditionalItem2 = (editor) => ({
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 20px 텍스트사이즈를 입력합니다.", styles: { } }],
+      content: [
+        {
+          type: "text",
+          text: "폰트사이즈 20px 텍스트사이즈를 입력합니다.",
+          styles: {},
+        },
+      ],
     }),
   aliases: ["textStyle20", "hw"],
   group: "textStyle",
@@ -128,7 +136,13 @@ const insertAdditionalItem3 = (editor) => ({
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 18px 텍스트사이즈를 입력합니다.", styles: { } }],
+      content: [
+        {
+          type: "text",
+          text: "폰트사이즈 18px 텍스트사이즈를 입력합니다.",
+          styles: {},
+        },
+      ],
     }),
   aliases: ["textStyle18", "hw"],
   group: "textStyle",
@@ -142,7 +156,13 @@ const insertAdditionalItem4 = (editor) => ({
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 16px 텍스트사이즈를 입력합니다.", styles: { } }],
+      content: [
+        {
+          type: "text",
+          text: "폰트사이즈 16px 텍스트사이즈를 입력합니다.",
+          styles: {},
+        },
+      ],
     }),
   aliases: ["textStyle16", "hw"],
   group: "textStyle",
@@ -156,7 +176,13 @@ const insertAdditionalItem5 = (editor) => ({
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 14px 텍스트사이즈를 입력합니다.", styles: { } }],
+      content: [
+        {
+          type: "text",
+          text: "폰트사이즈 14px 텍스트사이즈를 입력합니다.",
+          styles: {},
+        },
+      ],
     }),
   aliases: ["textStyle14", "hw"],
   group: "textStyle",
@@ -170,7 +196,13 @@ const insertAdditionalItem6 = (editor) => ({
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 13px 텍스트사이즈를 입력합니다.", styles: { } }],
+      content: [
+        {
+          type: "text",
+          text: "폰트사이즈 13px 텍스트사이즈를 입력합니다.",
+          styles: {},
+        },
+      ],
     }),
   aliases: ["textStyle13", "hw"],
   group: "textStyle",
@@ -184,7 +216,13 @@ const insertAdditionalItem7 = (editor) => ({
   onItemClick: () =>
     insertOrUpdateBlock(editor, {
       type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 12px 텍스트사이즈를 입력합니다.", styles: { } }],
+      content: [
+        {
+          type: "text",
+          text: "폰트사이즈 12px 텍스트사이즈를 입력합니다.",
+          styles: {},
+        },
+      ],
     }),
   aliases: ["textStyle12", "hw"],
   group: "textStyle",
@@ -224,7 +262,8 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
         insertAdditionalItem5(editor),
         insertAdditionalItem6(editor),
         insertAdditionalItem7(editor),
-        ...defaultItems];
+        ...defaultItems,
+      ];
       return filterSuggestionItems(customItems, query);
     };
   }, [editor]);
