@@ -28,7 +28,6 @@ export default function EventListPage() {
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
-
   const [category, setCategory] = useState("");
   const [categoryList, setCategoryList] = useState([]);
   const [visibility, setVisibility] = useState("");
@@ -36,6 +35,17 @@ export default function EventListPage() {
   const nameId = useId();
 
   const size = 10;
+
+  const [searchFilter, setSearchFilter] = useState({
+    name: searchParams.get("name") || "",
+    category: "",
+    visibility: "",
+    dateRange: {
+      startDate: null,
+      endDate: null,
+    },
+  });
+  const [activeFilter, setActiveFilter] = useState(searchFilter);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -184,7 +194,7 @@ export default function EventListPage() {
     };
 
     fetchData();
-  }, [page, name, category, visibility, dateRange, refreshKey]);
+  }, [page, activeFilter, refreshKey]);
 
   useEffect(() => {
     const refreshParam = searchParams.get("refresh");
@@ -208,9 +218,10 @@ export default function EventListPage() {
           <Row>
             <Col>
               <Select
-                label="카테고리"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                value={searchFilter.category}
+                onChange={(e) =>
+                  setSearchFilter({ ...searchFilter, category: e.target.value })
+                }
               >
                 <option value="">전체</option>
                 {categoryList.map((cat) => (
@@ -222,20 +233,22 @@ export default function EventListPage() {
             </Col>
             <p className="text-sm font-medium">게시글 등록일</p>
             <DateRangePicker
-              startDate={dateRange.startDate}
-              endDate={dateRange.endDate}
-              onRangeChange={({ startDate, endDate }) => {
-                console.log("날짜 선택됨:", startDate, endDate);
-                setDateRange({ startDate, endDate });
-              }}
+              startDate={searchFilter.dateRange.startDate}
+              endDate={searchFilter.dateRange.endDate}
+              onRangeChange={({ startDate, endDate }) =>
+                setSearchFilter({
+                  ...searchFilter,
+                  dateRange: { startDate, endDate },
+                })
+              }
             />
             <Col>
               <Input
-                id={nameId}
-                label={"타이틀"}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onClear={() => setName("")}
+                value={searchFilter.name}
+                onChange={(e) =>
+                  setSearchFilter({ ...searchFilter, name: e.target.value })
+                }
+                onClear={() => setSearchFilter({ ...searchFilter, name: "" })}
               />
             </Col>
 
@@ -243,37 +256,30 @@ export default function EventListPage() {
               노출 여부
             </span>
             <Radio
-              id="visible"
-              name="visibility"
               value="Y"
-              checked={visibility === "Y"}
-              onChange={(e) => setVisibility(e.target.value)}
-              label="노출"
+              checked={searchFilter.visibility === "Y"}
+              onChange={(e) =>
+                setSearchFilter({ ...searchFilter, visibility: e.target.value })
+              }
             />
             <Radio
-              id="hidden"
-              name="visibility"
               value="N"
-              checked={visibility === "N"}
-              onChange={(e) => setVisibility(e.target.value)}
-              label="미노출"
+              checked={searchFilter.visibility === "N"}
+              onChange={(e) =>
+                setSearchFilter({ ...searchFilter, visibility: e.target.value })
+              }
             />
 
             <Col className="self-end">
               <Button
                 onClick={() => {
                   setPage(1);
+                  setActiveFilter(searchFilter);
                   setSearchParams({
-                    name,
-                    category,
-                    visibility,
+                    name: searchFilter.name,
+                    category: searchFilter.category,
+                    visibility: searchFilter.visibility,
                     page: 1,
-                    ...(dateRange.startDate && {
-                      startDate: dateRange.startDate.toISOString(),
-                    }),
-                    ...(dateRange.endDate && {
-                      endDate: dateRange.endDate.toISOString(),
-                    }),
                   });
                 }}
               >
@@ -359,7 +365,7 @@ export default function EventListPage() {
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
                   <button
-                    className="text-black-600 underline p-2 truncate"
+                    className="text-black-600 truncate p-2 underline"
                     onClick={() =>
                       navigate(
                         `/contents/whatson/event/list/${row.emId}?lang=ko`
@@ -369,7 +375,7 @@ export default function EventListPage() {
                     {row.ko_title}
                   </button>
                   <button
-                    className="text-black-600 underline p-2 truncate"
+                    className="text-black-600 truncate p-2 underline"
                     onClick={() =>
                       navigate(
                         `/contents/whatson/event/list/${row.emId}?lang=en`
