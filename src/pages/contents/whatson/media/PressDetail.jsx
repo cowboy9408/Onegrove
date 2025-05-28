@@ -86,6 +86,21 @@ export default function PressDetail() {
   }, [koData, enData]);
 
   const toImageMeta = (file, original) => {
+    // 사용자가 이미지 삭제한 경우
+    if (file?.status === "D") {
+      return {
+        id: null,
+        name: null,
+        originalName: file.originalName || "",
+        size: null,
+        extension: null,
+        mime: null,
+        classification: "press-media", // 또는 null도 가능
+        path: null,
+        status: "D",
+      };
+    }
+
     const base = file || original;
     if (!base) return null;
 
