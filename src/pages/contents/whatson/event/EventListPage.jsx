@@ -365,7 +365,7 @@ export default function EventListPage() {
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
                   <button
-                    className="text-black-600 underline p-2 truncate"
+                    className="text-black-600 truncate p-2 underline"
                     onClick={() =>
                       navigate(
                         `/contents/whatson/event/list/${row.emId}?lang=ko`
@@ -375,7 +375,7 @@ export default function EventListPage() {
                     {row.ko_title}
                   </button>
                   <button
-                    className="text-black-600 underline p-2 truncate"
+                    className="text-black-600 truncate p-2 underline"
                     onClick={() =>
                       navigate(
                         `/contents/whatson/event/list/${row.emId}?lang=en`
