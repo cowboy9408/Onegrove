@@ -79,7 +79,7 @@ export default function DataTable({
                   {columns.map((col) => (
                     <td
                       key={col.key}
-                      className="border-r border-gray-100 px-4 py-2 whitespace-nowrap last:border-r-0 dark:border-gray-800"
+                      className="border-r border-gray-100 px-4 py-2 whitespace-nowrap last:border-r-0 dark:border-gray-800 max-w-[40vw] overflow-hidden"
                     >
                       {col.render ? col.render(row) : row[col.key]}
                     </td>
