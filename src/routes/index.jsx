@@ -293,14 +293,14 @@ export const routeMeta = [
                 hidden: false,
                 permissions: ["Admin", "User"],
                 children: [
-                  {
-                    uuid: "6c7470f5-f849-4777-88a9-6e09ec9bdd90",
-                    path: "/contents/whatson/stories/main",
-                    element: <StoriesCont />,
-                    title: "Stories of One Grove 콘텐츠",
-                    hidden: false,
-                    permissions: ["Admin", "User"],
-                  },
+                  // {
+                  //   uuid: "6c7470f5-f849-4777-88a9-6e09ec9bdd90",
+                  //   path: "/contents/whatson/stories/main",
+                  //   element: <StoriesCont />,
+                  //   title: "Stories of One Grove 콘텐츠",
+                  //   hidden: false,
+                  //   permissions: ["Admin", "User"],
+                  // },
 
                   {
                     uuid: "8275ec74-09ac-4b2a-9c65-78f5b75a06c7",
