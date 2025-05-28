@@ -49,8 +49,8 @@ export default function PressDetail() {
 
   useEffect(() => {
     if (!loading) {
-      const patchForm = (formRef, data) => {
-        if (!formRef || !data) return;
+      const patchForm = (formRef, data, fallbackCategory = "") => {
+        if (!formRef) return;
         const patchImageMeta = (img) =>
           img?.path
             ? {
@@ -59,7 +59,10 @@ export default function PressDetail() {
               }
             : null;
 
-        formRef.setValue("category", data.categoryCode || "");
+        formRef.setValue("category", data?.categoryCode ?? fallbackCategory);
+
+        if (!data) return;
+
         formRef.setValue("title", data.title || "");
         formRef.setValue("status", data.showYn === "Y" ? "active" : "inactive");
         formRef.setValue("publishDate", data.publishDate || "");
@@ -68,8 +71,11 @@ export default function PressDetail() {
         formRef.setValue("content", data.content || "");
       };
 
-      patchForm(koFormRef.current, koData);
-      patchForm(enFormRef.current, enData);
+      const koCategory = koData?.categoryCode ?? "";
+      const enCategory = enData?.categoryCode ?? "";
+
+      patchForm(koFormRef.current, koData, enCategory);
+      patchForm(enFormRef.current, enData, koCategory);
     }
   }, [loading, koData, enData]);
 
