@@ -42,12 +42,12 @@ export default function Menu({
             navigate(item.path);
           }
         }}
-        className={`flex cursor-pointer items-center rounded-md px-2 py-2 transition-colors duration-200 ${
+        className={`flex cursor-pointer items-center rounded-md px-1 py-1 transition-colors duration-200 ${
           isActive
             ? "bg-black text-white dark:bg-white dark:text-black"
             : `${depthStyle[depth]} ${bgHover[depth]}`
         }`}
-        style={{ marginLeft: isExpanded ? depth * 16 : 0 }}
+        style={{ marginLeft: isExpanded ? depth * 10 : 0 }}
       >
         {depth === 0 && item.icon && (
           <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center">
@@ -55,7 +55,7 @@ export default function Menu({
           </div>
         )}
         <span
-          className={`ml-2 overflow-hidden whitespace-nowrap transition-all duration-300 ${
+          className={`ml-2 overflow-hidden whitespace-nowrap transition-all duration-300 text-[14px] ${
             isExpanded ? "opacity-100" : "opacity-0"
           } flex w-full items-center justify-between`}
         >
