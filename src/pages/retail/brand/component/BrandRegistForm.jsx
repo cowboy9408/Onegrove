@@ -134,7 +134,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
               value="inactive"
               label="미사용"
               disabled={readOnly}
-              checked={watch("useStatus") === "inactive"}
+              checked={watch("useStatus") !== "active"}
               onChange={() => setValue("useStatus", "inactive")}
             />
           </div>
