@@ -154,3 +154,7 @@
     animation: fadeIn 0.2s ease-out both;
   }
 }
+
+.bn-container .bn-editor {
+  min-height: 550px;
+}

@@ -67,21 +67,22 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
 
       // 이미지 메타데이터 변환 함수
       const toImageMeta = (file) => {
-        console.log("toImageMeta file:", file);
-        if (!file || !file.name) return null;
+        if (!file || !file.name || !file.path) {
+          console.warn("이미지 path 누락:", file);
+          return null;
+        }
 
         return {
+          id: file.id ?? null,
           originalName: file.originalName || file.name,
           name: file.name,
           size: file.size,
           extension: "." + (file.originalName || file.name).split(".").pop(),
           mime: file.type || "image/png",
-          classification: file.classification ?? "brand",
+          classification: "brand",
           path: file.path,
-          status: file.status ?? "R",
-          // status: null,
+          status: file.status ?? "C",
         };
-          
       };
 
       return {
@@ -169,45 +170,6 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
                 field.onChange(newValue);
               };
 
-              const options = [
-                {
-                  code: "key0101",
-                  value: "Man",
-                },
-                {
-                  code: "key0102",
-                  value: "Woman",
-                },
-                {
-                  code: "key0103",
-                  value: "Lifewear",
-                },
-                {
-                  code: "key0104",
-                  value: "Street Fashion",
-                },
-                {
-                  code: "key0105",
-                  value: "Sportswear",
-                },
-                {
-                  code: "key0106",
-                  value: "SPA",
-                },
-                {
-                  code: "key0107",
-                  value: "Luxury",
-                },
-                {
-                  code: "key0108",
-                  value: "Kids",
-                },
-                {
-                  code: "key0109",
-                  value: "Beauty",
-                },
-              ];
-
               return (
                 <div className="flex flex-wrap gap-4">
                   {keywordList.map((keyword) => (
@@ -227,14 +189,14 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
 
         <Upload
           name="mainImage"
-          label="썸네일 이미지"
+          label="리스트 이미지"
           required
           classification="brand"
           preview
           readOnly={readOnly}
         />
         <Input
-          label="썸네일 텍스트"
+          label="리스트 Hover 텍스트"
           maxLength={200}
           showDefaultInfo
           required
@@ -261,14 +223,14 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
         {/* 이미지 업로드 */}
         <Upload
           name="pcImage"
-          label="PC 본문 이미지"
+          label="PC 상세 KV 이미지"
           required
           classification="brand"
           readOnly={readOnly}
         />
         <Upload
           name="moImage"
-          label="MO 본문 이미지"
+          label="MO 상세 KV 이미지"
           required
           classification="brand"
           readOnly={readOnly}
@@ -337,42 +299,18 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
             {...register("homepageUrl")}
             width="w-[550px]"
           />
-          <Controller
-            name="homepageNewTab"
-            control={control}
-            render={({ field }) => (
-              <Checkbox
-                label="새 창"
-                disabled={readOnly}
-                checked={field.value}
-                onChange={(e) => field.onChange(e.target.checked)}
-              />
-            )}
-          />
         </div>
 
         {/* SNS URL */}
         <div className="w-[800px] space-y-3 rounded-md border border-black p-4">
           <p className="text-sm font-medium">SNS URL</p>
-          {["instagram", "facebook", "youtube", "twitter"].map((sns) => (
+          {["instagram", "facebook", "youtube", "twitter", "blog"].map((sns) => (
             <div key={sns} className="flex items-center gap-4">
               <NewInput
-                label={sns === "twitter" ? "X" : sns}
+                label={sns === "twitter" ? "X(twitter)" : sns}
                 disabled={readOnly}
                 {...register(`sns.${sns}.url`)}
                 width="w-[500px]"
-              />
-              <Controller
-                name={`sns.${sns}.newWindow`}
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    label="새 창"
-                    checked={field.value}
-                    onChange={(e) => field.onChange(e.target.checked)}
-                    disabled={readOnly}
-                  />
-                )}
               />
             </div>
           ))}
