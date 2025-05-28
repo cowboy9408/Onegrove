@@ -275,6 +275,7 @@ export default function BrandDetail() {
       }
 
       alert("브랜드 정보가 수정되었습니다.");
+      navigate("/retail/brand/list?refresh=" + Date.now());
       // setIsReadOnly(true); // 다시 읽기 전용으로 전환
     } catch (err) {
       console.error("저장 실패:", err);

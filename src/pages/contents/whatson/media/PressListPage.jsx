@@ -239,7 +239,7 @@ export default function PressListPage() {
   //             ko_title: koItem.title || "-",
   //             en_title: enItem.title || "-",
   //             situation: "-",
-  //             status: koItem.showYn === "Y" ? "노출" : "비노출",
+  //             status: koItem.showYn === "Y" ? "노출" : "미노출",
   //             created_user: koItem.createUser || "-",
   //             created_at: koItem.createDatetime || "-",
   //             _id: `${entry.pmId}`, // 중요: pmId 사용해야 삭제 가능

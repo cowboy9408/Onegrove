@@ -359,7 +359,7 @@ export default function EventDetail() {
           onClick={() =>
             showModal({
               title: "이동 확인",
-              message: "이전 페이지로 돌아갈 경우 입려한 정보가 사라집니다.",
+              message: "이전 페이지로 돌아갈 경우 입력한 정보가 사라집니다.",
               showCancel: true,
               onConfirm: () =>
                 navigate("/contents/whatson/event/list?refresh=" + Date.now()),

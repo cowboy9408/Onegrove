@@ -67,7 +67,7 @@ export default function PopupRegist() {
                   value="N"
                   checked={form.isVisible === "N"}
                   onChange={(e) => handleChange("isVisible", e.target.value)}
-                  label="비노출"
+                  label="미노출"
                 />
               </div>
             </div>
