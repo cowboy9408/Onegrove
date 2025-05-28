@@ -15,9 +15,15 @@ import Datepicker from "@/components/common/Datepicker";
 import api from "@/lib/apiClient";
 
 const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
-  const methods = useForm({ mode: "onChange" });
+  const methods = useForm({
+    mode: "onChange",
+    defaultValues: {
+      status: "inactive",
+      publishDate: new Date().toISOString().split("T")[0],
+    },
+  });
   const { register, setValue, getValues, watch, control } = methods;
-  const [singleDate, setSingleDate] = useState(null);
+  const [singleDate, setSingleDate] = useState(new Date());
   const [categoryList, setCategoryList] = useState([]);
   const editorRef = useRef();
 
@@ -45,13 +51,19 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
       editorRef.current?.setContent?.(data.content || "");
       if (data.publishDate) {
         setSingleDate(new Date(data.publishDate));
+      } else {
+        const today = new Date();
+        const iso = today.toISOString().split("T")[0];
+        setValue("publishDate", iso);
+        setSingleDate(today);
       }
+
       console.log("값 세팅 완료");
     }
   }, [data]);
 
   useImperativeHandle(ref, () => ({
-    submit: async () => {
+    submit: async (onError) => {
       const values = {
         ...getValues(),
         imgPc: watch("imgPc"),
@@ -61,6 +73,31 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
       console.log("최종 imgMo:", values.imgMo);
 
       const content = await editorRef.current?.getContent?.();
+
+      if (!values.category) {
+        onError?.("카테고리를 선택해주세요.");
+        return null;
+      }
+
+      if (!values.title) {
+        onError?.("제목을 입력해주세요.");
+        return null;
+      }
+
+      if (!values.imgPc || !values.imgMo) {
+        onError?.("PC 및 모바일 썸네일 이미지를 등록해주세요.");
+        return null;
+      }
+
+      if (!content || content.replace(/<[^>]+>/g, "").trim() === "") {
+        onError?.("내용을 입력해주세요.");
+        return null;
+      }
+
+      if (!values.publishDate) {
+        onError?.("발행일을 선택해주세요.");
+        return null;
+      }
 
       const toImageMeta = (file) => {
         if (!file || !file.name || !file.path) {
@@ -126,13 +163,29 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
           ))}
         </Select>
 
-        <Input
-          id="title"
-          label="제목"
-          {...register("title", { required: true })}
-          disabled={readOnly}
-          required
-        />
+        <div>
+          <Input
+            id="title"
+            label="제목"
+            {...register("title", {
+              required: true,
+              maxLength: {
+                value: 100,
+                message: "제목은 공백 포함 100자 이하로 입력해주세요.",
+              },
+            })}
+            disabled={readOnly}
+            required
+            maxLength={100}
+            showDefaultInfo={true}
+          />
+          <p className="mt-1 text-right text-sm text-gray-500">
+            {watch("title")?.length || 0}/100자
+          </p>
+          {watch("title")?.length > 100 && (
+            <p className="text-sm text-red-500">100자 이내로 입력해주세요.</p>
+          )}
+        </div>
 
         <Upload
           key={`imgPc-upload`}
@@ -162,7 +215,9 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
         />
 
         <div>
-          <p className="mb-2 text-sm font-medium text-gray-800">노출 여부</p>
+          <p className="mb-2 text-sm font-medium text-gray-800">
+            노출 여부<span className="text-red-500">*</span>
+          </p>
           <div className="flex gap-4">
             <Radio
               name="status"
@@ -184,7 +239,9 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
         </div>
 
         <div>
-          <p className="mb-2 text-sm font-medium text-gray-800">내용</p>
+          <p className="mb-2 text-sm font-medium text-gray-800">
+            내용<span className="text-red-500">*</span>
+          </p>
           {/* <Editor ref={editorRef} readOnly={readOnly} /> */}
           <Controller
             name="content"
@@ -201,7 +258,9 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
         </div>
 
         <div>
-          <p className="mb-2 text-sm font-medium text-gray-800">발행일</p>
+          <p className="mb-2 text-sm font-medium text-gray-800">
+            발행일<span className="text-red-500">*</span>
+          </p>
           <Datepicker
             mode="single"
             selectedDate={singleDate}
