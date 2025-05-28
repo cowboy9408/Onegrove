@@ -224,8 +224,8 @@ export default function BrandListPage() {
               label: "언어",
               render: () => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <div className="py-1 font-medium">ko</div>
-                  <div className="py-1 font-medium">en</div>
+                  <div className="p-2 font-medium">ko</div>
+                  <div className="p-2 font-medium">en</div>
                 </div>
               ),
             },
@@ -242,7 +242,7 @@ export default function BrandListPage() {
                     >-</p>
                   ) : (
                     <button
-                      className="text-black-600 underline p-2 text-left"
+                      className="text-black-600 underline p-2 truncate text-left"
                       onClick={() =>
                         navigate(`/retail/brand/detail/${row.masterId}?lang=ko`)
                       }
@@ -258,7 +258,7 @@ export default function BrandListPage() {
                     >-</p>
                   ) : (
                     <button
-                      className="text-black-600 underline p-2  text-left"
+                      className="text-black-600 underline p-2 truncate  text-left"
                       onClick={() =>
                         navigate(`/retail/brand/detail/${row.masterId}?lang=en`)
                       }
