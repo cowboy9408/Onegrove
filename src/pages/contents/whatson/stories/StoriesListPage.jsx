@@ -60,7 +60,7 @@ export default function StoriesListPage() {
               ko_title: koItem.title || "-",
               en_title: enItem.title || "-",
               email: koItem.status || "진행중",
-              status: koItem.showYn || "비노출",
+              status: koItem.showYn || "미노출",
               created_user: koItem.createUser || "-",
               created_at: koItem.createDt || "-",
             };
