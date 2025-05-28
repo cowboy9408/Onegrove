@@ -236,7 +236,7 @@ export const routeMeta = [
             uuid: "952664cb-fbe1-4ecd-bb18-ca6aecead4d1",
             path: "/contents/whatson",
             element: <WhatsonLayout />,
-            title: "Wath`s On",
+            title: "What's On",
             hidden: false,
             permissions: ["Admin", "User"],
             children: [

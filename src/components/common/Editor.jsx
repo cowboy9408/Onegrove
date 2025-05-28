@@ -25,7 +25,6 @@ import { HiOutlineGlobeAlt } from "react-icons/hi";
 
 // 파일 업로드 핸들러
 async function uploadFile(selectedFile) {
-
   console.log("[Upload] 업로드 필드:", selectedFile);
 
   let classification = "default"; // 기본 분류 설정 editor?
@@ -63,7 +62,6 @@ async function uploadFile(selectedFile) {
     console.log("Upload 응답 result:", result);
     console.log("업로드 응답 result:", result);
 
-
     if (result.name && result.path) {
       const uploadedFile = {
         id: result.id ?? null,
@@ -83,7 +81,6 @@ async function uploadFile(selectedFile) {
     } else {
       console.error("파일 업로드 실패", result);
     }
-    
   } catch (err) {
     if (err.isAuthFailed) {
       alert("세션이 만료되었습니다. 다시 로그인해주세요.");
@@ -93,8 +90,7 @@ async function uploadFile(selectedFile) {
       alert("파일 업로드 중 문제가 발생했습니다.");
     }
   }
-};
-
+}
 
 const insertAdditionalItem = (editor) => ({
   title: "텍스트사이즈 22px",

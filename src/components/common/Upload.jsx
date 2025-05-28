@@ -1,5 +1,6 @@
 import api from "@/lib/apiClient";
 import { cn } from "@/lib/utils";
+import { id } from "date-fns/locale";
 import { Info, UploadIcon, XIcon } from "lucide-react";
 import { useMemo } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -179,7 +180,9 @@ export default function Upload({
     inputRef.current.value = null;
     onChange({
       ...value,
-      url: null,
+      id: null,
+      name: null,
+      path: null,
       status: "D",
     });
   };
