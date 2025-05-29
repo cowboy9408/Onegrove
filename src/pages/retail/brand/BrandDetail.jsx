@@ -75,23 +75,21 @@ export default function BrandDetail() {
           storePhone: data.brandTel,
           storeLocation: data.brandLocation,
           homepageUrl: data.homeUrl,
-          homepageNewTab: data.homeUrlNew === "Y",
           sns: {
             instagram: {
               url: data.instagram,
-              newWindow: data.instagramNew === "Y",
             },
             facebook: {
               url: data.facebook,
-              newWindow: data.facebookNew === "Y",
             },
             youtube: {
               url: data.youtube,
-              newWindow: data.youtubeNew === "Y",
             },
             twitter: {
               url: data.twitter,
-              newWindow: data.twitterNew === "Y",
+            },
+            blog: {
+              url: data.blog,
             },
           },
           openingHours: {
@@ -216,14 +214,11 @@ export default function BrandDetail() {
           mainImg: toImageMeta(data.mainImage, original.mainImage),
           useYn: data.useStatus === "active" ? "Y" : "N",
           homeUrlNew: data.homepageNewTab ? "Y" : "N",
-          instagramNew: data.sns?.instagram?.newWindow ? "Y" : "N",
-          facebookNew: data.sns?.facebook?.newWindow ? "Y" : "N",
-          youtubeNew: data.sns?.youtube?.newWindow ? "Y" : "N",
-          twitterNew: data.sns?.twitter?.newWindow ? "Y" : "N",
           instagram: data.sns?.instagram?.url || "",
           facebook: data.sns?.facebook?.url || "",
           youtube: data.sns?.youtube?.url || "",
           twitter: data.sns?.twitter?.url || "",
+          blog: data.sns?.blog?.url || "",
           mon: data.openingHours?.월?.time,
           tue: data.openingHours?.화?.time,
           wed: data.openingHours?.수?.time,
@@ -252,14 +247,26 @@ export default function BrandDetail() {
           payload.contentId = data.bcId;
         }
 
-        console.log(`[${lang}] 서버에 보낼 데이터:`, payload);
+        try {
+          const checkRes = await api.get(`/api/v1/brand/detail/${masterId}/${lang}`);
+          if (checkRes.data?.data?.bcId) {
+            payload.contentId = checkRes.data.data.bcId; // 기존 bcId가 있다면 사용
+          }
+          setLoading(false);
 
-        const apiUrl = (data.bcId !== undefined && data.bcId !== null)
-          ? "/api/v1/brand/update"
-          : "/api/v1/brand/insert";
-        const res = await api.post(apiUrl, payload);
+          console.log(`[${lang}] 서버에 보낼 데이터:`, lang, payload);
+
+          const apiUrl = (payload.contentId !== undefined && payload.contentId !== null)
+            ? "/api/v1/brand/update"
+            : "/api/v1/brand/insert";
+          const res = await api.post(apiUrl, payload);
+          
+          console.log("응답 결과:", res.data);
+        } catch (err) {
+          console.error("브랜드 상세 로딩 실패:", err);
+        }
+
         
-        console.log("응답 결과:", res.data);
       };
 
       if (currentLang === 0) {
@@ -275,7 +282,7 @@ export default function BrandDetail() {
       }
 
       alert("브랜드 정보가 수정되었습니다.");
-      navigate("/retail/brand/list?refresh=" + Date.now());
+      navigate("/retail/brand/?refresh=" + Date.now());
       // setIsReadOnly(true); // 다시 읽기 전용으로 전환
     } catch (err) {
       console.error("저장 실패:", err);
