@@ -19,6 +19,7 @@ export default function BrandDetail() {
   const [loading, setLoading] = useState(true);
   const [isReadOnly, setIsReadOnly] = useState(false); // 읽기 전용
   const [categoryList, setCategoryList] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -177,6 +178,9 @@ export default function BrandDetail() {
   };
 
   const handleSave = async () => {
+    if (isSaving) return;
+    setIsSaving(true); 
+
     try {
       const koValues = await koFormRef.current?.submit?.();
       const enValues = await enFormRef.current?.submit?.();
@@ -185,7 +189,10 @@ export default function BrandDetail() {
 
       console.log("return test:", !koValues && !enValues);
 
-      if (!koValues && !enValues) return;
+      if (!koValues && !enValues) {
+        setIsSaving(false);
+        return;
+      }
 
       const saveOne = async (data, lang, original) => {
         const payload = {
@@ -248,7 +255,9 @@ export default function BrandDetail() {
         }
 
         try {
-          const checkRes = await api.get(`/api/v1/brand/detail/${masterId}/${lang}`);
+          const checkRes = await api.get(
+            `/api/v1/brand/detail/${masterId}/${lang}`
+          );
           if (checkRes.data?.data?.bcId) {
             payload.contentId = checkRes.data.data.bcId; // 기존 bcId가 있다면 사용
           }
@@ -256,17 +265,16 @@ export default function BrandDetail() {
 
           console.log(`[${lang}] 서버에 보낼 데이터:`, lang, payload);
 
-          const apiUrl = (payload.contentId !== undefined && payload.contentId !== null)
-            ? "/api/v1/brand/update"
-            : "/api/v1/brand/insert";
+          const apiUrl =
+            payload.contentId !== undefined && payload.contentId !== null
+              ? "/api/v1/brand/update"
+              : "/api/v1/brand/insert";
           const res = await api.post(apiUrl, payload);
-          
+
           console.log("응답 결과:", res.data);
         } catch (err) {
           console.error("브랜드 상세 로딩 실패:", err);
         }
-
-        
       };
 
       if (currentLang === 0) {
@@ -287,6 +295,8 @@ export default function BrandDetail() {
     } catch (err) {
       console.error("저장 실패:", err);
       alert("저장 실패. 다시 시도해주세요.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -318,8 +328,12 @@ export default function BrandDetail() {
             수정
           </Button>
         ) : (
-          <Button onClick={handleSave} theme="primary">
-            수정
+          <Button
+            disabled={isSaving}
+            onClick={handleSave}
+            theme="primary"
+          >
+            {isSaving ? "수정 중..." : "수정"}
           </Button>
         )}
         <Button onClick={() => navigate("/retail/brand")}>목록</Button>

@@ -21,496 +21,552 @@ import api from "@/lib/apiClient";
 import Textarea from "@/components/common/Textarea";
 import "react-datepicker/dist/react-datepicker.css";
 
-const EventRegistForm = forwardRef(
-  ({ data, setData, lang, readOnly = false }, ref) => {
-    const methods = useForm({ mode: "onChange" });
-    const { register, setValue, getValues, watch, control } = methods;
-    const editorRef1 = useRef();
-    const editorRef2 = useRef();
-    const [brands, setBrands] = useState([]);
-    const { showModal } = useModal();
-    const [startDate, setStartDate] = useState(null);
-    const [startTime, setStartTime] = useState("00:00");
-    const [endDate, setEndDate] = useState(null);
-    const [endTime, setEndTime] = useState("00:00");
-    const [categoryOptions, setCategoryOptions] = useState([]);
+const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
+  const methods = useForm({
+    mode: "onChange",
+    defaultValues: {
+      status: "inactive",
+    },
+  });
+  const { register, setValue, getValues, watch, control } = methods;
+  const editorRef1 = useRef();
+  const editorRef2 = useRef();
+  const [brands, setBrands] = useState([]);
+  const { showModal } = useModal();
+  const [startDate, setStartDate] = useState(new Date());
+  const [startTime, setStartTime] = useState("00:00");
+  const [endDate, setEndDate] = useState(null);
+  const [endTime, setEndTime] = useState("00:00");
+  const [categoryOptions, setCategoryOptions] = useState([]);
 
-    useEffect(() => {
-      // 카테고리 불러오기
-      const fetchCategories = async () => {
-        try {
-          const res = await api.get("/api/v1/event-promotion/item/category");
-          if (res.data?.success) {
-            setCategoryOptions(res.data.data);
-          }
-        } catch (err) {
-          console.error("카테고리 로딩 실패", err);
+  useEffect(() => {
+    // 카테고리 불러오기
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get("/api/v1/event-promotion/item/category");
+        if (res.data?.success) {
+          setCategoryOptions(res.data.data);
         }
+      } catch (err) {
+        console.error("카테고리 로딩 실패", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const fetchBrandName = async () => {
+      const brandId = watch("brandId"); // watch는 즉시 값 반영이 어려울 수 있으므로 변수로 추출
+      if (!brandId) return;
+
+      try {
+        const res = await api.get("/api/v1/event-promotion/item/brand?lang=ko");
+        const brandList = res.data?.data ?? [];
+
+        const found = brandList.find((b) => String(b.id) === String(brandId));
+
+        if (found) {
+          setBrands([{ _id: found.id, brand: found.brandName }]);
+        }
+      } catch (err) {
+        console.error("브랜드 정보 불러오기 실패", err);
+      }
+    };
+
+    fetchBrandName();
+  }, [watch("brandId")]);
+
+  useEffect(() => {
+    console.log("받은 data:", data);
+    if (data && Object.keys(data).length > 0) {
+      setValue("category", data.category || "");
+      setValue("title", data.title || "");
+      setValue("status", data.showYn === "Y" ? "active" : "inactive");
+      setValue("order", data.sort || 1);
+      setValue("thumbImg", data.thumbImg || null);
+      setValue("imgBodyPc", data.imgBodyPc || null);
+      setValue("imgBodyMo", data.imgBodyMo || null);
+      setValue("imgPc", data.imgPc || null);
+      setValue("imgMo", data.imgMo || null);
+      editorRef1.current?.setContent?.(data.content || "");
+      editorRef2.current?.setContent?.(data.description || "");
+
+      // 브랜드 정보도 세팅
+      if (data.brandId) {
+        setBrands([{ _id: data.brandId, brand: "선택된 브랜드" }]);
+      }
+
+      console.log("값 세팅 완료");
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (data?.startDate) {
+      const start = new Date(data.startDate);
+      setStartDate(start);
+
+      // 시간 문자열로 변환 (ex: "09:30")
+      const hh = String(start.getHours()).padStart(2, "0");
+      const mm = String(start.getMinutes()).padStart(2, "0");
+      setStartTime(`${hh}:${mm}`);
+    }
+
+    if (data?.endDate) {
+      const end = new Date(data.endDate);
+      setEndDate(end);
+
+      const hh = String(end.getHours()).padStart(2, "0");
+      const mm = String(end.getMinutes()).padStart(2, "0");
+      setEndTime(`${hh}:${mm}`);
+    }
+  }, [data]);
+
+  useImperativeHandle(ref, () => ({
+    submit: async (onError) => {
+      const values = {
+        ...getValues(),
+        thumbImg: watch("thumbImg"),
+        imgBodyPc: watch("imgBodyPc"),
+        imgBodyMo: watch("imgBodyMo"),
+        imgPc: watch("imgPc"),
+        imgMo: watch("imgMo"),
+        description: watch("description"),
       };
+      const content = await editorRef1.current?.getContent?.();
+      const description = watch("description");
 
-      fetchCategories();
-    }, []);
+      const [startHour, startMin] = startTime.split(":").map(Number);
+      const [endHour, endMin] = endTime.split(":").map(Number);
 
-    useEffect(() => {
-      const fetchBrandName = async () => {
-        const brandId = watch("brandId"); // watch는 즉시 값 반영이 어려울 수 있으므로 변수로 추출
-        if (!brandId) return;
+      const start = new Date(startDate);
+      start.setHours(startHour, startMin, 0, 0);
+      const startDateStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-${String(start.getDate()).padStart(2, "0")}T${String(startHour).padStart(2, "0")}:${String(startMin).padStart(2, "0")}`;
 
-        try {
-          const res = await api.get(
-            "/api/v1/event-promotion/item/brand?lang=ko"
-          );
-          const brandList = res.data?.data ?? [];
+      const end = new Date(endDate);
+      end.setHours(endHour, endMin, 0, 0);
+      const endDateStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")}T${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
 
-          const found = brandList.find((b) => String(b.id) === String(brandId));
-
-          if (found) {
-            setBrands([{ _id: found.id, brand: found.brandName }]);
-          }
-        } catch (err) {
-          console.error("브랜드 정보 불러오기 실패", err);
-        }
-      };
-
-      fetchBrandName();
-    }, [watch("brandId")]);
-
-    useEffect(() => {
-      console.log("받은 data:", data);
-      if (data && Object.keys(data).length > 0) {
-        setValue("category", data.category || "");
-        setValue("title", data.title || "");
-        setValue("status", data.showYn === "Y" ? "active" : "inactive");
-        setValue("order", data.sort || 1);
-        setValue("thumbImg", data.thumbImg || null);
-        setValue("imgBodyPc", data.imgBodyPc || null);
-        setValue("imgBodyMo", data.imgBodyMo || null);
-        setValue("imgPc", data.imgPc || null);
-        setValue("imgMo", data.imgMo || null);
-        editorRef1.current?.setContent?.(data.content || "");
-        editorRef2.current?.setContent?.(data.description || "");
-
-        // 브랜드 정보도 세팅
-        if (data.brandId) {
-          setBrands([{ _id: data.brandId, brand: "선택된 브랜드" }]);
-        }
-
-        console.log("값 세팅 완료");
+      if (!values.category) {
+        onError?.("카테고리를 선택해주세요.");
+        return null;
       }
-    }, [data]);
-
-    useEffect(() => {
-      if (data?.startDate) {
-        const start = new Date(data.startDate);
-        setStartDate(start);
-
-        // 시간 문자열로 변환 (ex: "09:30")
-        const hh = String(start.getHours()).padStart(2, "0");
-        const mm = String(start.getMinutes()).padStart(2, "0");
-        setStartTime(`${hh}:${mm}`);
+      if (!values.title) {
+        onError?.("제목을 입력해주세요.");
+        return null;
+      }
+      if (
+        !values.imgPc ||
+        !values.imgMo ||
+        !values.thumbImg ||
+        !values.imgBodyPc ||
+        !values.imgBodyMo
+      ) {
+        onError?.("이미지를 모두 등록해주세요.");
+        return null;
+      }
+      if (!content || content.replace(/<[^>]+>/g, "").trim() === "") {
+        onError?.("상세 내용을 입력해주세요.");
+        return null;
       }
 
-      if (data?.endDate) {
-        const end = new Date(data.endDate);
-        setEndDate(end);
-
-        const hh = String(end.getHours()).padStart(2, "0");
-        const mm = String(end.getMinutes()).padStart(2, "0");
-        setEndTime(`${hh}:${mm}`);
+      if (!startDate || !endDate) {
+        onError?.("이벤트 시작일과 종료일을 선택해주세요.");
+        return null;
       }
-    }, [data]);
 
-    useImperativeHandle(ref, () => ({
-      submit: async () => {
-        const values = {
-          ...getValues(),
-          thumbImg: watch("thumbImg"),
-          imgBodyPc: watch("imgBodyPc"),
-          imgBodyMo: watch("imgBodyMo"),
-          imgPc: watch("imgPc"),
-          imgMo: watch("imgMo"),
-          description: watch("description"),
-        };
-        const content = await editorRef1.current?.getContent?.();
-        const description = watch("description");
+      if (brands.length === 0) {
+        onError?.("브랜드를 선택해주세요.");
+        return null;
+      }
+      if (!description || description.trim() === "") {
+        onError?.("디스크립션을 입력해주세요.");
+        return null;
+      }
 
-        const [startHour, startMin] = startTime.split(":").map(Number);
-        const [endHour, endMin] = endTime.split(":").map(Number);
+      console.log("검사 대상 값들:", {
+        title: values.title,
+        category: values.category,
+        startDate: startDate,
+        endDate: endDate,
+        thumbImg: values.thumbImg,
+        imgBodyPc: values.imgBodyPc,
+        imgBodyMo: values.imgBodyMo,
+        imgPc: values.imgPc,
+        imgMo: values.imgMo,
+        content,
+        description,
+        brands,
+      });
 
-        const start = new Date(startDate);
-        start.setHours(startHour, startMin, 0, 0);
-        const startDateStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-${String(start.getDate()).padStart(2, "0")}T${String(startHour).padStart(2, "0")}:${String(startMin).padStart(2, "0")}`;
+      if (
+        !values.title?.trim() ||
+        !values.category ||
+        !startDate ||
+        !endDate ||
+        !values.thumbImg ||
+        !values.imgBodyPc ||
+        !values.imgBodyMo ||
+        !values.imgPc ||
+        !values.imgMo ||
+        !content?.trim() ||
+        //        // !description?.trim() ||
+        brands.length === 0
+      ) {
+        alert("모든 필수 항목을 입력해주세요.");
+        return null;
+      }
 
-        const end = new Date(endDate);
-        end.setHours(endHour, endMin, 0, 0);
-        const endDateStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")}T${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
-
-        console.log("검사 대상 값들:", {
-          title: values.title,
-          category: values.category,
-          startDate: startDate,
-          endDate: endDate,
-          thumbImg: values.thumbImg,
-          imgBodyPc: values.imgBodyPc,
-          imgBodyMo: values.imgBodyMo,
-          imgPc: values.imgPc,
-          imgMo: values.imgMo,
-          content,
-          description,
-          brands,
-        });
-
-        if (
-          !values.title?.trim() ||
-          !values.category ||
-          !startDate ||
-          !endDate ||
-          !values.thumbImg ||
-          !values.imgBodyPc ||
-          !values.imgBodyMo ||
-          !values.imgPc ||
-          !values.imgMo ||
-          !content?.trim() ||
-          //        // !description?.trim() ||
-          brands.length === 0
-        ) {
-          alert("모든 필수 항목을 입력해주세요.");
-          return null;
-        }
-
-        const toImageMeta = (file) => {
-          if (!file || !file.name || !file.path) {
-            console.warn("이미지 path 누락:", file);
-            return null;
-          }
-
-          return {
-            id: file.id ?? null,
-            originalName: file.originalName || file.name,
-            name: file.name,
-            size: file.size,
-            extension: "." + (file.originalName || file.name).split(".").pop(),
-            mime: file.type || "image/png",
-            classification: "event-promotion",
-            path: file.path,
-            status: file.status ?? "C",
-          };
-        };
-
-        // 필수 체크
-        if (
-          !values.title?.trim() ||
-          !values.category ||
-          !startDate ||
-          !endDate ||
-          !watch("thumbImg") ||
-          !watch("imgBodyPc") ||
-          !watch("imgBodyMo") ||
-          !watch("imgPc") ||
-          !watch("imgMo") ||
-          !content?.trim() ||
-          !description?.trim() ||
-          brands.length === 0
-        ) {
-          alert("모든 필수 항목을 입력해주세요.");
+      const toImageMeta = (file) => {
+        if (!file || !file.name || !file.path) {
+          console.warn("이미지 path 누락:", file);
           return null;
         }
 
         return {
-          eventId: data?.id ?? null,
-          lang,
-          showYn: values.status === "active" ? "Y" : "N",
-          sort: Number(values.order) || 1,
-          category: values.category,
-          title: values.title || "",
-          thumbImg: toImageMeta(values.thumbImg),
-          imgBodyPc: toImageMeta(values.imgBodyPc),
-          imgBodyMo: toImageMeta(values.imgBodyMo),
-          imgPc: toImageMeta(values.imgPc),
-          imgMo: toImageMeta(values.imgMo),
-          content: content || "",
-          description: description || "",
-          startDate: startDateStr,
-          endDate: endDateStr,
-          brandId: brands[0]?._id ?? null,
-          delYn: "N",
+          id: file.id ?? null,
+          originalName: file.originalName || file.name,
+          name: file.name,
+          size: file.size,
+          extension: "." + (file.originalName || file.name).split(".").pop(),
+          mime: file.type || "image/png",
+          classification: "event-promotion",
+          path: file.path,
+          status: file.status ?? "C",
         };
-      },
-      setValue,
-      setDescription: (desc) => {
-        setValue("description", desc);
-      },
-      setContent: (html) => {
-        editorRef1.current?.setContent?.(html);
-      },
-    }));
-    console.log("brands", brands);
-    return (
-      <FormProvider {...methods}>
-        <form className="space-y-6 p-6">
-          {/* 카테고리 + 노출 여부 */}
-          <div className="flex items-end justify-between">
-            <Controller
-              name="category"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Select
-                  label="카테고리"
-                  className="w-1/2"
-                  {...field}
-                  required
-                  disabled={readOnly}
-                >
-                  <option value="">선택</option>
-                  {categoryOptions.map((item) => (
-                    <option key={item.code} value={item.code}>
-                      {item.value}
-                    </option>
-                  ))}
-                </Select>
-              )}
-            />
+      };
 
-            <div className="flex items-center gap-4">
-              <input type="hidden" {...register("status")} />
-              <p className="text-sm font-medium text-gray-800">노출 여부</p>
-              <Radio
-                name="status"
-                value="active"
-                label="사용"
-                checked={watch("status") === "active"}
-                onChange={() => setValue("status", "active")}
-                disabled={readOnly}
-              />
-              <Radio
-                name="status"
-                value="inactive"
-                label="미사용"
-                checked={watch("status") === "inactive"}
-                onChange={() => setValue("status", "inactive")}
-                disabled={readOnly}
-              />
-            </div>
-          </div>
+      // 필수 체크
+      if (
+        !values.title?.trim() ||
+        !values.category ||
+        !startDate ||
+        !endDate ||
+        !watch("thumbImg") ||
+        !watch("imgBodyPc") ||
+        !watch("imgBodyMo") ||
+        !watch("imgPc") ||
+        !watch("imgMo") ||
+        !content?.trim() ||
+        !description?.trim() ||
+        brands.length === 0
+      ) {
+        alert("모든 필수 항목을 입력해주세요.");
+        return null;
+      }
 
-          {/* 입력 필드 */}
-          <Input
-            label="노출 순서"
-            {...register("order")}
-            type="number"
-            disabled={readOnly}
-          />
-          <Input
-            label="타이틀"
-            {...register("title")}
-            required
-            disabled={readOnly}
-          />
-
-          {/* 파일 업로드 */}
-          <Upload
-            key={`thumbImg-upload`}
-            name="thumbImg"
-            label="썸네일 이미지"
-            required
-            classification="event-promotion"
-            readOnly={readOnly}
-            value={watch("thumbImg")}
-            onChange={(file) => {
-              console.log("썸네일 이미지 등록됨:", file);
-              setValue("thumbImg", file);
-            }}
-          />
-          <Upload
-            key={`imgBodyPc-upload`}
-            name="imgBodyPc"
-            label="PC 본문 이미지"
-            required
-            classification="event-promotion"
-            readOnly={readOnly}
-            value={watch("imgBodyPc")}
-            onChange={(file) => {
-              console.log("pc 본문 이미지 등록됨:", file);
-              setValue("imgBodyPc", file);
-            }}
-          />
-          <Upload
-            key={`imgBodyMo-upload`}
-            name="imgBodyMo"
-            label="MO 본문 이미지"
-            required
-            classification="event-promotion"
-            readOnly={readOnly}
-            value={watch("imgBodyMo")}
-            onChange={(file) => {
-              console.log("mo 본문 이미지 등록됨:", file);
-              setValue("imgBodyMo", file);
-            }}
-          />
-          {/* 상세 내용 에디터 1 */}
-          <p className="text-sm font-medium">
-            상세 내용<span className="text-red-500">*</span>
-          </p>
+      return {
+        eventId: data?.id ?? null,
+        lang,
+        showYn: values.status === "active" ? "Y" : "N",
+        sort: Number(values.order) || 1,
+        category: values.category,
+        title: values.title || "",
+        thumbImg: toImageMeta(values.thumbImg),
+        imgBodyPc: toImageMeta(values.imgBodyPc),
+        imgBodyMo: toImageMeta(values.imgBodyMo),
+        imgPc: toImageMeta(values.imgPc),
+        imgMo: toImageMeta(values.imgMo),
+        content: content || "",
+        description: description || "",
+        startDate: startDateStr,
+        endDate: endDateStr,
+        brandId: brands[0]?._id ?? null,
+        delYn: "N",
+      };
+    },
+    setValue,
+    setDescription: (desc) => {
+      setValue("description", desc);
+    },
+    setContent: (html) => {
+      editorRef1.current?.setContent?.(html);
+    },
+  }));
+  console.log("brands", brands);
+  return (
+    <FormProvider {...methods}>
+      <form className="space-y-6 p-6">
+        {/* 카테고리 + 노출 여부 */}
+        <div className="flex items-end justify-between">
           <Controller
-            name="content"
+            name="category"
             control={control}
+            rules={{ required: true }}
             render={({ field }) => (
-              <Editor
-                ref={editorRef1}
-                readOnly={readOnly}
-                initialContent={field.value}
-                onChange={(val) => field.onChange(val)} // 에디터 내부 값 변경을 폼과 동기화
-              />
+              <Select
+                label="카테고리"
+                className="w-1/2"
+                {...field}
+                required
+                disabled={readOnly}
+              >
+                <option value="">선택</option>
+                {categoryOptions.map((item) => (
+                  <option key={item.code} value={item.code}>
+                    {item.value}
+                  </option>
+                ))}
+              </Select>
             )}
           />
 
-          {/* 날짜 선택 */}
-          <p className="min-w-[80px] text-sm font-medium text-gray-800">
-            이벤트 기간<span className="ml-1 text-red-500">*</span>
-          </p>
-
-          {/* 시작 날짜 + 시간 */}
           <div className="flex items-center gap-4">
-            {/* 시작 날짜 + 시간 */}
-            <div className="flex items-center gap-2">
-              <Datepicker
-                mode="single"
-                selectedDate={startDate}
-                onSingleChange={(date) => {
-                  setStartDate(date);
-                  setValue("startDate", date?.toISOString());
-                }}
-                readOnly={readOnly}
-              />
-              <input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                className="rounded border px-2 py-1"
-                disabled={readOnly}
-              />
-            </div>
+            <input type="hidden" {...register("status")} />
+            <p className="text-sm font-medium text-gray-800">노출 여부</p>
+            <Radio
+              name="status"
+              value="active"
+              label="노출"
+              checked={watch("status") === "active"}
+              onChange={() => setValue("status", "active")}
+              disabled={readOnly}
+            />
+            <Radio
+              name="status"
+              value="inactive"
+              label="미노출"
+              checked={watch("status") === "inactive"}
+              onChange={() => setValue("status", "inactive")}
+              disabled={readOnly}
+            />
+          </div>
+        </div>
 
-            {/* ~ 기호 */}
-            <span className="font-bold">~</span>
+        {/* 입력 필드 */}
+        <Input
+          label="노출 순서"
+          {...register("order")}
+          type="number"
+          disabled={readOnly}
+        />
+        <div>
+          <Input
+            id="title"
+            label="제목"
+            {...register("title", {
+              required: true,
+              maxLength: {
+                value: 100,
+                message: "제목은 공백 포함 100자 이하로 입력해주세요.",
+              },
+            })}
+            disabled={readOnly}
+            required
+            maxLength={100}
+            showDefaultInfo={true}
+          />
+          <p className="mt-1 text-right text-sm text-gray-500">
+            {watch("title")?.length || 0}/100자
+          </p>
+          {watch("title")?.length > 100 && (
+            <p className="text-sm text-red-500">100자 이내로 입력해주세요.</p>
+          )}
+        </div>
 
-            {/* 종료 날짜 + 시간 */}
-            <div className="flex items-center gap-2">
-              <Datepicker
-                mode="single"
-                selectedDate={endDate}
-                onSingleChange={(date) => {
-                  setEndDate(date);
-                  setValue("endDate", date?.toISOString());
-                }}
-                readOnly={readOnly}
-              />
-              <input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                className="rounded border px-2 py-1"
-                disabled={readOnly}
-              />
-            </div>
+        {/* 파일 업로드 */}
+        <Upload
+          key={`thumbImg-upload`}
+          name="thumbImg"
+          label="썸네일 이미지"
+          required
+          classification="event-promotion"
+          readOnly={readOnly}
+          value={watch("thumbImg")}
+          onChange={(file) => {
+            console.log("썸네일 이미지 등록됨:", file);
+            setValue("thumbImg", file);
+          }}
+        />
+        <Upload
+          key={`imgBodyPc-upload`}
+          name="imgBodyPc"
+          label="PC 본문 이미지"
+          required
+          classification="event-promotion"
+          readOnly={readOnly}
+          value={watch("imgBodyPc")}
+          onChange={(file) => {
+            console.log("pc 본문 이미지 등록됨:", file);
+            setValue("imgBodyPc", file);
+          }}
+        />
+        <Upload
+          key={`imgBodyMo-upload`}
+          name="imgBodyMo"
+          label="MO 본문 이미지"
+          required
+          classification="event-promotion"
+          readOnly={readOnly}
+          value={watch("imgBodyMo")}
+          onChange={(file) => {
+            console.log("mo 본문 이미지 등록됨:", file);
+            setValue("imgBodyMo", file);
+          }}
+        />
+        {/* 상세 내용 에디터 1 */}
+        <p className="text-sm font-medium">
+          상세 내용<span className="text-red-500">*</span>
+        </p>
+        <Controller
+          name="content"
+          control={control}
+          render={({ field }) => (
+            <Editor
+              ref={editorRef1}
+              readOnly={readOnly}
+              initialContent={field.value}
+              onChange={(val) => field.onChange(val)} // 에디터 내부 값 변경을 폼과 동기화
+            />
+          )}
+        />
+
+        {/* 날짜 선택 */}
+        <p className="min-w-[80px] text-sm font-medium text-gray-800">
+          이벤트 기간<span className="ml-1 text-red-500">*</span>
+        </p>
+
+        {/* 시작 날짜 + 시간 */}
+        <div className="flex items-center gap-4">
+          {/* 시작 날짜 + 시간 */}
+          <div className="flex items-center gap-2">
+            <Datepicker
+              mode="single"
+              selectedDate={startDate}
+              onSingleChange={(date) => {
+                setStartDate(date);
+                setValue("startDate", date?.toISOString());
+              }}
+              readOnly={readOnly}
+            />
+            <input
+              type="time"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+              className="rounded border px-2 py-1"
+              disabled={readOnly}
+            />
           </div>
 
-          {/* 브랜드 선택 */}
-          <Row className="pb-4">
-            <Col className="flex-5">
-              <Input
-                label="노출 브랜드"
-                readOnly
-                required
-                value={brands.map((e) => e.brand).join(", ")}
-              />
-              <input
-                type="hidden"
-                {...register("lifestyle.brand")}
-                value={brands.map((e) => e._id).join(",")}
-              />
-            </Col>
-            <Col className="self-end">
-              <Button
-                onClick={() =>
-                  showModal({
-                    title: "브랜드 선택",
-                    customButton: true,
-                    showCancel: true,
-                    size: "5xl",
-                    children: ({ closeModal }) => (
-                      <BrandList
-                        selected={brands.map((e) => e._id)}
-                        closeModal={closeModal}
-                        onConfirm={(result) => {
-                          setBrands(result);
-                          setValue(
-                            "lifestyle.brand",
-                            result.map((b) => b.id)
-                          );
+          {/* ~ 기호 */}
+          <span className="font-bold">~</span>
 
-                          closeModal();
+          {/* 종료 날짜 + 시간 */}
+          <div className="flex items-center gap-2">
+            <Datepicker
+              mode="single"
+              selectedDate={endDate}
+              onSingleChange={(date) => {
+                setEndDate(date);
+                setValue("endDate", date?.toISOString());
+              }}
+              readOnly={readOnly}
+            />
+            <input
+              type="time"
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
+              className="rounded border px-2 py-1"
+              disabled={readOnly}
+            />
+          </div>
+          <div className="flex items-center gap-2"></div>
+        </div>
 
-                          // 이후 모달 충돌 방지를 위해 setTimeout으로 알림 모달 띄움
-                          setTimeout(() => {
-                            showModal({
-                              title: "알림",
-                              children: <p>저장되었습니다.</p>,
-                              showCancel: false,
-                            });
-                          }, 100);
-                        }}
-                      />
-                    ),
-                  })
-                }
-              >
-                관리
-              </Button>
-            </Col>
-          </Row>
+        {/* 브랜드 선택 */}
+        <Row className="pb-4">
+          <Col className="flex-5">
+            <Input
+              label="노출 브랜드"
+              readOnly
+              required
+              value={brands.map((e) => e.brand).join(", ")}
+            />
+            <input
+              type="hidden"
+              {...register("lifestyle.brand")}
+              value={brands.map((e) => e._id).join(",")}
+            />
+          </Col>
+          <Col className="self-end">
+            <Button
+              onClick={() =>
+                showModal({
+                  title: "브랜드 선택",
+                  customButton: true,
+                  showCancel: true,
+                  size: "5xl",
+                  children: ({ closeModal }) => (
+                    <BrandList
+                      selected={brands.map((e) => e._id)}
+                      closeModal={closeModal}
+                      onConfirm={(result) => {
+                        setBrands(result);
+                        setValue(
+                          "lifestyle.brand",
+                          result.map((b) => b.id)
+                        );
 
-          {/* 파일 업로드 2 */}
-          <Upload
-            key={`imgPc-upload`}
-            name="imgPc"
-            label="PC 이미지"
-            required
-            classification="event-promotion"
-            readOnly={readOnly}
-            value={watch("imgPc")}
-            onChange={(file) => {
-              console.log("PC 이미지 등록됨:", file);
-              setValue("imgPc", file);
-            }}
-          />
-          <Upload
-            name="imgMo"
-            label="모바일 이미지"
-            classification="event-promotion"
-            required
-            readOnly={readOnly}
-            value={watch("imgMo")}
-            onChange={(file) => {
-              console.log("모바일 이미지 업로드됨:", file);
-              setValue("imgMo", file);
-            }}
-          />
+                        closeModal();
 
-          {/* 내용 텍스트 공간 */}
-          <Textarea
-            id="description"
-            name="description"
-            label="디스크립션"
-            value={watch("description")}
-            onChange={(e) => setValue("description", e.target.value)}
-            required
-            maxLength={130}
-          />
-        </form>
-      </FormProvider>
-    );
-  }
-);
+                        // 이후 모달 충돌 방지를 위해 setTimeout으로 알림 모달 띄움
+                        setTimeout(() => {
+                          showModal({
+                            title: "알림",
+                            children: <p>저장되었습니다.</p>,
+                            showCancel: false,
+                          });
+                        }, 100);
+                      }}
+                    />
+                  ),
+                })
+              }
+            >
+              관리
+            </Button>
+          </Col>
+        </Row>
+
+        {/* 파일 업로드 2 */}
+        <Upload
+          key={`imgPc-upload`}
+          name="imgPc"
+          label="PC 이미지"
+          required
+          classification="event-promotion"
+          readOnly={readOnly}
+          value={watch("imgPc")}
+          onChange={(file) => {
+            console.log("PC 이미지 등록됨:", file);
+            setValue("imgPc", file);
+          }}
+        />
+        <Upload
+          name="imgMo"
+          label="모바일 이미지"
+          classification="event-promotion"
+          required
+          readOnly={readOnly}
+          value={watch("imgMo")}
+          onChange={(file) => {
+            console.log("모바일 이미지 업로드됨:", file);
+            setValue("imgMo", file);
+          }}
+        />
+
+        {/* 내용 텍스트 공간 */}
+        <Textarea
+          id="description"
+          name="description"
+          label="디스크립션"
+          value={watch("description")}
+          onChange={(e) => setValue("description", e.target.value)}
+          required
+          maxLength={130}
+        />
+      </form>
+    </FormProvider>
+  );
+});
 export default EventRegistForm;
