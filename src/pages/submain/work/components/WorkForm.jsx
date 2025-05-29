@@ -100,7 +100,7 @@ export default function WorkForm({ data, setData }) {
                 </Row>
 
                 <Row className="flex justify-center gap-2">
-                  {fields.length === index + 1 && fields.length < 4 && (
+                  {fields.length === index + 1 && fields.length < 6 && (
                     <Button
                       type="button"
                       onClick={() =>
