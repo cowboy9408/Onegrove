@@ -248,7 +248,9 @@ export default function BrandDetail() {
         }
 
         try {
-          const checkRes = await api.get(`/api/v1/brand/detail/${masterId}/${lang}`);
+          const checkRes = await api.get(
+            `/api/v1/brand/detail/${masterId}/${lang}`
+          );
           if (checkRes.data?.data?.bcId) {
             payload.contentId = checkRes.data.data.bcId; // 기존 bcId가 있다면 사용
           }
@@ -256,17 +258,16 @@ export default function BrandDetail() {
 
           console.log(`[${lang}] 서버에 보낼 데이터:`, lang, payload);
 
-          const apiUrl = (payload.contentId !== undefined && payload.contentId !== null)
-            ? "/api/v1/brand/update"
-            : "/api/v1/brand/insert";
+          const apiUrl =
+            payload.contentId !== undefined && payload.contentId !== null
+              ? "/api/v1/brand/update"
+              : "/api/v1/brand/insert";
           const res = await api.post(apiUrl, payload);
-          
+
           console.log("응답 결과:", res.data);
         } catch (err) {
           console.error("브랜드 상세 로딩 실패:", err);
         }
-
-        
       };
 
       if (currentLang === 0) {

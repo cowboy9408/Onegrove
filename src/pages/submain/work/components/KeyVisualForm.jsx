@@ -9,12 +9,14 @@ import Title from "@/components/layout/Title";
 import { useEffect } from "react";
 import { FormProvider, useForm, Controller } from "react-hook-form";
 
-const MAX_WORK_LENGTH = 6;
+const MAX_KV_LENGTH = 4;
 
-export default function WorkForm({ data, setData }) {
+export default function KeyVisualForm({ data, setData }) {
   const methods = useForm({
     defaultValues: {
-      work: [{ title: "", subtitle: "", file1: null, file2: null }],
+      kv: [
+        { type: "image", title: "", subtitle: "", file1: null, file2: null },
+      ],
     },
   });
 
@@ -22,19 +24,19 @@ export default function WorkForm({ data, setData }) {
 
   useEffect(() => {
     if (Array.isArray(data) && data.length > 0) {
-      reset({ work: data });
+      reset({ kv: data });
     }
   }, []); // 의존성 줄이기
 
   const onSubmit = (formValues) => {
-    setData(formValues.work);
+    setData(formValues.kv);
   };
 
   return (
     <FormProvider {...methods}>
       {/*폼을 제출하면 상위에 전달 */}
       <form onBlur={handleSubmit(onSubmit)} className="space-y-8 p-4">
-        <FieldGroup name="work">
+        <FieldGroup name="kv">
           {({ fields, field, index, append, remove }) => {
             const idTitle = `title-${field.id}`;
             const idSubtitle = `subtitle-${field.id}`;
@@ -44,30 +46,42 @@ export default function WorkForm({ data, setData }) {
                 key={field.id}
                 className="mb-2 rounded-md border-2 border-gray-200"
               >
-                <Title title={`■ Work 상단 콘텐츠 ${index + 1}`} />
+                <Title title={`■ Key Visual 이미지 ${index + 1}`} />
+
+                <Row className="pb-4">
+                  <FormRadioGroup
+                    name={`kv.${index}.type`}
+                    label="콘텐츠 형식"
+                    options={[
+                      { label: "이미지", value: "image" },
+                      { label: "영상", value: "video" },
+                    ]}
+                    required
+                  />
+                </Row>
 
                 <Row className="pb-4">
                   <Controller
-                    name={`work.${index}.file1`}
+                    name={`kv.${index}.file1`}
                     control={methods.control}
                     render={({ field }) => (
                       <Upload
                         {...field}
                         label="PC 이미지"
-                        acceptWith={`work.${index}.type`}
+                        acceptWith={`kv.${index}.type`}
                       />
                     )}
                   />
                 </Row>
                 <Row className="pb-4">
                   <Controller
-                    name={`work.${index}.file2`}
+                    name={`kv.${index}.file2`}
                     control={methods.control}
                     render={({ field }) => (
                       <Upload
                         {...field}
                         label="MO 이미지"
-                        acceptWith={`work.${index}.type`}
+                        acceptWith={`kv.${index}.type`}
                       />
                     )}
                   />
@@ -77,12 +91,12 @@ export default function WorkForm({ data, setData }) {
                   <FormInput
                     id={idTitle}
                     label="타이틀"
-                    fieldName={`work.${index}.title`}
+                    fieldName={`kv.${index}.title`}
                     maxLength={50}
                     required
                     placeholder="타이틀을 입력해주세요"
-                    {...register(`work.${index}.title`)}
-                    onClear={() => resetField(`work.${index}.title`)}
+                    {...register(`kv.${index}.title`)}
+                    onClear={() => resetField(`kv.${index}.title`)}
                   />
                 </Row>
 
@@ -90,12 +104,12 @@ export default function WorkForm({ data, setData }) {
                   <FormInput
                     id={idSubtitle}
                     label="서브타이틀"
-                    fieldName={`work.${index}.subtitle`}
+                    fieldName={`kv.${index}.subtitle`}
                     maxLength={100}
                     required
                     placeholder="서브타이틀을 입력해주세요."
-                    {...register(`work.${index}.subtitle`)}
-                    onClear={() => resetField(`work.${index}.subtitle`)}
+                    {...register(`kv.${index}.subtitle`)}
+                    onClear={() => resetField(`kv.${index}.subtitle`)}
                   />
                 </Row>
 
