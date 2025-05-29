@@ -33,7 +33,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
   const editorRef2 = useRef();
   const [brands, setBrands] = useState([]);
   const { showModal } = useModal();
-  const [startDate, setStartDate] = useState(null);
+  const [startDate, setStartDate] = useState(new Date());
   const [startTime, setStartTime] = useState("00:00");
   const [endDate, setEndDate] = useState(null);
   const [endTime, setEndTime] = useState("00:00");
@@ -123,7 +123,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
   }, [data]);
 
   useImperativeHandle(ref, () => ({
-    submit: async () => {
+    submit: async (onError) => {
       const values = {
         ...getValues(),
         thumbImg: watch("thumbImg"),
@@ -146,6 +146,43 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
       const end = new Date(endDate);
       end.setHours(endHour, endMin, 0, 0);
       const endDateStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")}T${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
+
+      if (!values.category) {
+        onError?.("카테고리를 선택해주세요.");
+        return null;
+      }
+      if (!values.title) {
+        onError?.("제목을 입력해주세요.");
+        return null;
+      }
+      if (
+        !values.imgPc ||
+        !values.imgMo ||
+        !values.thumbImg ||
+        !values.imgBodyPc ||
+        !values.imgBodyMo
+      ) {
+        onError?.("이미지를 모두 등록해주세요.");
+        return null;
+      }
+      if (!content || content.replace(/<[^>]+>/g, "").trim() === "") {
+        onError?.("상세 내용을 입력해주세요.");
+        return null;
+      }
+
+      if (!startDate || !endDate) {
+        onError?.("이벤트 시작일과 종료일을 선택해주세요.");
+        return null;
+      }
+
+      if (brands.length === 0) {
+        onError?.("브랜드를 선택해주세요.");
+        return null;
+      }
+      if (!description || description.trim() === "") {
+        onError?.("디스크립션을 입력해주세요.");
+        return null;
+      }
 
       console.log("검사 대상 값들:", {
         title: values.title,
@@ -303,12 +340,29 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           type="number"
           disabled={readOnly}
         />
-        <Input
-          label="타이틀"
-          {...register("title")}
-          required
-          disabled={readOnly}
-        />
+        <div>
+          <Input
+            id="title"
+            label="제목"
+            {...register("title", {
+              required: true,
+              maxLength: {
+                value: 100,
+                message: "제목은 공백 포함 100자 이하로 입력해주세요.",
+              },
+            })}
+            disabled={readOnly}
+            required
+            maxLength={100}
+            showDefaultInfo={true}
+          />
+          <p className="mt-1 text-right text-sm text-gray-500">
+            {watch("title")?.length || 0}/100자
+          </p>
+          {watch("title")?.length > 100 && (
+            <p className="text-sm text-red-500">100자 이내로 입력해주세요.</p>
+          )}
+        </div>
 
         {/* 파일 업로드 */}
         <Upload
@@ -416,6 +470,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
               disabled={readOnly}
             />
           </div>
+          <div className="flex items-center gap-2"></div>
         </div>
 
         {/* 브랜드 선택 */}
