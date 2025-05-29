@@ -55,6 +55,11 @@ import PopupRegist from "@/pages/popup/PopupRegist";
 import BrandDetail from "@/pages/retail/brand/BrandDetail";
 import PressDetail from "@/pages/contents/whatson/media/PressDetail";
 import EventDetail from "@/pages/contents/whatson/event/EventDetail";
+import SubmainLayout from "@/pages/submain/SubmainLayout";
+import LifeStylePage from "@/pages/submain/lifestyle/LifeStylePage";
+import WhatsonPage from "@/pages/submain/whatson/WhatsonPage";
+import WorkPage from "@/pages/submain/work/WorkPage";
+import BannerLayout from "@/pages/banner/BannerLayout";
 
 export const routeMeta = [
   {
@@ -76,7 +81,7 @@ export const routeMeta = [
         path: "/admin",
         element: <AdminLayout />,
         title: "관리자 관리",
-        icon: <CartIcon size={18} />,
+        icon: <UsersIcon size={18} />,
         hidden: false,
         permissions: ["Admin", "User"],
         children: [
@@ -219,10 +224,81 @@ export const routeMeta = [
         path: "/mainpage",
         element: <MainPage />,
         title: "메인화면 관리",
-        icon: <LayoutPanelTopIcon size={18} />,
+        icon: <FileTextIcon size={18} />,
         hidden: false,
         permissions: ["Admin", "User"],
       },
+      {
+        uuid: "79d324e5-4e32-47e5-a372-fa5d58340aca",
+        path: "/submain",
+        element: <SubmainLayout />,
+        title: "서브메인 관리",
+        icon: <FileTextIcon size={18} />,
+        hidden: false,
+        permissions: ["Admin", "User"],
+        children: [
+          {
+            uuid: "217c8074-622d-4ae1-a101-ad664b6c8615",
+            path: "/submain/whatson",
+            element: <WhatsonPage />,
+            title: "What's On 관리",
+            hidden: false,
+            permissions: ["Admin", "User"],
+          },
+          {
+            uuid: "9eb49204-b00e-4ac9-af35-0b4267c01f8f",
+            path: "/submain/lifestyle",
+            element: <LifeStylePage />,
+            title: "LifeStyle 관리",
+            hidden: false,
+            permissions: ["Admin", "User"],
+          },
+          {
+            uuid: "cfd16abc-83b1-4998-a32a-f77b2ac59ec3",
+            path: "/submain/work",
+            element: <WorkPage />,
+            title: "Work 관리",
+            hidden: false,
+            permissions: ["Admin", "User"],
+          },
+        ],
+      },
+      {
+        uuid: "8c3ff65d-9b00-466f-bdd6-ef0f7b3fe7af",
+        path: "/banner",
+        element: <BannerLayout />,
+        title: "하단 배너 관리",
+        icon: <LayoutPanelTopIcon size={18} />,
+        hidden: false,
+        permissions: ["Admin", "User"],
+        children: [
+          {
+            uuid: "3183d249-9f8e-42f9-9745-ab251a784135",
+            path: "/banner/whatson",
+            element: <WhatsonPage />,
+            title: "What's On 관리",
+            hidden: false,
+            permissions: ["Admin", "User"],
+          },
+          {
+            uuid: "5434ebe5-4879-4ba1-9c41-90afc4beea54",
+            path: "/banner/lifestyle",
+            element: <LifeStylePage />,
+            title: "LifeStyle 관리",
+            hidden: false,
+            permissions: ["Admin", "User"],
+          },
+          {
+            uuid: "ddef41a9-2eff-4c9d-9a05-68a133b3b16b",
+            path: "/banner/work",
+            element: <WorkPage />,
+            title: "Work 관리",
+            hidden: false,
+            permissions: ["Admin", "User"],
+          },
+        ],
+      },
+
       {
         uuid: "4c15f65b-5154-48be-8d42-d373136c529f",
         path: "/contents",
@@ -348,24 +424,24 @@ export const routeMeta = [
               },
             ],
           },
-          {
-            uuid: "88afdd08-b5f6-420a-bc03-28eb0f31d182",
-            path: "/contents/lifestyle",
-            element: <LifeStyleLayout />,
-            title: "Lifestyle",
-            hidden: false,
-            permissions: ["Admin", "User"],
-            children: [
-              {
-                uuid: "68f994c5-2dac-49cf-b30d-e7eae1b29b76",
-                path: "/contents/lifestyle/all",
-                element: <All />,
-                title: "All",
-                hidden: false,
-                permissions: ["Admin", "User"],
-              },
-            ],
-          },
+          // {
+          //   uuid: "88afdd08-b5f6-420a-bc03-28eb0f31d182",
+          //   path: "/contents/lifestyle",
+          //   element: <LifeStyleLayout />,
+          //   title: "Lifestyle",
+          //   hidden: false,
+          //   permissions: ["Admin", "User"],
+          //   children: [
+          //     {
+          //       uuid: "68f994c5-2dac-49cf-b30d-e7eae1b29b76",
+          //       path: "/contents/lifestyle/all",
+          //       element: <All />,
+          //       title: "All",
+          //       hidden: false,
+          //       permissions: ["Admin", "User"],
+          //     },
+          //   ],
+          // },
           {
             uuid: "87072701-2246-4ec6-8e76-e50906be08b2",
             path: "/contents/work",
