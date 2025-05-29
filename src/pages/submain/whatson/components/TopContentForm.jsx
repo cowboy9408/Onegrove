@@ -10,7 +10,7 @@ import Title from "@/components/layout/Title";
 
 const MAX_ETC_LENGTH = 5;
 const defaultItem = {
-  type: "simple",
+  category: "",
   image: { name: "", url: "", size: 0 },
 };
 
