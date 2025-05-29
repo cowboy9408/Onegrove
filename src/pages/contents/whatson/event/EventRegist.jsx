@@ -20,25 +20,23 @@ export default function EventRegist() {
   const [enData, setEnData] = useState({});
   const handleSave = async () => {
     const ref = currentLang === 0 ? koFormRef : enFormRef;
-    const form = await ref.current?.submit?.();
+    const form = await ref.current?.submit?.((message) => {
+      showModal({
+        title: "필수 항목을 입력해 주세요.",
+        message,
+        showCancel: false,
+      });
+    });
     console.log("payload:", form);
     //
-    if (!form) {
-      alert(
-        currentLang === 0
-          ? "국문 탭 입력을 확인해주세요."
-          : "영문 탭 입력을 확인해주세요."
-      );
-      return;
-    }
+    if (!form) return;
 
     try {
       await api.post("/api/v1/event-promotion/item/insert", form);
-      alert(currentLang === 0 ? "국문 저장 완료" : "영문 저장 완료");
+
       navigate("/contents/whatson/event/list");
     } catch (err) {
       console.error("저장 실패:", err);
-      alert("저장에 실패했습니다. 입력값을 확인해주세요.");
     }
   };
 
