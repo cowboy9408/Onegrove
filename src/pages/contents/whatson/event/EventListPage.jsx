@@ -348,8 +348,8 @@ export default function EventListPage() {
               label: "언어",
               render: () => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <div className="p-2 font-medium">ko</div>
-                  <div className="p-2 font-medium">en</div>
+                  <div className="py-1 font-medium">ko</div>
+                  <div className="py-1 font-medium">en</div>
                 </div>
               ),
             },
@@ -359,7 +359,7 @@ export default function EventListPage() {
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
                   <button
-                    className="text-black-600 underline p-2 truncate"
+                    className="text-black-600 underline"
                     onClick={() =>
                       navigate(
                         `/contents/whatson/event/list/${row.emId}?lang=ko`
@@ -369,7 +369,7 @@ export default function EventListPage() {
                     {row.ko_title}
                   </button>
                   <button
-                    className="text-black-600 underline p-2 truncate"
+                    className="text-black-600 underline"
                     onClick={() =>
                       navigate(
                         `/contents/whatson/event/list/${row.emId}?lang=en`
@@ -386,8 +386,8 @@ export default function EventListPage() {
               label: "노출여부",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <div className="p-2">{row.status_ko}</div>
-                  <div className="p-2">{row.status_en}</div>
+                  <div className="py-1">{row.status_ko}</div>
+                  <div className="py-1">{row.status_en}</div>
                 </div>
               ),
             },
@@ -396,8 +396,8 @@ export default function EventListPage() {
               label: "등록자",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <div className="p-2">{row.created_user_ko}</div>
-                  <div className="p-2">{row.created_user_en}</div>
+                  <div className="py-1">{row.created_user_ko}</div>
+                  <div className="py-1">{row.created_user_en}</div>
                 </div>
               ),
             },
@@ -406,8 +406,8 @@ export default function EventListPage() {
               label: "등록일시",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <div className="p-2">{row.created_at_ko}</div>
-                  <div className="p-2">{row.created_at_en}</div>
+                  <div className="py-1">{row.created_at_ko}</div>
+                  <div className="py-1">{row.created_at_en}</div>
                 </div>
               ),
             },

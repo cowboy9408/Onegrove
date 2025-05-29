@@ -36,6 +36,18 @@ export default function PressListPage() {
 
   const size = 10;
 
+  const defaultFilter = {
+    name: "",
+    category: "",
+    visibility: "",
+    dateRange: {
+      startDate: null,
+      endDate: null,
+    },
+  };
+  const [searchFilter, setSearchFilter] = useState(defaultFilter);
+  const [activeFilter, setActiveFilter] = useState(defaultFilter);
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -91,14 +103,20 @@ export default function PressListPage() {
           // 검색 필터링
           const filtered = rows.filter((row) => {
             const titleMatch =
-              name === "" ||
-              row.ko_title.includes(name) ||
-              row.en_title.includes(name);
-            const categoryMatch = category === "" || row.name === category;
+              activeFilter.name === "" ||
+              row.ko_title.includes(activeFilter.name) ||
+              row.en_title.includes(activeFilter.name);
+
+            const categoryMatch =
+              activeFilter.category === "" ||
+              row.name === activeFilter.category;
+
             const visibilityMatch =
-              visibility === "" ||
-              row.status_ko === (visibility === "Y" ? "노출" : "미노출") ||
-              row.status_en === (visibility === "Y" ? "노출" : "미노출");
+              activeFilter.visibility === "" ||
+              row.status_ko ===
+                (activeFilter.visibility === "Y" ? "노출" : "미노출") ||
+              row.status_en ===
+                (activeFilter.visibility === "Y" ? "노출" : "미노출");
 
             function parseDateOnly(input) {
               const date = new Date(input);
@@ -113,11 +131,11 @@ export default function PressListPage() {
             const rowDate = parseDateOnly(
               row.created_at_ko || row.created_at_en
             );
-            const startDateOnly = dateRange.startDate
-              ? parseDateOnly(dateRange.startDate)
+            const startDateOnly = activeFilter.dateRange.startDate
+              ? parseDateOnly(activeFilter.dateRange.startDate)
               : null;
-            const endDateOnly = dateRange.endDate
-              ? parseDateOnly(dateRange.endDate)
+            const endDateOnly = activeFilter.dateRange.endDate
+              ? parseDateOnly(activeFilter.dateRange.endDate)
               : null;
 
             const dateMatch =
@@ -165,7 +183,7 @@ export default function PressListPage() {
     };
 
     fetchData();
-  }, [page, name, category, visibility, dateRange, refreshKey]);
+  }, [page, activeFilter, refreshKey]);
 
   useEffect(() => {
     const refreshParam = searchParams.get("refresh");
@@ -300,8 +318,10 @@ export default function PressListPage() {
             <Col>
               <Select
                 label="카테고리"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                value={searchFilter.category}
+                onChange={(e) =>
+                  setSearchFilter({ ...searchFilter, category: e.target.value })
+                }
               >
                 <option value="">전체</option>
                 {categoryList.map((cat) => (
@@ -313,19 +333,24 @@ export default function PressListPage() {
             </Col>
             <p className="text-sm font-medium">게시글 등록일</p>
             <DateRangePicker
-              startDate={dateRange.startDate}
-              endDate={dateRange.endDate}
+              startDate={searchFilter.dateRange.startDate}
+              endDate={searchFilter.dateRange.endDate}
               onRangeChange={({ startDate, endDate }) =>
-                setDateRange({ startDate, endDate })
+                setSearchFilter({
+                  ...searchFilter,
+                  dateRange: { startDate, endDate },
+                })
               }
             />
             <Col>
               <Input
                 id={nameId}
-                label={"타이틀"}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onClear={() => setName("")}
+                label="타이틀"
+                value={searchFilter.name}
+                onChange={(e) =>
+                  setSearchFilter({ ...searchFilter, name: e.target.value })
+                }
+                onClear={() => setSearchFilter({ ...searchFilter, name: "" })}
               />
             </Col>
 
@@ -336,27 +361,60 @@ export default function PressListPage() {
               id="visible"
               name="visibility"
               value="Y"
-              checked={visibility === "Y"}
-              onChange={(e) => setVisibility(e.target.value)}
+              checked={searchFilter.visibility === "Y"}
+              onChange={(e) =>
+                setSearchFilter({ ...searchFilter, visibility: e.target.value })
+              }
               label="노출"
             />
             <Radio
               id="hidden"
               name="visibility"
               value="N"
-              checked={visibility === "N"}
-              onChange={(e) => setVisibility(e.target.value)}
+              checked={searchFilter.visibility === "N"}
+              onChange={(e) =>
+                setSearchFilter({ ...searchFilter, visibility: e.target.value })
+              }
               label="미노출"
             />
 
-            <Col className="self-end">
+            <Col className="flex gap-2 self-end">
               <Button
                 onClick={() => {
                   setPage(1);
-                  setSearchParams({ name, category, visibility, page: 1 });
+                  setActiveFilter(searchFilter);
+                  const params = {
+                    name: searchFilter.name,
+                    category: searchFilter.category,
+                    visibility: searchFilter.visibility,
+                    page: 1,
+                  };
+                  if (searchFilter.dateRange.startDate) {
+                    params.startDate = searchFilter.dateRange.startDate
+                      .toISOString()
+                      .split("T")[0];
+                  }
+                  if (searchFilter.dateRange.endDate) {
+                    params.endDate = searchFilter.dateRange.endDate
+                      .toISOString()
+                      .split("T")[0];
+                  }
+                  setSearchParams(params);
                 }}
               >
                 검색
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchFilter(defaultFilter);
+                  setActiveFilter(defaultFilter);
+                  setPage(1);
+                  setSearchParams({ page: 1 }); // URL 파라미터 초기화
+                }}
+              >
+                초기화
               </Button>
             </Col>
           </Row>
@@ -436,7 +494,7 @@ export default function PressListPage() {
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
                   <button
-                    className="text-black-600 underline p-2 truncate"
+                    className={`text-black-600 truncate p-2 text-left ${row.ko_title !== "-" && row.ko_title !== null && "underline"}`}
                     onClick={() =>
                       navigate(`/contents/whatson/media/${row.pmId}?lang=ko`)
                     }
@@ -444,7 +502,7 @@ export default function PressListPage() {
                     {row.ko_title}
                   </button>
                   <button
-                    className="text-black-600 underline p-2 truncate"
+                    className={`text-black-600 truncate p-2 text-left ${row.en_title !== "-" && row.en_title !== null && "underline"}`}
                     onClick={() =>
                       navigate(`/contents/whatson/media/${row.pmId}?lang=en`)
                     }
