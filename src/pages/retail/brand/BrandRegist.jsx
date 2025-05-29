@@ -62,13 +62,10 @@ export default function BrandRegist() {
         homeUrlNew: form.homepageNewTab ? "Y" : "N",
 
         instagram: form.sns?.instagram?.url || "",
-        instagramNew: form.sns?.instagram?.newWindow ? "Y" : "N",
         facebook: form.sns?.facebook?.url || "",
-        facebookNew: form.sns?.facebook?.newWindow ? "Y" : "N",
         youtube: form.sns?.youtube?.url || "",
-        youtubeNew: form.sns?.youtube?.newWindow ? "Y" : "N",
         twitter: form.sns?.twitter?.url || "",
-        twitterNew: form.sns?.twitter?.newWindow ? "Y" : "N",
+        blog: form.sns?.blog?.url || "",
 
         mon: form.openingHours?.월?.time || "",
         tue: form.openingHours?.화?.time || "",
