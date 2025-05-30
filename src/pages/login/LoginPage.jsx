@@ -46,7 +46,7 @@ export default function LoginPage() {
       <img
         src="/img/ONE GROVE.png"
         alt="ONE GROVE 로고"
-        className="mx-auto mb-10 h-20 w-auto"
+        className="mx-auto mb-10 h-auto w-auto"
       />
       <div className={"w-full max-w-sm rounded-lg bg-white p-6 pb-10"}>
         <form onSubmit={handleLogin} className={"mt-4 space-y-5 text-black"}>
