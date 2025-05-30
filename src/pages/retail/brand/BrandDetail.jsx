@@ -64,7 +64,7 @@ export default function BrandDetail() {
           office: matchedCategory.code || "",
           useStatus: data.useYn === "Y" ? "active" : "inactive",
           description: data.content,
-          keywords: data.keywordList?.map((k) => k.keyword) || [],
+          keywordList: data.keywordList,
           mainImage: data.thumbImg,
           pcImage: data.mainPcImg,
           moImage: data.mainMoImg,
@@ -242,11 +242,7 @@ export default function BrandDetail() {
           sunHoliday: data.openingHours?.일?.holiday ? "Y" : "N",
           breakTime: data.openingHours?.breakTime?.time,
           breakYn: data.openingHours?.breakTime?.none ? "Y" : "N",
-          keywordList: (data.keywords || []).map((keyword) => ({
-            id: null,
-            keyword,
-            delYn: "N",
-          })),
+          keywordList: data.keywordList?.length < 1 ? [] : data.keywordList,
         };
 
         // bcId가 있는 경우에만 contentId 추가
