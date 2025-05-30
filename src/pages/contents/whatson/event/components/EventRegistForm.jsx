@@ -20,12 +20,14 @@ import useModal from "@/hooks/useModal";
 import api from "@/lib/apiClient";
 import Textarea from "@/components/common/Textarea";
 import "react-datepicker/dist/react-datepicker.css";
+import Checkbox from "@/components/common/Checkbox";
 
 const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
   const methods = useForm({
     mode: "onChange",
     defaultValues: {
       status: "inactive",
+      progressStatus: "inProgress",
     },
   });
   const { register, setValue, getValues, watch, control } = methods;
@@ -38,6 +40,8 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
   const [endDate, setEndDate] = useState(null);
   const [endTime, setEndTime] = useState("00:00");
   const [categoryOptions, setCategoryOptions] = useState([]);
+  const [manualEndInput, setManualEndInput] = useState(false);
+  const [manualEndValue, setManualEndValue] = useState(""); // 수동 입력 값
 
   useEffect(() => {
     // 카테고리 불러오기
@@ -78,9 +82,15 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
   }, [watch("brandId")]);
 
   useEffect(() => {
-    console.log("받은 data:", data);
-    if (data && Object.keys(data).length > 0) {
-      setValue("category", data.category || "");
+    if (data && Object.keys(data).length > 0 && categoryOptions.length > 0) {
+      console.log("받은 data:", data);
+
+      const matchedCategory = categoryOptions.find(
+        (opt) => opt.value === data.category
+      );
+      const categoryCode = matchedCategory?.code || data.category;
+
+      setValue("category", categoryCode);
       setValue("title", data.title || "");
       setValue("status", data.showYn === "Y" ? "active" : "inactive");
       setValue("order", data.sort || 1);
@@ -99,7 +109,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
 
       console.log("값 세팅 완료");
     }
-  }, [data]);
+  }, [data, categoryOptions]);
 
   useEffect(() => {
     if (data?.startDate) {
@@ -122,6 +132,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
     }
   }, [data]);
 
+  console.log("manualEndValue 상태:", `"${manualEndValue}"`);
   useImperativeHandle(ref, () => ({
     submit: async (onError) => {
       const values = {
@@ -170,8 +181,16 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         return null;
       }
 
-      if (!startDate || !endDate) {
+      if (!startDate) {
         onError?.("이벤트 시작일과 종료일을 선택해주세요.");
+        return null;
+      }
+      if (!manualEndInput && (!endDate || !endTime)) {
+        onError?.("이벤트 종료일과 시간을 선택해주세요.");
+        return null;
+      }
+      if (manualEndInput && (!manualEndValue || manualEndValue.trim() === "")) {
+        onError?.("종료 조건 텍스트를 입력해주세요.");
         return null;
       }
 
@@ -188,7 +207,8 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         title: values.title,
         category: values.category,
         startDate: startDate,
-        endDate: endDate,
+        endDate: manualEndInput ? null : endDate,
+        endInput: manualEndInput ? manualEndValue : null,
         thumbImg: values.thumbImg,
         imgBodyPc: values.imgBodyPc,
         imgBodyMo: values.imgBodyMo,
@@ -203,7 +223,8 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         !values.title?.trim() ||
         !values.category ||
         !startDate ||
-        !endDate ||
+        (!manualEndInput && !endDate) ||
+        (manualEndInput && !manualEndValue?.trim()) ||
         !values.thumbImg ||
         !values.imgBodyPc ||
         !values.imgBodyMo ||
@@ -241,7 +262,8 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         !values.title?.trim() ||
         !values.category ||
         !startDate ||
-        !endDate ||
+        (!manualEndInput && !endDate) ||
+        (manualEndInput && !watch("endInput")?.trim()) ||
         !watch("thumbImg") ||
         !watch("imgBodyPc") ||
         !watch("imgBodyMo") ||
@@ -270,7 +292,9 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         content: content || "",
         description: description || "",
         startDate: startDateStr,
-        endDate: endDateStr,
+        endDate: manualEndInput ? null : endDateStr,
+        endInput: manualEndInput ? watch("endInput") : null,
+        progressYn: values.progressStatus === "inProgress" ? "Y" : "N",
         brandId: brands[0]?._id ?? null,
         delYn: "N",
       };
@@ -283,6 +307,13 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
       editorRef1.current?.setContent?.(html);
     },
   }));
+
+  console.log("최종 유효성 검사 판단", {
+    manualEndInput,
+    manualEndValue,
+    endDate,
+    isValidEnd: manualEndInput ? !!manualEndValue?.trim() : !!endDate,
+  });
   console.log("brands", brands);
   return (
     <FormProvider {...methods}>
@@ -448,29 +479,74 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             />
           </div>
 
-          {/* ~ 기호 */}
-          <span className="font-bold">~</span>
-
-          {/* 종료 날짜 + 시간 */}
           <div className="flex items-center gap-2">
-            <Datepicker
-              mode="single"
-              selectedDate={endDate}
-              onSingleChange={(date) => {
-                setEndDate(date);
-                setValue("endDate", date?.toISOString());
-              }}
-              readOnly={readOnly}
-            />
-            <input
-              type="time"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-              className="rounded border px-2 py-1"
+            <span className="font-bold">~</span>
+            <Checkbox
+              id="manualEnd"
+              checked={manualEndInput}
+              onChange={(e) => setManualEndInput(e.target.checked)}
               disabled={readOnly}
             />
           </div>
-          <div className="flex items-center gap-2"></div>
+
+          {/* 종료 날짜 + 시간 */}
+          <div className="flex items-center gap-2">
+            {manualEndInput ? (
+              <input
+                type="text"
+                value={manualEndValue}
+                onChange={(e) => {
+                  setManualEndValue(e.target.value);
+                  setValue("endInput", e.target.value); // 폼 값에도 저장 가능
+                }}
+                placeholder="공백 포함 최대 10자"
+                className="w-52 rounded border px-2 py-1"
+                disabled={readOnly}
+              />
+            ) : (
+              <>
+                <Datepicker
+                  mode="single"
+                  selectedDate={endDate}
+                  onSingleChange={(date) => {
+                    setEndDate(date);
+                    setValue("endDate", date?.toISOString());
+                  }}
+                  readOnly={readOnly}
+                />
+                <input
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className="rounded border px-2 py-1"
+                  disabled={readOnly}
+                />
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* 진행 상태 라디오 버튼 */}
+        <div className="mt-4 flex items-center gap-4">
+          <p className="min-w-[80px] text-sm font-medium text-gray-800">
+            진행 상태<span className="ml-1 text-red-500">*</span>
+          </p>
+          <Radio
+            name="progressStatus"
+            value="inProgress"
+            label="진행"
+            checked={watch("progressStatus") === "inProgress"}
+            onChange={() => setValue("progressStatus", "inProgress")}
+            disabled={readOnly}
+          />
+          <Radio
+            name="progressStatus"
+            value="ended"
+            label="종료"
+            checked={watch("progressStatus") === "ended"}
+            onChange={() => setValue("progressStatus", "ended")}
+            disabled={readOnly}
+          />
         </div>
 
         {/* 브랜드 선택 */}

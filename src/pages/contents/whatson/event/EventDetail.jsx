@@ -85,7 +85,7 @@ export default function EventDetail() {
               }
             : null;
 
-        formRef.setValue("category", data.category || data.categoryCode || "");
+        formRef.setValue("category", data.categoryCode || data.category || "");
         formRef.setValue("title", data.title || "");
         formRef.setValue("status", data.showYn === "Y" ? "active" : "inactive");
         formRef.setValue("publishDate", data.publishDate || "");
