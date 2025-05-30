@@ -6,6 +6,7 @@ import {
   filterSuggestionItems,
   insertOrUpdateBlock,
   locales,
+  defaultBlockSpecs,
 } from "@blocknote/core";
 import "@blocknote/core/fonts/inter.css";
 import { BlockNoteView } from "@blocknote/mantine";
@@ -13,7 +14,12 @@ import "@blocknote/mantine/style.css";
 import {
   getDefaultReactSlashMenuItems,
   SuggestionMenuController,
+} from "@blocknote/react";
+import {
+  FormattingToolbarController,
+  blockTypeSelectItems,
   useCreateBlockNote,
+  FormattingToolbar,
 } from "@blocknote/react";
 import {
   multiColumnDropCursor,
@@ -21,6 +27,10 @@ import {
   withMultiColumn,
 } from "@blocknote/xl-multi-column";
 import { HiOutlineGlobeAlt } from "react-icons/hi";
+
+import { RiAlertFill } from "react-icons/ri";
+
+import { Alert } from "./Editor/textType.jsx";
 
 
 // 파일 업로드 핸들러
@@ -225,11 +235,27 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
 
   const editor = useCreateBlockNote({
     uploadFile,
-    schema: withMultiColumn(BlockNoteSchema.create()),
+    schema: withMultiColumn(BlockNoteSchema.create({
+      blockSpecs: {
+        // Adds all default blocks.
+        ...defaultBlockSpecs,
+        // Adds the Alert block.
+        alert: Alert,
+      },
+    })),
     dropCursor: multiColumnDropCursor,
     dictionary: {
       ...locales.ko,
       multi_column: multiColumnLocales.ko,
+      placeholders: {
+        ...locales.ko.placeholders,
+        // We override the empty document placeholder
+        emptyDocument: "텍스트를 입력하거나 명령을 입력하려면 '/'를 입력하세요.",
+        // We override the default placeholder
+        default: "텍스트를 입력하거나 명령을 입력하려면 '/'를 입력하세요.",
+        // We override the heading placeholder
+        heading: "제목을 입력하거나 명령을 입력하려면 '/'를 입력하세요.",
+      },
     },
     ...(initialContent ? { initialContent } : {}),
   });
@@ -278,10 +304,24 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
       <BlockNoteView
         editor={editor}
         slashMenu={true}
-        className="editor-container"
+        className="relative editor-container !pt-[80px]"
         theme={isDarkMode ? "dark" : "light"}
         editable={!readOnly}
       >
+        <div className="absolute top-[10px] z-50 bg-white">
+          <FormattingToolbar
+            editor={editor}
+            blockTypeSelectItems={[
+              ...blockTypeSelectItems(editor.dictionary),
+              {
+                name: "Alert",
+                type: "alert",
+                icon: RiAlertFill,
+                isSelected: (block) => block.type === "alert",
+              },
+            ]}
+          />
+        </div>
         <SuggestionMenuController
           triggerCharacter="/"
           getItems={getSlashMenuItems}
