@@ -67,7 +67,7 @@ export default function PressRegist() {
             ref={enFormRef}
             data={enData}
             setData={setEnData}
-            lang="en"
+            lang="ko"
           />
         </TabPanel>
       </Tabs>
