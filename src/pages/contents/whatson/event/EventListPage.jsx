@@ -100,7 +100,8 @@ export default function EventListPage() {
                 koItem.lang && enItem.lang ? "both" : koItem.lang ? "ko" : "en",
               ko_title: koItem.title || "-",
               en_title: enItem.title || "-",
-              situation: "-", // status 없음
+              progress_ko: koItem.progressYn === "Y" ? "진행 중" : "종료",
+              progress_en: enItem.progressYn === "Y" ? "진행 중" : "종료",
               status_ko: koItem.showYn === "Y" ? "노출" : "미노출",
               status_en: enItem.showYn === "Y" ? "노출" : "미노출",
 
@@ -429,6 +430,21 @@ export default function EventListPage() {
                 </div>
               ),
             },
+            {
+              key: "progress",
+              label: "진행 상태",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="py-1">
+                    {row.progress_ko === "Y" ? "진행 중" : "종료"}
+                  </div>
+                  <div className="py-1">
+                    {row.progress_en === "Y" ? "진행 중" : "종료"}
+                  </div>
+                </div>
+              ),
+            },
+
             {
               key: "status",
               label: "노출여부",
