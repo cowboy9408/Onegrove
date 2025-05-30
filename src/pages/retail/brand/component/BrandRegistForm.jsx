@@ -210,38 +210,44 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
             defaultValue={[]}
             render={({ field }) => {
               const handleToggle = (keyword) => {
-                const existing = field.value.find((item) => item.id === keyword.id);
+                const existing = field.value.find(
+                  (item) => item.keyword === keyword.code
+                );
                 let newValue;
 
                 if (existing) {
                   // delYn 토글
                   newValue = field.value.map((item) =>
-                    item.id === keyword.id
-                      ? { ...item, delYn: item.delYn === 'N' ? 'Y' : 'N' }
+                    item.keyword === keyword.code
+                      ? { ...item, delYn: item.delYn === "N" ? "Y" : "N" }
                       : item
                   );
                 } else {
                   // 새 항목 추가
-                  newValue = [...field.value, { keyword: keyword.code, delYn: 'N' }];
+                  newValue = [
+                    ...field.value,
+                    { keyword: keyword.code, delYn: "N" },
+                  ];
                 }
 
                 field.onChange(newValue);
               };
 
-              const isChecked = (index) => {
-                const id = index + 1;
-                const item = field.value.find((item) => item.id === id);
-                return item?.delYn === 'N';
+              const isChecked = (keyword) => {
+                const item = field.value.find(
+                  (item) => item.keyword === keyword.code
+                );
+                return item?.delYn === "N";
               };
 
               return (
                 <div className="flex flex-wrap gap-4">
-                  {keywordList.map((keyword, index) => (
+                  {keywordList.map((keyword) => (
                     <Checkbox
                       key={keyword.code}
                       label={keyword.value}
-                      checked={isChecked(index)}
-                      onChange={() => handleToggle(keyword, index)}
+                      checked={isChecked(keyword)}
+                      onChange={() => handleToggle(keyword)}
                       disabled={readOnly}
                     />
                   ))}
