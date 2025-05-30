@@ -163,21 +163,20 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
             control={control}
             defaultValue={[]}
             render={({ field }) => {
-              const handleToggle = (keyword, index) => {
-                const id = index + 1;
-                const existing = field.value.find((item) => item.id === id);
+              const handleToggle = (keyword) => {
+                const existing = field.value.find((item) => item.id === keyword.id);
                 let newValue;
 
                 if (existing) {
                   // delYn 토글
                   newValue = field.value.map((item) =>
-                    item.id === id
+                    item.id === keyword.id
                       ? { ...item, delYn: item.delYn === 'N' ? 'Y' : 'N' }
                       : item
                   );
                 } else {
                   // 새 항목 추가
-                  newValue = [...field.value, { id, keyword: keyword.code, delYn: 'N' }];
+                  newValue = [...field.value, { keyword: keyword.code, delYn: 'N' }];
                 }
 
                 field.onChange(newValue);
