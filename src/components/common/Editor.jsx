@@ -3,23 +3,19 @@ import { useEffect, useMemo, forwardRef, useImperativeHandle } from "react";
 import api from "@/lib/apiClient";
 import {
   BlockNoteSchema,
-  filterSuggestionItems,
-  insertOrUpdateBlock,
-  locales,
   defaultBlockSpecs,
+  defaultInlineContentSpecs,
+  filterSuggestionItems,
+  locales,
 } from "@blocknote/core";
-import "@blocknote/core/fonts/inter.css";
 import { BlockNoteView } from "@blocknote/mantine";
-import "@blocknote/mantine/style.css";
 import {
   getDefaultReactSlashMenuItems,
   SuggestionMenuController,
-} from "@blocknote/react";
-import {
   FormattingToolbarController,
+  FormattingToolbar,
   blockTypeSelectItems,
   useCreateBlockNote,
-  FormattingToolbar,
 } from "@blocknote/react";
 import {
   multiColumnDropCursor,
@@ -28,22 +24,15 @@ import {
 } from "@blocknote/xl-multi-column";
 import { HiOutlineGlobeAlt } from "react-icons/hi";
 
-import { RiAlertFill } from "react-icons/ri";
+import "@blocknote/core/fonts/inter.css";
+import "@blocknote/mantine/style.css";
+import "./Editor/styles.css";
 
-import { Alert } from "./Editor/textType.jsx";
-
-
-// 파일 업로드 핸들러
+// ✅ 파일 업로드 핸들러
 async function uploadFile(selectedFile) {
-  console.log("[Upload] 업로드 필드:", selectedFile);
+  if (!selectedFile) return;
 
-  let classification = "default"; // 기본 분류 설정 editor?
-
-  if (!selectedFile) {
-    console.warn("파일이 선택되지 않았습니다.");
-    return;
-  }
-  const maxSize = 20 * 1024 * 1024; // 20MB
+  const maxSize = 20 * 1024 * 1024;
   if (selectedFile.size > maxSize) {
     alert("20MB가 넘는 이미지는 등록할 수 없습니다.");
     return;
@@ -51,178 +40,81 @@ async function uploadFile(selectedFile) {
 
   const formData = new FormData();
   formData.append("file", selectedFile);
-  formData.append("classification", classification);
-
-  console.log("업로드할 파일:", selectedFile);
+  formData.append("classification", "default");
 
   try {
-    console.log("업로드할 form:", formData);
     const res = await api.post("/api/v1/file/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers: { "Content-Type": "multipart/form-data" },
       withCredentials: true,
     });
-
-    console.log("업로드 전체 응답:", res);
-    console.log("업로드 응답 .data:", res.data);
-    console.log("업로드 응답 .data.data:", res.data?.data);
-
-    const result = res.data;
-    console.log("Upload 응답 result:", result);
-    console.log("업로드 응답 result:", result);
-
-    if (result.name && result.path) {
-      const uploadedFile = {
-        id: result.id ?? null,
-        originalName: selectedFile.name,
-        name: result.name,
-        size: result.size,
-        extension: "." + selectedFile.name.split(".").pop(),
-        mime: result.mime || selectedFile.type,
-        classification: classification,
-        path: result.path,
-        status: "C", //신규 등록이면 반드시 C
-        field: result.name,
-      };
-      console.log("서버 업로드 완료:", result.name, uploadedFile);
-
-      return await result.path;
-    } else {
-      console.error("파일 업로드 실패", result);
-    }
+    return res.data?.path;
   } catch (err) {
-    if (err.isAuthFailed) {
-      alert("세션이 만료되었습니다. 다시 로그인해주세요.");
-      // 필요시 로그인 모달 오픈 등 UI 처리
-    } else {
-      console.error("파일 업로드 에러", err);
-      alert("파일 업로드 중 문제가 발생했습니다.");
-    }
+    alert("파일 업로드 중 문제가 발생했습니다.");
+    console.error("파일 업로드 에러", err);
   }
 }
 
-const insertAdditionalItem = (editor) => ({
-  title: "텍스트사이즈 22px",
-  onItemClick: () =>
-    insertOrUpdateBlock(editor, {
-      type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 22px 텍스트사이즈를 입력합니다.", class: "f22" }],
-    }),
-  aliases: ["textStyle22", "hw"],
+// ✅ 커스텀 inlineContentSpecs: props.className 사용
+const customInlineContentSpecs = {
+  ...defaultInlineContentSpecs,
+  text: {
+    ...defaultInlineContentSpecs.text,
+    parseDOM: [
+      {
+        tag: "span",
+        getAttrs: (node) => {
+          if (!(node instanceof HTMLElement)) return {};
+          const className = node.getAttribute("class");
+          return className ? { props: { className } } : {};
+        },
+      },
+    ],
+    toDOM: (node) => {
+      const className = node.props?.className;
+      return ["span", { class: className }, 0];
+    },
+  },
+};
+
+// ✅ 폰트 사이즈 명령
+const fontSizeItems = [22, 20, 18, 17, 16, 14, 12, 10].map((size) => (editor) => ({
+  title: `텍스트사이즈 ${size}px`,
+  onItemClick: async () => {
+    await editor.insertBlocks([
+      editor.schema.blockSpecs.paragraph.create({
+        content: [
+          editor.schema.inlineContentSpecs.text.create({
+            text: `${size}px 텍스트사이즈를 입력합니다.`,
+            props: { className: `f${size}` },
+          }),
+        ],
+      }),
+    ]);
+  },
+  aliases: [`textStyle${size}`],
   group: "textStyle",
   icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: "폰트사이즈 22px 텍스트사이즈를 입력합니다.",
-  description: "텍스트사이즈 22px을 입력합니다.",
-});
-
-const insertAdditionalItem2 = (editor) => ({
-  title: "텍스트사이즈 20px",
-  onItemClick: () =>
-    insertOrUpdateBlock(editor, {
-      type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 20px 텍스트사이즈를 입력합니다.", class: "f20" }],
-    }),
-  aliases: ["textStyle20", "hw"],
-  group: "textStyle",
-  icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: "폰트사이즈 20px 텍스트사이즈를 입력합니다.",
-  description: "텍스트사이즈 20px을 입력합니다.",
-});
-
-const insertAdditionalItem3 = (editor) => ({
-  title: "텍스트사이즈 18px",
-  onItemClick: () =>
-    insertOrUpdateBlock(editor, {
-      type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 18px 텍스트사이즈를 입력합니다.", class: "f18" }],
-    }),
-  aliases: ["textStyle18", "hw"],
-  group: "textStyle",
-  icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: "폰트사이즈 18px 텍스트사이즈를 입력합니다.",
-  description: "텍스트사이즈 18px을 입력합니다.",
-});
+  subtext: `${size}px 텍스트사이즈`,
+  description: `${size}px 텍스트사이즈를 입력합니다.`,
+}));
 
 
-const insertAdditionalItem4 = (editor) => ({
-  title: "텍스트사이즈 17px",
-  onItemClick: () =>
-    insertOrUpdateBlock(editor, {
-      type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 13px 텍스트사이즈를 입력합니다.", class: "f17" }],
-    }),
-  aliases: ["textStyle13", "hw"],
-  group: "textStyle",
-  icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: "폰트사이즈 13px 텍스트사이즈를 입력합니다.",
-  description: "텍스트사이즈 13px을 입력합니다.",
-});
-
-const insertAdditionalItem5 = (editor) => ({
-  title: "텍스트사이즈 16px",
-  onItemClick: () =>
-    insertOrUpdateBlock(editor, {
-      type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 16px 텍스트사이즈를 입력합니다.", class: "f16" }],
-    }),
-  aliases: ["textStyle16", "hw"],
-  group: "textStyle",
-  icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: "폰트사이즈 16px 텍스트사이즈를 입력합니다.",
-  description: "텍스트사이즈 16px을 입력합니다.",
-});
-
-const insertAdditionalItem6 = (editor) => ({
-  title: "텍스트사이즈 14px",
-  onItemClick: () =>
-    insertOrUpdateBlock(editor, {
-      type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 14px 텍스트사이즈를 입력합니다.", class: "f14" }],
-    }),
-  aliases: ["textStyle14", "hw"],
-  group: "textStyle",
-  icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: "폰트사이즈 14px 텍스트사이즈를 입력합니다.",
-  description: "텍스트사이즈 14px을 입력합니다.",
-});
-
-const insertAdditionalItem7 = (editor) => ({
-  title: "텍스트사이즈 12px",
-  onItemClick: () =>
-    insertOrUpdateBlock(editor, {
-      type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 12px 텍스트사이즈를 입력합니다.", class: "f12" }],
-    }),
-  aliases: ["textStyle12", "hw"],
-  group: "textStyle",
-  icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: "폰트사이즈 12px 텍스트사이즈를 입력합니다.",
-  description: "텍스트사이즈 12px을 입력합니다.",
-});
-
-const insertAdditionalItem8 = (editor) => ({
-  title: "텍스트사이즈 10px",
-  onItemClick: () =>
-    insertOrUpdateBlock(editor, {
-      type: "paragraph",
-      content: [{ type: "text", text: "폰트사이즈 10px 텍스트사이즈를 입력합니다.", class: "f10" }],
-    }),
-  aliases: ["textStyle10", "hw"],
-  group: "textStyle",
-  icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: "폰트사이즈 10px 텍스트사이즈를 입력합니다.",
-  description: "텍스트사이즈 10px을 입력합니다.",
-});
-
-const insertAdditionalItem9 = (editor) => ({
+// ✅ 캡션 텍스트 명령
+const insertCaptionText = (editor) => ({
   title: "캡션 텍스트",
-  onItemClick: () =>
-    insertOrUpdateBlock(editor, {
-      type: "paragraph",
-      content: [{ type: "text", text: "캡션 텍스트 입력합니다.", class: "f10" }],
-    }),
-  aliases: ["textStyle12", "hw"],
+  onItemClick: async () => {
+    await editor.insertBlocks([
+      editor.schema.blockSpecs.paragraph.create({
+        content: [
+          editor.schema.inlineContentSpecs.text.create({
+            text: "캡션 텍스트를 입력합니다.",
+            props: { className: "f10" },
+          }),
+        ],
+      }),
+    ]);
+  },
+  aliases: ["caption"],
   group: "textStyle",
   icon: <HiOutlineGlobeAlt size={18} />,
   subtext: "캡션 텍스트를 입력합니다.",
@@ -230,61 +122,48 @@ const insertAdditionalItem9 = (editor) => ({
 });
 
 
+
+// ✅ Editor 컴포넌트
 const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
   const { isDarkMode } = useTheme();
 
   const editor = useCreateBlockNote({
     uploadFile,
-    schema: withMultiColumn(BlockNoteSchema.create({
-      blockSpecs: {
-        // Adds all default blocks.
-        ...defaultBlockSpecs,
-        // Adds the Alert block.
-        alert: Alert,
-      },
-    })),
+    schema: withMultiColumn(
+      BlockNoteSchema.create({
+        blockSpecs: { ...defaultBlockSpecs },
+        inlineContentSpecs: customInlineContentSpecs,
+      })
+    ),
     dropCursor: multiColumnDropCursor,
     dictionary: {
       ...locales.ko,
       multi_column: multiColumnLocales.ko,
       placeholders: {
         ...locales.ko.placeholders,
-        // We override the empty document placeholder
         emptyDocument: "텍스트를 입력하거나 명령을 입력하려면 '/'를 입력하세요.",
-        // We override the default placeholder
         default: "텍스트를 입력하거나 명령을 입력하려면 '/'를 입력하세요.",
-        // We override the heading placeholder
         heading: "제목을 입력하거나 명령을 입력하려면 '/'를 입력하세요.",
       },
     },
     ...(initialContent ? { initialContent } : {}),
   });
 
-  // 외부에서 HTML 추출할 수 있도록 ref 노출
+  // ✅ 외부에서 HTML 추출
   useImperativeHandle(ref, () => ({
     getContent: async () => await editor.blocksToFullHTML(editor.document),
   }));
 
-  // Slash 메뉴 항목 정의
+  // ✅ 슬래시 메뉴 항목 정의
   const getSlashMenuItems = useMemo(() => {
     return async (query) => {
       const defaultItems = getDefaultReactSlashMenuItems(editor);
-      const customItems = [
-        insertAdditionalItem(editor),
-        insertAdditionalItem2(editor),
-        insertAdditionalItem3(editor),
-        insertAdditionalItem4(editor),
-        insertAdditionalItem5(editor),
-        insertAdditionalItem6(editor),
-        insertAdditionalItem7(editor),
-        insertAdditionalItem8(editor),
-        insertAdditionalItem9(editor),
-        ...defaultItems];
-      return filterSuggestionItems(customItems, query);
+      const customItems = [...fontSizeItems.map((fn) => fn(editor)), insertCaptionText(editor)];
+      return filterSuggestionItems([...customItems, ...defaultItems], query);
     };
   }, [editor]);
 
-  // HTML → 블록 변환 (초기 콘텐츠 설정)
+  // ✅ 초기 HTML → 블록 파싱
   useEffect(() => {
     async function loadInitialHTML() {
       if (typeof initialContent === "string" && initialContent.trim()) {
@@ -303,7 +182,7 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
     <div>
       <BlockNoteView
         editor={editor}
-        slashMenu={true}
+        slashMenu
         className="relative editor-container !pt-[80px]"
         theme={isDarkMode ? "dark" : "light"}
         editable={!readOnly}
@@ -311,21 +190,10 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
         <div className="absolute top-[10px] z-50 bg-white">
           <FormattingToolbar
             editor={editor}
-            blockTypeSelectItems={[
-              ...blockTypeSelectItems(editor.dictionary),
-              {
-                name: "Alert",
-                type: "alert",
-                icon: RiAlertFill,
-                isSelected: (block) => block.type === "alert",
-              },
-            ]}
+            blockTypeSelectItems={blockTypeSelectItems(editor.dictionary)}
           />
         </div>
-        <SuggestionMenuController
-          triggerCharacter="/"
-          getItems={getSlashMenuItems}
-        />
+        <SuggestionMenuController triggerCharacter="/" getItems={getSlashMenuItems} />
       </BlockNoteView>
     </div>
   );
