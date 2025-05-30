@@ -93,8 +93,10 @@ export default function BrandRegist() {
         breakYn: form.openingHours?.breakTime?.none ? "Y" : "N",
 
         useYn: form.useStatus === "active" ? "Y" : "N",
-        keywordList: form.keywords?.map((k) => ({ keyword: k })) || [],
+        keywordList: form.keywordList?.map((k) => ({ keyword: k })) || [],
       };
+
+      console.log("저장할 키워드 정보:", payload?.keywordList);
 
       await api.post("/api/v1/brand/insert", payload);
       alert("브랜드 정보가 저장되었습니다.");
