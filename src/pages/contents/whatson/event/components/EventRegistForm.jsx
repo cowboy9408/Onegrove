@@ -404,10 +404,10 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           classification="event-promotion"
           readOnly={readOnly}
           value={watch("thumbImg")}
-          onChange={(file) => {
-            console.log("썸네일 이미지 등록됨:", file);
-            setValue("thumbImg", file);
-          }}
+          onChange={(file) => setValue("thumbImg", file)}
+          accept="image/png, image/jpeg, image/jpg"
+          showDefaultInfo={true}
+          info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
         />
         <Upload
           key={`imgBodyPc-upload`}
@@ -417,10 +417,10 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           classification="event-promotion"
           readOnly={readOnly}
           value={watch("imgBodyPc")}
-          onChange={(file) => {
-            console.log("pc 본문 이미지 등록됨:", file);
-            setValue("imgBodyPc", file);
-          }}
+          onChange={(file) => setValue("imgBodyPc", file)}
+          accept="image/png, image/jpeg, image/jpg"
+          showDefaultInfo={true}
+          info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
         />
         <Upload
           key={`imgBodyMo-upload`}
@@ -430,10 +430,10 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           classification="event-promotion"
           readOnly={readOnly}
           value={watch("imgBodyMo")}
-          onChange={(file) => {
-            console.log("mo 본문 이미지 등록됨:", file);
-            setValue("imgBodyMo", file);
-          }}
+          onChange={(file) => setValue("imgBodyMo", file)}
+          accept="image/png, image/jpeg, image/jpg"
+          showDefaultInfo={true}
+          info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
         />
         {/* 상세 내용 에디터 1 */}
         <p className="text-sm font-medium">
@@ -613,10 +613,10 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           classification="event-promotion"
           readOnly={readOnly}
           value={watch("imgPc")}
-          onChange={(file) => {
-            console.log("PC 이미지 등록됨:", file);
-            setValue("imgPc", file);
-          }}
+          onChange={(file) => setValue("imgPc", file)}
+          accept="image/png, image/jpeg, image/jpg"
+          showDefaultInfo={true}
+          info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
         />
         <Upload
           name="imgMo"
@@ -625,10 +625,10 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           required
           readOnly={readOnly}
           value={watch("imgMo")}
-          onChange={(file) => {
-            console.log("모바일 이미지 업로드됨:", file);
-            setValue("imgMo", file);
-          }}
+          onChange={(file) => setValue("imgMo", file)}
+          accept="image/png, image/jpeg, image/jpg"
+          showDefaultInfo={true}
+          info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
         />
 
         {/* 내용 텍스트 공간 */}
