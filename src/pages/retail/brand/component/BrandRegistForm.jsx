@@ -46,12 +46,8 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
     fetchKeyword();
   }, []);
 
-  const validateRequiredFields = () => {
-    return null;
-  };
-
   useImperativeHandle(ref, () => ({
-    submit: async () => {
+    submit: async (onError) => {
       const values = getValues();
       const content = await editorRef.current?.getContent?.();
 
@@ -60,11 +56,61 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
       console.log("폼 값:", values);
       console.log("에디터 내용:", content);
 
-      const message = validateRequiredFields(values, content);
-      if (message) {
+      if (!values.brandName?.trim()) {
+        onError?.("브랜드명을 입력해주세요.");
+        return null;
+      }
+      if (!values.office) {
+        onError?.("카테고리를 선택해주세요.");
+        return null;
+      }
+      if (!values.mainImage || !values.mainImage.path) {
+        onError?.("리스트 이미지를 등록해주세요.");
+        return null;
+      }
+      if (!values.thumbText?.trim()) {
+        onError?.("리스트 Hover 텍스트를 입력해주세요.");
+        return null;
+      }
+      if (!values.pcImage || !values.pcImage.path) {
+        onError?.("PC 상세 KV 이미지를 등록해주세요.");
+        return null;
+      }
+      if (!values.moImage || !values.moImage.path) {
+        onError?.("MO 상세 KV 이미지를 등록해주세요.");
+        return null;
+      }
+      if (!content || content.replace(/<[^>]+>/g, "").trim() === "") {
+        onError?.("메인 내용을 입력해주세요.");
+        return null;
+      }
+      for (let i = 1; i <= 5; i++) {
+        const img = values[`contentImage${i}`];
+        if (!img || !img.path) {
+          onError?.(`본문 이미지 ${i}를/을 등록해주세요.`);
+          return null;
+        }
+      }
+      const openingDays = ["월", "화", "수", "목", "금", "토", "일"];
+      let hasOpeningHours = false;
+      for (const day of openingDays) {
+        const time = values.openingHours?.[day]?.time;
+        const holiday = values.openingHours?.[day]?.holiday;
+        if (holiday !== true && time?.trim()) {
+          hasOpeningHours = true;
+          break;
+        }
+      }
+
+      if (!hasOpeningHours) {
+        onError?.("운영시간을 1일 이상 입력해주세요.");
         return null;
       }
 
+      if (!values.storeLocation?.trim()) {
+        onError?.("매장 위치를 입력해주세요.");
+        return null;
+      }
       // 이미지 메타데이터 변환 함수
       const toImageMeta = (file) => {
         if (!file || !file.name || !file.path) {
@@ -164,38 +210,44 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
             defaultValue={[]}
             render={({ field }) => {
               const handleToggle = (keyword) => {
-                const existing = field.value.find((item) => item.id === keyword.id);
+                const existing = field.value.find(
+                  (item) => item.keyword === keyword.code
+                );
                 let newValue;
 
                 if (existing) {
                   // delYn 토글
                   newValue = field.value.map((item) =>
-                    item.id === keyword.id
-                      ? { ...item, delYn: item.delYn === 'N' ? 'Y' : 'N' }
+                    item.keyword === keyword.code
+                      ? { ...item, delYn: item.delYn === "N" ? "Y" : "N" }
                       : item
                   );
                 } else {
                   // 새 항목 추가
-                  newValue = [...field.value, { keyword: keyword.code, delYn: 'N' }];
+                  newValue = [
+                    ...field.value,
+                    { keyword: keyword.code, delYn: "N" },
+                  ];
                 }
 
                 field.onChange(newValue);
               };
 
-              const isChecked = (index) => {
-                const id = index + 1;
-                const item = field.value.find((item) => item.id === id);
-                return item?.delYn === 'N';
+              const isChecked = (keyword) => {
+                const item = field.value.find(
+                  (item) => item.keyword === keyword.code
+                );
+                return item?.delYn === "N";
               };
 
               return (
                 <div className="flex flex-wrap gap-4">
-                  {keywordList.map((keyword, index) => (
+                  {keywordList.map((keyword) => (
                     <Checkbox
                       key={keyword.code}
                       label={keyword.value}
-                      checked={isChecked(index)}
-                      onChange={() => handleToggle(keyword, index)}
+                      checked={isChecked(keyword)}
+                      onChange={() => handleToggle(keyword)}
                       disabled={readOnly}
                     />
                   ))}
@@ -271,7 +323,6 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
             />
           )}
         />
-        
 
         <Upload
           name="contentImage1"
@@ -322,16 +373,18 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
         {/* SNS URL */}
         <div className="w-[800px] space-y-3 rounded-md border border-black p-4">
           <p className="text-sm font-medium">SNS URL</p>
-          {["instagram", "facebook", "youtube", "twitter", "blog"].map((sns) => (
-            <div key={sns} className="flex items-center gap-4">
-              <NewInput
-                label={sns === "twitter" ? "X(twitter)" : sns}
-                disabled={readOnly}
-                {...register(`sns.${sns}.url`)}
-                width="w-[500px]"
-              />
-            </div>
-          ))}
+          {["instagram", "facebook", "youtube", "twitter", "blog"].map(
+            (sns) => (
+              <div key={sns} className="flex items-center gap-4">
+                <NewInput
+                  label={sns === "twitter" ? "X(twitter)" : sns}
+                  disabled={readOnly}
+                  {...register(`sns.${sns}.url`)}
+                  width="w-[500px]"
+                />
+              </div>
+            )
+          )}
         </div>
 
         {/* 운영시간 */}
