@@ -32,7 +32,13 @@ export default function BrandRegist() {
   const handleSave = async () => {
     try {
       const ref = currentLang === 0 ? koFormRef : enFormRef;
-      const form = await ref.current?.submit();
+      const form = await ref.current?.submit?.((message) => {
+        showModal({
+          title: "필수 항목을 입력해 주세요.",
+          message,
+          showCancel: false,
+        });
+      });
       if (!form) return;
 
       const payload = {

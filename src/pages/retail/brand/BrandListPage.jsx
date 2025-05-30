@@ -116,8 +116,10 @@ export default function BrandListPage() {
     console.log("삭제할 pmId 목록:", idsToDelete);
 
     try {
-      const res = await api.post("/api/v1/brand/delete", checkedIds.map((id) => Number(id))
-    );
+      const res = await api.post(
+        "/api/v1/brand/delete",
+        checkedIds.map((id) => Number(id))
+      );
 
       if (res.status === 200) {
         alert("삭제가 완료되었습니다.");
@@ -182,10 +184,19 @@ export default function BrandListPage() {
             <Col className="self-end">
               <Button
                 onClick={() => {
+                  // URL 검색 파라미터를 업데이트
+                  setSearchParams({
+                    name: searchName,
+                    category: searchCategory,
+                    status: searchStatus,
+                    page: "1",
+                  });
+
+                  // 상태 반영
                   setName(searchName);
                   setCategory(searchCategory);
                   setStatus(searchStatus);
-                  setPage(1); //페이지 초기화
+                  setPage(1);
                 }}
               >
                 검색
@@ -235,14 +246,17 @@ export default function BrandListPage() {
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
                   {row.ko_title === "-" ? (
-                    <p className="text-black-600 p-2 text-left"
+                    <p
+                      className="text-black-600 p-2 text-left"
                       onClick={() =>
                         navigate(`/retail/brand/detail/${row.masterId}?lang=ko`)
                       }
-                    >-</p>
+                    >
+                      -
+                    </p>
                   ) : (
                     <button
-                      className="text-black-600 underline p-2 truncate text-left"
+                      className="text-black-600 truncate p-2 text-left underline"
                       onClick={() =>
                         navigate(`/retail/brand/detail/${row.masterId}?lang=ko`)
                       }
@@ -251,14 +265,17 @@ export default function BrandListPage() {
                     </button>
                   )}
                   {row.en_title === "-" ? (
-                    <p className="text-black-600 p-2 text-left"
+                    <p
+                      className="text-black-600 p-2 text-left"
                       onClick={() =>
                         navigate(`/retail/brand/detail/${row.masterId}?lang=en`)
                       }
-                    >-</p>
+                    >
+                      -
+                    </p>
                   ) : (
                     <button
-                      className="text-black-600 underline p-2 truncate  text-left"
+                      className="text-black-600 truncate p-2 text-left underline"
                       onClick={() =>
                         navigate(`/retail/brand/detail/${row.masterId}?lang=en`)
                       }
