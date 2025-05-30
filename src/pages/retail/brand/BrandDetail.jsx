@@ -19,6 +19,7 @@ export default function BrandDetail() {
   const [loading, setLoading] = useState(true);
   const [isReadOnly, setIsReadOnly] = useState(false); // 읽기 전용
   const [categoryList, setCategoryList] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -63,7 +64,7 @@ export default function BrandDetail() {
           office: matchedCategory.code || "",
           useStatus: data.useYn === "Y" ? "active" : "inactive",
           description: data.content,
-          keywords: data.keywordList?.map((k) => k.keyword) || [],
+          keywordList: data.keywordList,
           mainImage: data.thumbImg,
           pcImage: data.mainPcImg,
           moImage: data.mainMoImg,
@@ -177,6 +178,9 @@ export default function BrandDetail() {
   };
 
   const handleSave = async () => {
+    if (isSaving) return;
+    setIsSaving(true); 
+
     try {
       const koValues = await koFormRef.current?.submit?.();
       const enValues = await enFormRef.current?.submit?.();
@@ -185,7 +189,10 @@ export default function BrandDetail() {
 
       console.log("return test:", !koValues && !enValues);
 
-      if (!koValues && !enValues) return;
+      if (!koValues && !enValues) {
+        setIsSaving(false);
+        return;
+      }
 
       const saveOne = async (data, lang, original) => {
         const payload = {
@@ -235,11 +242,7 @@ export default function BrandDetail() {
           sunHoliday: data.openingHours?.일?.holiday ? "Y" : "N",
           breakTime: data.openingHours?.breakTime?.time,
           breakYn: data.openingHours?.breakTime?.none ? "Y" : "N",
-          keywordList: (data.keywords || []).map((keyword) => ({
-            id: null,
-            keyword,
-            delYn: "N",
-          })),
+          keywordList: data.keywordList?.length < 1 ? [] : data.keywordList,
         };
 
         // bcId가 있는 경우에만 contentId 추가
@@ -288,6 +291,8 @@ export default function BrandDetail() {
     } catch (err) {
       console.error("저장 실패:", err);
       alert("저장 실패. 다시 시도해주세요.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -319,8 +324,12 @@ export default function BrandDetail() {
             수정
           </Button>
         ) : (
-          <Button onClick={handleSave} theme="primary">
-            수정
+          <Button
+            disabled={isSaving}
+            onClick={handleSave}
+            theme="primary"
+          >
+            {isSaving ? "수정 중..." : "수정"}
           </Button>
         )}
         <Button onClick={() => navigate("/retail/brand")}>목록</Button>

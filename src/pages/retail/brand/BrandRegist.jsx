@@ -15,6 +15,7 @@ export default function BrandRegist() {
   const { showModal } = useModal();
   const [koData, setKoData] = useState({});
   const [enData, setEnData] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("brand");
@@ -30,6 +31,8 @@ export default function BrandRegist() {
   }, []);
 
   const handleSave = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
     try {
       const ref = currentLang === 0 ? koFormRef : enFormRef;
       const form = await ref.current?.submit?.((message) => {
@@ -93,8 +96,10 @@ export default function BrandRegist() {
         breakYn: form.openingHours?.breakTime?.none ? "Y" : "N",
 
         useYn: form.useStatus === "active" ? "Y" : "N",
-        keywordList: form.keywords?.map((k) => ({ keyword: k })) || [],
+        keywordList: form.keywordList?.map((k) => ({ keyword: k })) || [],
       };
+
+      console.log("저장할 키워드 정보:", payload?.keywordList);
 
       await api.post("/api/v1/brand/insert", payload);
       alert("브랜드 정보가 저장되었습니다.");
@@ -104,6 +109,8 @@ export default function BrandRegist() {
       alert(
         "브랜드 등록 실패: " + (err.response?.data?.message || err.message)
       );
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -127,6 +134,7 @@ export default function BrandRegist() {
 
       <div className="flex justify-end gap-4 px-6 pb-6">
         <Button
+          disabled={isSaving}
           onClick={() =>
             showModal({
               title: "저장 확인",
@@ -136,7 +144,7 @@ export default function BrandRegist() {
             })
           }
         >
-          저장
+          {isSaving ? "저장 중..." : "저장"}
         </Button>
         <Button
           type="button"

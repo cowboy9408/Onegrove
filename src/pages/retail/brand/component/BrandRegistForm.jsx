@@ -205,25 +205,43 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
         <div>
           <p className="mb-2 text-sm font-medium">검색 키워드</p>
           <Controller
-            name="keywords"
+            name="keywordList"
             control={control}
             defaultValue={[]}
             render={({ field }) => {
-              const handleToggle = (value) => {
-                const newValue = field.value.includes(value)
-                  ? field.value.filter((v) => v !== value)
-                  : [...field.value, value];
+              const handleToggle = (keyword) => {
+                const existing = field.value.find((item) => item.id === keyword.id);
+                let newValue;
+
+                if (existing) {
+                  // delYn 토글
+                  newValue = field.value.map((item) =>
+                    item.id === keyword.id
+                      ? { ...item, delYn: item.delYn === 'N' ? 'Y' : 'N' }
+                      : item
+                  );
+                } else {
+                  // 새 항목 추가
+                  newValue = [...field.value, { keyword: keyword.code, delYn: 'N' }];
+                }
+
                 field.onChange(newValue);
+              };
+
+              const isChecked = (index) => {
+                const id = index + 1;
+                const item = field.value.find((item) => item.id === id);
+                return item?.delYn === 'N';
               };
 
               return (
                 <div className="flex flex-wrap gap-4">
-                  {keywordList.map((keyword) => (
+                  {keywordList.map((keyword, index) => (
                     <Checkbox
                       key={keyword.code}
                       label={keyword.value}
-                      checked={field.value.includes(keyword.code)}
-                      onChange={() => handleToggle(keyword.code)}
+                      checked={isChecked(index)}
+                      onChange={() => handleToggle(keyword, index)}
                       disabled={readOnly}
                     />
                   ))}
