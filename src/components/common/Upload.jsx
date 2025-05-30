@@ -58,13 +58,12 @@ export default function Upload({
   const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
-    if (!value || !value.path || value.url === null) {
+    if (!value || !value.path) {
       setPreviewUrl(null);
       setLocalFile(null);
       return;
     }
 
-    // 각 필드별로 분리
     setPreviewUrl(value.path);
     setLocalFile({
       name: value.name,
@@ -102,79 +101,88 @@ export default function Upload({
       return;
     }
 
-    // 해상도 체크
-    const img = new Image();
+    // const checkImageResolution = (file) =>
+    //   new Promise((resolve, reject) => {
+    //     const img = new Image();
+    //     const objectUrl = URL.createObjectURL(file);
+
+    //     img.onload = () => {
+    //       const isValid = img.width === 416 && img.height === 280;
+    //       URL.revokeObjectURL(objectUrl); // 메모리 해제
+    //       if (isValid) {
+    //         resolve(true);
+    //       } else {
+    //         reject(
+    //           new Error(
+    //             `이미지 해상도는 416x280px 이어야 합니다. (현재: ${img.width}x${img.height})`
+    //           )
+    //         );
+    //       }
+    //     };
+
+    //     img.onerror = () => {
+    //       URL.revokeObjectURL(objectUrl);
+    //       reject(new Error("이미지를 불러올 수 없습니다."));
+    //     };
+
+    //     img.src = objectUrl;
+    //   });
+
+    // try {
+    //   await checkImageResolution(selectedFile);
+    // } catch (err) {
+    //   alert(err.message);
+    //   return;
+    // }
+
+    //해상도 통과 후 기존 로직 수행
     const blobUrl = URL.createObjectURL(selectedFile);
+    setPreviewUrl(blobUrl);
+    setLocalFile(selectedFile);
+    onChange({
+      name: selectedFile.name,
+      size: selectedFile.size,
+      url: blobUrl,
+    });
 
-    img.src = blobUrl;
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    formData.append("classification", classification);
 
-    img.onload = async () => {
-      if (img.width !== 416 || img.height !== 280) {
-        alert("이미지 해상도는 416x280px만 가능합니다.");
-        return;
-      }
-
-      // Preview 및 상태 저장
-      setPreviewUrl(blobUrl);
-      setLocalFile(selectedFile);
-
-      // react-hook-form에도 반영
-      onChange({
-        name: selectedFile.name,
-        size: selectedFile.size,
-        url: blobUrl,
+    try {
+      const res = await api.post("/api/v1/file/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
       });
 
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-      formData.append("classification", classification);
+      const result = res.data;
 
-      try {
-        const res = await api.post("/api/v1/file/upload", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          withCredentials: true,
-        });
+      const isReplace = !!value?.id;
+      const isNew = !isReplace;
 
-        const result = res.data;
-
-        const isReplace = !!value?.id;
-        const isNew = !isReplace;
-
-        if (result.name && result.path) {
-          const uploadedFile = {
-            id: result.id ?? null,
-            originalName: selectedFile.name,
-            name: result.name,
-            size: result.size,
-            extension: "." + selectedFile.name.split(".").pop(),
-            mime: result.mime || selectedFile.type,
-            classification: classification,
-            path: result.path,
-            status: isNew ? "C" : "E",
-            field: name,
-          };
-          console.log("서버 업로드 완료:", name, uploadedFile);
-          onChange(uploadedFile);
-        } else {
-          console.error("파일 업로드 실패", result);
-        }
-      } catch (err) {
-        if (err.isAuthFailed) {
-          alert("세션이 만료되었습니다. 다시 로그인해주세요.");
-        } else {
-          console.error("파일 업로드 에러", err);
-          alert("파일 업로드 중 문제가 발생했습니다.");
-        }
+      if (result.name && result.path) {
+        const uploadedFile = {
+          id: result.id ?? null,
+          originalName: selectedFile.name,
+          name: result.name,
+          size: result.size,
+          extension: "." + selectedFile.name.split(".").pop(),
+          mime: result.mime || selectedFile.type,
+          classification: classification,
+          path: result.path,
+          status: isNew ? "C" : "E",
+          field: name,
+        };
+        onChange(uploadedFile);
+      } else {
+        alert("파일 업로드 실패");
       }
-    };
-
-    img.onerror = () => {
-      alert(
-        "이미지를 불러올 수 없습니다. 올바른 이미지 파일인지 확인해주세요."
-      );
-    };
+    } catch (err) {
+      alert("파일 업로드 중 문제가 발생했습니다.");
+      console.error("파일 업로드 에러", err);
+    }
   };
 
   const handleClick = () => {

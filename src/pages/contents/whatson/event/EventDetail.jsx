@@ -66,40 +66,32 @@ export default function EventDetail() {
       const patchForm = (formRef, data) => {
         if (!formRef || !data) return;
 
-        const ensurePath = (img) => {
-          if (!img || img.path) return img;
-          if (img.originalName) {
-            return {
-              ...img,
-              path: `https://d2md7choov3drl.cloudfront.net/event-promotion/${img.originalName}`,
-            };
-          }
-          return img;
+        const patchImageMeta = (img) => {
+          if (!img) return null;
+
+          const fileName = img.originalName || img.name;
+          const fallbackPath = fileName
+            ? `https://assets.onegrove.kr/dev/event-promotion/${fileName}`
+            : null;
+
+          return {
+            ...img,
+            path: img.path || fallbackPath,
+            name: img.name || fileName,
+            status: img.status ?? "R",
+          };
         };
 
-        const patchImageMeta = (img) =>
-          img?.path
-            ? {
-                ...img,
-                status: "R",
-              }
-            : null;
+        console.log("imgBodyPc 데이터:", data.imgBodyPc);
 
         formRef.setValue("category", data.categoryCode || data.category || "");
         formRef.setValue("title", data.title || "");
         formRef.setValue("status", data.showYn === "Y" ? "active" : "inactive");
-        formRef.setValue("publishDate", data.publishDate || "");
-        formRef.setValue("thumbImg", patchImageMeta(ensurePath(data.thumbImg)));
-        formRef.setValue(
-          "imgBodyPc",
-          patchImageMeta(ensurePath(data.imgBodyPc))
-        );
-        formRef.setValue(
-          "imgBodyMo",
-          patchImageMeta(ensurePath(data.imgBodyMo))
-        );
-        formRef.setValue("imgPc", patchImageMeta(ensurePath(data.imgPc)));
-        formRef.setValue("imgMo", patchImageMeta(ensurePath(data.imgMo)));
+        formRef.setValue("thumbImg", patchImageMeta(data.thumbImg));
+        formRef.setValue("imgBodyPc", patchImageMeta(data.imgBodyPc));
+        formRef.setValue("imgBodyMo", patchImageMeta(data.imgBodyMo));
+        formRef.setValue("imgPc", patchImageMeta(data.imgPc));
+        formRef.setValue("imgMo", patchImageMeta(data.imgMo));
         formRef.setValue("content", data.content || "");
         formRef.setValue("description", data.description || "");
         formRef.setDescription?.(data.description || "");
@@ -108,11 +100,18 @@ export default function EventDetail() {
           "startDate",
           data.startDate ? parseLocalDateTime(data.startDate) : null
         );
+        formRef.setValue("brandId", data.brandId ?? null);
+
+        const isManualEnd =
+          data.manualEndInput === true ||
+          (!!data.endInput &&
+            (data.endDate === null || data.endDate === undefined));
+        formRef.setValue("manualEndInput", isManualEnd);
+        formRef.setValue("endInput", isManualEnd ? data.endInput : "");
         formRef.setValue(
           "endDate",
-          data.endDate ? parseLocalDateTime(data.endDate) : null
+          !isManualEnd && data.endDate ? parseLocalDateTime(data.endDate) : null
         );
-        formRef.setValue("brandId", data.brandId ?? null);
       };
 
       patchForm(koFormRef.current, koData);
@@ -138,6 +137,13 @@ export default function EventDetail() {
 
     const originalName = base.originalName || base.name || "";
     const extension = base.extension || "." + originalName.split(".").pop();
+
+    let path = "";
+    if (base.path) {
+      path = base.path;
+    } else if (originalName) {
+      path = `https://d2md7choov3drl.cloudfront.net/event-promotion/${originalName}`;
+    }
 
     return {
       id: base.id ?? null,
@@ -180,11 +186,14 @@ export default function EventDetail() {
               ? new Date(data.startDate)
               : data.startDate
             )?.toISOString() || null,
-          endDate:
-            (typeof data.endDate === "string"
-              ? new Date(data.endDate)
-              : data.endDate
-            )?.toISOString() || null,
+          endDate: data.manualEndInput
+            ? null
+            : (typeof data.endDate === "string"
+                ? new Date(data.endDate)
+                : data.endDate
+              )?.toISOString() || null,
+          endInput: data.manualEndInput ? data.endInput : "",
+          manualEndInput: data.manualEndInput === true,
           brandId: data.brandId ?? null,
           delYn: "N",
         };
@@ -203,6 +212,11 @@ export default function EventDetail() {
       if (currentLang === 0) {
         const koValues = await koFormRef.current?.submit?.();
         if (!koValues) return;
+
+        localStorage.setItem(
+          `manualEnd_ko_${emId}`,
+          koValues.manualEndInput ? "1" : "0"
+        );
 
         await saveOne(
           {
@@ -236,6 +250,13 @@ export default function EventDetail() {
       alert("저장 실패. 다시 시도해주세요.");
     }
   };
+
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem(`manualEnd_ko_${emId}`);
+      localStorage.removeItem(`manualEnd_en_${emId}`);
+    };
+  }, [emId]);
 
   return (
     <Section>
