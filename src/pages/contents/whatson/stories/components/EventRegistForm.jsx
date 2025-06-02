@@ -94,7 +94,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
       ...data,
       brandIds: brands.map((e) => e._id),
       content,
-      ...dateRange,
+      // ...dateRange,
     });
   };
 

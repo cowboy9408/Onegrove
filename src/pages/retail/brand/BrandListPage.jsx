@@ -397,7 +397,7 @@ export default function BrandListPage() {
             );
           }}
         />
-        <Pagination
+        {/* <Pagination
           current={page}
           totalPages={Math.ceil(total / size)}
           onChange={
@@ -409,7 +409,7 @@ export default function BrandListPage() {
               });
             }
           }
-        />
+        /> */}
       </ResultSection>
     </div>
   );
