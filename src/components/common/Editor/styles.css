@@ -8,6 +8,10 @@
   outline: 0;
 }
 
+.bn-block-content :where(strong):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  color: inherit;
+}
+
 .f22 { font-size: 22px; }
 .f20 { font-size: 20px; }
 .f18 { font-size: 18px; }
