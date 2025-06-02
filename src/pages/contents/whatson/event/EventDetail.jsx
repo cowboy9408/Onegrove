@@ -16,7 +16,7 @@ export default function EventDetail() {
   const enFormRef = useRef();
   const { showModal } = useModal();
   const { emId } = useParams();
-
+  const [sharedCategory, setSharedCategory] = useState("");
   const [isReadOnly, setIsReadOnly] = useState(true);
   const [loading, setLoading] = useState(true);
   const [categoryOptions, setCategoryOptions] = useState([]);
@@ -26,6 +26,7 @@ export default function EventDetail() {
     );
     return matched?.code || "";
   };
+  const [sharedBrands, setSharedBrands] = useState([]);
 
   // 국문 상태
   const [koData, setKoData] = useState({});
@@ -339,6 +340,10 @@ export default function EventDetail() {
                 data={koData}
                 setData={setKoData}
                 lang="ko"
+                brands={sharedBrands}
+                setBrands={setSharedBrands}
+                category={sharedCategory}
+                setCategory={setSharedCategory}
               />
               <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
                 <tbody>
@@ -382,6 +387,10 @@ export default function EventDetail() {
                 data={enData}
                 setData={setEnData}
                 lang="ko"
+                brands={sharedBrands}
+                setBrands={setSharedBrands}
+                category={sharedCategory}
+                setCategory={setSharedCategory}
               />
               <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
                 <tbody>
