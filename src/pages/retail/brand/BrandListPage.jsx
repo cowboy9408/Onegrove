@@ -60,14 +60,16 @@ export default function BrandListPage() {
       try {
         const res = await api.get("/api/v1/brand", {
           params: {
-            currentPage: page,
+            currentPageNo: page,
             category: activeFilter.category || undefined,
             brand: activeFilter.name || undefined,
             status: activeFilter.status || undefined,
           },
         });
 
-        const rows = res.data.map((brand, idx) => {
+        console.log("브랜드 목록 로딩 성공:", page, res.data);
+
+        const rows = res.data.data.map((brand, idx) => {
           const ko = Array.isArray(brand.contentList)
             ? brand.contentList.find((c) => c.lang?.toUpperCase() === "KO")
             : null;
@@ -100,7 +102,7 @@ export default function BrandListPage() {
         });
 
         setData(rows);
-        setTotal(res.data.length);
+        setTotal(res.data.pageable.totalElements || 0);
       } catch (err) {
         console.error("브랜드 목록 로딩 실패:", err);
       }
@@ -398,7 +400,15 @@ export default function BrandListPage() {
         <Pagination
           current={page}
           totalPages={Math.ceil(total / size)}
-          onChange={setPage}
+          onChange={
+            (newPage) => {
+              setPage(newPage);
+              setSearchParams({
+                ...Object.fromEntries(searchParams.entries()),
+                page: newPage,
+              });
+            }
+          }
         />
       </ResultSection>
     </div>
