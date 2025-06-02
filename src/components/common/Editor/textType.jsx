@@ -1,51 +1,51 @@
 import { defaultProps } from "@blocknote/core";
 import { createReactBlockSpec } from "@blocknote/react";
 import { Menu } from "@mantine/core";
-import { MdCancel, MdCheckCircle, MdError, MdInfo } from "react-icons/md";
+import { MdCancel, MdCheckCircle, MdError, MdOutlineFormatColorText } from "react-icons/md";
 
 import "./styles.css";
 
 // The types of alerts that users can choose from.
 export const alertTypes = [
   {
-    title: "Warning",
-    value: "warning",
-    icon: MdError,
-    color: "#e69819",
-    backgroundColor: {
-      light: "#fff6e6",
-      dark: "#805d20",
-    },
+    title: "폰트사이즈 28px",
+    value: "f28",
+    icon: MdOutlineFormatColorText,
   },
   {
-    title: "Error",
-    value: "error",
-    icon: MdCancel,
-    color: "#d80d0d",
-    backgroundColor: {
-      light: "#ffe6e6",
-      dark: "#802020",
-    },
+    title: "폰트사이즈 24px",
+    value: "f24",
+    icon: MdOutlineFormatColorText,
   },
   {
-    title: "Info",
-    value: "info",
-    icon: MdInfo,
-    color: "#507aff",
-    backgroundColor: {
-      light: "#e6ebff",
-      dark: "#203380",
-    },
+    title: "폰트사이즈 22px",
+    value: "f22",
+    icon: MdOutlineFormatColorText,
   },
   {
-    title: "Success",
-    value: "success",
-    icon: MdCheckCircle,
-    color: "#0bc10b",
-    backgroundColor: {
-      light: "#e6ffe6",
-      dark: "#208020",
-    },
+    title: "폰트사이즈 20px",
+    value: "f20",
+    icon: MdOutlineFormatColorText,
+  },
+  {
+    title: "폰트사이즈 18px",
+    value: "f18",
+    icon: MdOutlineFormatColorText,
+  },
+  {
+    title: "폰트사이즈 16px",
+    value: "f16",
+    icon: MdOutlineFormatColorText,
+  },
+  {
+    title: "폰트사이즈 14px",
+    value: "f14",
+    icon: MdOutlineFormatColorText,
+  },
+  {
+    title: "폰트사이즈 12px",
+    value: "f12",
+    icon: MdOutlineFormatColorText,
   },
 ];
 
@@ -57,8 +57,8 @@ export const Alert = createReactBlockSpec(
       textAlignment: defaultProps.textAlignment,
       textColor: defaultProps.textColor,
       type: {
-        default: "warning",
-        values: ["warning", "error", "info", "success"],
+        default: "f22",
+        values: ["f28", "f24", "f22", "f20", "f18", "f16", "f14", "f12"],
       },
     },
     content: "inline",
@@ -71,7 +71,7 @@ export const Alert = createReactBlockSpec(
       const Icon = alertType.icon;
 
       return (
-        <div className="alert" data-alert-type={props.block.props.type}>
+        <div className="fontsize" data-alert-type={props.block.props.type}>
           {/* Icon which opens a menu to choose the Alert type */}
           <Menu withinPortal={false}>
             <Menu.Target>
@@ -85,7 +85,7 @@ export const Alert = createReactBlockSpec(
             </Menu.Target>
             {/* Dropdown to change the Alert type */}
             <Menu.Dropdown>
-              <Menu.Label>Alert Type</Menu.Label>
+              <Menu.Label>폰트사이즈 리스트</Menu.Label>
               <Menu.Divider />
               {alertTypes.map((type) => {
                 const ItemIcon = type.icon;
