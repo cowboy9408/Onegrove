@@ -96,7 +96,7 @@ export default function BrandRegist() {
         breakYn: form.openingHours?.breakTime?.none ? "Y" : "N",
 
         useYn: form.useStatus === "active" ? "Y" : "N",
-        keywordList: form.keywordList?.map((k) => ({ keyword: k })) || [],
+        keywordList: form.keywordList ? form.keywordList : [],
       };
 
       console.log("저장할 키워드 정보:", payload?.keywordList);
