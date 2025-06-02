@@ -5,6 +5,7 @@ import Section from "@/components/layout/Section";
 import Button from "@/components/common/Button";
 import PressRegistForm from "./component/PressRegistForm";
 import api from "@/lib/apiClient";
+import useModal from "@/hooks/useModal";
 
 export default function PressDetail() {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ export default function PressDetail() {
   const [currentLang, setCurrentLang] = useState(initialLang === "ko" ? 0 : 1);
   const koFormRef = useRef();
   const enFormRef = useRef();
-
+  const { showModal } = useModal();
   const [koData, setKoData] = useState(null);
   const [enData, setEnData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -266,7 +267,7 @@ export default function PressDetail() {
               <PressRegistForm
                 ref={enFormRef}
                 data={enData}
-                lang="en"
+                lang="ko"
                 // readOnly={isReadOnly}
               />
               <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
@@ -305,7 +306,16 @@ export default function PressDetail() {
       </Tabs>
 
       <div className="flex justify-end gap-4 px-6 pb-6">
-        <Button onClick={handleSave} theme="primary">
+        <Button
+          onClick={() =>
+            showModal({
+              title: "저장 확인",
+              message: "저장하시겠습니까?",
+              showCancel: true,
+              onConfirm: handleSave,
+            })
+          }
+        >
           저장
         </Button>
 

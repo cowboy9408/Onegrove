@@ -195,10 +195,9 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
           classification="press&media"
           readOnly={readOnly}
           value={watch("imgPc")}
-          onChange={(file) => {
-            console.log("PC 이미지 등록됨:", file);
-            setValue("imgPc", file);
-          }}
+          onChange={(file) => setValue("imgPc", file)}
+          showDefaultInfo={true}
+          info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
         />
 
         <Upload
@@ -208,10 +207,9 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
           required
           readOnly={readOnly}
           value={watch("imgMo")}
-          onChange={(file) => {
-            console.log("모바일 이미지 업로드됨:", file);
-            setValue("imgMo", file);
-          }}
+          onChange={(file) => setValue("imgMo", file)}
+          showDefaultInfo={true}
+          info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
         />
 
         <div>

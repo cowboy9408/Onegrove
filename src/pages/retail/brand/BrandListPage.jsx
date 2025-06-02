@@ -21,17 +21,22 @@ export default function BrandListPage() {
   const { showModal } = useModal(); // 삭제할때 모달용 아직 미구현
 
   const [refreshKey, setRefreshKey] = useState(0);
-  const [searchName, setSearchName] = useState("");
-  const [searchCategory, setSearchCategory] = useState("");
+
   const [searchStatus, setSearchStatus] = useState("");
-  const [name, setName] = useState(searchParams.get("name") || "");
-  const [category, setCategory] = useState(searchParams.get("category") || "");
-  const [status, setStatus] = useState(searchParams.get("status") || "");
+
   const [page, setPage] = useState(Number(searchParams.get("page") || 1));
   const [checkedIds, setCheckedIds] = useState([]);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [categoryList, setCategoryList] = useState([]);
+  const defaultFilter = {
+    name: "",
+    category: "",
+    status: "",
+  };
+
+  const [searchFilter, setSearchFilter] = useState(defaultFilter);
+  const [activeFilter, setActiveFilter] = useState(defaultFilter);
 
   const size = 10;
   const nameId = useId();
@@ -48,15 +53,17 @@ export default function BrandListPage() {
     };
 
     fetchCategory();
+  }, []);
 
+  useEffect(() => {
     const fetchBrands = async () => {
       try {
         const res = await api.get("/api/v1/brand", {
           params: {
             currentPage: page,
-            category: category || undefined,
-            brand: name || undefined,
-            status: status || undefined,
+            category: activeFilter.category || undefined,
+            brand: activeFilter.name || undefined,
+            status: activeFilter.status || undefined,
           },
         });
 
@@ -100,7 +107,7 @@ export default function BrandListPage() {
     };
 
     fetchBrands();
-  }, [name, category, status, page, refreshKey]);
+  }, [page, activeFilter, refreshKey]);
 
   const handleCheck = (id, checked) => {
     setCheckedIds((prev) =>
@@ -116,8 +123,10 @@ export default function BrandListPage() {
     console.log("삭제할 pmId 목록:", idsToDelete);
 
     try {
-      const res = await api.post("/api/v1/brand/delete", checkedIds.map((id) => Number(id))
-    );
+      const res = await api.post(
+        "/api/v1/brand/delete",
+        checkedIds.map((id) => Number(id))
+      );
 
       if (res.status === 200) {
         alert("삭제가 완료되었습니다.");
@@ -140,11 +149,12 @@ export default function BrandListPage() {
             <Col>
               <Select
                 label="카테고리"
-                value={searchCategory}
-                onChange={(e) => setSearchCategory(e.target.value)}
+                value={searchFilter.category}
+                onChange={(e) =>
+                  setSearchFilter({ ...searchFilter, category: e.target.value })
+                }
               >
                 <option value="">전체</option>
-
                 {categoryList.map((item) => (
                   <option key={item.code} value={item.code}>
                     {item.value}
@@ -157,9 +167,11 @@ export default function BrandListPage() {
               <Input
                 id={nameId}
                 label="브랜드명"
-                value={searchName}
-                onChange={(e) => setSearchName(e.target.value)}
-                onClear={() => setSearchName("")}
+                value={searchFilter.name}
+                onChange={(e) =>
+                  setSearchFilter({ ...searchFilter, name: e.target.value })
+                }
+                onClear={() => setSearchFilter({ ...searchFilter, name: "" })}
               />
             </Col>
             <Col className="flex items-center gap-4">
@@ -168,8 +180,10 @@ export default function BrandListPage() {
                 name="status"
                 value="active"
                 label="사용"
-                checked={searchStatus === "active"}
-                onChange={() => setSearchStatus("active")}
+                checked={searchFilter.status === "active"}
+                onChange={() =>
+                  setSearchFilter({ ...searchFilter, status: "active" })
+                }
               />
               <Radio
                 name="status"
@@ -182,13 +196,36 @@ export default function BrandListPage() {
             <Col className="self-end">
               <Button
                 onClick={() => {
-                  setName(searchName);
-                  setCategory(searchCategory);
-                  setStatus(searchStatus);
-                  setPage(1); //페이지 초기화
+                  setPage(1);
+                  setActiveFilter(searchFilter);
+                  setSearchParams({
+                    name: searchFilter.name,
+                    category: searchFilter.category,
+                    status: searchFilter.status,
+                    page: 1,
+                  });
                 }}
               >
                 검색
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchFilter({
+                    name: "",
+                    category: "",
+                    status: "",
+                  });
+                  setActiveFilter({
+                    name: "",
+                    category: "",
+                    status: "",
+                  });
+                  setPage(1);
+                  setSearchParams({ page: 1 });
+                }}
+              >
+                초기화
               </Button>
             </Col>
           </Row>
@@ -235,14 +272,17 @@ export default function BrandListPage() {
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
                   {row.ko_title === "-" ? (
-                    <p className="text-black-600 p-2 text-left"
+                    <p
+                      className="text-black-600 p-2 text-left"
                       onClick={() =>
                         navigate(`/retail/brand/detail/${row.masterId}?lang=ko`)
                       }
-                    >-</p>
+                    >
+                      -
+                    </p>
                   ) : (
                     <button
-                      className="text-black-600 underline p-2 truncate text-left"
+                      className="text-black-600 truncate p-2 text-left underline"
                       onClick={() =>
                         navigate(`/retail/brand/detail/${row.masterId}?lang=ko`)
                       }
@@ -251,14 +291,17 @@ export default function BrandListPage() {
                     </button>
                   )}
                   {row.en_title === "-" ? (
-                    <p className="text-black-600 p-2 text-left"
+                    <p
+                      className="text-black-600 p-2 text-left"
                       onClick={() =>
                         navigate(`/retail/brand/detail/${row.masterId}?lang=en`)
                       }
-                    >-</p>
+                    >
+                      -
+                    </p>
                   ) : (
                     <button
-                      className="text-black-600 underline p-2 truncate  text-left"
+                      className="text-black-600 truncate p-2 text-left underline"
                       onClick={() =>
                         navigate(`/retail/brand/detail/${row.masterId}?lang=en`)
                       }
