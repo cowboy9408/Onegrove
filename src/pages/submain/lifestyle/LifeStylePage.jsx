@@ -1,58 +1,13 @@
 import Section from "@/components/layout/Section";
 import Tabs, { TabPanel } from "@/components/layout/Tabs";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import KeyVisualForm from "./components/KeyVisualForm";
 import api from "@/lib/apiClient";
 import Button from "@/components/common/Button";
 
-function mapResponseToFormData(resData) {
-  const kv =
-    resData.keyVisual?.map((item) => ({
-      type: item.contentType === "V" ? "video" : "image",
-      file: {
-        name: "",
-        url: item.contentFilePc?.url || "",
-        size: 0,
-      },
-      title: item.title || "",
-      subtitle: item.subTitle || "",
-    })) || [];
-
-  const keyVisual =
-    kv.length > 0
-      ? kv
-      : [
-          {
-            type: "image",
-            file: { name: "", url: "", size: 0 },
-            title: "",
-            subtitle: "",
-          },
-        ];
-
-  return { keyVisual };
-}
-
-function mapFormDataToRequest(formData, lang, id = null) {
-  return {
-    id: id ?? 1,
-    lang,
-    delYn: "N",
-
-    keyVisual: formData.keyVisual.map((item, index) => ({
-      id: null,
-      contentType: item.type === "video" ? "V" : "I",
-      contentFilePc: item.file?.url ? { url: item.file.url } : null,
-      contentFileMo: item.file?.url ? { url: item.file.url } : null,
-      title: item.title || "",
-      subTitle: item.subtitle || "",
-      sort: index + 1,
-      delYn: "N",
-    })),
-  };
-}
-
 export default function LifeStylePage() {
+  const krRef = useRef();
+  const enRef = useRef();
   const emptyData = {
     keyVisual: [],
   };
@@ -66,33 +21,23 @@ export default function LifeStylePage() {
   useEffect(() => {
     const fetchData = async () => {
       const lang = currentLang === 0 ? "ko" : "en";
+      const res = await api.get(`/api/v1/lifestyle?lang=${lang}`);
+      const keyVisual = res.data?.data?.keyVisual || [];
 
-      try {
-        const res = await api.get(
-          "/api/v1/event-promotion/contents",
-          {
-            params: { lang },
-          },
-          {
-            withCredentials: true,
-          }
-        );
+      const mapped = keyVisual.map((item) => ({
+        ...item,
+        file1: item.contentFilePc || null,
+        file2: item.contentFileMo || null,
+      }));
 
-        const mapped = mapResponseToFormData(res.data.data);
+      const id = res.data?.data?.id;
 
-        if (lang === "ko") {
-          setKrId(res.data.data.id);
-          setKrData(mapped);
-        } else {
-          setEnId(res.data.data.id);
-          setEnData(mapped);
-        }
-      } catch {
-        if (lang === "ko") {
-          setKrData(emptyData);
-        } else {
-          setEnData(emptyData);
-        }
+      if (lang === "ko") {
+        setKrData({ keyVisual: mapped });
+        setKrId(id);
+      } else {
+        setEnData({ keyVisual: mapped });
+        setEnId(id);
       }
     };
 
@@ -100,20 +45,46 @@ export default function LifeStylePage() {
   }, [currentLang]);
 
   const handleSave = async () => {
+    const isKorean = currentLang === 0;
+    const ref = isKorean ? krRef : enRef;
+    const lang = isKorean ? "ko" : "en";
+    const id = isKorean ? krId : enId;
+
+    const keyVisual = await ref.current?.submit();
+    if (!keyVisual) return;
+
+    const payload = {
+      id: id ?? 0,
+      lang,
+      delYn: "N",
+      keyVisual,
+    };
+
     try {
-      if (currentLang === 0) {
-        const krPayload = mapFormDataToRequest(krData, "ko", krId);
-        await api.post("/api/v1/event-promotion/contents/insert", krPayload);
-        alert("국문 저장 완료");
+      await api.post("/api/v1/lifestyle/insert", payload);
+      alert("저장 완료");
+
+      //저장 후 새로고침 시 데이터를 다시 가져오기
+      const res = await api.get(`/api/v1/lifestyle?lang=${lang}`);
+      const newKeyVisual = res.data?.data?.keyVisual || [];
+      const newId = res.data?.data?.id;
+
+      const mapped = newKeyVisual.map((item) => ({
+        ...item,
+        file1: item.contentFilePc,
+        file2: item.contentFileMo,
+      }));
+
+      if (isKorean) {
+        setKrData({ keyVisual: mapped });
+        setKrId(newId);
       } else {
-        const enPayload = mapFormDataToRequest(enData, "en", enId);
-        await api.post("/api/v1/event-promotion/contents/insert", enPayload);
-        alert("영문 저장 완료");
+        setEnData({ keyVisual: mapped });
+        setEnId(newId);
       }
-      window.location.reload();
     } catch (error) {
-      console.error("저장 오류:", error);
-      alert("저장 중 오류가 발생했습니다.");
+      console.error("저장 실패", error);
+      alert("저장에 실패했습니다.");
     }
   };
 
@@ -128,21 +99,11 @@ export default function LifeStylePage() {
         onTabChange={(index) => setCurrentLang(index)}
       >
         <TabPanel>
-          <KeyVisualForm
-            data={krData.keyVisual || []}
-            setData={(newVal) =>
-              setKrData((prev) => ({ ...prev, keyVisual: newVal }))
-            }
-          />
+          <KeyVisualForm ref={krRef} data={krData.keyVisual} />
         </TabPanel>
 
         <TabPanel>
-          <KeyVisualForm
-            data={krData.keyVisual || []}
-            setData={(newVal) =>
-              setEnData((prev) => ({ ...prev, keyVisual: newVal }))
-            }
-          />
+          <KeyVisualForm ref={enRef} data={enData.keyVisual} />
         </TabPanel>
       </Tabs>
       <div className="mt-8 flex justify-end">

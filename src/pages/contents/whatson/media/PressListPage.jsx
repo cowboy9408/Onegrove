@@ -170,7 +170,7 @@ export default function PressListPage() {
           console.log("원본 데이터 총 개수:", json.data.length);
           const sliced = sorted.slice(start, end).map((row, idx) => ({
             ...row,
-            no: start + idx + 1,
+            no: filtered.length - (start + idx),
             _id: `${row.pmId}`,
           }));
 
@@ -313,72 +313,107 @@ export default function PressListPage() {
   return (
     <div>
       <SearchSection>
-        <Box>
-          <Row>
-            <Col>
-              <Select
-                label="카테고리"
-                value={searchFilter.category}
-                onChange={(e) =>
-                  setSearchFilter({ ...searchFilter, category: e.target.value })
-                }
-              >
-                <option value="">전체</option>
-                {categoryList.map((cat) => (
-                  <option key={cat.code} value={cat.value}>
-                    {cat.value}
-                  </option>
-                ))}
-              </Select>
-            </Col>
-            <p className="text-sm font-medium">게시글 등록일</p>
-            <DateRangePicker
-              startDate={searchFilter.dateRange.startDate}
-              endDate={searchFilter.dateRange.endDate}
-              onRangeChange={({ startDate, endDate }) =>
-                setSearchFilter({
-                  ...searchFilter,
-                  dateRange: { startDate, endDate },
-                })
-              }
-            />
-            <Col>
-              <Input
-                id={nameId}
-                label="타이틀"
-                value={searchFilter.name}
-                onChange={(e) =>
-                  setSearchFilter({ ...searchFilter, name: e.target.value })
-                }
-                onClear={() => setSearchFilter({ ...searchFilter, name: "" })}
-              />
-            </Col>
+        <Box className="space-y-4">
+          <div className="flex w-full flex-col gap-1">
+            {/* 라벨 줄 */}
+            <div className="flex gap-4">
+              {/* 카테고리 라벨 */}
+              <div className="w-[560px]">
+                <span className="text-sm font-medium">카테고리</span>
+              </div>
+              {/* 게시글 등록일 라벨 */}
+              <div className="flex-1">
+                <span className="text-sm font-medium">게시글 등록일</span>
+              </div>
+            </div>
 
-            <span className="flex items-center text-sm font-medium whitespace-nowrap text-gray-800">
-              노출 여부
-            </span>
-            <Radio
-              id="visible"
-              name="visibility"
-              value="Y"
-              checked={searchFilter.visibility === "Y"}
-              onChange={(e) =>
-                setSearchFilter({ ...searchFilter, visibility: e.target.value })
-              }
-              label="노출"
-            />
-            <Radio
-              id="hidden"
-              name="visibility"
-              value="N"
-              checked={searchFilter.visibility === "N"}
-              onChange={(e) =>
-                setSearchFilter({ ...searchFilter, visibility: e.target.value })
-              }
-              label="미노출"
-            />
+            {/* 입력 줄 */}
+            <div className="flex gap-16">
+              {/* 카테고리 Select */}
+              <div className="w-[505px]">
+                <Select
+                  value={searchFilter.category}
+                  onChange={(e) =>
+                    setSearchFilter({
+                      ...searchFilter,
+                      category: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">전체</option>
+                  {categoryList.map((cat) => (
+                    <option key={cat.code} value={cat.value}>
+                      {cat.value}
+                    </option>
+                  ))}
+                </Select>
+              </div>
 
-            <Col className="flex gap-2 self-end">
+              {/* 게시글 등록일 DateRangePicker */}
+              <div className="flex-1">
+                <DateRangePicker
+                  startDate={searchFilter.dateRange.startDate}
+                  endDate={searchFilter.dateRange.endDate}
+                  onRangeChange={({ startDate, endDate }) =>
+                    setSearchFilter({
+                      ...searchFilter,
+                      dateRange: { startDate, endDate },
+                    })
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          <Row className="flex w-full flex-wrap items-end gap-4">
+            <Row className="flex w-full gap-20">
+              {/* 타이틀 영역 */}
+              <div className="flex w-[500px] flex-col">
+                <span className="mb-1 text-sm font-medium">타이틀</span>
+                <Input
+                  id={nameId}
+                  value={searchFilter.name}
+                  onChange={(e) =>
+                    setSearchFilter({ ...searchFilter, name: e.target.value })
+                  }
+                  onClear={() => setSearchFilter({ ...searchFilter, name: "" })}
+                />
+              </div>
+
+              {/* 노출 여부 영역 */}
+              <div className="flex min-w-[240px] flex-col">
+                <span className="mb-1 text-sm font-medium">노출 여부</span>
+                <div className="mt-[15px] flex gap-4">
+                  <Radio
+                    id="visible"
+                    name="visibility"
+                    value="Y"
+                    checked={searchFilter.visibility === "Y"}
+                    onChange={(e) =>
+                      setSearchFilter({
+                        ...searchFilter,
+                        visibility: e.target.value,
+                      })
+                    }
+                    label="노출"
+                  />
+                  <Radio
+                    id="hidden"
+                    name="visibility"
+                    value="N"
+                    checked={searchFilter.visibility === "N"}
+                    onChange={(e) =>
+                      setSearchFilter({
+                        ...searchFilter,
+                        visibility: e.target.value,
+                      })
+                    }
+                    label="미노출"
+                  />
+                </div>
+              </div>
+            </Row>
+            <Col className="flex w-1/4 justify-end gap-2">
               <Button
                 onClick={() => {
                   setPage(1);
@@ -404,14 +439,13 @@ export default function PressListPage() {
               >
                 검색
               </Button>
-
               <Button
                 variant="outline"
                 onClick={() => {
                   setSearchFilter(defaultFilter);
                   setActiveFilter(defaultFilter);
                   setPage(1);
-                  setSearchParams({ page: 1 }); // URL 파라미터 초기화
+                  setSearchParams({ page: 1 });
                 }}
               >
                 초기화
