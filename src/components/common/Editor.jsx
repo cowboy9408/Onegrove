@@ -24,7 +24,7 @@ import {
   withMultiColumn,
 } from "@blocknote/xl-multi-column";
 import { HiOutlineGlobeAlt } from "react-icons/hi";
-import { RiAlertFill } from "react-icons/ri";
+import { MdOutlineFormatColorText } from "react-icons/md";
 
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
@@ -79,27 +79,7 @@ const customInlineContentSpecs = {
   },
 };
 
-// 폰트 사이즈 명령
-const fontSizeItems = [22, 20, 18, 17, 16, 14, 12, 10].map((size) => (editor) => ({
-  title: `텍스트사이즈 ${size}px`,
-  onItemClick: async () => {
-    await editor.insertBlocks([
-      editor.schema.blockSpecs.paragraph.create({
-        content: [
-          editor.schema.inlineContentSpecs.text.create({
-            text: `${size}px 텍스트사이즈를 입력합니다.`,
-            props: { className: `f${size}` },
-          }),
-        ],
-      }),
-    ]);
-  },
-  aliases: [`textStyle${size}`],
-  group: "textStyle",
-  icon: <HiOutlineGlobeAlt size={18} />,
-  subtext: `${size}px 텍스트사이즈`,
-  description: `${size}px 텍스트사이즈를 입력합니다.`,
-}));
+
 
 // 캡션 텍스트 명령
 const insertCaptionText = (editor) => ({
@@ -160,7 +140,7 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
       const defaultItems = getDefaultReactSlashMenuItems(editor);
 
       const customItems = [
-        ...fontSizeItems.map((fn) => fn(editor)),
+        // ...fontSizeItems.map((fn) => fn(editor)),
         insertCaptionText(editor),
       ];
 
@@ -188,7 +168,7 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
         editor={editor}
         slashMenu
         formattingToolbar={false}
-        className="relative editor-container !pt-[80px]"
+        className="relative editor-container"
         theme={isDarkMode ? "dark" : "light"}
         editable={!readOnly}
       >
@@ -200,7 +180,7 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
                 {
                   name: "폰트사이즈 변경",
                   type: "alert",
-                  icon: RiAlertFill,
+                  icon: MdOutlineFormatColorText,
                   isSelected: (block) => block.type === "alert",
                 },
               ]}
@@ -214,7 +194,7 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
 
             const defaultItems = getDefaultReactSlashMenuItems(editor);
             const lastBasicBlockIndex = defaultItems.findLastIndex(
-              (item) => item.group === "Basic blocks"
+              (item) => item.group === "기본 블록"
             );
 
             const alertItem = {
@@ -233,8 +213,8 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
                 "info",
                 "success",
               ],
-              group: "Basic blocks",
-              icon: <RiAlertFill />,
+              group: "기본 블록",
+              icon: <MdOutlineFormatColorText />,
             };
 
             if (lastBasicBlockIndex >= 0) {

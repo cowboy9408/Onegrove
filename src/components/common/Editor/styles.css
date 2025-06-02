@@ -1,4 +1,13 @@
 
+
+
+.bn-block-content {
+  padding: 0;
+}
+.ProseMirror-selectednode>.bn-block-content>* {
+  outline: 0;
+}
+
 .f22 { font-size: 22px; }
 .f20 { font-size: 20px; }
 .f18 { font-size: 18px; }
