@@ -19,6 +19,13 @@ export default function EventDetail() {
 
   const [isReadOnly, setIsReadOnly] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  const resolveCategoryCode = (input) => {
+    const matched = categoryOptions.find(
+      (opt) => opt.code === input || opt.name === input || opt.value === input
+    );
+    return matched?.code || "";
+  };
 
   // 국문 상태
   const [koData, setKoData] = useState({});
@@ -40,8 +47,22 @@ export default function EventDetail() {
         console.log("koData:", ko);
         console.log("enData:", en);
 
-        setKoData(ko);
-        setEnData(en);
+        const patchedKo = ko
+          ? {
+              ...ko,
+              category: resolveCategoryCode(ko.category),
+            }
+          : null;
+
+        const patchedEn = en
+          ? {
+              ...en,
+              category: resolveCategoryCode(en.category),
+            }
+          : null;
+
+        setKoData(patchedKo);
+        setEnData(patchedEn);
         setLoading(false);
       } catch (err) {
         console.error("API 호출 실패:", err);
@@ -51,7 +72,36 @@ export default function EventDetail() {
       }
     };
     fetchData();
-  }, [emId]);
+  }, [emId, categoryOptions]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get("/api/v1/event-promotion/item/category");
+        if (res.data?.success) {
+          setCategoryOptions(res.data.data); //
+        }
+      } catch (err) {
+        console.error("카테고리 로딩 실패", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    if (categoryOptions.length === 0) return;
+
+    setKoData((prev) => ({
+      ...prev,
+      category: resolveCategoryCode(prev?.category),
+    }));
+
+    setEnData((prev) => ({
+      ...prev,
+      category: resolveCategoryCode(prev?.category),
+    }));
+  }, [categoryOptions]);
 
   const parseLocalDateTime = (str) => {
     if (!str) return null;
@@ -62,9 +112,9 @@ export default function EventDetail() {
   };
 
   useEffect(() => {
-    if (!loading) {
-      const patchForm = (formRef, data) => {
-        if (!formRef || !data) return;
+    if (!loading && categoryOptions.length > 0) {
+      const patchForm = (formRef, data, fallbackCategory = "") => {
+        if (!formRef) return;
 
         const patchImageMeta = (img) => {
           if (!img) return null;
@@ -82,9 +132,15 @@ export default function EventDetail() {
           };
         };
 
-        console.log("imgBodyPc 데이터:", data.imgBodyPc);
+        const categoryCode = resolveCategoryCode(
+          data?.categoryCode ?? fallbackCategory
+        );
+        setTimeout(() => {
+          formRef.setValue("category", categoryCode);
+        }, 0);
 
-        formRef.setValue("category", data.categoryCode || data.category || "");
+        if (!data || Object.keys(data).length === 0) return;
+
         formRef.setValue("title", data.title || "");
         formRef.setValue("status", data.showYn === "Y" ? "active" : "inactive");
         formRef.setValue("thumbImg", patchImageMeta(data.thumbImg));
@@ -114,10 +170,14 @@ export default function EventDetail() {
         );
       };
 
-      patchForm(koFormRef.current, koData);
-      patchForm(enFormRef.current, enData);
+      const sharedCategory = resolveCategoryCode(
+        koData?.categoryCode || enData?.categoryCode || ""
+      );
+
+      patchForm(koFormRef.current, koData, sharedCategory);
+      patchForm(enFormRef.current, enData, sharedCategory);
     }
-  }, [loading, koData, enData]);
+  }, [loading, koData, enData, categoryOptions]);
 
   useEffect(() => {
     if (!loading) {

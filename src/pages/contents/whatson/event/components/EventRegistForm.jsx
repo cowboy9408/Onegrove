@@ -104,14 +104,16 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
 
   useEffect(() => {
     if (data && Object.keys(data).length > 0 && categoryOptions.length > 0) {
-      console.log("받은 data:", data);
-
-      const matchedCategory = categoryOptions.find(
-        (opt) => opt.value === data.category
+      const matched = categoryOptions.find(
+        (opt) => opt.code === data.category || opt.value === data.category
       );
-      const categoryCode = matchedCategory?.code || data.category;
+      const categoryCode = matched?.code || "";
 
-      setValue("category", categoryCode);
+      setTimeout(() => {
+        setValue("category", categoryCode);
+      }, 1);
+
+      // 나머지 필드 세팅
       setValue("title", data.title || "");
       setValue("status", data.showYn === "Y" ? "active" : "inactive");
       setValue("order", data.sort || 1);
@@ -123,12 +125,11 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
       editorRef1.current?.setContent?.(data.content || "");
       editorRef2.current?.setContent?.(data.description || "");
 
-      // 브랜드 정보도 세팅
       if (data.brandId) {
         setBrands([{ _id: data.brandId, brand: "선택된 브랜드" }]);
       }
 
-      console.log("값 세팅 완료");
+      console.log("값 세팅 완료:", categoryCode);
     }
   }, [data, categoryOptions]);
 
@@ -409,7 +410,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           readOnly={readOnly}
           value={watch("thumbImg")}
           onChange={(file) => setValue("thumbImg", file)}
-          accept="image/png, image/jpeg, image/jpg"
+          accept="image/png, image/jpeg, image/jpg, image/webp"
           showDefaultInfo={true}
           info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
         />
@@ -422,7 +423,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           readOnly={readOnly}
           value={watch("imgBodyPc")}
           onChange={(file) => setValue("imgBodyPc", file)}
-          accept="image/png, image/jpeg, image/jpg"
+          accept="image/png, image/jpeg, image/jpg, image/webp"
           showDefaultInfo={true}
           info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
         />
@@ -435,7 +436,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           readOnly={readOnly}
           value={watch("imgBodyMo")}
           onChange={(file) => setValue("imgBodyMo", file)}
-          accept="image/png, image/jpeg, image/jpg"
+          accept="image/png, image/jpeg, image/jpg, image/webp"
           showDefaultInfo={true}
           info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
         />
@@ -619,7 +620,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           readOnly={readOnly}
           value={watch("imgPc")}
           onChange={(file) => setValue("imgPc", file)}
-          accept="image/png, image/jpeg, image/jpg"
+          accept="image/png, image/jpeg, image/jpg, image/webp"
           showDefaultInfo={true}
           info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
         />
@@ -631,7 +632,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           readOnly={readOnly}
           value={watch("imgMo")}
           onChange={(file) => setValue("imgMo", file)}
-          accept="image/png, image/jpeg, image/jpg"
+          accept="image/png, image/jpeg, image/jpg, image/webp"
           showDefaultInfo={true}
           info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
         />

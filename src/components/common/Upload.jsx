@@ -44,7 +44,7 @@ export default function Upload({
   const accepted = useMemo(() => {
     switch (watchedValue) {
       case "image":
-        return "image/png, image/jpeg, image/gif";
+        return "image/png, image/jpeg, image/gif, image/webp";
       case "document":
         return ".pdf, .doc, .docx, .txt";
       case "video":
