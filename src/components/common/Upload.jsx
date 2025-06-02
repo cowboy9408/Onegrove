@@ -8,6 +8,7 @@ import { useController, useFormContext, useWatch } from "react-hook-form";
 
 export default function Upload({
   name,
+
   value: externalValue,
   onChange: externalOnChange,
   label = "파일 업로드",
@@ -20,6 +21,9 @@ export default function Upload({
   required = false,
   defaultValue = null, // { name, size, url }
   classification = "default",
+  maxLength,
+  showDefaultInfo = false,
+  info,
 }) {
   const inputRef = useRef(null);
   const wrapperRef = useRef(null);
@@ -54,13 +58,12 @@ export default function Upload({
   const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
-    if (!value || !value.path || value.url === null) {
+    if (!value || !value.path) {
       setPreviewUrl(null);
       setLocalFile(null);
       return;
     }
 
-    // 각 필드별로 분리
     setPreviewUrl(value.path);
     setLocalFile({
       name: value.name,
@@ -84,34 +87,69 @@ export default function Upload({
       console.warn("파일이 선택되지 않았습니다.");
       return;
     }
+
+    // 이미지 전용 체크
+    if (!selectedFile.type.startsWith("image/")) {
+      alert("이미지 파일만 업로드할 수 있습니다.");
+      return;
+    }
+
+    // 용량 체크
     const maxSize = 20 * 1024 * 1024; // 20MB
     if (selectedFile.size > maxSize) {
       alert("20MB가 넘는 이미지는 등록할 수 없습니다.");
       return;
     }
 
+    // const checkImageResolution = (file) =>
+    //   new Promise((resolve, reject) => {
+    //     const img = new Image();
+    //     const objectUrl = URL.createObjectURL(file);
+
+    //     img.onload = () => {
+    //       const isValid = img.width === 416 && img.height === 280;
+    //       URL.revokeObjectURL(objectUrl); // 메모리 해제
+    //       if (isValid) {
+    //         resolve(true);
+    //       } else {
+    //         reject(
+    //           new Error(
+    //             `이미지 해상도는 416x280px 이어야 합니다. (현재: ${img.width}x${img.height})`
+    //           )
+    //         );
+    //       }
+    //     };
+
+    //     img.onerror = () => {
+    //       URL.revokeObjectURL(objectUrl);
+    //       reject(new Error("이미지를 불러올 수 없습니다."));
+    //     };
+
+    //     img.src = objectUrl;
+    //   });
+
+    // try {
+    //   await checkImageResolution(selectedFile);
+    // } catch (err) {
+    //   alert(err.message);
+    //   return;
+    // }
+
+    //해상도 통과 후 기존 로직 수행
+    const blobUrl = URL.createObjectURL(selectedFile);
+    setPreviewUrl(blobUrl);
+    setLocalFile(selectedFile);
+    onChange({
+      name: selectedFile.name,
+      size: selectedFile.size,
+      url: blobUrl,
+    });
+
     const formData = new FormData();
     formData.append("file", selectedFile);
     formData.append("classification", classification);
 
-    console.log("업로드할 파일:", selectedFile);
-
-    //  1. preview URL 생성
-    const blobUrl = URL.createObjectURL(selectedFile);
-    setPreviewUrl(blobUrl);
-
-    // 2. 로컬 상태 저장
-    setLocalFile(selectedFile);
-
-    // 3. react-hook-form 값으로도 반영
-    onChange({
-      name: selectedFile.name,
-      size: selectedFile.size,
-      url: blobUrl, // 실제 업로드 URL이 아니라 local preview용 URL
-    });
-
     try {
-      console.log("업로드할 form:", formData);
       const res = await api.post("/api/v1/file/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -119,15 +157,9 @@ export default function Upload({
         withCredentials: true,
       });
 
-      console.log("업로드 전체 응답:", res);
-      console.log("업로드 응답 .data:", res.data);
-      console.log("업로드 응답 .data.data:", res.data?.data);
-
       const result = res.data;
-      console.log("Upload 응답 result:", result);
-      console.log("업로드 응답 result:", result);
 
-      const isReplace = !!value?.id; // 기존 값이 있는지 판단
+      const isReplace = !!value?.id;
       const isNew = !isReplace;
 
       if (result.name && result.path) {
@@ -140,22 +172,16 @@ export default function Upload({
           mime: result.mime || selectedFile.type,
           classification: classification,
           path: result.path,
-          status: isNew ? "C" : "E", //신규 등록이면 반드시 C
+          status: isNew ? "C" : "E",
           field: name,
         };
-        console.log("서버 업로드 완료:", name, uploadedFile);
         onChange(uploadedFile);
       } else {
-        console.error("파일 업로드 실패", result);
+        alert("파일 업로드 실패");
       }
     } catch (err) {
-      if (err.isAuthFailed) {
-        alert("세션이 만료되었습니다. 다시 로그인해주세요.");
-        // 필요시 로그인 모달 오픈 등 UI 처리
-      } else {
-        console.error("파일 업로드 에러", err);
-        alert("파일 업로드 중 문제가 발생했습니다.");
-      }
+      alert("파일 업로드 중 문제가 발생했습니다.");
+      console.error("파일 업로드 에러", err);
     }
   };
 
@@ -250,6 +276,15 @@ export default function Upload({
           handleFileChange(e);
         }}
       />
+      {showDefaultInfo && (
+        <span className="mt-1 flex items-center gap-1 pl-1 text-xs text-gray-400">
+          <Info size={14} />
+          {info ||
+            (maxLength
+              ? `최대 ${maxLength}개까지 업로드 가능`
+              : "업로드 가능한 파일을 선택하세요.")}
+        </span>
+      )}
 
       {error && (
         <span className="flex items-center gap-1 pt-1 pl-1 text-xs text-red-500">

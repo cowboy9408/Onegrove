@@ -40,8 +40,8 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
   const [endDate, setEndDate] = useState(null);
   const [endTime, setEndTime] = useState("00:00");
   const [categoryOptions, setCategoryOptions] = useState([]);
-  const [manualEndInput, setManualEndInput] = useState(false);
-  const [manualEndValue, setManualEndValue] = useState(""); // 수동 입력 값
+  const [isManualEndInput, setIsManualEndInput] = useState(false);
+  const [manualEndText, setManualEndText] = useState("");
 
   useEffect(() => {
     // 카테고리 불러오기
@@ -80,6 +80,27 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
 
     fetchBrandName();
   }, [watch("brandId")]);
+
+  useEffect(() => {
+    register("manualEndInput");
+    register("endInput");
+  }, [register]);
+
+  useEffect(() => {
+    if (data) {
+      const isManual =
+        data.manualEndInput ||
+        (!!data.endInput && (!data.endDate || data.endInput.trim() !== ""));
+      setIsManualEndInput(isManual);
+      setManualEndText(data.endInput || "");
+      setValue("manualEndInput", isManual);
+      setValue("endInput", data.endInput || "");
+
+      if (!isManual) {
+        setValue("endDate", data.endDate ? new Date(data.endDate) : null);
+      }
+    }
+  }, [data]);
 
   useEffect(() => {
     if (data && Object.keys(data).length > 0 && categoryOptions.length > 0) {
@@ -132,7 +153,6 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
     }
   }, [data]);
 
-  console.log("manualEndValue 상태:", `"${manualEndValue}"`);
   useImperativeHandle(ref, () => ({
     submit: async (onError) => {
       const values = {
@@ -143,6 +163,8 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         imgPc: watch("imgPc"),
         imgMo: watch("imgMo"),
         description: watch("description"),
+        endInput: watch("endInput"),
+        manualEndInput: watch("manualEndInput"),
       };
       const content = await editorRef1.current?.getContent?.();
       const description = watch("description");
@@ -185,11 +207,15 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         onError?.("이벤트 시작일과 종료일을 선택해주세요.");
         return null;
       }
-      if (!manualEndInput && (!endDate || !endTime)) {
+      if (!values.manualEndInput && (!endDate || !endTime)) {
         onError?.("이벤트 종료일과 시간을 선택해주세요.");
         return null;
       }
-      if (manualEndInput && (!manualEndValue || manualEndValue.trim() === "")) {
+
+      if (
+        values.manualEndInput &&
+        (!values.endInput || values.endInput.trim() === "")
+      ) {
         onError?.("종료 조건 텍스트를 입력해주세요.");
         return null;
       }
@@ -207,8 +233,9 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         title: values.title,
         category: values.category,
         startDate: startDate,
-        endDate: manualEndInput ? null : endDate,
-        endInput: manualEndInput ? manualEndValue : null,
+        endDate: values.manualEndInput ? null : endDateStr,
+        endInput: values.manualEndInput ? values.endInput : null,
+
         thumbImg: values.thumbImg,
         imgBodyPc: values.imgBodyPc,
         imgBodyMo: values.imgBodyMo,
@@ -223,8 +250,8 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         !values.title?.trim() ||
         !values.category ||
         !startDate ||
-        (!manualEndInput && !endDate) ||
-        (manualEndInput && !manualEndValue?.trim()) ||
+        (!values.manualEndInput && !endDate) ||
+        (values.manualEndInput && !values.endInput?.trim()) ||
         !values.thumbImg ||
         !values.imgBodyPc ||
         !values.imgBodyMo ||
@@ -239,8 +266,8 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
       }
 
       const toImageMeta = (file) => {
-        if (!file || !file.name || !file.path) {
-          console.warn("이미지 path 누락:", file);
+        if (!file || !file.name) {
+          console.warn("이미지 name 누락:", file);
           return null;
         }
 
@@ -252,30 +279,12 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           extension: "." + (file.originalName || file.name).split(".").pop(),
           mime: file.type || "image/png",
           classification: "event-promotion",
-          path: file.path,
-          status: file.status ?? "C",
+          path:
+            file.path ||
+            `https://assets.onegrove.kr/dev/event-promotion/${file.originalName || file.name}`,
+          status: file.status || "C",
         };
       };
-
-      // 필수 체크
-      if (
-        !values.title?.trim() ||
-        !values.category ||
-        !startDate ||
-        (!manualEndInput && !endDate) ||
-        (manualEndInput && !watch("endInput")?.trim()) ||
-        !watch("thumbImg") ||
-        !watch("imgBodyPc") ||
-        !watch("imgBodyMo") ||
-        !watch("imgPc") ||
-        !watch("imgMo") ||
-        !content?.trim() ||
-        !description?.trim() ||
-        brands.length === 0
-      ) {
-        alert("모든 필수 항목을 입력해주세요.");
-        return null;
-      }
 
       return {
         eventId: data?.id ?? null,
@@ -292,8 +301,9 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         content: content || "",
         description: description || "",
         startDate: startDateStr,
-        endDate: manualEndInput ? null : endDateStr,
-        endInput: manualEndInput ? watch("endInput") : null,
+        endDate: values.manualEndInput ? null : endDateStr,
+        endInput: values.manualEndInput ? values.endInput : null,
+        manualEndInput: values.manualEndInput,
         progressYn: values.progressStatus === "inProgress" ? "Y" : "N",
         brandId: brands[0]?._id ?? null,
         delYn: "N",
@@ -308,12 +318,6 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
     },
   }));
 
-  console.log("최종 유효성 검사 판단", {
-    manualEndInput,
-    manualEndValue,
-    endDate,
-    isValidEnd: manualEndInput ? !!manualEndValue?.trim() : !!endDate,
-  });
   console.log("brands", brands);
   return (
     <FormProvider {...methods}>
@@ -404,10 +408,10 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           classification="event-promotion"
           readOnly={readOnly}
           value={watch("thumbImg")}
-          onChange={(file) => {
-            console.log("썸네일 이미지 등록됨:", file);
-            setValue("thumbImg", file);
-          }}
+          onChange={(file) => setValue("thumbImg", file)}
+          accept="image/png, image/jpeg, image/jpg"
+          showDefaultInfo={true}
+          info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
         />
         <Upload
           key={`imgBodyPc-upload`}
@@ -417,10 +421,10 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           classification="event-promotion"
           readOnly={readOnly}
           value={watch("imgBodyPc")}
-          onChange={(file) => {
-            console.log("pc 본문 이미지 등록됨:", file);
-            setValue("imgBodyPc", file);
-          }}
+          onChange={(file) => setValue("imgBodyPc", file)}
+          accept="image/png, image/jpeg, image/jpg"
+          showDefaultInfo={true}
+          info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
         />
         <Upload
           key={`imgBodyMo-upload`}
@@ -430,10 +434,10 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           classification="event-promotion"
           readOnly={readOnly}
           value={watch("imgBodyMo")}
-          onChange={(file) => {
-            console.log("mo 본문 이미지 등록됨:", file);
-            setValue("imgBodyMo", file);
-          }}
+          onChange={(file) => setValue("imgBodyMo", file)}
+          accept="image/png, image/jpeg, image/jpg"
+          showDefaultInfo={true}
+          info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
         />
         {/* 상세 내용 에디터 1 */}
         <p className="text-sm font-medium">
@@ -483,21 +487,22 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             <span className="font-bold">~</span>
             <Checkbox
               id="manualEnd"
-              checked={manualEndInput}
-              onChange={(e) => setManualEndInput(e.target.checked)}
+              checked={isManualEndInput}
+              onChange={(e) => {
+                setIsManualEndInput(e.target.checked);
+                setValue("manualEndInput", e.target.checked);
+              }}
               disabled={readOnly}
             />
-          </div>
 
-          {/* 종료 날짜 + 시간 */}
-          <div className="flex items-center gap-2">
-            {manualEndInput ? (
+            {isManualEndInput ? (
               <input
                 type="text"
-                value={manualEndValue}
+                value={manualEndText}
                 onChange={(e) => {
-                  setManualEndValue(e.target.value);
-                  setValue("endInput", e.target.value); // 폼 값에도 저장 가능
+                  const val = e.target.value;
+                  setManualEndText(val);
+                  setValue("endInput", val);
                 }}
                 placeholder="공백 포함 최대 10자"
                 className="w-52 rounded border px-2 py-1"
@@ -613,10 +618,10 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           classification="event-promotion"
           readOnly={readOnly}
           value={watch("imgPc")}
-          onChange={(file) => {
-            console.log("PC 이미지 등록됨:", file);
-            setValue("imgPc", file);
-          }}
+          onChange={(file) => setValue("imgPc", file)}
+          accept="image/png, image/jpeg, image/jpg"
+          showDefaultInfo={true}
+          info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
         />
         <Upload
           name="imgMo"
@@ -625,10 +630,10 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           required
           readOnly={readOnly}
           value={watch("imgMo")}
-          onChange={(file) => {
-            console.log("모바일 이미지 업로드됨:", file);
-            setValue("imgMo", file);
-          }}
+          onChange={(file) => setValue("imgMo", file)}
+          accept="image/png, image/jpeg, image/jpg"
+          showDefaultInfo={true}
+          info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
         />
 
         {/* 내용 텍스트 공간 */}
