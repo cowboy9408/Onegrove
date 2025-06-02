@@ -330,7 +330,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         <Input label="타이틀" {...methods.register("title")} maxLength={50} required />
 
         <div className="space-y-4">
-          <Upload n
+          <Upload
             key={`thumbnail-upload`}
             name="thumbnail"
             label="썸네일 이미지"
