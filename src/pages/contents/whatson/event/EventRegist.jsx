@@ -13,7 +13,8 @@ export default function EventRegist() {
   const koFormRef = useRef();
   const enFormRef = useRef();
   const { showModal } = useModal();
-
+  const [sharedBrands, setSharedBrands] = useState([]);
+  const [sharedCategory, setSharedCategory] = useState("");
   // 국문 상태
   const [koData, setKoData] = useState({});
   // 영문 상태
@@ -56,6 +57,10 @@ export default function EventRegist() {
             data={koData}
             setData={setKoData}
             lang="ko"
+            brands={sharedBrands}
+            setBrands={setSharedBrands}
+            category={sharedCategory}
+            setCategory={setSharedCategory}
           />
         </TabPanel>
 
@@ -65,6 +70,10 @@ export default function EventRegist() {
             data={enData}
             setData={setEnData}
             lang="ko"
+            brands={sharedBrands}
+            setBrands={setSharedBrands}
+            category={sharedCategory}
+            setCategory={setSharedCategory}
           />
         </TabPanel>
       </Tabs>
