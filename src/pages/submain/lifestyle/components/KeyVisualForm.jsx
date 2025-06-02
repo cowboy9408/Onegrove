@@ -8,10 +8,11 @@ import Row from "@/components/layout/Row";
 import Title from "@/components/layout/Title";
 import { useEffect } from "react";
 import { FormProvider, useForm, Controller } from "react-hook-form";
+import { forwardRef, useImperativeHandle } from "react";
 
 const MAX_KV_LENGTH = 4;
 
-export default function KeyVisualForm({ data, setData }) {
+const KeyVisualForm = forwardRef(({ data }, ref) => {
   const methods = useForm({
     defaultValues: {
       kv: [
@@ -20,22 +21,89 @@ export default function KeyVisualForm({ data, setData }) {
     },
   });
 
-  const { handleSubmit, reset, resetField, register } = methods;
+  const { reset, resetField, register, getValues } = methods;
 
   useEffect(() => {
-    if (Array.isArray(data) && data.length > 0) {
-      reset({ kv: data });
-    }
-  }, []); // 의존성 줄이기
+    if (Array.isArray(data)) {
+      const mappedData =
+        data.length > 0
+          ? data.map((item) => ({
+              ...item,
+              file1: item.contentFilePc?.path
+                ? { path: item.contentFilePc.path }
+                : null,
+              file2: item.contentFileMo?.path
+                ? { path: item.contentFileMo.path }
+                : null,
+            }))
+          : [
+              {
+                type: "image",
+                title: "",
+                subtitle: "",
+                file1: null,
+                file2: null,
+              },
+            ];
 
-  const onSubmit = (formValues) => {
-    setData(formValues.kv);
+      reset({ kv: mappedData });
+    }
+  }, [data]);
+
+  const toImageMeta = (file) => {
+    if (!file || !file.path) return null;
+
+    const originalName = file.originalName || file.name || "";
+    const extension = file.extension || "." + originalName.split(".").pop();
+
+    return {
+      id: file.id ?? null,
+      originalName,
+      name: file.name ?? originalName,
+      size: file.size ?? 0,
+      extension,
+      mime: file.mime || "image/jpeg",
+      classification: file.classification || "lifestyle",
+      path: file.path,
+      status: file.status ?? "C", // 기본은 신규
+    };
   };
+
+  useImperativeHandle(ref, () => ({
+    submit: async () => {
+      const values = getValues();
+
+      // 필수 입력 체크
+      const hasEmpty = values.kv.some((item) => {
+        return !item.title || !item.subtitle || !item.file1;
+      });
+
+      if (hasEmpty) {
+        alert("필수 항목이 비어 있습니다.");
+        return null;
+      }
+
+      // API 전송용 데이터 포맷으로 변환
+      const result = values.kv.map((item, index) => ({
+        id: item.id ?? null, // <-- 기존 ID 유지
+        contentType: item.type === "video" ? "V" : "I",
+        contentFilePc: toImageMeta(item.file1),
+        contentFileMo: toImageMeta(item.file2),
+        title: item.title,
+        subTitle: item.subtitle,
+        sort: index + 1,
+        delYn:
+          item.file1?.status === "D" && item.file2?.status === "D" ? "Y" : "N",
+      }));
+
+      return result;
+    },
+  }));
 
   return (
     <FormProvider {...methods}>
       {/*폼을 제출하면 상위에 전달 */}
-      <form onBlur={handleSubmit(onSubmit)} className="space-y-8 p-4">
+      <form className="space-y-8 p-4">
         <FieldGroup name="kv">
           {({ fields, field, index, append, remove }) => {
             const idTitle = `title-${field.id}`;
@@ -69,6 +137,7 @@ export default function KeyVisualForm({ data, setData }) {
                         {...field}
                         label="PC 이미지"
                         acceptWith={`kv.${index}.type`}
+                        classification="lifestyle"
                       />
                     )}
                   />
@@ -82,6 +151,7 @@ export default function KeyVisualForm({ data, setData }) {
                         {...field}
                         label="MO 이미지"
                         acceptWith={`kv.${index}.type`}
+                        classification="lifestyle"
                       />
                     )}
                   />
@@ -141,4 +211,6 @@ export default function KeyVisualForm({ data, setData }) {
       </form>
     </FormProvider>
   );
-}
+});
+
+export default KeyVisualForm;

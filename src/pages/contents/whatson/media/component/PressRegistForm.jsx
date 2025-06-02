@@ -64,10 +64,15 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
 
   useImperativeHandle(ref, () => ({
     submit: async (onError) => {
+      const getCleanedImage = (img) => {
+        if (img?.status === "D") return null;
+        return img;
+      };
+
       const values = {
         ...getValues(),
-        imgPc: watch("imgPc"),
-        imgMo: watch("imgMo"),
+        imgPc: getCleanedImage(watch("imgPc")),
+        imgMo: getCleanedImage(watch("imgMo")),
       };
       console.log("최종 imgPc:", values.imgPc);
       console.log("최종 imgMo:", values.imgMo);
