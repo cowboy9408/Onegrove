@@ -250,7 +250,7 @@ export default function Upload({
       {/* 업로드 박스 (미리보기 아래에 위치 X) */}
       <div
         className={cn(
-          "relative flex h-10 w-full items-center justify-center rounded-md border text-xs",
+          "items-row relative flex h-10 w-full justify-center rounded-md border text-xs",
           readOnly
             ? "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400"
             : "cursor-pointer border-dashed border-gray-300 hover:bg-gray-100"
