@@ -28,7 +28,7 @@ import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
 import "./Editor/styles.css";
 
-// ✅ 파일 업로드 핸들러
+// 파일 업로드 핸들러
 async function uploadFile(selectedFile) {
   if (!selectedFile) return;
 
@@ -54,7 +54,7 @@ async function uploadFile(selectedFile) {
   }
 }
 
-// ✅ 커스텀 inlineContentSpecs: props.className 사용
+// 커스텀 inlineContentSpecs: props.className 사용
 const customInlineContentSpecs = {
   ...defaultInlineContentSpecs,
   text: {
@@ -76,7 +76,7 @@ const customInlineContentSpecs = {
   },
 };
 
-// ✅ 폰트 사이즈 명령
+// 폰트 사이즈 명령
 const fontSizeItems = [22, 20, 18, 17, 16, 14, 12, 10].map((size) => (editor) => ({
   title: `텍스트사이즈 ${size}px`,
   onItemClick: async () => {
@@ -99,7 +99,7 @@ const fontSizeItems = [22, 20, 18, 17, 16, 14, 12, 10].map((size) => (editor) =>
 }));
 
 
-// ✅ 캡션 텍스트 명령
+// 캡션 텍스트 명령
 const insertCaptionText = (editor) => ({
   title: "캡션 텍스트",
   onItemClick: async () => {
@@ -123,7 +123,7 @@ const insertCaptionText = (editor) => ({
 
 
 
-// ✅ Editor 컴포넌트
+// Editor 컴포넌트
 const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
   const { isDarkMode } = useTheme();
 
@@ -149,21 +149,27 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
     ...(initialContent ? { initialContent } : {}),
   });
 
-  // ✅ 외부에서 HTML 추출
+  // 외부에서 HTML 추출
   useImperativeHandle(ref, () => ({
     getContent: async () => await editor.blocksToFullHTML(editor.document),
   }));
 
-  // ✅ 슬래시 메뉴 항목 정의
+  // 슬래시 메뉴 항목 정의
   const getSlashMenuItems = useMemo(() => {
     return async (query) => {
       const defaultItems = getDefaultReactSlashMenuItems(editor);
-      const customItems = [...fontSizeItems.map((fn) => fn(editor)), insertCaptionText(editor)];
-      return filterSuggestionItems([...customItems, ...defaultItems], query);
+      const customItems = [
+        ...fontSizeItems.map((fn) => fn(editor)),
+        insertCaptionText(editor)
+      ];
+      return filterSuggestionItems([
+        // ...customItems,
+        ...defaultItems
+      ], query);
     };
   }, [editor]);
 
-  // ✅ 초기 HTML → 블록 파싱
+  // 초기 HTML → 블록 파싱
   useEffect(() => {
     async function loadInitialHTML() {
       if (typeof initialContent === "string" && initialContent.trim()) {
