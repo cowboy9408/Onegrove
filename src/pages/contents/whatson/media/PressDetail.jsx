@@ -133,6 +133,12 @@ export default function PressDetail() {
   };
 
   const handleSave = async () => {
+    const showError = (msg) =>
+      showModal({
+        title: "입력 오류",
+        message: msg,
+        showCancel: false,
+      });
     try {
       const saveOne = async (data, original = {}) => {
         const payload = {
@@ -168,40 +174,57 @@ export default function PressDetail() {
         console.log("응답 결과:", res.data);
       };
 
-      if (currentLang === 0) {
-        const koValues = await koFormRef.current?.submit?.();
-        if (!koValues) return;
+      const isKorean = currentLang === 0;
+      const formRef = isKorean ? koFormRef : enFormRef;
+      const originalData = isKorean ? koData : enData;
 
-        await saveOne(
-          {
-            ...koValues,
-            id: koData?.id ?? null,
-            pressId: koData?.pressId ?? enData?.pressId ?? null,
-            lang: "ko",
-          },
-          koData || {}
-        );
-      } else {
-        const enValues = await enFormRef.current?.submit?.();
-        if (!enValues) return;
+      const formValues = await formRef.current?.submit?.(showError);
+      if (!formValues) return;
 
-        await saveOne(
-          {
-            ...enValues,
-            id: enData?.id ?? null,
-            pressId: koData?.pressId ?? null,
-            lang: "en",
-          },
-          enData || {}
-        );
-      }
+      showModal({
+        title: "저장 확인",
+        message: "저장하시겠습니까?",
+        showCancel: true,
+        onConfirm: async () => {
+          try {
+            await saveOne(
+              {
+                ...formValues,
+                id: originalData?.id ?? null,
+                pressId: isKorean
+                  ? (koData?.pressId ?? enData?.pressId ?? null)
+                  : (koData?.pressId ?? null),
+                lang: isKorean ? "ko" : "en",
+              },
+              originalData || {}
+            );
 
-      alert("저장 완료");
-      setIsReadOnly(true);
-      navigate("/contents/whatson/media?refresh=" + Date.now());
+            showModal({
+              title: "저장 완료",
+              message: "정상적으로 저장되었습니다.",
+              showCancel: false,
+              onConfirm: () => {
+                setIsReadOnly(true);
+                navigate("/contents/whatson/media?refresh=" + Date.now());
+              },
+            });
+          } catch (err) {
+            console.error("저장 실패:", err);
+            showModal({
+              title: "저장 실패",
+              message: "저장 중 문제가 발생했습니다. 다시 시도해주세요.",
+              showCancel: false,
+            });
+          }
+        },
+      });
     } catch (err) {
-      console.error("저장 실패:", err);
-      alert("저장 실패. 다시 시도해주세요.");
+      console.error("시스템 예외:", err);
+      showModal({
+        title: "시스템 오류",
+        message: "예상치 못한 오류가 발생했습니다.",
+        showCancel: false,
+      });
     }
   };
 
@@ -306,18 +329,7 @@ export default function PressDetail() {
       </Tabs>
 
       <div className="flex justify-end gap-4 px-6 pb-6">
-        <Button
-          onClick={() =>
-            showModal({
-              title: "저장 확인",
-              message: "저장하시겠습니까?",
-              showCancel: true,
-              onConfirm: handleSave,
-            })
-          }
-        >
-          저장
-        </Button>
+        <Button onClick={handleSave}>저장</Button>
 
         <Button
           onClick={() =>
