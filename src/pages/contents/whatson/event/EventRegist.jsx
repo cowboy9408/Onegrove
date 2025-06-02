@@ -64,7 +64,7 @@ export default function EventRegist() {
             ref={enFormRef}
             data={enData}
             setData={setEnData}
-            lang="en"
+            lang="ko"
           />
         </TabPanel>
       </Tabs>
