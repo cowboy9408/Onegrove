@@ -257,7 +257,7 @@ export default function Upload({
         )}
         onClick={handleClick}
       >
-        <div className="justify-center= flex flex-col items-center gap-1">
+        <div className="flex flex-row items-center justify-center gap-1">
           <UploadIcon size={20} />
           <p className="text-gray-500">
             {localFile ? "다시 업로드하려면 클릭" : "클릭하여 파일 업로드"}

@@ -128,7 +128,7 @@ export default function BrandRegist() {
           <BrandRegistForm ref={koFormRef} lang="ko" />
         </TabPanel>
         <TabPanel>
-          <BrandRegistForm ref={enFormRef} lang="en" />
+          <BrandRegistForm ref={enFormRef} lang="ko" />
         </TabPanel>
       </Tabs>
 

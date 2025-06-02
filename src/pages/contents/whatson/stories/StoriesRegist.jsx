@@ -1,74 +1,44 @@
 import Section from "@/components/layout/Section";
 import Tabs, { TabPanel } from "@/components/layout/Tabs";
-import { useEffect, useState } from "react";
+import { useState, useRef } from "react";
 import EventRegistForm from "./components/EventRegistForm";
+import Button from "@/components/common/Button";
+import { useNavigate } from "react-router-dom";
+import api from "@/lib/apiClient";
+import useModal from "@/hooks/useModal";
 
 export default function StoriesRegist() {
-  const [setKeyVisual] = useState([]);
-  const [setWhatsOn] = useState({});
-  const [setLifestyle] = useState({});
-  const [setWork] = useState({});
-  const [setEtc] = useState([]);
-  const [setBanner] = useState({});
+  const [currentLang, setCurrentLang] = useState(0); // 0 = 국문, 1 = 영문
+  const navigate = useNavigate();
+  const koFormRef = useRef();
+  const enFormRef = useRef();
+  const { showModal } = useModal();
 
-  useEffect(() => {
-    // TODO: fetch data
-    setKeyVisual([
-      { type: "image", title: "title1", subtitle: "subtitle1" },
-      { type: "image", title: "title2", subtitle: "subtitle2" },
-    ]);
-
-    setWhatsOn({
-      subtitle: "subtitle",
-      type: "image",
-      url: "http://www.onegrove.kr",
-      contents: [],
+  // 국문 상태
+  const [koData, setKoData] = useState({});
+  // 영문 상태
+  const [enData, setEnData] = useState({});
+  const handleSave = async () => {
+    const ref = currentLang === 0 ? koFormRef : enFormRef;
+    const form = await ref.current?.submit?.((message) => {
+      showModal({
+        title: "필수 항목을 입력해 주세요.",
+        message,
+        showCancel: false,
+      });
     });
+    console.log("payload:", form);
+    //
+    if (!form) return;
 
-    setLifestyle({
-      subtitle1: "subtitle1",
-      subtitle2: "subtitle2",
-      brand: [],
-    });
+    try {
+      await api.post("/api/v1/stories/insert", form);
 
-    setWork({
-      subtitle1: "subtitle1",
-      subtitle2: "subtitle2",
-      file: [
-        { name: "", url: "", size: 0 },
-        { name: "", url: "", size: 0 },
-        { name: "", url: "", size: 0 },
-      ],
-    });
-
-    setEtc([
-      {
-        type: "simple",
-        image: { name: "", url: "", size: 0 },
-        url: "https://www.onegrove.kr",
-      },
-      {
-        type: "complex",
-        image: { name: "", url: "", size: 0 },
-        title: "title",
-        subtitle: "subtitle",
-        detail: "detail",
-        button: "button",
-        url: "https://www.onegrove.kr",
-      },
-    ]);
-
-    setBanner({
-      displayYn: "Y",
-      title: "title",
-      subtitle: "subtitle",
-      image: { name: "", url: "", size: 0 },
-      button: "button",
-      bg: "DBDBDB",
-      color: "222222",
-      url: "https://www.onegrove.kr",
-    });
-  }, []);
+      navigate("/contents/whatson/stories/list");
+    } catch (err) {
+      console.error("저장 실패:", err);
+    }
+  };
 
   return (
     <Section>
@@ -77,17 +47,57 @@ export default function StoriesRegist() {
           { key: "kr", label: "국문" },
           { key: "en", label: "영문" },
         ]}
+        defaultIndex={0}
+        onTabChange={(index) => setCurrentLang(index)}
       >
         <TabPanel>
           {/* 국문 폼 */}
-          <EventRegistForm />
+          <EventRegistForm
+            ref={koFormRef}
+            data={koData}
+            setData={setKoData}
+            lang="ko"
+          />
         </TabPanel>
 
         <TabPanel>
           {/* 영문 폼 */}
-          <EventRegistForm />
+          <EventRegistForm
+            ref={enFormRef}
+            data={enData}
+            setData={setEnData}
+            lang="ko"
+          />
         </TabPanel>
       </Tabs>
+      <div className="flex justify-end gap-4 px-6 pb-6">
+        <Button
+          onClick={() =>
+            showModal({
+              title: "저장 확인",
+              message: "저장하시겠습니까?",
+              showCancel: true,
+              onConfirm: handleSave,
+            })
+          }
+        >
+          저장
+        </Button>
+        <Button
+          type="button"
+          className="bg-gray-200"
+          onClick={() =>
+            showModal({
+              title: "이동 확인",
+              message: "이전 페이지로 돌아갈 경우 입력한 정보가 사라집니다.",
+              showCancel: true,
+              onConfirm: () => navigate("/contents/whatson/stories/list"),
+            })
+          }
+        >
+          목록
+        </Button>
+      </div>
     </Section>
   );
 }

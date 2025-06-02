@@ -321,7 +321,7 @@ export default function EventDetail() {
                 ref={enFormRef}
                 data={enData}
                 setData={setEnData}
-                lang="en"
+                lang="ko"
               />
               <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
                 <tbody>
