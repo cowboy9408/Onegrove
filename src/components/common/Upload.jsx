@@ -172,7 +172,6 @@ export default function Upload({
   const handleClick = () => {
     console.log("Upload 영역 클릭됨");
     if (readOnly) {
-      console.log("읽기 전용 상태 - 클릭 무시");
       return;
     }
 
