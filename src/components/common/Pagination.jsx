@@ -2,7 +2,7 @@ export default function Pagination({
   current = 1,
   totalPages = 1,
   onChange = () => {},
-  maxVisible = 5,
+  maxVisible = 10,
 }) {
   const goToPage = (page) => {
     const validPage = Math.min(Math.max(page, 1), totalPages);
