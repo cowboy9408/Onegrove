@@ -166,6 +166,7 @@ export default function Upload({
         });
       }
     }
+    fileInput.value = null;
   };
 
   const handleClick = () => {
