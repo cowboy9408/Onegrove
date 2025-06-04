@@ -225,6 +225,7 @@ const EventRegistForm = forwardRef(
           onError?.("이미지를 모두 등록해주세요.");
           return null;
         }
+
         if (!content || content.replace(/<[^>]+>/g, "").trim() === "") {
           onError?.("상세 내용을 입력해주세요.");
           return null;

@@ -386,7 +386,7 @@ export default function EventDetail() {
                 ref={enFormRef}
                 data={enData}
                 setData={setEnData}
-                lang="ko"
+                lang="en"
                 brands={sharedBrands}
                 setBrands={setSharedBrands}
                 category={sharedCategory}
