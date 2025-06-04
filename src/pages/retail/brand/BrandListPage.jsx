@@ -83,8 +83,8 @@ export default function BrandListPage() {
             console.log("Item:", items, koItem, enItem);
 
             return {
-              originalIndex: index,
-              pmId: entry.pmId,
+              id: entry.id,
+              masterId: entry.id,
               pid_ko: koItem.pid || null,
               pid_en: enItem.pid || null,
               occupancy: entry.rownum || 0,
@@ -107,7 +107,7 @@ export default function BrandListPage() {
               en_created_user: enItem.createUser || "-",
               ko_updated_user: koItem?.updateUser || "-",
               en_updated_user: enItem?.updateUser || "-",
-              _id: `${entry.pmId}`,
+              _id: `${entry.id}`,
             };
           });
 
@@ -182,7 +182,7 @@ export default function BrandListPage() {
           const sliced = sorted.slice(start, end).map((row, idx) => ({
             ...row,
             no: filtered.length - (start + idx),
-            _id: `${row.pmId}`,
+            _id: `${row.id}`,
           }));
 
           setData(sliced);
