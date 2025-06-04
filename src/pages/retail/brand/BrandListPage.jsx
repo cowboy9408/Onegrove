@@ -80,7 +80,7 @@ export default function BrandListPage() {
             const koItem = items.find((i) => i.lang === "KO") || {};
             const enItem = items.find((i) => i.lang === "EN") || {};
 
-            console.log("Item:", items, koItem, enItem);
+            // console.log("Item:", items, koItem, enItem);
 
             return {
               id: entry.id,
@@ -296,28 +296,30 @@ export default function BrandListPage() {
                 onClear={() => setSearchFilter({ ...searchFilter, name: "" })}
               />
             </Col>
-            <Col className="flex items-center gap-4">
+            <Col className="flex flex-col items-start gap-4 justify-center">
               <span className="text-sm font-medium">사용 여부</span>
-              <Radio
-                name="status"
-                value="active"
-                label="사용"
-                checked={searchFilter.status === "active"}
-                onChange={() =>
-                  setSearchFilter({ ...searchFilter, status: "active" })
-                }
-              />
-              <Radio
-                name="status"
-                value="inactive"
-                label="미사용"
-                checked={searchFilter.status === "inactive"}
-                onChange={() =>
-                  setSearchFilter({ ...searchFilter, status: "inactive" })
-                }
-              />
+              <div className="flex flex-row items-center gap-4">
+                <Radio
+                  name="status"
+                  value="active"
+                  label="사용"
+                  checked={searchFilter.status === "active"}
+                  onChange={() =>
+                    setSearchFilter({ ...searchFilter, status: "active" })
+                  }
+                />
+                <Radio
+                  name="status"
+                  value="inactive"
+                  label="미사용"
+                  checked={searchFilter.status === "inactive"}
+                  onChange={() =>
+                    setSearchFilter({ ...searchFilter, status: "inactive" })
+                  }
+                />
+              </div>
             </Col>
-            <Col className="self-end">
+            <Col className="self-end flex gap-2">
               <Button
                 onClick={() => {
                   setPage(1);
@@ -444,10 +446,10 @@ export default function BrandListPage() {
               label: "사용여부",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <p className="text-black-600 p-2 text-center">
+                  <p className="text-black-600 p-2">
                     {row.ko_status}
                   </p>
-                  <p className="text-black-600 p-2 text-center">
+                  <p className="text-black-600 p-2">
                     {row.en_status}
                   </p>
                 </div>
@@ -458,10 +460,10 @@ export default function BrandListPage() {
               label: "등록일시",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <p className="text-black-600 p-2 text-center">
+                  <p className="text-black-600 p-2">
                     {row.ko_created_at}
                   </p>
-                  <p className="text-black-600 p-2 text-center">
+                  <p className="text-black-600 p-2">
                     {row.en_created_at}
                   </p>
                 </div>
@@ -472,10 +474,10 @@ export default function BrandListPage() {
               label: "등록자",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <p className="text-black-600 p-2 text-center">
+                  <p className="text-black-600 p-2">
                     {row.ko_created_user}
                   </p>
-                  <p className="text-black-600 p-2 text-center">
+                  <p className="text-black-600 p-2">
                     {row.en_created_user}
                   </p>
                 </div>
@@ -486,10 +488,10 @@ export default function BrandListPage() {
               label: "수정일시",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <p className="text-black-600 p-2 text-center">
+                  <p className="text-black-600 p-2">
                     {row.ko_updated_at}
                   </p>
-                  <p className="text-black-600 p-2 text-center">
+                  <p className="text-black-600 p-2">
                     {row.en_updated_at}
                   </p>
                 </div>
@@ -500,10 +502,10 @@ export default function BrandListPage() {
               label: "수정자",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <p className="text-black-600 p-2 text-center">
+                  <p className="text-black-600 p-2">
                     {row.ko_updated_user}
                   </p>
-                  <p className="text-black-600 p-2 text-center">
+                  <p className="text-black-600 p-2">
                     {row.en_updated_user}
                   </p>
                 </div>
