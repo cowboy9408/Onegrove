@@ -519,7 +519,7 @@ const EventRegistForm = forwardRef(
                 disabled={readOnly}
               />
             </div>
-
+            <span>~</span>
             <div className="flex items-center gap-4">
               {/* 종료일 날짜 + 시간 */}
               <Datepicker
@@ -531,6 +531,7 @@ const EventRegistForm = forwardRef(
                 }}
                 readOnly={readOnly}
                 disabled={readOnly || isManualEndInput} // manual이면 readonly 처리
+                startDate={startDate}
               />
               <input
                 type="time"

@@ -19,6 +19,7 @@ export default function Datepicker({
         <DatePicker
           selected={selectedDate}
           onChange={onSingleChange}
+          minDate={startDate}
           dateFormat="yyyy-MM-dd"
           placeholderText="날짜 선택"
           disabled={disabled}
