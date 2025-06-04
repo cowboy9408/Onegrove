@@ -296,28 +296,30 @@ export default function BrandListPage() {
                 onClear={() => setSearchFilter({ ...searchFilter, name: "" })}
               />
             </Col>
-            <Col className="flex items-center gap-4">
+            <Col className="flex flex-col items-start gap-4 justify-center">
               <span className="text-sm font-medium">사용 여부</span>
-              <Radio
-                name="status"
-                value="active"
-                label="사용"
-                checked={searchFilter.status === "active"}
-                onChange={() =>
-                  setSearchFilter({ ...searchFilter, status: "active" })
-                }
-              />
-              <Radio
-                name="status"
-                value="inactive"
-                label="미사용"
-                checked={searchFilter.status === "inactive"}
-                onChange={() =>
-                  setSearchFilter({ ...searchFilter, status: "inactive" })
-                }
-              />
+              <div className="flex flex-row items-center gap-4">
+                <Radio
+                  name="status"
+                  value="active"
+                  label="사용"
+                  checked={searchFilter.status === "active"}
+                  onChange={() =>
+                    setSearchFilter({ ...searchFilter, status: "active" })
+                  }
+                />
+                <Radio
+                  name="status"
+                  value="inactive"
+                  label="미사용"
+                  checked={searchFilter.status === "inactive"}
+                  onChange={() =>
+                    setSearchFilter({ ...searchFilter, status: "inactive" })
+                  }
+                />
+              </div>
             </Col>
-            <Col className="self-end">
+            <Col className="self-end flex gap-2">
               <Button
                 onClick={() => {
                   setPage(1);
