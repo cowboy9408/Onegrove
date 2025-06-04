@@ -28,7 +28,10 @@ export default function BrandListPage() {
   const [checkedIds, setCheckedIds] = useState([]);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
-  const [categoryList, setCategoryList] = useState([]);
+  
+  const [category, setCategory] = useState(""); // 현재 선택된 카테고리
+  const [categoryList, setCategoryList] = useState([]); // API로 받은 카테고리 목록
+  const [visibility, setVisibility] = useState("");
   const defaultFilter = {
     name: "",
     category: "",
@@ -68,41 +71,158 @@ export default function BrandListPage() {
         });
 
         console.log("브랜드 목록 로딩 성공:", page, res.data);
+        const json = res.data;
 
-        const rows = res.data.data.map((brand, idx) => {
-          const ko = Array.isArray(brand.contentList)
-            ? brand.contentList.find((c) => c.lang?.toUpperCase() === "KO")
-            : null;
-          const en = Array.isArray(brand.contentList)
-            ? brand.contentList.find((c) => c.lang?.toUpperCase() === "EN")
-            : null;
+        if (json.success && Array.isArray(json.data)) {
+          console.log("브랜드 목록 데이터:", json.data);
+          const rows = json.data.map((entry, index) => {
+            const items = entry.contentList || [];
+            const koItem = items.find((i) => i.lang === "KO") || {};
+            const enItem = items.find((i) => i.lang === "EN") || {};
 
-          console.log("ko.name 확인:", ko?.name);
-          console.log("en.name 확인:", en?.name);
+            console.log("Item:", items, koItem, enItem);
 
-          return {
-            _id: String(brand.id),
-            id: brand.id,
-            masterId: brand.id,
-            no: brand.rownum || (page - 1) * size + idx + 1,
-            category: brand.category || "-",
-            ko_title: ko?.name || "-",
-            en_title: en?.name || "-",
-            ko_status: ko?.useYn || "-",
-            en_status: en?.useYn || "-",
-            ko_created_at: ko?.createDt?.split(" ")[0] || "-",
-            en_created_at: en?.createDt?.split(" ")[0] || "-",
-            ko_created_user: ko?.createUser || "-",
-            en_created_user: en?.createUser || "-",
-            ko_updated_at: ko?.updateDt?.split(" ")[0] || "-",
-            en_updated_at: en?.updateDt?.split(" ")[0] || "-",
-            ko_updated_user: ko?.updateUser || "-",
-            en_updated_user: en?.updateUser || "-",
-          };
-        });
+            return {
+              originalIndex: index,
+              pmId: entry.pmId,
+              pid_ko: koItem.pid || null,
+              pid_en: enItem.pid || null,
+              occupancy: entry.rownum || 0,
+              category: entry.category || "-",
+              language:
+                koItem.lang && enItem.lang ? "both" : koItem.lang ? "ko" : "en",
+              ko_title: koItem.name || "-",
+              en_title: enItem.name || "-",
+              situation: "-", // status 없음
+              status_ko: koItem.showYn === "노출" ? "노출" : "미노출",
+              status_en: enItem.showYn === "노출" ? "노출" : "미노출",
+              ko_status: koItem.useYn || "-",
+              en_status: enItem.useYn|| "-",
 
-        setData(rows);
-        setTotal(res.data.pageable.totalElements || 0);
+              ko_created_at: koItem?.createDt?.split(" ")[0] || "-",
+              en_created_at: enItem?.createDt?.split(" ")[0] || "-",
+              ko_updated_at: koItem?.updateDt?.split(" ")[0] || "-",
+              en_updated_at: enItem?.updateDt?.split(" ")[0] || "-",
+              ko_created_user: koItem.createUser || "-",
+              en_created_user: enItem.createUser || "-",
+              ko_updated_user: koItem?.updateUser || "-",
+              en_updated_user: enItem?.updateUser || "-",
+              _id: `${entry.pmId}`,
+            };
+          });
+
+          // 검색 필터링
+          const filtered = rows.filter((row) => {
+            const titleMatch =
+              activeFilter.name === "" ||
+              row.ko_title.includes(activeFilter.name) ||
+              row.en_title.includes(activeFilter.name);
+
+            const categoryMatch =
+              activeFilter.category === "" ||
+              row.name === activeFilter.category;
+
+            const visibilityMatch =
+              activeFilter.status === "" ||
+              row.status_ko ===
+                (activeFilter.status === "active" ? "노출" : "미노출") ||
+              row.status_en ===
+                (activeFilter.status === "active" ? "노출" : "미노출");
+
+            function parseDateOnly(input) {
+              const date = new Date(input);
+              if (isNaN(date.getTime())) return null;
+              return new Date(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate()
+              );
+            }
+
+            const rowDate = parseDateOnly(
+              row.created_at_ko || row.created_at_en
+            );
+            // const startDateOnly = activeFilter.dateRange.startDate
+            //   ? parseDateOnly(activeFilter.dateRange.startDate)
+            //   : null;
+            // const endDateOnly = activeFilter.dateRange.endDate
+            //   ? parseDateOnly(activeFilter.dateRange.endDate)
+            //   : null;
+
+            // const dateMatch =
+            //   (!startDateOnly || (rowDate && rowDate >= startDateOnly)) &&
+            //   (!endDateOnly || (rowDate && rowDate <= endDateOnly));
+
+            return titleMatch && categoryMatch && visibilityMatch;
+          });
+
+          function parseValidDate(str) {
+            if (!str || str === "-") return new Date("1970-01-01");
+            return new Date(str);
+          }
+
+          const sorted = filtered.sort((a, b) => {
+            const dateA = parseValidDate(a.created_at_ko || a.created_at_en);
+            const dateB = parseValidDate(b.created_at_ko || b.created_at_en);
+            return dateB - dateA; // 최신순
+          });
+
+          const start = (page - 1) * size;
+          const end = start + size;
+          console.log("총 필터링된 데이터:", filtered.length);
+          console.log(
+            "현재 페이지:",
+            page,
+            "시작 인덱스:",
+            start,
+            "끝 인덱스:",
+            end
+          );
+          console.log("원본 데이터 총 개수:", json.data.length);
+          const sliced = sorted.slice(start, end).map((row, idx) => ({
+            ...row,
+            no: filtered.length - (start + idx),
+            _id: `${row.pmId}`,
+          }));
+
+          setData(sliced);
+          setTotal(filtered.length);
+        }
+
+        // const rows = res.data.data.map((brand, idx) => {
+        //   const ko = Array.isArray(brand.contentList)
+        //     ? brand.contentList.find((c) => c.lang?.toUpperCase() === "KO")
+        //     : null;
+        //   const en = Array.isArray(brand.contentList)
+        //     ? brand.contentList.find((c) => c.lang?.toUpperCase() === "EN")
+        //     : null;
+
+        //   console.log("ko.name 확인:", ko?.name);
+        //   console.log("en.name 확인:", en?.name);
+
+        //   return {
+        //     _id: String(brand.id),
+        //     id: brand.id,
+        //     masterId: brand.id,
+        //     no: brand.rownum || (page - 1) * size + idx + 1,
+        //     category: brand.category || "-",
+        //     ko_title: ko?.name || "-",
+        //     en_title: en?.name || "-",
+        //     ko_status: ko?.useYn || "-",
+        //     en_status: en?.useYn || "-",
+        //     ko_created_at: ko?.createDt?.split(" ")[0] || "-",
+        //     en_created_at: en?.createDt?.split(" ")[0] || "-",
+        //     ko_created_user: ko?.createUser || "-",
+        //     en_created_user: en?.createUser || "-",
+        //     ko_updated_at: ko?.updateDt?.split(" ")[0] || "-",
+        //     en_updated_at: en?.updateDt?.split(" ")[0] || "-",
+        //     ko_updated_user: ko?.updateUser || "-",
+        //     en_updated_user: en?.updateUser || "-",
+        //   };
+        // });
+
+        // setData(rows);
+        // setTotal(res.data.pageable.totalElements || 0);
       } catch (err) {
         console.error("브랜드 목록 로딩 실패:", err);
       }
@@ -191,8 +311,10 @@ export default function BrandListPage() {
                 name="status"
                 value="inactive"
                 label="미사용"
-                checked={searchStatus === "inactive"}
-                onChange={() => setSearchStatus("inactive")}
+                checked={searchFilter.status === "inactive"}
+                onChange={() =>
+                  setSearchFilter({ ...searchFilter, status: "inactive" })
+                }
               />
             </Col>
             <Col className="self-end">
@@ -395,6 +517,15 @@ export default function BrandListPage() {
             setCheckedIds((prev) =>
               checked ? [...prev, id] : prev.filter((v) => v !== id)
             );
+          }}
+        />
+
+        <Pagination
+          current={page}
+          totalPages={Math.ceil(total / size)}
+          onChange={(page) => {
+            setPage(page);
+            setSearchParams({ name, category, visibility, page });
           }}
         />
         {/* <Pagination
