@@ -178,13 +178,17 @@ const EventRegistForm = forwardRef(
 
     useImperativeHandle(ref, () => ({
       submit: async (onError) => {
+        const getCleanedImage = (img) => {
+          if (img?.status === "D") return null;
+          return img;
+        };
         const values = {
           ...getValues(),
-          thumbImg: watch("thumbImg"),
-          imgBodyPc: watch("imgBodyPc"),
-          imgBodyMo: watch("imgBodyMo"),
-          imgPc: watch("imgPc"),
-          imgMo: watch("imgMo"),
+          thumbImg: getCleanedImage(watch("thumbImg")),
+          imgBodyPc: getCleanedImage(watch("imgBodyPc")),
+          imgBodyMo: getCleanedImage(watch("imgBodyMo")),
+          imgPc: getCleanedImage(watch("imgPc")),
+          imgMo: getCleanedImage(watch("imgMo")),
           description: watch("description"),
           endInput: watch("endInput"),
           manualEndInput: watch("manualEndInput"),
@@ -394,8 +398,18 @@ const EventRegistForm = forwardRef(
           {/* 입력 필드 */}
           <Input
             label="노출 순서"
-            {...register("order")}
             type="number"
+            value={watch("order") ?? ""}
+            onInput={(e) => {
+              let val = e.target.value.replace(/[^0-9]/g, ""); // 숫자만
+
+              if (val !== "") {
+                const num = Math.max(1, Math.min(100, parseInt(val)));
+                val = String(num);
+              }
+
+              setValue("order", val === "" ? "" : Number(val));
+            }}
             disabled={readOnly}
           />
           <div>
@@ -506,19 +520,32 @@ const EventRegistForm = forwardRef(
               />
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="font-bold">~</span>
-              <Checkbox
-                id="manualEnd"
-                checked={isManualEndInput}
-                onChange={(e) => {
-                  setIsManualEndInput(e.target.checked);
-                  setValue("manualEndInput", e.target.checked);
+            <div className="flex items-center gap-4">
+              {/* 종료일 날짜 + 시간 */}
+              <Datepicker
+                mode="single"
+                selectedDate={endDate}
+                onSingleChange={(date) => {
+                  setEndDate(date);
+                  setValue("endDate", date?.toISOString());
                 }}
-                disabled={readOnly}
+                readOnly={readOnly}
+                disabled={readOnly || isManualEndInput} // manual이면 readonly 처리
+              />
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className={`rounded border px-2 py-1 transition-colors duration-150 ${
+                  readOnly || isManualEndInput
+                    ? "cursor-not-allowed bg-gray-100 text-gray-500 opacity-70"
+                    : ""
+                }`}
+                disabled={readOnly || isManualEndInput}
               />
 
-              {isManualEndInput ? (
+              {/* 수동 입력 필드 (선택적 노출) */}
+              {isManualEndInput && (
                 <input
                   type="text"
                   value={manualEndText}
@@ -531,26 +558,18 @@ const EventRegistForm = forwardRef(
                   className="w-52 rounded border px-2 py-1"
                   disabled={readOnly}
                 />
-              ) : (
-                <>
-                  <Datepicker
-                    mode="single"
-                    selectedDate={endDate}
-                    onSingleChange={(date) => {
-                      setEndDate(date);
-                      setValue("endDate", date?.toISOString());
-                    }}
-                    readOnly={readOnly}
-                  />
-                  <input
-                    type="time"
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                    className="rounded border px-2 py-1"
-                    disabled={readOnly}
-                  />
-                </>
               )}
+
+              {/* 체크박스 */}
+              <Checkbox
+                id="manualEnd"
+                checked={isManualEndInput}
+                onChange={(e) => {
+                  setIsManualEndInput(e.target.checked);
+                  setValue("manualEndInput", e.target.checked);
+                }}
+                disabled={readOnly}
+              />
             </div>
           </div>
 
