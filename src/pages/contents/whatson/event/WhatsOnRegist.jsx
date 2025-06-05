@@ -176,7 +176,7 @@ export default function WhatsOnRegist() {
       window.location.reload();
     } catch (error) {
       console.error("저장 오류:", error);
-      alert("저장 중 오류가 발생했습니다.");
+      alert("필수입력 내용을 다시 확인해 주세요.");
     }
   };
 

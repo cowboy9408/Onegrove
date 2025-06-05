@@ -74,14 +74,17 @@ const KeyVisualForm = forwardRef(({ data }, ref) => {
       const values = getValues();
 
       // 필수 입력 체크
+      console.log("Form Values:", values);
+
+      
       const hasEmpty = values.kv.some((item) => {
         return !item.title || !item.subtitle || !item.file1;
       });
 
-      if (hasEmpty) {
-        alert("필수 항목이 비어 있습니다.");
-        return null;
-      }
+      // if (hasEmpty) {
+      //   alert("필수 항목이 비어 있습니다.");
+      //   return null;
+      // }
 
       // API 전송용 데이터 포맷으로 변환
       const result = values.kv.map((item, index) => ({
