@@ -19,9 +19,15 @@ export default function OccupancyRegist() {
 
   const handleSave = async () => {
     const ref = currentLang === 0 ? koFormRef : enFormRef;
-    const payload = await ref.current?.submit();
+    const payload = await ref.current?.submit?.((message) => {
+      showModal({
+        title: "필수 항목을 입력해 주세요.",
+        message,
+        showCancel: false,
+      });
+    });
 
-    if (!payload) return;
+    if (!payload || typeof payload !== "object") return;
 
     try {
       await api.post("/api/v1/company/insert", payload);
@@ -51,6 +57,7 @@ export default function OccupancyRegist() {
             data={koData}
             setData={setKoData}
             lang="ko"
+            currentLang={currentLang}
           />
         </TabPanel>
         <TabPanel>
@@ -59,6 +66,7 @@ export default function OccupancyRegist() {
             data={enData}
             setData={setEnData}
             lang="en"
+            currentLang={currentLang}
           />
         </TabPanel>
       </Tabs>

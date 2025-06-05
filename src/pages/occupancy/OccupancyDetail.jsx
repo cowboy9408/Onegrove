@@ -46,7 +46,7 @@ export default function OccupancyDetail() {
   };
 
   useEffect(() => {
-    fetchDetail(); // 🔁 여기도 여전히 사용 가능
+    fetchDetail();
   }, [id]);
 
   useEffect(() => {
