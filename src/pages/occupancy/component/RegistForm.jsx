@@ -81,19 +81,45 @@ const RegistForm = forwardRef(
     }, [data]);
 
     useImperativeHandle(ref, () => ({
-      submit: () => {
+      submit: async (onError) => {
         const values = getValues();
+
         console.log("제출 값 확인:", values);
         console.log(`[${lang}] 제출값:`, getValues("locations"));
-        if (
-          !values.companyName ||
-          !values.ceoName ||
-          !values.phone ||
-          !values.time
-        ) {
-          alert("필수 항목을 입력해주세요.");
+
+        if (!values.companyName) {
+          setTimeout(() => onError?.("입주사명을 입력해주세요."), 0);
           return null;
         }
+        if (!Array.isArray(values.locations) || values.locations.length === 0) {
+          setTimeout(() => onError?.("오피스를 1개 이상 등록해주세요."), 0);
+          return null;
+        }
+
+        if (!values.ceoName) {
+          setTimeout(() => onError?.("대표명을 입력해주세요."), 0);
+          return null;
+        }
+        if (!values.phone) {
+          setTimeout(() => onError?.("전화번호를 입력해주세요."), 0);
+          return null;
+        }
+        if (!values.mail) {
+          setTimeout(() => onError?.("대표 이메일을 입력해주세요."), 0);
+          return null;
+        }
+        if (!values.mainImage || !values.mainImage.path) {
+          setTimeout(() => onError?.("대표 이미지를 등록해주세요."), 0);
+          return null;
+        }
+        if (!values.time) {
+          setTimeout(
+            () => onError?.("회의실 무료 예약시간을 입력해주세요."),
+            0
+          );
+          return null;
+        }
+
         const toImageMeta = (file) => {
           if (!file || !file.name || !file.path) {
             console.warn("이미지 path 누락:", file); // 이 경고 꼭 확인!
@@ -169,7 +195,7 @@ const RegistForm = forwardRef(
             />
             <Input label="대표명" {...register("ceoName")} required />
             <Input label="전화번호" {...register("phone")} required />
-            <Input label="대표 이메일" {...register("mail")} />
+            <Input label="대표 이메일" {...register("mail")} required />
 
             <Upload
               name="mainImage"
