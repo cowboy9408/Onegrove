@@ -19,10 +19,13 @@ export default function Datepicker({
         <DatePicker
           selected={selectedDate}
           onChange={onSingleChange}
+          minDate={startDate}
           dateFormat="yyyy-MM-dd"
           placeholderText="날짜 선택"
           disabled={disabled}
-          className="w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none"
+          className={`w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none ${
+            disabled ? "cursor-not-allowed bg-gray-100 text-gray-500" : ""
+          }`}
         />
 
         <FaCalendarAlt className="pointer-events-none absolute top-3 right-2 text-gray-400" />
