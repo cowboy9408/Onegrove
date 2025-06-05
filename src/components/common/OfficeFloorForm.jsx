@@ -1,28 +1,43 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Button from "./Button"; // 기존 Button 컴포넌트 사용
+import { useFormContext } from "react-hook-form";
 
-export default function OfficeFloorForm({ value = [], onChange }) {
+export default function OfficeFloorForm({ value = [] }) {
+  const { setValue } = useFormContext();
   const [items, setItems] = useState(
     value.length ? value : [{ office: "", floor: "" }]
   );
 
+  useEffect(() => {
+    const isSame = JSON.stringify(value) === JSON.stringify(items);
+    if (!isSame && value.length <= 4) {
+      setItems(value.length ? [...value] : [{ office: "", floor: "" }]);
+    }
+  }, [value]);
+
+  const updateItems = (newItems) => {
+    setItems(newItems);
+    setValue("locations", newItems);
+  };
+
   const handleChange = (index, key, val) => {
     const newItems = [...items];
     newItems[index][key] = val;
-    setItems(newItems);
-    onChange?.(newItems);
+    updateItems(newItems);
   };
 
   const handleAdd = () => {
+    if (items.length >= 4) {
+      alert("오피스는 최대 4개까지만 추가할 수 있습니다.");
+      return;
+    }
     const newItems = [...items, { office: "", floor: "" }];
-    setItems(newItems);
-    onChange?.(newItems);
+    updateItems(newItems);
   };
 
   const handleRemove = (index) => {
     const newItems = items.filter((_, i) => i !== index);
-    setItems(newItems);
-    onChange?.(newItems);
+    updateItems(newItems);
   };
 
   return (
@@ -38,8 +53,8 @@ export default function OfficeFloorForm({ value = [], onChange }) {
               required
             >
               <option value="">선택</option>
-              <option value="office1">오피스1</option>
-              <option value="office2">오피스2</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
             </select>
           </div>
 
@@ -52,9 +67,11 @@ export default function OfficeFloorForm({ value = [], onChange }) {
               required
             >
               <option value="">선택</option>
-              <option value="1F">1층</option>
-              <option value="2F">2층</option>
-              <option value="3F">3층</option>
+              <option value="1F">1F</option>
+              <option value="2F">2F</option>
+              <option value="3F">3F</option>
+              <option value="4F">4F</option>
+              <option value="5F">5F</option>
             </select>
           </div>
 

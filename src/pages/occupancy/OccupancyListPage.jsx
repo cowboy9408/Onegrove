@@ -9,17 +9,18 @@ import Col from "@/components/layout/Col";
 import ResultSection from "@/components/layout/ResultSection";
 import Row from "@/components/layout/Row";
 import SearchSection from "@/components/layout/SearchSection";
-import { faker } from "@faker-js/faker";
+
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Radio from "@/components/common/Radio";
+import api from "@/lib/apiClient";
 
 export default function OccupancyListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [checkedIds, setCheckedIds] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  //   const [name, setName] = useState(searchParams.get("name") || "");
-  //   const [email, setEmail] = useState(searchParams.get("email") || "");
   const [page, setPage] = useState(searchParams.get("page") || 1);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
@@ -27,53 +28,52 @@ export default function OccupancyListPage() {
 
   const size = 10;
 
+  const handleCheck = (id, checked) => {
+    setCheckedIds((prev) => {
+      return checked ? [...prev, id] : prev.filter((v) => v !== id);
+    });
+  };
+
   useEffect(() => {
     const fetchData = async () => {
-      // TODO: faker 삭제
-      const generateFakePagedUsers = ({ page = 1, size = 10 }) => {
-        const totalElements = 23;
-        const totalPages = Math.ceil(totalElements / size);
-        const start = (page - 1) * size;
+      try {
+        const res = await api.get("/api/v1/company", {
+          params: { page, size },
+        });
 
-        const data = Array.from({ length: size }, (_, i) => {
-          const index = start + i + 1;
+        const result = res.data?.data || [];
+
+        const formatted = result.map((item) => {
+          const koContent = item.contentList.find((c) => c.lang === "KO") || {};
+          const enContent = item.contentList.find((c) => c.lang === "EN") || {};
+          const officeNames = item.officeList.map((o) => o.office).join(", ");
+          const floorNames = item.officeList.map((o) => o.floor).join(", ");
+
           return {
-            no: index,
-            type: faker.helpers.arrayElement(["관리자", "일반", "외부"]),
-            occupancy: faker.company.name(),
-            name: faker.person.lastName() + faker.person.firstName(),
-            username: faker.internet.userName(),
-            email: faker.internet.email(),
-            status: faker.helpers.arrayElement(["활성", "비활성"]),
-            created_user: faker.person.fullName(),
-            created_at: faker.date
-              .recent({ days: 30 })
-              .toISOString()
-              .split("T")[0],
+            _id: item.id, // ← 버튼에서 사용됨
+            id: item.id,
+            no: item.rownum,
+            ko_title: koContent.companyName || "-",
+            en_title: enContent.companyName || "-",
+            occupancy: "-", // 필요 없다면 삭제 가능
+            office: officeNames || "-",
+            floor: floorNames || "-",
+            phone: item.tel || "-",
+            status: item.useYn === "Y" ? "사용" : "미사용",
+            created_user: koContent.userName || "-",
+            created_at: koContent.createDt?.split(" ")[0] || "-", // 날짜만
           };
         });
 
-        return {
-          pageable: {
-            totalPages,
-            totalElements,
-            currentPage: page,
-            pageSize: size,
-          },
-          data: data.slice(0, totalElements - start), // 마지막 페이지 size 조정
-        };
-      };
-      // END TODO faker 삭제
-
-      // TODO: FETCH DATA
-      const res = generateFakePagedUsers(page);
-
-      setData(res.data);
-      setTotal(res.pageable.totalElements);
+        setData(formatted);
+        setTotal(res.data?.pageable?.totalElements || 0);
+      } catch (err) {
+        console.error("입주사 목록 불러오기 실패:", err);
+      }
     };
 
     fetchData();
-  }, [page]);
+  }, [page, refreshKey]);
 
   return (
     <div>
@@ -150,8 +150,34 @@ export default function OccupancyListPage() {
           </Button>
           <Button
             className="bg-black text-white hover:bg-gray-800"
-            onClick={() => {
-              // 삭제 버튼 클릭 시 로직
+            onClick={async () => {
+              if (checkedIds.length === 0) {
+                alert("삭제할 항목을 선택해주세요.");
+                return;
+              }
+
+              const confirmed =
+                window.confirm("선택한 입주사를 삭제하시겠습니까?");
+              if (!confirmed) return;
+
+              try {
+                const res = await api.post(
+                  "/api/v1/company/delete",
+                  checkedIds
+                );
+
+                if (res.status === 200) {
+                  alert("삭제가 완료되었습니다.");
+                  setCheckedIds([]);
+                  setPage(1); // 첫 페이지로 이동
+                  setRefreshKey((prev) => prev + 1);
+                } else {
+                  alert("삭제 실패: 서버 오류");
+                }
+              } catch (err) {
+                console.error("삭제 요청 실패:", err);
+                alert("삭제 중 오류가 발생했습니다.");
+              }
             }}
           >
             삭제
@@ -162,7 +188,40 @@ export default function OccupancyListPage() {
         <DataTable
           columns={[
             { key: "no", label: "번호" },
-            { key: "occupancy", label: "입주사명" },
+            {
+              key: "language",
+              label: "언어",
+              render: () => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="p-2 font-medium">ko</div>
+                  <div className="p-2 font-medium">en</div>
+                </div>
+              ),
+            },
+            {
+              key: "occupancy",
+              label: "입주사명",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <button
+                    className={`text-black-600 truncate p-2 text-left ${row.ko_title !== "-" && row.ko_title !== null && "underline"}`}
+                    onClick={() =>
+                      navigate(`/occupancy/detail/${row.id}?lang=ko`)
+                    }
+                  >
+                    {row.ko_title}
+                  </button>
+                  <button
+                    className={`text-black-600 truncate p-2 text-left ${row.en_title !== "-" && row.en_title !== null && "underline"}`}
+                    onClick={() =>
+                      navigate(`/occupancy/detail/${row.id}?lang=en`)
+                    }
+                  >
+                    {row.en_title}
+                  </button>
+                </div>
+              ),
+            },
             { key: "office", label: "오피스" },
             { key: "floor", label: "층수" },
             { key: "phone", label: "입주자 연락처" },
@@ -172,6 +231,9 @@ export default function OccupancyListPage() {
           ]}
           data={data}
           link={{ base: "/admin", path: "no" }}
+          checkable={true}
+          checkedIds={checkedIds}
+          onCheck={handleCheck}
         />
         <Pagination
           current={page}

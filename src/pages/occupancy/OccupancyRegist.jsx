@@ -1,139 +1,96 @@
-import React, { useState } from "react";
-import Input from "@/components/common/Input";
-import Select from "@/components/common/Select";
-import Radio from "@/components/common/Radio";
-import Upload from "@/components/common/Upload";
-import Button from "@/components/common/Button";
+import RegistForm from "./component/RegistForm";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useForm, FormProvider } from "react-hook-form";
-import OfficeFloorForm from "@/components/common/OfficeFloorForm";
+import api from "@/lib/apiClient";
+import useModal from "@/hooks/useModal";
+import Section from "@/components/layout/Section";
+import Tabs, { TabPanel } from "@/components/layout/Tabs";
+import Button from "@/components/common/Button";
 
 export default function OccupancyRegist() {
-  const [form, setForm] = useState({
-    companyName: "",
-    useStatus: "active",
-    locations: [{ office: "", floor: "" }],
-    ceoName: "",
-    phone: "",
-    mail: "",
-    mainImage: null,
-    roomUse: "yes",
-    visitorAllow: "yes",
-  });
-
-  const methods = useForm();
+  const [currentLang, setCurrentLang] = useState(0); // 0 = 국문
   const navigate = useNavigate();
+  const koFormRef = useRef();
+  const enFormRef = useRef(); // 다국어 확장 대비
+  const { showModal } = useModal();
 
-  const handleChange = (key, value) => {
-    setForm((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
+  const [koData, setKoData] = useState({});
+  const [enData, setEnData] = useState({});
 
-  const handleSubmit = () => {
-    console.log("등록 요청 데이터:", form);
-    // TODO: 서버로 전송 처리
+  const handleSave = async () => {
+    const ref = currentLang === 0 ? koFormRef : enFormRef;
+    const payload = await ref.current?.submit();
+
+    if (!payload) return;
+
+    try {
+      await api.post("/api/v1/company/insert", payload);
+      navigate("/occupancy");
+    } catch (err) {
+      console.error("등록 실패:", err);
+      showModal({
+        title: "오류",
+        message: "등록 중 오류가 발생했습니다.",
+      });
+    }
   };
 
   return (
-    <FormProvider {...methods}>
-      <div className="mx-auto max-w-3xl space-y-6 rounded-lg bg-white p-8 shadow-md">
-        {/* 입주사명 + 사용 여부 */}
-        <div className="flex flex-wrap gap-8">
-          <div className="min-w-[250px] flex-1">
-            <Input
-              label="입주사명"
-              value={form.companyName}
-              onChange={(e) => handleChange("companyName", e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="min-w-[250px] flex-1">
-            <p className="mb-2 text-sm font-medium text-gray-800">사용 여부</p>
-            <div className="flex gap-4">
-              <Radio
-                name="useStatus"
-                label="사용"
-                value="active"
-                checked={form.useStatus === "active"}
-                onChange={() => handleChange("useStatus", "active")}
-              />
-              <Radio
-                name="useStatus"
-                label="미사용"
-                value="inactive"
-                checked={form.useStatus === "inactive"}
-                onChange={() => handleChange("useStatus", "inactive")}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* 오피스 선택 + 층 수 선택 */}
-        <div className="p-6">
-          <h2 className="mb-4 text-xl font-semibold">오피스 설정</h2>
-
-          <OfficeFloorForm
-            value={form.locations}
-            onChange={(newVal) => handleChange("locations", newVal)}
+    <Section>
+      <Tabs
+        tabs={[
+          { key: "kr", label: "국문" },
+          { key: "en", label: "영문" },
+        ]}
+        defaultIndex={0}
+        onTabChange={(i) => setCurrentLang(i)}
+      >
+        <TabPanel>
+          <RegistForm
+            ref={koFormRef}
+            data={koData}
+            setData={setKoData}
+            lang="ko"
           />
-        </div>
-
-        {/* 대표명 */}
-        <div>
-          <Input
-            label="대표명"
-            value={form.ceoName}
-            onChange={(e) => handleChange("ceoName", e.target.value)}
-            required
+        </TabPanel>
+        <TabPanel>
+          <RegistForm
+            ref={enFormRef}
+            data={enData}
+            setData={setEnData}
+            lang="en"
           />
-        </div>
+        </TabPanel>
+      </Tabs>
 
-        {/* 입주사 전화번호 */}
-        <div>
-          <Input
-            label="입주사 전화번호"
-            value={form.phone}
-            onChange={(e) => handleChange("phone", e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <Input
-            label="대표 이메일"
-            value={form.mail}
-            onChange={(e) => handleChange("phone", e.target.value)}
-            required
-          />
-        </div>
-
-        {/* 대표 이미지 업로드 */}
-        <div>
-          <Upload name="mainImage" label="대표 이미지 업로드" preview />
-        </div>
-        <div className="w-[400px]">
-          <Input
-            label="회의실 예약 무료 시간"
-            value={form.time}
-            onChange={(e) => handleChange("phone", e.target.value)}
-            required
-          />
-        </div>
-
-        {/* 등록 / 목록 버튼 */}
-        <div className="flex justify-end gap-4 pt-6">
-          <Button onClick={handleSubmit}>등록</Button>
-          <Button
-            type="button"
-            className="bg-gray-200 text-black"
-            onClick={() => navigate("/occupancy")}
-          >
-            목록
-          </Button>
-        </div>
+      <div className="flex justify-end gap-4 px-6 pt-12">
+        <Button
+          onClick={() =>
+            showModal({
+              title: "저장 확인",
+              message: "저장하시겠습니까?",
+              showCancel: true,
+              onConfirm: handleSave,
+            })
+          }
+        >
+          저장
+        </Button>
+        <Button
+          type="button"
+          className="bg-gray-200"
+          onClick={() =>
+            showModal({
+              title: "이동 확인",
+              message: "입력된 내용이 사라집니다. 목록으로 돌아가시겠습니까?",
+              showCancel: true,
+              onConfirm: () => navigate("/occupancy"),
+            })
+          }
+        >
+          목록
+        </Button>
       </div>
-    </FormProvider>
+    </Section>
   );
 }
