@@ -39,20 +39,27 @@ const RegistForm = forwardRef(
         console.log(`[${lang}] setValue로 locations 반영`);
         setValue("locations", next);
       }
-    }, [locations]);
+    }, [locations, currentLang]); // ← 여기에 currentLang 추가
 
     const handleOfficeChange = (updatedList) => {
-      setValue("locations", updatedList);
+      const prevList = getValues("locations") || [];
 
-      const isCurrent =
+      const deletedItems = prevList
+        .filter((prev) => !updatedList.some((u) => u.id === prev.id))
+        .map((item) => ({ ...item, delYn: "Y" }));
+
+      const finalList = [...updatedList, ...deletedItems];
+
+      setValue("locations", finalList);
+
+      if (
         (lang === "ko" && currentLang === 0) ||
-        (lang === "en" && currentLang === 1);
-
-      if (isCurrent) {
-        console.log(`[${lang}] setLocations 실행:`, updatedList);
-        setLocations(updatedList);
+        (lang === "en" && currentLang === 1)
+      ) {
+        console.log(`[${lang}] setLocations 실행`);
+        setLocations(finalList);
       } else {
-        console.log(`[${lang}] setLocations 생략됨 (비활성 탭)`);
+        console.log(`[${lang}] 현재 탭 아님 → setLocations 생략됨`);
       }
     };
 

@@ -21,7 +21,8 @@ export default function OccupancyDetail() {
   const [loading, setLoading] = useState(true);
   const [isReadOnly, setIsReadOnly] = useState(true);
   const hasPatchedRef = useRef(false);
-  const [sharedLocations, setSharedLocations] = useState([]);
+  const [koLocations, setKoLocations] = useState([]);
+  const [enLocations, setEnLocations] = useState([]);
 
   const fetchDetail = async () => {
     try {
@@ -33,11 +34,8 @@ export default function OccupancyDetail() {
 
       setKoData(ko);
       setEnData(en);
-
-      const officeList = ko.officeList?.length
-        ? ko.officeList
-        : en.officeList || [];
-      setSharedLocations(officeList);
+      setKoLocations(ko.officeList || []);
+      setEnLocations(en.officeList || []);
 
       setLoading(false);
     } catch (err) {
@@ -79,7 +77,8 @@ export default function OccupancyDetail() {
         set("time", data.freeHour || "");
         set("useStatus", data.useYn === "Y" ? "active" : "inactive");
         set("mainImage", patchImageMeta(data.mainImg));
-        set("locations", sharedLocations);
+        const locations = data.officeList || [];
+        set("locations", locations);
       };
 
       patchForm(koFormRef, koData);
@@ -163,7 +162,7 @@ export default function OccupancyDetail() {
           freeHour: data.freeHour,
           useYn: data.useYn,
           mainImg: toImageMeta(data.mainImg, original.mainImg),
-          officeList: currentLang === 0 ? formValues.officeList : [],
+          officeList: formValues.officeList,
         };
         console.log("저장 요청 - PC:", data.thumbImgPc);
         console.log("저장 요청 - MO:", data.thumbImgMo);
@@ -215,7 +214,6 @@ export default function OccupancyDetail() {
         message: "저장하시겠습니까?",
         showCancel: true,
         onConfirm: async () => {
-          console.log("저장 직전 sharedLocations:", sharedLocations);
           try {
             await saveOne(
               {
@@ -277,40 +275,10 @@ export default function OccupancyDetail() {
                 ref={koFormRef}
                 data={koData}
                 lang="ko"
-                locations={sharedLocations}
-                setLocations={setSharedLocations}
+                locations={koLocations}
+                setLocations={setKoLocations}
                 currentLang={currentLang}
               />
-              <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
-                <tbody>
-                  <tr>
-                    <th className="w-32 border bg-gray-100 px-4 py-2">
-                      등록일시
-                    </th>
-                    <td className="border px-4 py-2">
-                      {koData?.createDatetime || "-"}
-                    </td>
-                    <th className="w-32 border bg-gray-100 px-4 py-2">
-                      등록자
-                    </th>
-                    <td className="border px-4 py-2">
-                      {koData?.createUser || "-"}
-                    </td>
-                  </tr>
-                  <tr>
-                    <th className="border bg-gray-100 px-4 py-2">수정일시</th>
-                    <td className="border px-4 py-2">
-                      {koData?.updateDatetime || "-"}
-                    </td>
-                    <th className="border bg-gray-100 px-4 py-2">
-                      최근 수정자
-                    </th>
-                    <td className="border px-4 py-2">
-                      {koData?.updateUser || "-"}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
             </>
           )}
         </TabPanel>
@@ -322,40 +290,10 @@ export default function OccupancyDetail() {
                 ref={enFormRef}
                 data={enData}
                 lang="en"
-                locations={sharedLocations}
-                setLocations={setSharedLocations}
+                locations={enLocations}
+                setLocations={setEnLocations}
                 currentLang={currentLang}
               />
-              <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
-                <tbody>
-                  <tr>
-                    <th className="w-32 border bg-gray-100 px-4 py-2">
-                      등록일시
-                    </th>
-                    <td className="border px-4 py-2">
-                      {enData?.createDatetime || "-"}
-                    </td>
-                    <th className="w-32 border bg-gray-100 px-4 py-2">
-                      등록자
-                    </th>
-                    <td className="border px-4 py-2">
-                      {enData?.createUser || "-"}
-                    </td>
-                  </tr>
-                  <tr>
-                    <th className="border bg-gray-100 px-4 py-2">수정일시</th>
-                    <td className="border px-4 py-2">
-                      {enData?.updateDatetime || "-"}
-                    </td>
-                    <th className="border bg-gray-100 px-4 py-2">
-                      최근 수정자
-                    </th>
-                    <td className="border px-4 py-2">
-                      {enData?.updateUser || "-"}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
             </>
           )}
         </TabPanel>
