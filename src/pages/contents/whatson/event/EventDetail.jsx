@@ -225,6 +225,12 @@ export default function EventDetail() {
   };
 
   const handleSave = async () => {
+    const showError = (msg) =>
+      showModal({
+        title: "입력 오류",
+        message: msg,
+        showCancel: false,
+      });
     try {
       const saveOne = async (data, original = {}) => {
         const isInsert = !data.id;
@@ -271,7 +277,7 @@ export default function EventDetail() {
       };
 
       if (currentLang === 0) {
-        const koValues = await koFormRef.current?.submit?.();
+        const koValues = await koFormRef.current?.submit?.(showError);
         if (!koValues) return;
 
         localStorage.setItem(
@@ -289,7 +295,7 @@ export default function EventDetail() {
           koData || {}
         );
       } else {
-        const enValues = await enFormRef.current?.submit?.();
+        const enValues = await enFormRef.current?.submit?.(showError);
         if (!enValues) return;
 
         await saveOne(
@@ -386,7 +392,7 @@ export default function EventDetail() {
                 ref={enFormRef}
                 data={enData}
                 setData={setEnData}
-                lang="ko"
+                lang="en"
                 brands={sharedBrands}
                 setBrands={setSharedBrands}
                 category={sharedCategory}
