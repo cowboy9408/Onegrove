@@ -60,6 +60,7 @@ import LifeStylePage from "@/pages/submain/lifestyle/LifeStylePage";
 import WhatsonPage from "@/pages/submain/whatson/WhatsonPage";
 import WorkPage from "@/pages/submain/work/WorkPage";
 import BannerLayout from "@/pages/banner/BannerLayout";
+import OccupancyDetail from "@/pages/occupancy/OccupancyDetail";
 
 export const routeMeta = [
   {
@@ -163,6 +164,14 @@ export const routeMeta = [
         path: "/occupancy/regist",
         element: <OccupancyRegist />,
         title: "입주사 등록",
+        hidden: true,
+        permissions: ["Admin", "User"],
+      },
+      {
+        uuid: "6f56e1bc-b894-4403-8399-dd389d4540b6",
+        path: "/occupancy/detail/:id",
+        element: <OccupancyDetail />,
+        title: "입주사 상세 페이지",
         hidden: true,
         permissions: ["Admin", "User"],
       },

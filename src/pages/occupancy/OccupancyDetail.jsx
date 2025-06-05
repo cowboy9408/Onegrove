@@ -3,13 +3,13 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Tabs, { TabPanel } from "@/components/layout/Tabs";
 import Section from "@/components/layout/Section";
 import Button from "@/components/common/Button";
-import PressRegistForm from "./component/PressRegistForm";
+import RegistForm from "./component/RegistForm";
 import api from "@/lib/apiClient";
 import useModal from "@/hooks/useModal";
 
-export default function PressDetail() {
+export default function OccupancyDetail() {
   const navigate = useNavigate();
-  const { pmId } = useParams();
+  const { id } = useParams();
   const [searchParams] = useSearchParams();
   const initialLang = searchParams.get("lang") || "ko";
   const [currentLang, setCurrentLang] = useState(initialLang === "ko" ? 0 : 1);
@@ -20,63 +20,72 @@ export default function PressDetail() {
   const [enData, setEnData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isReadOnly, setIsReadOnly] = useState(true);
+  const hasPatchedRef = useRef(false);
+  const [sharedLocations, setSharedLocations] = useState([]);
+
+  const fetchDetail = async () => {
+    try {
+      const resKo = await api.get(`/api/v1/company/detail/${id}/KO`);
+      const resEn = await api.get(`/api/v1/company/detail/${id}/EN`);
+
+      const ko = resKo.data?.data || {};
+      const en = resEn.data?.data || {};
+
+      setKoData(ko);
+      setEnData(en);
+
+      const officeList = ko.officeList?.length
+        ? ko.officeList
+        : en.officeList || [];
+      setSharedLocations(officeList);
+
+      setLoading(false);
+    } catch (err) {
+      console.error("상세 조회 실패:", err);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await api.get(`/api/v1/press/${pmId}`);
-        console.log("API 응답 결과:", res.data);
-
-        const list = Array.isArray(res.data?.data) ? res.data.data : [];
-
-        const ko = list.find((item) => item.lang === "ko") || null;
-        const en = list.find((item) => item.lang === "en") || null;
-
-        console.log("koData:", ko);
-        console.log("enData:", en);
-
-        setKoData(ko);
-        setEnData(en);
-        setLoading(false);
-      } catch (err) {
-        console.error("API 호출 실패:", err);
-        setKoData(null);
-        setEnData(null);
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [pmId]);
+    fetchDetail(); // 🔁 여기도 여전히 사용 가능
+  }, [id]);
 
   useEffect(() => {
     if (!loading) {
-      const patchForm = (formRef, data, fallbackCategory = "") => {
-        if (!formRef) return;
+      const patchForm = (formRef, data) => {
+        if (!formRef?.current || !data) return;
+        const set = formRef.current.setValue;
+
+        // mainImg 구조 변환
         const patchImageMeta = (img) =>
           img?.path
             ? {
-                ...img,
+                id: img.id ?? null,
+                name: img.name ?? img.originalName ?? "image.jpg",
+                originalName: img.originalName ?? img.name,
+                size: img.size ?? 0,
+                extension:
+                  img.extension ?? "." + (img.name || "").split(".").pop(),
+                mime: img.mime ?? "image/jpeg",
+                classification: "company",
+                path: img.path,
                 status: "R",
               }
             : null;
 
-        formRef.setValue("category", data?.categoryCode ?? fallbackCategory);
-
-        if (!data) return;
-
-        formRef.setValue("title", data.title || "");
-        formRef.setValue("status", data.showYn === "Y" ? "active" : "inactive");
-        formRef.setValue("publishDate", data.publishDate || "");
-        formRef.setValue("imgPc", patchImageMeta(data.thumbImgPc));
-        formRef.setValue("imgMo", patchImageMeta(data.thumbImgMo));
-        formRef.setValue("content", data.content || "");
+        set("companyName", data.name || "");
+        set("ceoName", data.mainName || "");
+        set("phone", data.tel || "");
+        set("mail", data.email || "");
+        set("time", data.freeHour || "");
+        set("useStatus", data.useYn === "Y" ? "active" : "inactive");
+        set("mainImage", patchImageMeta(data.mainImg));
+        set("locations", sharedLocations);
       };
 
-      const koCategory = koData?.categoryCode ?? "";
-      const enCategory = enData?.categoryCode ?? "";
+      patchForm(koFormRef, koData);
+      patchForm(enFormRef, enData);
 
-      patchForm(koFormRef.current, koData, enCategory);
-      patchForm(enFormRef.current, enData, koCategory);
+      hasPatchedRef.current = true;
     }
   }, [loading, koData, enData]);
 
@@ -94,15 +103,15 @@ export default function PressDetail() {
 
   const toImageMeta = (file, original) => {
     // 사용자가 이미지 삭제한 경우
-    if (file?.status === "D") {
+    if (!file || file.status === "D" || !file.path) {
       return {
         id: null,
         name: null,
-        originalName: file.originalName || "",
+        originalName: file?.originalName || "",
         size: null,
         extension: null,
         mime: null,
-        classification: "press-media", // 또는 null도 가능
+        classification: "company",
         path: null,
         status: "D",
       };
@@ -114,6 +123,8 @@ export default function PressDetail() {
     const originalName = base.originalName || base.name || "";
     const extension = base.extension || "." + originalName.split(".").pop();
 
+    const isNew = !base.id && !original?.id;
+
     return {
       id: base.id ?? null,
       originalName: originalName,
@@ -121,14 +132,15 @@ export default function PressDetail() {
       size: base.size ?? 0,
       extension: extension,
       mime: base.mime || "image/jpeg",
-      classification: base.classification || "press-media",
+      classification: base.classification || "company",
       path: base.path || null,
-      status:
-        base.status !== undefined && base.status !== null
-          ? base.status
-          : file?.changed
+      status: isNew
+        ? "C"
+        : file?.changed
+          ? "E"
+          : original?.path !== file?.path
             ? "E"
-            : "R", // 수정 안 하면 R
+            : file?.status || "R",
     };
   };
 
@@ -143,15 +155,15 @@ export default function PressDetail() {
       const saveOne = async (data, original = {}) => {
         const payload = {
           id: data.id,
-          pressId: data.pressId,
-          lang: data.lang,
-          category: data.category,
-          title: data.title,
-          thumbImgPc: toImageMeta(data.thumbImgPc, original.thumbImgPc),
-          thumbImgMo: toImageMeta(data.thumbImgMo, original.thumbImgMo),
-          showYn: data.showYn,
-          content: data.content,
-          publishDate: data.publishDate,
+          lang: data.lang === "ko" ? "KO" : "EN",
+          name: data.name,
+          mainName: data.mainName,
+          tel: data.tel,
+          email: data.email,
+          freeHour: data.freeHour,
+          useYn: data.useYn,
+          mainImg: toImageMeta(data.mainImg, original.mainImg),
+          officeList: currentLang === 0 ? formValues.officeList : [],
         };
         console.log("저장 요청 - PC:", data.thumbImgPc);
         console.log("저장 요청 - MO:", data.thumbImgMo);
@@ -166,11 +178,13 @@ export default function PressDetail() {
         console.log("저장 payload:", payload);
         console.log("payload.thumbImgPc:", payload.thumbImgPc);
 
-        const apiUrl = data.id
-          ? "/api/v1/press/update"
-          : "/api/v1/press/insert";
-        const res = await api.post(apiUrl, payload);
+        const isNew = !original?.id || original?.lang !== payload.lang;
 
+        const apiUrl = isNew
+          ? "/api/v1/company/insert"
+          : "/api/v1/company/update";
+
+        const res = await api.post(apiUrl, payload);
         console.log("응답 결과:", res.data);
       };
 
@@ -181,23 +195,38 @@ export default function PressDetail() {
       const formValues = await formRef.current?.submit?.(showError);
       if (!formValues) return;
 
+      const commonId = koData?.id || enData?.id || formValues?.id || null;
+
+      if (!commonId) {
+        showModal({
+          title: "저장 불가",
+          message:
+            "기존 항목이 없어서 저장할 수 없습니다. 먼저 국문 정보를 저장해주세요.",
+          showCancel: false,
+        });
+        return;
+      }
+      console.log(
+        "formValues.officeList (before override):",
+        formValues.officeList
+      );
       showModal({
         title: "저장 확인",
         message: "저장하시겠습니까?",
         showCancel: true,
         onConfirm: async () => {
+          console.log("저장 직전 sharedLocations:", sharedLocations);
           try {
             await saveOne(
               {
                 ...formValues,
-                id: originalData?.id ?? null,
-                pressId: isKorean
-                  ? (koData?.pressId ?? enData?.pressId ?? null)
-                  : (koData?.pressId ?? null),
+                id: commonId,
                 lang: isKorean ? "ko" : "en",
               },
               originalData || {}
             );
+
+            await fetchDetail();
 
             showModal({
               title: "저장 완료",
@@ -205,7 +234,7 @@ export default function PressDetail() {
               showCancel: false,
               onConfirm: () => {
                 setIsReadOnly(true);
-                navigate("/contents/whatson/media?refresh=" + Date.now());
+                navigate("/occupancy?refresh=" + Date.now());
               },
             });
           } catch (err) {
@@ -244,11 +273,13 @@ export default function PressDetail() {
         <TabPanel>
           {!loading && (
             <>
-              <PressRegistForm
+              <RegistForm
                 ref={koFormRef}
                 data={koData}
                 lang="ko"
-                // readOnly={isReadOnly}
+                locations={sharedLocations}
+                setLocations={setSharedLocations}
+                currentLang={currentLang}
               />
               <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
                 <tbody>
@@ -287,11 +318,13 @@ export default function PressDetail() {
         <TabPanel>
           {!loading && (
             <>
-              <PressRegistForm
+              <RegistForm
                 ref={enFormRef}
                 data={enData}
                 lang="en"
-                // readOnly={isReadOnly}
+                locations={sharedLocations}
+                setLocations={setSharedLocations}
+                currentLang={currentLang}
               />
               <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
                 <tbody>
@@ -331,11 +364,7 @@ export default function PressDetail() {
       <div className="flex justify-end gap-4 px-6 pb-6">
         <Button onClick={handleSave}>저장</Button>
 
-        <Button
-          onClick={() =>
-            navigate("/contents/whatson/media?refresh=" + Date.now())
-          }
-        >
+        <Button onClick={() => navigate("/occupancy?refresh=" + Date.now())}>
           목록
         </Button>
       </div>
