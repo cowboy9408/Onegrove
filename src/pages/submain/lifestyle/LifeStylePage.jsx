@@ -22,15 +22,26 @@ export default function LifeStylePage() {
     const fetchData = async () => {
       const lang = currentLang === 0 ? "ko" : "en";
       const res = await api.get(`/api/v1/lifestyle?lang=${lang}`);
-      const keyVisual = res.data?.data?.keyVisual || [];
+      const keyVisual = res.data?.data || [];
+
+      console.log("Fetched Key Visual Data:", keyVisual);
 
       const mapped = keyVisual.map((item) => ({
-        ...item,
-        file1: item.contentFilePc || null,
-        file2: item.contentFileMo || null,
+        // ...item.keyVisual,
+        title: item?.keyVisual?.[0]?.title || "",
+        subtitle: item?.keyVisual?.[0]?.subTitle || "",
+        type: item?.keyVisual?.[0]?.type || "image",
+        delYn: item?.keyVisual?.[0]?.delYn || "N",
+        id: item?.lifeId || null,
+        file1: item?.keyVisual?.[0]?.contentFilePc || null,
+        file2: item?.keyVisual?.[0]?.contentFileMo || null,
       }));
 
-      const id = res.data?.data?.id;
+      
+
+      const id = res.data?.data?.id || 1;
+
+      console.log("Mapped Key Visual Data:", mapped, id);
 
       if (lang === "ko") {
         setKrData({ keyVisual: mapped });
@@ -51,11 +62,13 @@ export default function LifeStylePage() {
     const id = isKorean ? krId : enId;
 
     const keyVisual = await ref.current?.submit();
+
+    console.log("Key Visual to Save:", keyVisual, id, lang);
     if (!keyVisual) return;
 
     const payload = {
       id: id ?? 0,
-      lang,
+      lang: lang,
       delYn: "N",
       keyVisual,
     };
