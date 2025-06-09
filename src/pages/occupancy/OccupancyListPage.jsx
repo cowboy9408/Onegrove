@@ -9,71 +9,100 @@ import Col from "@/components/layout/Col";
 import ResultSection from "@/components/layout/ResultSection";
 import Row from "@/components/layout/Row";
 import SearchSection from "@/components/layout/SearchSection";
-import { faker } from "@faker-js/faker";
+
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Radio from "@/components/common/Radio";
+import api from "@/lib/apiClient";
 
 export default function OccupancyListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-
-  //   const [name, setName] = useState(searchParams.get("name") || "");
-  //   const [email, setEmail] = useState(searchParams.get("email") || "");
+  const [checkedIds, setCheckedIds] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [page, setPage] = useState(searchParams.get("page") || 1);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
-  const [searchStatus, setSearchStatus] = useState("");
 
   const size = 10;
 
+  const defaultFilter = {
+    name: "",
+    office: "",
+    floor: "",
+    status: "",
+  };
+  const [searchFilter, setSearchFilter] = useState(defaultFilter);
+  const [activeFilter, setActiveFilter] = useState(defaultFilter);
+
+  const handleCheck = (id, checked) => {
+    setCheckedIds((prev) => {
+      return checked ? [...prev, id] : prev.filter((v) => v !== id);
+    });
+  };
+
   useEffect(() => {
     const fetchData = async () => {
-      // TODO: faker 삭제
-      const generateFakePagedUsers = ({ page = 1, size = 10 }) => {
-        const totalElements = 23;
-        const totalPages = Math.ceil(totalElements / size);
-        const start = (page - 1) * size;
+      try {
+        const res = await api.get("/api/v1/company", {
+          params: { page, size },
+        });
 
-        const data = Array.from({ length: size }, (_, i) => {
-          const index = start + i + 1;
+        const result = res.data?.data || [];
+
+        //
+        const filtered = result.filter((item) => {
+          const koContent = item.contentList.find((c) => c.lang === "KO") || {};
+          const officeNames = item.officeList.map((o) => o.office).join(", ");
+          const floorNames = item.officeList.map((o) => o.floor).join(", ");
+
+          const nameMatch =
+            !activeFilter.name ||
+            koContent.companyName?.includes(activeFilter.name);
+
+          const officeMatch =
+            !activeFilter.office || officeNames.includes(activeFilter.office);
+
+          const floorMatch =
+            !activeFilter.floor || floorNames.includes(activeFilter.floor);
+
+          const statusMatch =
+            !activeFilter.status || item.useYn === activeFilter.status;
+
+          return nameMatch && officeMatch && floorMatch && statusMatch;
+        });
+
+        const formatted = filtered.map((item) => {
+          const koContent = item.contentList.find((c) => c.lang === "KO") || {};
+          const enContent = item.contentList.find((c) => c.lang === "EN") || {};
+          const officeNames = item.officeList.map((o) => o.office).join(", ");
+          const floorNames = item.officeList.map((o) => o.floor).join(", ");
+
           return {
-            no: index,
-            type: faker.helpers.arrayElement(["관리자", "일반", "외부"]),
-            occupancy: faker.company.name(),
-            name: faker.person.lastName() + faker.person.firstName(),
-            username: faker.internet.userName(),
-            email: faker.internet.email(),
-            status: faker.helpers.arrayElement(["활성", "비활성"]),
-            created_user: faker.person.fullName(),
-            created_at: faker.date
-              .recent({ days: 30 })
-              .toISOString()
-              .split("T")[0],
+            _id: item.id,
+            id: item.id,
+            no: item.rownum,
+            ko_title: koContent.companyName || "-",
+            en_title: enContent.companyName || "-",
+            occupancy: "-",
+            office: officeNames || "-",
+            floor: floorNames || "-",
+            phone: item.tel || "-",
+            status: item.useYn === "Y" ? "사용" : "미사용",
+            created_user: koContent.userName || "-",
+            created_at: koContent.createDt?.split(" ")[0] || "-",
           };
         });
 
-        return {
-          pageable: {
-            totalPages,
-            totalElements,
-            currentPage: page,
-            pageSize: size,
-          },
-          data: data.slice(0, totalElements - start), // 마지막 페이지 size 조정
-        };
-      };
-      // END TODO faker 삭제
-
-      // TODO: FETCH DATA
-      const res = generateFakePagedUsers(page);
-
-      setData(res.data);
-      setTotal(res.pageable.totalElements);
+        setData(formatted);
+        setTotal(filtered.length);
+      } catch (err) {
+        console.error("입주사 목록 불러오기 실패:", err);
+      }
     };
 
     fetchData();
-  }, [page]);
+  }, [page, refreshKey]);
 
   return (
     <div>
@@ -81,56 +110,79 @@ export default function OccupancyListPage() {
         <Box>
           <Row>
             <Col>
-              <Select label={"입주사명"}>
+              <Input
+                label="입주사명"
+                placeholder="입주사명을 입력하세요"
+                value={searchFilter.name}
+                onChange={(e) =>
+                  setSearchFilter({ ...searchFilter, name: e.target.value })
+                }
+              />
+            </Col>
+            <Col>
+              <Select
+                label="오피스"
+                value={searchFilter.office}
+                onChange={(e) =>
+                  setSearchFilter({ ...searchFilter, office: e.target.value })
+                }
+              >
                 <option value="">전체</option>
-                <option value="">입주사1</option>
-                <option value="">입주사2</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
               </Select>
             </Col>
             <Col>
-              <Select label={"오피스"}>
-                <option value="">전체</option>
-                <option value="">오피스1</option>
-                <option value="">오피스2</option>
-              </Select>
-            </Col>
-            <Col>
-              <Select label={"충"}>
-                <option value="">전체</option>
-                <option value="">1층</option>
-                <option value="">2층</option>
-                <option value="">3층</option>
-                <option value="">4층</option>
-                <option value="">5층</option>
-                <option value="">6층</option>
-                <option value="">7층</option>
-              </Select>
+              <Input
+                label="층수"
+                placeholder="예: 3F"
+                value={searchFilter.floor}
+                onChange={(e) =>
+                  setSearchFilter({ ...searchFilter, floor: e.target.value })
+                }
+              />
             </Col>
             <Col className="flex items-center gap-4">
               <span className="text-sm font-medium">사용 여부</span>
               <Radio
                 name="status"
-                value="active"
+                value="Y"
                 label="사용"
-                checked={searchStatus === "active"}
-                onChange={() => setSearchStatus("active")}
+                checked={searchFilter.status === "Y"}
+                onChange={() =>
+                  setSearchFilter({ ...searchFilter, status: "Y" })
+                }
               />
               <Radio
                 name="status"
-                value="inactive"
+                value="N"
                 label="미사용"
-                checked={searchStatus === "inactive"}
-                onChange={() => setSearchStatus("inactive")}
+                checked={searchFilter.status === "N"}
+                onChange={() =>
+                  setSearchFilter({ ...searchFilter, status: "N" })
+                }
               />
             </Col>
             <Col className="self-end">
               <Button
-                className={"h-12 w-full"}
                 onClick={() => {
-                  setSearchParams({ name, page });
+                  setPage(1);
+                  setActiveFilter(searchFilter);
+                  setRefreshKey((prev) => prev + 1);
                 }}
               >
                 검색
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchFilter(defaultFilter);
+                  setActiveFilter(defaultFilter);
+                  setPage(1);
+                  setRefreshKey((prev) => prev + 1);
+                }}
+              >
+                초기화
               </Button>
             </Col>
           </Row>
@@ -150,8 +202,34 @@ export default function OccupancyListPage() {
           </Button>
           <Button
             className="bg-black text-white hover:bg-gray-800"
-            onClick={() => {
-              // 삭제 버튼 클릭 시 로직
+            onClick={async () => {
+              if (checkedIds.length === 0) {
+                alert("삭제할 항목을 선택해주세요.");
+                return;
+              }
+
+              const confirmed =
+                window.confirm("선택한 입주사를 삭제하시겠습니까?");
+              if (!confirmed) return;
+
+              try {
+                const res = await api.post(
+                  "/api/v1/company/delete",
+                  checkedIds
+                );
+
+                if (res.status === 200) {
+                  alert("삭제가 완료되었습니다.");
+                  setCheckedIds([]);
+                  setPage(1); // 첫 페이지로 이동
+                  setRefreshKey((prev) => prev + 1);
+                } else {
+                  alert("삭제 실패: 서버 오류");
+                }
+              } catch (err) {
+                console.error("삭제 요청 실패:", err);
+                alert("삭제 중 오류가 발생했습니다.");
+              }
             }}
           >
             삭제
@@ -162,16 +240,52 @@ export default function OccupancyListPage() {
         <DataTable
           columns={[
             { key: "no", label: "번호" },
-            { key: "occupancy", label: "입주사명" },
+            {
+              key: "language",
+              label: "언어",
+              render: () => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="p-2 font-medium">ko</div>
+                  <div className="p-2 font-medium">en</div>
+                </div>
+              ),
+            },
+            {
+              key: "occupancy",
+              label: "입주사명",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <button
+                    className={`text-black-600 truncate p-2 text-left ${row.ko_title !== "-" && row.ko_title !== null && "underline"}`}
+                    onClick={() =>
+                      navigate(`/occupancy/detail/${row.id}?lang=ko`)
+                    }
+                  >
+                    {row.ko_title}
+                  </button>
+                  <button
+                    className={`text-black-600 truncate p-2 text-left ${row.en_title !== "-" && row.en_title !== null && "underline"}`}
+                    onClick={() =>
+                      navigate(`/occupancy/detail/${row.id}?lang=en`)
+                    }
+                  >
+                    {row.en_title}
+                  </button>
+                </div>
+              ),
+            },
             { key: "office", label: "오피스" },
             { key: "floor", label: "층수" },
             { key: "phone", label: "입주자 연락처" },
-            { key: "", label: "사용 여부" },
+            { key: "status", label: "사용 여부" },
             { key: "created_user", label: "등록일자" },
             { key: "created_at", label: "등록자" },
           ]}
           data={data}
           link={{ base: "/admin", path: "no" }}
+          checkable={true}
+          checkedIds={checkedIds}
+          onCheck={handleCheck}
         />
         <Pagination
           current={page}
