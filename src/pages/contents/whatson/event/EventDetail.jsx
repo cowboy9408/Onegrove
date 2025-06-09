@@ -117,6 +117,8 @@ export default function EventDetail() {
       const patchForm = (formRef, data, fallbackCategory = "") => {
         if (!formRef) return;
 
+        console.log(">>> patchForm 호출 시점:", formRef.current);
+
         const patchImageMeta = (img) => {
           if (!img) return null;
 
@@ -133,17 +135,27 @@ export default function EventDetail() {
           };
         };
 
+        formRef.setValue(
+          "progressStatus",
+          data?.progressYn === "Y" ? "inProgress" : "ended"
+        );
+
         const categoryCode = resolveCategoryCode(
           data?.categoryCode ?? fallbackCategory
         );
         setTimeout(() => {
           formRef.setValue("category", categoryCode);
+          formRef.current.setValue(
+            "progressStatus",
+            data?.progressYn === "Y" ? "inProgress" : "ended"
+          );
         }, 0);
 
         if (!data || Object.keys(data).length === 0) return;
 
         formRef.setValue("title", data.title || "");
         formRef.setValue("status", data.showYn === "Y" ? "active" : "inactive");
+
         formRef.setValue("thumbImg", patchImageMeta(data.thumbImg));
         formRef.setValue("imgBodyPc", patchImageMeta(data.imgBodyPc));
         formRef.setValue("imgBodyMo", patchImageMeta(data.imgBodyMo));
@@ -246,6 +258,7 @@ export default function EventDetail() {
           imgPc: toImageMeta(data.imgPc, original.imgPc),
           imgMo: toImageMeta(data.imgMo, original.imgMo),
           showYn: data.showYn,
+          progressYn: data.progressYn,
           content: data.content,
           description: data.description || "",
           startDate:
