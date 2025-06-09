@@ -209,13 +209,24 @@ const RegistForm = forwardRef(
               label="대표 이미지"
               value={watch("mainImage")}
               onChange={(file) => {
-                file.changed = true; // 이 줄 추가!
+                file.changed = true;
                 setValue("mainImage", file);
               }}
-              classification="Company" // 대소문자도 맞춰주세요
+              classification="Company"
               required
             />
-            <Input label="회의실 무료 예약시간" {...register("time")} />
+            <Input
+              label="회의실 무료 예약시간"
+              type="number"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              {...register("time", {
+                pattern: {
+                  value: /^[0-9]+$/,
+                  message: "숫자만 입력해주세요.",
+                },
+              })}
+            />
           </div>
         </form>
       </FormProvider>
