@@ -26,7 +26,13 @@ const BannerForm = forwardRef(({ data, lang, menu }, ref) => {
 
   useImperativeHandle(ref, () => ({
     submit: async () => {
+      const getCleanedImage = (img) => {
+        if (img?.status === "D") return null;
+        return img;
+      };
+
       const values = getValues("banner");
+
       if (
         !values.title ||
         !values.url ||
