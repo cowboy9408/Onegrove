@@ -67,7 +67,7 @@ export default function MainBannerPage() {
       await api.post("/api/v1/banner/insert", payload);
       alert("저장 완료");
 
-      window.location.reload();
+      // window.location.reload();
     } catch (error) {
       console.error("저장 실패 (post)", error);
       alert("저장에 실패했습니다.");

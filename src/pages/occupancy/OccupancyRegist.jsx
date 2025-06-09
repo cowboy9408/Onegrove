@@ -17,8 +17,9 @@ export default function OccupancyRegist() {
   const [koData, setKoData] = useState({});
   const [enData, setEnData] = useState({});
 
-  const handleSave = async () => {
+  const handleClickSave = async () => {
     const ref = currentLang === 0 ? koFormRef : enFormRef;
+
     const payload = await ref.current?.submit?.((message) => {
       showModal({
         title: "필수 항목을 입력해 주세요.",
@@ -27,8 +28,19 @@ export default function OccupancyRegist() {
       });
     });
 
+    // 입력 검증 실패 시 종료
     if (!payload || typeof payload !== "object") return;
 
+    // 검증 성공 시 → 저장 확인 모달 표시
+    showModal({
+      title: "저장 확인",
+      message: "저장하시겠습니까?",
+      showCancel: true,
+      onConfirm: () => handleSave(payload),
+    });
+  };
+
+  const handleSave = async (payload) => {
     try {
       await api.post("/api/v1/company/insert", payload);
       navigate("/occupancy");
@@ -72,18 +84,7 @@ export default function OccupancyRegist() {
       </Tabs>
 
       <div className="flex justify-end gap-4 px-6 pt-12">
-        <Button
-          onClick={() =>
-            showModal({
-              title: "저장 확인",
-              message: "저장하시겠습니까?",
-              showCancel: true,
-              onConfirm: handleSave,
-            })
-          }
-        >
-          저장
-        </Button>
+        <Button onClick={handleClickSave}>저장</Button>
         <Button
           type="button"
           className="bg-gray-200"
