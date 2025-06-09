@@ -20,13 +20,20 @@ export default function OccupancyListPage() {
   const navigate = useNavigate();
   const [checkedIds, setCheckedIds] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
-
   const [page, setPage] = useState(searchParams.get("page") || 1);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
-  const [searchStatus, setSearchStatus] = useState("");
 
   const size = 10;
+
+  const defaultFilter = {
+    name: "",
+    office: "",
+    floor: "",
+    status: "",
+  };
+  const [searchFilter, setSearchFilter] = useState(defaultFilter);
+  const [activeFilter, setActiveFilter] = useState(defaultFilter);
 
   const handleCheck = (id, checked) => {
     setCheckedIds((prev) => {
@@ -43,30 +50,52 @@ export default function OccupancyListPage() {
 
         const result = res.data?.data || [];
 
-        const formatted = result.map((item) => {
+        //
+        const filtered = result.filter((item) => {
+          const koContent = item.contentList.find((c) => c.lang === "KO") || {};
+          const officeNames = item.officeList.map((o) => o.office).join(", ");
+          const floorNames = item.officeList.map((o) => o.floor).join(", ");
+
+          const nameMatch =
+            !activeFilter.name ||
+            koContent.companyName?.includes(activeFilter.name);
+
+          const officeMatch =
+            !activeFilter.office || officeNames.includes(activeFilter.office);
+
+          const floorMatch =
+            !activeFilter.floor || floorNames.includes(activeFilter.floor);
+
+          const statusMatch =
+            !activeFilter.status || item.useYn === activeFilter.status;
+
+          return nameMatch && officeMatch && floorMatch && statusMatch;
+        });
+
+        const formatted = filtered.map((item) => {
           const koContent = item.contentList.find((c) => c.lang === "KO") || {};
           const enContent = item.contentList.find((c) => c.lang === "EN") || {};
           const officeNames = item.officeList.map((o) => o.office).join(", ");
           const floorNames = item.officeList.map((o) => o.floor).join(", ");
 
           return {
-            _id: item.id, // ← 버튼에서 사용됨
+            _id: item.id,
             id: item.id,
             no: item.rownum,
             ko_title: koContent.companyName || "-",
             en_title: enContent.companyName || "-",
-            occupancy: "-", // 필요 없다면 삭제 가능
+            occupancy: "-",
             office: officeNames || "-",
             floor: floorNames || "-",
             phone: item.tel || "-",
             status: item.useYn === "Y" ? "사용" : "미사용",
             created_user: koContent.userName || "-",
-            created_at: koContent.createDt?.split(" ")[0] || "-", // 날짜만
+            created_at: koContent.createDt?.split(" ")[0] || "-",
           };
         });
 
         setData(formatted);
-        setTotal(res.data?.pageable?.totalElements || 0);
+        setTotal(filtered.length);
       } catch (err) {
         console.error("입주사 목록 불러오기 실패:", err);
       }
@@ -81,56 +110,79 @@ export default function OccupancyListPage() {
         <Box>
           <Row>
             <Col>
-              <Select label={"입주사명"}>
+              <Input
+                label="입주사명"
+                placeholder="입주사명을 입력하세요"
+                value={searchFilter.name}
+                onChange={(e) =>
+                  setSearchFilter({ ...searchFilter, name: e.target.value })
+                }
+              />
+            </Col>
+            <Col>
+              <Select
+                label="오피스"
+                value={searchFilter.office}
+                onChange={(e) =>
+                  setSearchFilter({ ...searchFilter, office: e.target.value })
+                }
+              >
                 <option value="">전체</option>
-                <option value="">입주사1</option>
-                <option value="">입주사2</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
               </Select>
             </Col>
             <Col>
-              <Select label={"오피스"}>
-                <option value="">전체</option>
-                <option value="">오피스1</option>
-                <option value="">오피스2</option>
-              </Select>
-            </Col>
-            <Col>
-              <Select label={"충"}>
-                <option value="">전체</option>
-                <option value="">1층</option>
-                <option value="">2층</option>
-                <option value="">3층</option>
-                <option value="">4층</option>
-                <option value="">5층</option>
-                <option value="">6층</option>
-                <option value="">7층</option>
-              </Select>
+              <Input
+                label="층수"
+                placeholder="예: 3F"
+                value={searchFilter.floor}
+                onChange={(e) =>
+                  setSearchFilter({ ...searchFilter, floor: e.target.value })
+                }
+              />
             </Col>
             <Col className="flex items-center gap-4">
               <span className="text-sm font-medium">사용 여부</span>
               <Radio
                 name="status"
-                value="active"
+                value="Y"
                 label="사용"
-                checked={searchStatus === "active"}
-                onChange={() => setSearchStatus("active")}
+                checked={searchFilter.status === "Y"}
+                onChange={() =>
+                  setSearchFilter({ ...searchFilter, status: "Y" })
+                }
               />
               <Radio
                 name="status"
-                value="inactive"
+                value="N"
                 label="미사용"
-                checked={searchStatus === "inactive"}
-                onChange={() => setSearchStatus("inactive")}
+                checked={searchFilter.status === "N"}
+                onChange={() =>
+                  setSearchFilter({ ...searchFilter, status: "N" })
+                }
               />
             </Col>
             <Col className="self-end">
               <Button
-                className={"h-12 w-full"}
                 onClick={() => {
-                  setSearchParams({ name, page });
+                  setPage(1);
+                  setActiveFilter(searchFilter);
+                  setRefreshKey((prev) => prev + 1);
                 }}
               >
                 검색
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchFilter(defaultFilter);
+                  setActiveFilter(defaultFilter);
+                  setPage(1);
+                  setRefreshKey((prev) => prev + 1);
+                }}
+              >
+                초기화
               </Button>
             </Col>
           </Row>
@@ -225,7 +277,7 @@ export default function OccupancyListPage() {
             { key: "office", label: "오피스" },
             { key: "floor", label: "층수" },
             { key: "phone", label: "입주자 연락처" },
-            { key: "", label: "사용 여부" },
+            { key: "status", label: "사용 여부" },
             { key: "created_user", label: "등록일자" },
             { key: "created_at", label: "등록자" },
           ]}
