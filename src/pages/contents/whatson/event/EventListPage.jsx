@@ -100,8 +100,9 @@ export default function EventListPage() {
                 koItem.lang && enItem.lang ? "both" : koItem.lang ? "ko" : "en",
               ko_title: koItem.title || "-",
               en_title: enItem.title || "-",
-              progress_ko: koItem.progressYn === "Y" ? "진행 중" : "종료",
-              progress_en: enItem.progressYn === "Y" ? "진행 중" : "종료",
+              progress_ko: entry.status || "-",
+              progress_en: entry.status || "-",
+              status: entry.status,
               status_ko: koItem.showYn === "Y" ? "노출" : "미노출",
               status_en: enItem.showYn === "Y" ? "노출" : "미노출",
 
@@ -172,7 +173,7 @@ export default function EventListPage() {
             return dateB - dateA; // 최신순 (최근 날짜가 먼저)
           });
           console.log(
-            "원시 데이터 createDatetime들",
+            "데이터 createDatetime들",
             json.data.map((entry) => ({
               ko: entry.items?.find((i) => i.lang === "ko")?.createDatetime,
               en: entry.items?.find((i) => i.lang === "en")?.createDatetime,
@@ -467,12 +468,8 @@ export default function EventListPage() {
               label: "진행 상태",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <div className="py-1">
-                    {row.progress_ko === "Y" ? "진행 중" : "종료"}
-                  </div>
-                  <div className="py-1">
-                    {row.progress_en === "Y" ? "진행 중" : "종료"}
-                  </div>
+                  <div className="py-1">{row.progress_ko}</div>
+                  <div className="py-1">{row.progress_en}</div>
                 </div>
               ),
             },
