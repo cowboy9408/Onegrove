@@ -83,13 +83,26 @@ export default function LifeStylePage() {
 
       //저장 후 새로고침 시 데이터를 다시 가져오기
       const res = await api.get(`/api/v1/lifestyle?lang=${lang}`);
-      const newKeyVisual = res.data?.data?.keyVisual || [];
+      const newKeyVisual = res.data?.data || [];
       const newId = res.data?.data?.id;
 
-      const mapped = newKeyVisual.map((item) => ({
-        ...item,
-        file1: item.contentFilePc,
-        file2: item.contentFileMo,
+      // const mapped = newKeyVisual.map((item) => ({
+      //   ...item,
+      //   contentFilePc: item.contentFilePc,
+      //   contentFileMo: item.contentFileMo,
+      // }));
+
+      const mapped = newKeyVisual.map((item, index) => ({
+        // ...item.keyVisual,
+        id: item?.id || null,
+        contentType: item?.keyVisual?.[0]?.contentType || "I",
+        contentFilePc: item?.keyVisual?.[0]?.contentFilePc || null,
+        contentFileMo: item?.keyVisual?.[0]?.contentFileMo || null,
+        title: item?.keyVisual?.[0]?.title || "",
+        subtitle: item?.keyVisual?.[0]?.subTitle || "",
+        sort: (index+1) || 1,
+        delYn: item?.keyVisual?.[0]?.delYn || "N",
+        type: item.contentType === "V" ? "video" : "image",
       }));
 
       if (isKorean) {
