@@ -26,15 +26,17 @@ export default function LifeStylePage() {
 
       console.log("Fetched Key Visual Data:", keyVisual);
 
-      const mapped = keyVisual.map((item) => ({
+      const mapped = keyVisual.map((item, index) => ({
         // ...item.keyVisual,
+        id: item?.id || null,
+        contentType: item?.keyVisual?.[0]?.contentType || "I",
+        contentFilePc: item?.keyVisual?.[0]?.contentFilePc || null,
+        contentFileMo: item?.keyVisual?.[0]?.contentFileMo || null,
         title: item?.keyVisual?.[0]?.title || "",
         subtitle: item?.keyVisual?.[0]?.subTitle || "",
-        type: item?.keyVisual?.[0]?.type || "image",
+        sort: (index+1) || 1,
         delYn: item?.keyVisual?.[0]?.delYn || "N",
-        id: item?.lifeId || null,
-        file1: item?.keyVisual?.[0]?.contentFilePc || null,
-        file2: item?.keyVisual?.[0]?.contentFileMo || null,
+        type: item.contentType === "V" ? "video" : "image",
       }));
 
       
@@ -63,15 +65,17 @@ export default function LifeStylePage() {
 
     const keyVisual = await ref.current?.submit();
 
-    console.log("Key Visual to Save:", keyVisual, id, lang);
+    
     if (!keyVisual) return;
 
     const payload = {
-      id: id ?? 0,
+      lifeId: id ?? 0,
       lang: lang,
       delYn: "N",
-      keyVisual,
+      keyVisual: keyVisual,
     };
+
+    console.log("Key Visual to Save:", payload);
 
     try {
       await api.post("/api/v1/lifestyle/insert", payload);
