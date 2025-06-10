@@ -70,8 +70,23 @@ export default function StoriesListPage() {
               en_title: enItem.title || "-",
               status: koItem.status || "진행중",
               showYn: koItem.showYn || "미노출",
-              created_user: koItem.createUser || "-",
-              created_at: koItem.createDt || "-",
+
+
+              status_ko: koItem.status || "진행중",
+              status_en: enItem.status || "진행중",
+              showYn_ko: koItem.showYn || "미노출",
+              showYn_en: enItem.showYn || "미노출",
+
+              created_user_ko: koItem.createUser || "-",
+              created_user_en: enItem.createUser || "-",
+
+              created_at_ko: koItem.createDt || "-",
+              created_at_en: enItem.createDt || "-",
+              created_at: koItem.createDt || enItem.createDt || "-",
+
+
+              created_user: koItem.created_user || "-",
+              // created_at: koItem.createDcreateUsert || "-",
             };
           });
 
@@ -265,10 +280,46 @@ export default function StoriesListPage() {
                 </div>
               ),
             },
-            { key: "status", label: "상태여부" },
-            { key: "showYn", label: "노출여부" },
-            { key: "created_user", label: "등록자" },
-            { key: "created_at", label: "등록일시" },
+            {
+              key: "status",
+              label: "상태여부",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="py-1">{row.status_ko}</div>
+                  <div className="py-1">{row.status_en}</div>
+                </div>
+              ),
+            },
+            {
+              key: "showYn",
+              label: "노출여부",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="py-1">{row.showYn_ko}</div>
+                  <div className="py-1">{row.showYn_en}</div>
+                </div>
+              ),
+            },
+            {
+              key: "created_user",
+              label: "등록자",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="py-1">{row.created_user_ko}</div>
+                  <div className="py-1">{row.created_user_en}</div>
+                </div>
+              ),
+            },
+            {
+              key: "created_at",
+              label: "등록일시",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="py-1">{row.created_at_ko}</div>
+                  <div className="py-1">{row.created_at_en}</div>
+                </div>
+              ),
+            },
           ]}
           data={data}
           link={{ base: "/admin", path: "no" }}
