@@ -13,6 +13,7 @@ const MAX_KV_LENGTH = 4;
 
 export default function KeyVisualForm({ data, setData }) {
   const methods = useForm({
+    mode: "onChange",
     defaultValues: {
       kv: [
         { type: "image", title: "", subtitle: "", file1: null, file2: null },
@@ -21,12 +22,13 @@ export default function KeyVisualForm({ data, setData }) {
   });
 
   const { handleSubmit, reset, resetField, register } = methods;
+  
 
   useEffect(() => {
     if (Array.isArray(data) && data.length > 0) {
       reset({ kv: data });
     }
-  }, []); // 의존성 줄이기
+  }, [data]); // 의존성 줄이기
 
   const onSubmit = (formValues) => {
     setData(formValues.kv);
@@ -68,6 +70,7 @@ export default function KeyVisualForm({ data, setData }) {
                       <Upload
                         {...field}
                         label="PC 이미지"
+                        preview
                         acceptWith={`kv.${index}.type`}
                       />
                     )}

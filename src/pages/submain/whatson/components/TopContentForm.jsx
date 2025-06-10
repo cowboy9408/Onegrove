@@ -32,7 +32,7 @@ export default function TopContentForm({ data, setData }) {
     if (Array.isArray(data) && data.length > 0) {
       reset({ etc: data });
     }
-  }, []);
+  }, [data]);
 
   const onSubmit = (formValues) => {
     setData(formValues.etc);

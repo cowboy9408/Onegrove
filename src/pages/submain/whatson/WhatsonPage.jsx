@@ -7,14 +7,29 @@ import api from "@/lib/apiClient";
 import Button from "@/components/common/Button";
 
 function mapResponseToFormData(resData) {
+
+  const toImageMeta = (file) => {
+    if (!file || !file.name || !file.path) {
+      console.warn("이미지 path 누락:", file);
+      return null;
+    }
+
+    return {
+      id: file.id ?? null,
+      originalName: file.originalName || file.name,
+      name: file.name,
+      size: file.size,
+      extension: "." + (file.originalName || file.name).split(".").pop(),
+      mime: file.type || "image/png",
+      classification: "brand",
+      path: file.path,
+      status: file.status ?? "C",
+    };
+  };
   const kv =
     resData.keyVisual?.map((item) => ({
       type: item.contentType === "V" ? "video" : "image",
-      file: {
-        name: "",
-        url: item.contentFilePc?.url || "",
-        size: 0,
-      },
+      file: toImageMeta(item.contentFilePc),
       title: item.title || "",
       subtitle: item.subTitle || "",
     })) || [];
@@ -101,6 +116,9 @@ export default function WhatsonPage() {
 
         const mapped = mapResponseToFormData(res.data.data);
 
+
+        console.log("Response Data:", currentLang, lang, res.data.data.id, mapped);
+
         if (lang === "ko") {
           setKrId(res.data.data.id);
           setKrData(mapped);
@@ -109,6 +127,7 @@ export default function WhatsonPage() {
           setEnData(mapped);
         }
       } catch {
+        console.log("error nothing reset:", currentLang, lang, emptyData);
         if (lang === "ko") {
           setKrData(emptyData);
         } else {
@@ -134,7 +153,7 @@ export default function WhatsonPage() {
       window.location.reload();
     } catch (error) {
       console.error("저장 오류:", error);
-      alert("저장 중 오류가 발생했습니다.");
+      alert("필수입력 내용을 다시 확인해 주세요.");
     }
   };
 
