@@ -87,8 +87,9 @@ export default function AdminListPage() {
             <Col>
               <Select label={"관리자 유형"}>
                 <option value="">전체</option>
-                <option value="">관리자1</option>
-                <option value="">관리자2</option>
+                <option value="">일반</option>
+                <option value="">리테일</option>
+                <option value="">오피스</option>
               </Select>
             </Col>
             <Col>
