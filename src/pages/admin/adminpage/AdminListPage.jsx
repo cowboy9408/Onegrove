@@ -9,10 +9,10 @@ import Col from "@/components/layout/Col";
 import ResultSection from "@/components/layout/ResultSection";
 import Row from "@/components/layout/Row";
 import SearchSection from "@/components/layout/SearchSection";
-import { faker } from "@faker-js/faker";
 import { useEffect, useId, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Radio from "@/components/common/Radio";
+import api from "@/lib/apiClient";
 
 export default function AdminListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -32,52 +32,41 @@ export default function AdminListPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // TODO: faker 삭제
-      const generateFakePagedUsers = ({ page = 1, size = 10 }) => {
-        const totalElements = 23;
-        const totalPages = Math.ceil(totalElements / size);
-        const start = (page - 1) * size;
-
-        const data = Array.from({ length: size }, (_, i) => {
-          const index = start + i + 1;
-          return {
-            no: index,
-            _id: String(index),
-            type: faker.helpers.arrayElement(["관리자", "일반", "외부"]),
-            occupancy: faker.company.name(),
-            name: faker.person.lastName() + faker.person.firstName(),
-            username: faker.internet.userName(),
-            email: faker.internet.email(),
-            status: faker.helpers.arrayElement(["활성", "비활성"]),
-            created_user: faker.person.fullName(),
-            created_at: faker.date
-              .recent({ days: 30 })
-              .toISOString()
-              .split("T")[0],
-          };
-        });
-
-        return {
-          pageable: {
-            totalPages,
-            totalElements,
-            currentPage: page,
-            pageSize: size,
-          },
-          data: data.slice(0, totalElements - start), // 마지막 페이지 size 조정
+      try {
+        const params = {
+          page,
+          name,
+          email,
+          status: searchStatus,
         };
-      };
-      // END TODO faker 삭제
 
-      // TODO: FETCH DATA
-      const res = generateFakePagedUsers(page);
+        const response = await api.get("/api/v1/user/admin", { params });
+        const res = response.data;
 
-      setData(res.data);
-      setTotal(res.pageable.totalElements);
+        if (res.success) {
+          setData(
+            res.data.map((item) => ({
+              no: item.rownum,
+              _id: item.id,
+              type: item.role,
+              occupancy: "", // 입주사 없음
+              name: item.name,
+              username: item.username,
+              email: item.email,
+              status: item.status,
+              valuable: item.isUse,
+              created_at: item.createDatetime?.split("T")[0],
+            }))
+          );
+          setTotal(res.data.length); // 실제 total 값이 없으므로 추후 백엔드 개선 필요
+        }
+      } catch (error) {
+        console.error("API 요청 실패:", error);
+      }
     };
 
     fetchData();
-  }, [page]);
+  }, [page, name, email, searchStatus]);
 
   return (
     <div>
@@ -87,8 +76,9 @@ export default function AdminListPage() {
             <Col>
               <Select label={"관리자 유형"}>
                 <option value="">전체</option>
-                <option value="">관리자1</option>
-                <option value="">관리자2</option>
+                <option value="">일반</option>
+                <option value="">리테일</option>
+                <option value="">오피스</option>
               </Select>
             </Col>
             <Col>
@@ -164,7 +154,6 @@ export default function AdminListPage() {
           columns={[
             { key: "no", label: "번호" },
             { key: "type", label: "관리자 유형" },
-            { key: "occupancy", label: "입주사" },
             { key: "name", label: "이름" },
             { key: "username", label: "아이디" },
             { key: "email", label: "이메일" },

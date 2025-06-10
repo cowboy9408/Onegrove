@@ -28,6 +28,7 @@ const RegistForm = forwardRef(
 
       if (!isCurrentTab) return;
 
+      // 이미 설정한 값이면 더 이상 반영하지 않음
       const current = getValues("locations") || [];
       const next = locations || [];
 
@@ -39,7 +40,7 @@ const RegistForm = forwardRef(
         console.log(`[${lang}] setValue로 locations 반영`);
         setValue("locations", next);
       }
-    }, [locations, currentLang]); // ← 여기에 currentLang 추가
+    }, [currentLang]);
 
     const handleOfficeChange = (updatedList) => {
       const prevList = getValues("locations") || [];
@@ -50,17 +51,11 @@ const RegistForm = forwardRef(
 
       const finalList = [...updatedList, ...deletedItems];
 
+      // 현재 폼 내부 값 설정
       setValue("locations", finalList);
 
-      if (
-        (lang === "ko" && currentLang === 0) ||
-        (lang === "en" && currentLang === 1)
-      ) {
-        console.log(`[${lang}] setLocations 실행`);
-        setLocations(finalList);
-      } else {
-        console.log(`[${lang}] 현재 탭 아님 → setLocations 생략됨`);
-      }
+      //
+      setLocations(finalList);
     };
 
     useEffect(() => {
@@ -90,6 +85,7 @@ const RegistForm = forwardRef(
     useImperativeHandle(ref, () => ({
       submit: async (onError) => {
         const values = getValues();
+        const locations = values.locations || [];
 
         console.log("제출 값 확인:", values);
         console.log(`[${lang}] 제출값:`, getValues("locations"));
@@ -98,7 +94,11 @@ const RegistForm = forwardRef(
           setTimeout(() => onError?.("입주사명을 입력해주세요."), 0);
           return null;
         }
-        if (!Array.isArray(values.locations) || values.locations.length === 0) {
+        const activeLocations = locations.filter(
+          (loc) => loc.delYn !== "Y" && loc.office?.trim() && loc.floor?.trim()
+        );
+
+        if (activeLocations.length === 0) {
           setTimeout(() => onError?.("오피스를 1개 이상 등록해주세요."), 0);
           return null;
         }
@@ -145,13 +145,19 @@ const RegistForm = forwardRef(
             status: file.status ?? "C",
           };
         };
-        const sortedOfficeList = (values.locations || []).map((item, idx) => ({
-          id: item.id ?? null,
-          office: item.office,
-          floor: item.floor,
-          sort: idx + 1,
-          delYn: (item.delYn ?? "N").toUpperCase() === "Y" ? "Y" : "N",
-        }));
+
+        const sortedOfficeList = (values.locations || []).map((item, idx) => {
+          const rawDelYn = typeof item.delYn === "string" ? item.delYn : "N";
+          const delYn = rawDelYn.toUpperCase() === "Y" ? "Y" : "N";
+
+          return {
+            id: item.id ?? null,
+            office: item.office?.trim() || "UNKNOWN",
+            floor: item.floor?.trim() || "UNKNOWN",
+            sort: idx + 1,
+            delYn: delYn,
+          };
+        });
 
         return {
           id: data?.id,
@@ -217,10 +223,14 @@ const RegistForm = forwardRef(
             />
             <Input
               label="회의실 무료 예약시간"
-              type="number"
+              type="text" // ← number 대신 text 사용!
               inputMode="numeric"
               pattern="[0-9]*"
+              onInput={(e) => {
+                e.target.value = e.target.value.replace(/[^0-9]/g, ""); // 숫자 이외 제거
+              }}
               {...register("time", {
+                required: "회의실 무료 예약시간을 입력해주세요.",
                 pattern: {
                   value: /^[0-9]+$/,
                   message: "숫자만 입력해주세요.",

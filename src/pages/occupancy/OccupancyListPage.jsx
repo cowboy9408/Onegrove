@@ -108,10 +108,10 @@ export default function OccupancyListPage() {
     <div>
       <SearchSection>
         <Box>
-          <Row>
-            <Col>
+          <Row className="items-end gap-8">
+            <Col className="flex flex-col">
+              <label className="mb-1 text-sm font-medium">입주사명</label>
               <Input
-                label="입주사명"
                 placeholder="입주사명을 입력하세요"
                 value={searchFilter.name}
                 onChange={(e) =>
@@ -119,9 +119,10 @@ export default function OccupancyListPage() {
                 }
               />
             </Col>
-            <Col>
+
+            <Col className="flex flex-col">
+              <label className="mb-1 text-sm font-medium">오피스</label>
               <Select
-                label="오피스"
                 value={searchFilter.office}
                 onChange={(e) =>
                   setSearchFilter({ ...searchFilter, office: e.target.value })
@@ -132,9 +133,10 @@ export default function OccupancyListPage() {
                 <option value="B">B</option>
               </Select>
             </Col>
-            <Col>
+
+            <Col className="flex flex-col">
+              <label className="mb-1 text-sm font-medium">층수</label>
               <Input
-                label="층수"
                 placeholder="예: 3F"
                 value={searchFilter.floor}
                 onChange={(e) =>
@@ -142,28 +144,32 @@ export default function OccupancyListPage() {
                 }
               />
             </Col>
-            <Col className="flex items-center gap-4">
-              <span className="text-sm font-medium">사용 여부</span>
-              <Radio
-                name="status"
-                value="Y"
-                label="사용"
-                checked={searchFilter.status === "Y"}
-                onChange={() =>
-                  setSearchFilter({ ...searchFilter, status: "Y" })
-                }
-              />
-              <Radio
-                name="status"
-                value="N"
-                label="미사용"
-                checked={searchFilter.status === "N"}
-                onChange={() =>
-                  setSearchFilter({ ...searchFilter, status: "N" })
-                }
-              />
+
+            <Col className="flex flex-col">
+              <label className="mb-7 text-sm font-medium">사용 여부</label>
+              <div className="relative -top-[15px] mt-0 flex gap-4">
+                <Radio
+                  name="status"
+                  value="Y"
+                  label="사용"
+                  checked={searchFilter.status === "Y"}
+                  onChange={() =>
+                    setSearchFilter({ ...searchFilter, status: "Y" })
+                  }
+                />
+                <Radio
+                  name="status"
+                  value="N"
+                  label="미사용"
+                  checked={searchFilter.status === "N"}
+                  onChange={() =>
+                    setSearchFilter({ ...searchFilter, status: "N" })
+                  }
+                />
+              </div>
             </Col>
-            <Col className="self-end">
+
+            <Col className="flex gap-2 self-end">
               <Button
                 onClick={() => {
                   setPage(1);
