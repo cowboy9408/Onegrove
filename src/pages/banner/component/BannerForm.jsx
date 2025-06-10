@@ -19,31 +19,34 @@ const BannerForm = forwardRef(({ data, lang, menu }, ref) => {
   } = methods;
 
   useEffect(() => {
-    reset({ banner: data });
+    reset(data);
   }, [data]);
 
-  const banner = watch("banner") || {};
+  const banner = watch();
 
   useImperativeHandle(ref, () => ({
-    submit: async () => {
+    submit: async (onError) => {
       const getCleanedImage = (img) => {
         if (img?.status === "D") return null;
         return img;
       };
 
-      const values = getValues("banner");
+      const values = getValues();
 
-      if (
-        !values.title ||
-        !values.url ||
-        !values.bannerType ||
-        !values.displayYn
-      ) {
-        alert("필수 항목을 입력해주세요.");
+      const reject = (msg) => {
+        setTimeout(() => onError?.(msg), 0);
         return null;
-      }
+      };
+
+      if (!values.title) return reject("타이틀을 입력해주세요.");
+      if (!values.url) return reject("URL을 입력해주세요.");
+      if (!values.bannerType) return reject("배너 타입을 선택해주세요.");
+      if (!values.displayYn) return reject("사용 여부를 선택해주세요.");
+      if (!values.image1?.path) return reject("PC 이미지를 등록해주세요.");
+      if (!values.image2?.path) return reject("MO 이미지를 등록해주세요.");
 
       return {
+        id: values.id,
         menu,
         lang: lang.toUpperCase(),
         type: values.bannerType,
@@ -72,14 +75,14 @@ const BannerForm = forwardRef(({ data, lang, menu }, ref) => {
                 value="N"
                 label="기본형"
                 checked={banner?.bannerType === "N"}
-                onChange={() => setValue("banner.bannerType", "N")}
+                onChange={() => setValue("bannerType", "N")}
               />
               <Radio
                 name="banner.bannerType"
                 value="B"
                 label="대형"
                 checked={banner?.bannerType === "B"}
-                onChange={() => setValue("banner.bannerType", "B")}
+                onChange={() => setValue("bannerType", "B")}
               />
             </div>
           </Row>
@@ -93,14 +96,14 @@ const BannerForm = forwardRef(({ data, lang, menu }, ref) => {
                 value="Y"
                 label="사용"
                 checked={banner?.displayYn === "Y"}
-                onChange={() => setValue("banner.displayYn", "Y")}
+                onChange={() => setValue("displayYn", "Y")}
               />
               <Radio
                 name="banner.displayYn"
                 value="N"
                 label="미사용"
                 checked={banner?.displayYn === "N"}
-                onChange={() => setValue("banner.displayYn", "N")}
+                onChange={() => setValue("displayYn", "N")}
               />
             </div>
           </Row>
@@ -113,10 +116,10 @@ const BannerForm = forwardRef(({ data, lang, menu }, ref) => {
               placeholder="타이틀을 입력해주세요."
               maxLength={50}
               value={banner?.title || ""}
-              onChange={(e) => setValue("banner.title", e.target.value)}
+              onChange={(e) => setValue("title", e.target.value)}
               showDefaultInfo
               required
-              error={errors.banner?.title?.message}
+              error={errors.title?.message}
             />
           </Row>
 
@@ -128,7 +131,7 @@ const BannerForm = forwardRef(({ data, lang, menu }, ref) => {
               placeholder="서브타이틀을 입력해주세요."
               maxLength={50}
               value={banner?.subtitle || ""}
-              onChange={(e) => setValue("banner.subtitle", e.target.value)}
+              onChange={(e) => setValue("subtitle", e.target.value)}
               showDefaultInfo
               error={errors.banner?.subtitle?.message}
             />
@@ -140,7 +143,7 @@ const BannerForm = forwardRef(({ data, lang, menu }, ref) => {
               name="banner.image1"
               label="PC 이미지"
               value={banner?.image1}
-              onChange={(file) => setValue("banner.image1", file)}
+              onChange={(file) => setValue("image1", file)}
               required
             />
           </Row>
@@ -151,7 +154,7 @@ const BannerForm = forwardRef(({ data, lang, menu }, ref) => {
               name="banner.image2"
               label="MO 이미지"
               value={banner?.image2}
-              onChange={(file) => setValue("banner.image2", file)}
+              onChange={(file) => setValue("image2", file)}
               required
             />
           </Row>
@@ -163,7 +166,7 @@ const BannerForm = forwardRef(({ data, lang, menu }, ref) => {
               label="URL"
               placeholder="URL을 입력해주세요."
               value={banner?.url || ""}
-              onChange={(e) => setValue("banner.url", e.target.value)}
+              onChange={(e) => setValue("url", e.target.value)}
               required
               error={errors.banner?.url?.message}
             />
