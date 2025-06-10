@@ -486,7 +486,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           className="h-12 w-full"
           onClick={() => { setIsAddContent(!isAddContent)}}
         >
-          내용 추가
+          {isAddContent ? '내용 추가 등록 취소' : '내용 추가' }
         </Button>
 
         <div className={`contetnt2 ${ !isAddContent && 'hidden'}`}>
