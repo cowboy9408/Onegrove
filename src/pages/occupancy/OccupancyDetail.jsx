@@ -6,6 +6,7 @@ import Button from "@/components/common/Button";
 import RegistForm from "./component/RegistForm";
 import api from "@/lib/apiClient";
 import useModal from "@/hooks/useModal";
+import cloneDeep from "lodash/cloneDeep";
 
 export default function OccupancyDetail() {
   const navigate = useNavigate();
@@ -34,8 +35,8 @@ export default function OccupancyDetail() {
 
       setKoData(ko);
       setEnData(en);
-      setKoLocations(ko.officeList || en.officeList || []);
-      setEnLocations(en.officeList || ko.officeList || []);
+      setKoLocations(ko.officeList ?? cloneDeep(en.officeList || []));
+      setEnLocations(en.officeList ?? cloneDeep(ko.officeList || []));
 
       setLoading(false);
     } catch (err) {

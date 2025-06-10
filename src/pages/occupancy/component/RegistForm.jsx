@@ -223,7 +223,7 @@ const RegistForm = forwardRef(
             />
             <Input
               label="회의실 무료 예약시간"
-              type="text"
+              type="text" // ← number 대신 text 사용!
               inputMode="numeric"
               pattern="[0-9]*"
               onInput={(e) => {
