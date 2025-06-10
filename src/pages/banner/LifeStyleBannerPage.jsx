@@ -56,24 +56,21 @@ export default function MainBannerPage() {
     const isKorean = currentLang === 0;
     const ref = isKorean ? koRef : enRef;
 
-    // 1. 유효성 검사 수행
     const payload = await ref.current?.submit?.((message) => {
       showModal({
-        title: "입력 오류",
+        title: "필수 항목을 모두 입력해주세요.",
         message,
         showCancel: false,
       });
     });
 
-    // 유효성 실패 시 종료
     if (!payload) return;
 
-    // 2. 저장 확인 모달 표시
     showModal({
       title: "저장 확인",
       message: "입력한 내용을 저장하시겠습니까?",
       showCancel: true,
-      onConfirm: () => handleSave(payload), // → 확인 시 저장 실행
+      onConfirm: () => handleSave(payload),
     });
   };
 
