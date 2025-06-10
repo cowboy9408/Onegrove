@@ -9,7 +9,6 @@ import useModal from "@/hooks/useModal";
 
 export default function Upload({
   name,
-
   value: externalValue,
   onChange: externalOnChange,
   label = "파일 업로드",
@@ -124,6 +123,9 @@ export default function Upload({
       const formData = new FormData();
       formData.append("file", selectedFile);
       formData.append("classification", classification);
+
+      console.log("파일 업로드 시작", selectedFile);
+      console.log("파일 업로드 시작", classification);
 
       const res = await api.post("/api/v1/file/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
