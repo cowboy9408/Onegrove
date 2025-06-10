@@ -16,8 +16,7 @@ import DateRangePicker from "@/components/common/Datepicker";
 import SelectInput from "@/components/common/SelectInput";
 import Radio from "@/components/common/Radio";
 
-
-export default function FnqListPage() {
+export default function InquiryListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [name, setName] = useState(searchParams.get("name") || "");
@@ -26,18 +25,16 @@ export default function FnqListPage() {
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [startDate, setStartDate] = useState(null);
-const [endDate, setEndDate] = useState(null);
-const [statusType, setStatusType] = useState("상태");
-const [statusKeyword, setStatusKeyword] = useState("");
-const [language, setLanguage] = useState("all"); // 언어 상태
+  const [endDate, setEndDate] = useState(null);
+  const [statusType, setStatusType] = useState("상태");
+  const [statusKeyword, setStatusKeyword] = useState("");
+  const [language, setLanguage] = useState("all"); // 언어 상태
 
-const handleLanguageChange = (e) => {
+  const handleLanguageChange = (e) => {
     setLanguage(e.target.value);
   };
 
-
   const nameId = useId();
-  
 
   const size = 10;
 
@@ -94,7 +91,6 @@ const handleLanguageChange = (e) => {
       <SearchSection>
         <Box>
           <Row>
-            
             <Col>
               <Select label={"상태"}>
                 <option value="">전체</option>
@@ -110,61 +106,61 @@ const handleLanguageChange = (e) => {
               </Select>
             </Col>
             <Row className="pb-4">
-  <Col>
-    <p className="mb-1 text-sm font-medium text-gray-800">언어</p>
-    <div className="flex gap-4">
-      <Radio
-        id="lang-all"
-        name="language"
-        value="all"
-        checked={language === "all"}
-        onChange={handleLanguageChange}
-        label="전체"
-      />
-      <Radio
-        id="lang-ko"
-        name="language"
-        value="ko"
-        checked={language === "ko"}
-        onChange={handleLanguageChange}
-        label="국문"
-      />
-      <Radio
-        id="lang-en"
-        name="language"
-        value="en"
-        checked={language === "en"}
-        onChange={handleLanguageChange}
-        label="영문"
-      />
-    </div>
-  </Col>
-</Row>
+              <Col>
+                <p className="mb-1 text-sm font-medium text-gray-800">언어</p>
+                <div className="flex gap-4">
+                  <Radio
+                    id="lang-all"
+                    name="language"
+                    value="all"
+                    checked={language === "all"}
+                    onChange={handleLanguageChange}
+                    label="전체"
+                  />
+                  <Radio
+                    id="lang-ko"
+                    name="language"
+                    value="ko"
+                    checked={language === "ko"}
+                    onChange={handleLanguageChange}
+                    label="국문"
+                  />
+                  <Radio
+                    id="lang-en"
+                    name="language"
+                    value="en"
+                    checked={language === "en"}
+                    onChange={handleLanguageChange}
+                    label="영문"
+                  />
+                </div>
+              </Col>
+            </Row>
             <Row>
-             <Col>
-        <DateRangePicker
-          startDate={startDate}
-          endDate={endDate}
-          onChange={({ startDate, endDate }) => {
-            setStartDate(startDate);
-            setEndDate(endDate);
-          }}
-        />
-      </Col>
-      </Row>
-      <Row>
-      <Col>
-      <SelectInput
-  label="키워드 검색"
-  selectOptions={["전체", "아이디", "이름"]}
-  selectValue={statusType}
-  onSelectChange={(e) => setStatusType(e.target.value)}
-  inputValue={statusKeyword}
-  onInputChange={(e) => setStatusKeyword(e.target.value)}
-  onClear={() => setStatusKeyword("")}
-/>
-      </Col>   
-      </Row>
+              <Col>
+                <DateRangePicker
+                  startDate={startDate}
+                  endDate={endDate}
+                  onChange={({ startDate, endDate }) => {
+                    setStartDate(startDate);
+                    setEndDate(endDate);
+                  }}
+                />
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <SelectInput
+                  label="키워드 검색"
+                  selectOptions={["전체", "아이디", "이름"]}
+                  selectValue={statusType}
+                  onSelectChange={(e) => setStatusType(e.target.value)}
+                  inputValue={statusKeyword}
+                  onInputChange={(e) => setStatusKeyword(e.target.value)}
+                  onClear={() => setStatusKeyword("")}
+                />
+              </Col>
+            </Row>
             <Col className="self-end">
               <Button
                 className={"h-12 w-full"}
@@ -180,7 +176,6 @@ const handleLanguageChange = (e) => {
       </SearchSection>
       <ResultSummary total={total} />
       <ResultSection>
-        
         <DataTable
           columns={[
             { key: "no", label: "번호" },

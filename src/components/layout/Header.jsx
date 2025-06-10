@@ -29,7 +29,7 @@ export default function Header() {
       </div>
 
       <div className="flex items-center gap-4 px-6 py-4">
-        <DarkModeToggle />
+        {/* <DarkModeToggle /> */}
 
         <Tooltip label={meta?.description || meta?.title}>
           <BadgeAlertIcon size={20} />
