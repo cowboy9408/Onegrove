@@ -20,11 +20,10 @@ export default function PressRegist() {
   // 영문 상태
   const [enData, setEnData] = useState({});
 
-  const handleSave = async () => {
+  const handleClickSave = async () => {
     const ref = currentLang === 0 ? koFormRef : enFormRef;
-    const payload = await formRef.current?.submit();
-    console.log("payload:", payload);
 
+    // 폼 유효성 검사 (필수 항목 누락 시 모달)
     const form = await ref.current?.submit?.((message) => {
       showModal({
         title: "필수 항목을 입력해 주세요.",
@@ -35,6 +34,16 @@ export default function PressRegist() {
 
     if (!form) return;
 
+    // 유효성 통과 → 저장 확인 모달
+    showModal({
+      title: "저장 확인",
+      message: "저장하시겠습니까?",
+      showCancel: true,
+      onConfirm: () => handleSave(form),
+    });
+  };
+
+  const handleSave = async (form) => {
     try {
       await api.post("/api/v1/press/insert", form);
       navigate("/contents/whatson/media");
@@ -73,14 +82,7 @@ export default function PressRegist() {
       </Tabs>
       <div className="flex justify-end gap-4 px-6 pb-6">
         <Button
-          onClick={() =>
-            showModal({
-              title: "저장 확인",
-              message: "저장하시겠습니까?",
-              showCancel: true,
-              onConfirm: handleSave,
-            })
-          }
+          onClick={handleClickSave} // 기존 showModal → 새 함수로 교체
         >
           저장
         </Button>
