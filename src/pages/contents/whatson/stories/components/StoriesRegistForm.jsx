@@ -314,7 +314,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         {/* 카테고리 + 상태 */}
         <div className="flex justify-between items-end gap-4">
           <div className="w-1/2">
-            <Input label="카테고리" {...methods.register("category")} maxLength={50} required />
+            <Input label="카테고리" {...methods.register("category")} maxLength={50} required showDefaultInfo={true} />
           </div>
           <div className="w-1/2">
             <Input
@@ -330,7 +330,8 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
 
                 setValue("order", val === "" ? "" : Number(val));
               }}
-              type="number"
+              type="tel"
+              info="노출순서 최대 설정값 : 100"
             />
           </div>
 
@@ -447,7 +448,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             onChange={(file) => setValue("imgPc", file)}
             accept="image/png, image/jpeg, image/jpg, image/webp"
             showDefaultInfo={true}
-            info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
+            info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
           
           />
           <Upload
@@ -510,6 +511,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
           />
+          <Input {...methods.register("category")} info="PC 이미지 1 캡션 영역" />
 
           <Upload
             name="banner"
@@ -521,7 +523,9 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             accept="image/png, image/jpeg, image/jpg, image/webp"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
+            className="mt-4"
           />
+          <Input {...methods.register("category")} info="PC 이미지 캡션 영역" />
 
           <Upload
             name="banner"
@@ -533,7 +537,9 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             accept="image/png, image/jpeg, image/jpg, image/webp"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
+            className="mt-4"
           />
+          <Input {...methods.register("category")} info="PC 이미지 캡션 영역" />
         </div>
 
 
@@ -550,6 +556,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
           />
+          <Input {...methods.register("category")} info="MO 이미지 캡션 영역" />
           <Upload
             name="extraImage"
             label="MO 스와이프이미지 2"
@@ -560,7 +567,9 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             accept="image/png, image/jpeg, image/jpg, image/webp"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
+            className="mt-4"
           />
+          <Input label="MO 이미지 2 캡션 영역" {...methods.register("category")} info="MO 이미지 캡션 영역" />
           <Upload
             name="extraImage"
             label="MO 스와이프이미지 3"
@@ -571,7 +580,9 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             accept="image/png, image/jpeg, image/jpg, image/webp"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
+            className="mt-4"
           />
+          <Input label="MO 이미지 3 캡션 영역" {...methods.register("category")} info="MO 이미지 캡션 영역" />
         </div>
 
 
