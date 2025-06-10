@@ -290,7 +290,7 @@ export default function PressDetail() {
               <PressRegistForm
                 ref={enFormRef}
                 data={enData}
-                lang="ko"
+                lang="en"
                 // readOnly={isReadOnly}
               />
               <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">

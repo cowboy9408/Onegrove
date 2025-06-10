@@ -6,13 +6,11 @@ import { FileTextIcon } from "@/components/ui/file-text";
 import { HomeIcon } from "@/components/ui/home";
 import { LayoutPanelTopIcon } from "@/components/ui/layout-panel-top";
 import { SettingsGearIcon } from "@/components/ui/settings-gear";
-import { UserIcon } from "@/components/ui/user";
 import { UsersIcon } from "@/components/ui/users";
 import AuthLayout from "@/layouts/AuthLayout";
 import RetailLayout from "@/pages/retail/RetailLayout";
 import ContentsLayout from "@/pages/contents/ContentsLayout";
 import WhatsonLayout from "@/pages/contents/whatson/WhatsonLayout";
-import LifeStyleLayout from "@/pages/contents/lifestyle/LifeStyleLayout";
 import OfficeLayout from "@/pages/office/OfficeLayout";
 import InquiryLayout from "@/pages/inquiry/InquiryLayout";
 import SystemLayout from "@/pages/system/SystemLayout";
@@ -34,7 +32,6 @@ import PopupListPage from "@/pages/popup/PopupListPage";
 import EventListPage from "@/pages/contents/whatson/event/EventListPage";
 import StoriesListPage from "@/pages/contents/whatson/stories/StoriesListPage";
 import PressListPage from "@/pages/contents/whatson/media/PressListPage";
-import All from "@/pages/contents/lifestyle/all/All";
 import Meeting from "@/pages/office/meeting/Meeting";
 import Visit from "@/pages/office/visit/Visit";
 import Sleep from "@/pages/office/sleep/Sleep";
@@ -46,9 +43,7 @@ import AdminRegist from "@/pages/admin/adminpage/AdminRegist";
 import UserRegist from "@/pages/user/UserRegist";
 import OccupancyRegist from "@/pages/occupancy/OccupancyRegist";
 import BrandRegist from "@/pages/retail/brand/BrandRegist";
-import WhatsOnRegist from "@/pages/contents/whatson/event/WhatsOnRegist";
 import PressRegist from "@/pages/contents/whatson/media/PressRegist";
-import StoriesCont from "@/pages/contents/whatson/stories/StoriesCont";
 import AffairListPage from "@/pages/admin/adminpage/AffairListPage";
 import AffairRegist from "@/pages/admin/adminpage/AffairRegist";
 import PopupRegist from "@/pages/popup/PopupRegist";
@@ -60,6 +55,12 @@ import LifeStylePage from "@/pages/submain/lifestyle/LifeStylePage";
 import WhatsonPage from "@/pages/submain/whatson/WhatsonPage";
 import WorkPage from "@/pages/submain/work/WorkPage";
 import BannerLayout from "@/pages/banner/BannerLayout";
+import OccupancyDetail from "@/pages/occupancy/OccupancyDetail";
+import MainBannerPage from "@/pages/banner/MainBannerPage";
+import WhatsonBannerPage from "@/pages/banner/WhatsonBannerPage";
+import LifeStyleBannerPage from "@/pages/banner/LifeStyleBannerPage";
+import WorkBannerPage from "@/pages/banner/WhatsonBannerPage";
+import AboutBannerPage from "@/pages/banner/AboutBannerPage";
 
 export const routeMeta = [
   {
@@ -163,6 +164,14 @@ export const routeMeta = [
         path: "/occupancy/regist",
         element: <OccupancyRegist />,
         title: "입주사 등록",
+        hidden: true,
+        permissions: ["Admin", "User"],
+      },
+      {
+        uuid: "6f56e1bc-b894-4403-8399-dd389d4540b6",
+        path: "/occupancy/detail/:id",
+        element: <OccupancyDetail />,
+        title: "입주사 상세 페이지",
         hidden: true,
         permissions: ["Admin", "User"],
       },
@@ -274,25 +283,41 @@ export const routeMeta = [
         children: [
           {
             uuid: "3183d249-9f8e-42f9-9745-ab251a784135",
+            path: "/banner/main",
+            element: <MainBannerPage />,
+            title: "Main 메뉴",
+            hidden: false,
+            permissions: ["Admin", "User"],
+          },
+          {
+            uuid: "9d93fcbe-641f-42a6-98fd-b7ba93201834",
             path: "/banner/whatson",
-            element: <WhatsonPage />,
-            title: "What's On 관리",
+            element: <WhatsonBannerPage />,
+            title: "What's On 메뉴",
             hidden: false,
             permissions: ["Admin", "User"],
           },
           {
-            uuid: "5434ebe5-4879-4ba1-9c41-90afc4beea54",
+            uuid: "d4228ac7-87dd-48e1-9b5b-bacae5b367b9",
             path: "/banner/lifestyle",
-            element: <LifeStylePage />,
-            title: "LifeStyle 관리",
+            element: <LifeStyleBannerPage />,
+            title: "LifeStyle 메뉴",
             hidden: false,
             permissions: ["Admin", "User"],
           },
           {
-            uuid: "ddef41a9-2eff-4c9d-9a05-68a133b3b16b",
+            uuid: "0c33961e-71d2-4cc0-a678-aaa9c5c11ecc",
             path: "/banner/work",
-            element: <WorkPage />,
-            title: "Work 관리",
+            element: <WorkBannerPage />,
+            title: "Work 메뉴",
+            hidden: false,
+            permissions: ["Admin", "User"],
+          },
+          {
+            uuid: "17020178-0250-4457-9d87-1bafe7375e05",
+            path: "/banner/about",
+            element: <AboutBannerPage />,
+            title: "About 메뉴",
             hidden: false,
             permissions: ["Admin", "User"],
           },

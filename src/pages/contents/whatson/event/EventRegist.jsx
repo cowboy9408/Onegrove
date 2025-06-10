@@ -19,8 +19,11 @@ export default function EventRegist() {
   const [koData, setKoData] = useState({});
   // 영문 상태
   const [enData, setEnData] = useState({});
-  const handleSave = async () => {
+
+  const handleClickSave = async () => {
     const ref = currentLang === 0 ? koFormRef : enFormRef;
+
+    // 폼 유효성 검사 (필수 항목 누락 시 모달)
     const form = await ref.current?.submit?.((message) => {
       showModal({
         title: "필수 항목을 입력해 주세요.",
@@ -28,10 +31,19 @@ export default function EventRegist() {
         showCancel: false,
       });
     });
-    console.log("payload:", form);
-    //
+
     if (!form) return;
 
+    // 유효성 통과 → 저장 확인 모달
+    showModal({
+      title: "저장 확인",
+      message: "저장하시겠습니까?",
+      showCancel: true,
+      onConfirm: () => handleSave(form),
+    });
+  };
+
+  const handleSave = async (form) => {
     try {
       await api.post("/api/v1/event-promotion/item/insert", form);
 
@@ -78,18 +90,7 @@ export default function EventRegist() {
         </TabPanel>
       </Tabs>
       <div className="flex justify-end gap-4 px-6 pb-6">
-        <Button
-          onClick={() =>
-            showModal({
-              title: "저장 확인",
-              message: "저장하시겠습니까?",
-              showCancel: true,
-              onConfirm: handleSave,
-            })
-          }
-        >
-          저장
-        </Button>
+        <Button onClick={handleClickSave}>저장</Button>
         <Button
           type="button"
           className="bg-gray-200"

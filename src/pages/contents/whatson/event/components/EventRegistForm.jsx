@@ -31,9 +31,10 @@ const EventRegistForm = forwardRef(
       mode: "onChange",
       defaultValues: {
         status: "inactive",
-        progressStatus: "inProgress",
+        progressStatus: data?.progressYn === "Y" ? "inProgress" : "ended",
       },
     });
+
     const { register, setValue, getValues, watch, control } = methods;
     const editorRef1 = useRef();
     const editorRef2 = useRef();
@@ -87,6 +88,15 @@ const EventRegistForm = forwardRef(
     }, [watch("brandId")]);
 
     useEffect(() => {
+      if (data?.progressYn) {
+        setValue(
+          "progressStatus",
+          data.progressYn === "Y" ? "inProgress" : "ended"
+        );
+      }
+    }, [data, setValue]);
+
+    useEffect(() => {
       if (data?.brandId) {
         setValue("brandId", data.brandId); // ← 이 줄을 새로 추가합니다!
       }
@@ -97,6 +107,13 @@ const EventRegistForm = forwardRef(
         setValue("category", category);
       }
     }, [category]);
+
+    useEffect(() => {
+      const newValue = data?.progressYn === "Y" ? "inProgress" : "ended";
+      setTimeout(() => {
+        setValue("progressStatus", newValue);
+      }, 0);
+    }, [data?.progressYn, setValue]);
 
     useEffect(() => {
       const subscription = watch((value, { name }) => {
@@ -192,6 +209,7 @@ const EventRegistForm = forwardRef(
           description: watch("description"),
           endInput: watch("endInput"),
           manualEndInput: watch("manualEndInput"),
+          progressYn: watch("progressStatus") === "inProgress" ? "Y" : "N",
         };
         const content = await editorRef1.current?.getContent?.();
         const description = watch("description");
@@ -256,14 +274,13 @@ const EventRegistForm = forwardRef(
           onError?.("디스크립션을 입력해주세요.");
           return null;
         }
-
+        console.log("최종 제출값:", values.progressStatus);
         console.log("검사 대상 값들:", {
           title: values.title,
           category: values.category,
           startDate: startDate,
           endDate: values.manualEndInput ? null : endDateStr,
           endInput: values.manualEndInput ? values.endInput : null,
-
           thumbImg: values.thumbImg,
           imgBodyPc: values.imgBodyPc,
           imgBodyMo: values.imgBodyMo,
@@ -332,7 +349,7 @@ const EventRegistForm = forwardRef(
           endDate: values.manualEndInput ? null : endDateStr,
           endInput: values.manualEndInput ? values.endInput : null,
           manualEndInput: values.manualEndInput,
-          progressYn: values.progressStatus === "inProgress" ? "Y" : "N",
+          progressYn: watch("progressStatus") === "inProgress" ? "Y" : "N",
           brandId: brands[0]?._id ?? null,
           delYn: "N",
         };
@@ -580,21 +597,29 @@ const EventRegistForm = forwardRef(
             <p className="min-w-[80px] text-sm font-medium text-gray-800">
               진행 상태<span className="ml-1 text-red-500">*</span>
             </p>
-            <Radio
+            <Controller
               name="progressStatus"
-              value="inProgress"
-              label="진행"
-              checked={watch("progressStatus") === "inProgress"}
-              onChange={() => setValue("progressStatus", "inProgress")}
-              disabled={readOnly}
-            />
-            <Radio
-              name="progressStatus"
-              value="ended"
-              label="종료"
-              checked={watch("progressStatus") === "ended"}
-              onChange={() => setValue("progressStatus", "ended")}
-              disabled={readOnly}
+              control={control}
+              render={({ field }) => (
+                <>
+                  <Radio
+                    {...field}
+                    value="inProgress"
+                    checked={field.value === "inProgress"}
+                    onChange={() => field.onChange("inProgress")}
+                    label="진행"
+                    disabled={readOnly}
+                  />
+                  <Radio
+                    {...field}
+                    value="ended"
+                    checked={field.value === "ended"}
+                    onChange={() => field.onChange("ended")}
+                    label="종료"
+                    disabled={readOnly}
+                  />
+                </>
+              )}
             />
           </div>
 
