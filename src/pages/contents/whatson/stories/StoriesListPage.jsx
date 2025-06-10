@@ -42,25 +42,34 @@ export default function StoriesListPage() {
     const fetchData = async () => {
       try {
         const res = await api.get("/api/v1/stories");
-        const json = res.data;
+        const json = res.data?.data || [];
+
+        // console.log("Fetched Stories Data:", json.sort((a, b) => a.id - b.id));
+        // console.log("Fetched Stories Data:", json.sort((a, b) => b.id - a.id));
 
         if (Array.isArray(json)) {
           const rows = json.map((item, index) => {
             const koItem = item.contentList.find((i) => i.lang === "KO") || {};
             const enItem = item.contentList.find((i) => i.lang === "EN") || {};
 
+            console.log("koItem:", koItem);
+            console.log("enItem:", enItem);
+
+            console.log("item:", koItem.category);
+
+
             return {
               originalIndex: item.id,
               _id: String(item.id),
               no: index + 1,
               occupancy: Number(koItem.sort) || 0,
-              name: koItem.category || "-",
+              category: koItem.category || "-",
               language:
                 koItem.lang && enItem.lang ? "both" : koItem.lang ? "ko" : "en",
               ko_title: koItem.title || "-",
               en_title: enItem.title || "-",
-              email: koItem.status || "진행중",
-              status: koItem.showYn || "미노출",
+              status: koItem.status || "진행중",
+              showYn: koItem.showYn || "미노출",
               created_user: koItem.createUser || "-",
               created_at: koItem.createDt || "-",
             };
@@ -74,7 +83,7 @@ export default function StoriesListPage() {
               row.en_title.includes(name);
             const categoryMatch = category === "" || row.name === category;
             const visibilityMatch =
-              visibility === "" || row.status === visibility;
+              visibility === "" || row.showYn === visibility;
             const dateMatch =
               (!dateRange.startDate ||
                 new Date(row.created_at) >= new Date(dateRange.startDate)) &&
@@ -89,7 +98,7 @@ export default function StoriesListPage() {
           const end = start + size;
           const sliced = sorted.slice(start, end).map((row, idx) => ({
             ...row,
-            no: start + idx + 1,
+            no: filtered.length - (start + idx),
           }));
 
           setData(sliced);
@@ -191,7 +200,6 @@ export default function StoriesListPage() {
             className="bg-black text-white hover:bg-gray-800"
             onClick={() => {
               if (checkedIds.length === 0) return;
-              console.log("삭제 버튼 클릭됨");
               showModal({
                 title: "스토리 삭제 확인",
                 message: "정말 삭제하시겠습니까?",
@@ -199,11 +207,13 @@ export default function StoriesListPage() {
                 confirmButton: "삭제",
                 onConfirm: async () => {
                   try {
-                    await api.post("/api/v1/stories/delete", {
-                      ids: checkedIds.map((id) => Number(id)),
-                    });
+                    await api.post("/api/v1/stories/delete", 
+                      checkedIds.map((id) => Number(id)),
+                    );
+                    console.log("삭제 성공");
                     setCheckedIds([]);
                     setPage(1);
+                    window.location.reload();
                   } catch (err) {
                     console.error("삭제 실패:", err);
                   }
@@ -220,7 +230,7 @@ export default function StoriesListPage() {
           columns={[
             { key: "no", label: "번호" },
             { key: "occupancy", label: "노출순서" },
-            { key: "name", label: "카테고리" },
+            { key: "category", label: "카테고리" },
             {
               key: "language",
               label: "언어",
@@ -236,13 +246,27 @@ export default function StoriesListPage() {
               label: "타이틀",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <div className="p-2">{row.ko_title}</div>
-                  <div className="p-2">{row.en_title}</div>
+                  <button
+                    className={`text-black-600 truncate p-2 text-left cursor-pointer ${row.ko_title !== "-" && row.ko_title !== null && "underline"}`}
+                    onClick={() =>
+                      navigate(`/contents/whatson/stories/${row.originalIndex}?lang=ko`)
+                    }
+                  >
+                    {row.ko_title}
+                  </button>
+                  <button
+                    className={`text-black-600 truncate p-2 text-left cursor-pointer ${row.en_title !== "-" && row.en_title !== null && "underline"}`}
+                    onClick={() =>
+                      navigate(`/contents/whatson/stories/${row.originalIndex}?lang=en`)
+                    }
+                  >
+                    {row.en_title}
+                  </button>
                 </div>
               ),
             },
-            { key: "email", label: "상태여부" },
-            { key: "status", label: "노출여부" },
+            { key: "status", label: "상태여부" },
+            { key: "showYn", label: "노출여부" },
             { key: "created_user", label: "등록자" },
             { key: "created_at", label: "등록일시" },
           ]}
