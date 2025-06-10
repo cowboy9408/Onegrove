@@ -1,7 +1,7 @@
 import Section from "@/components/layout/Section";
 import Tabs, { TabPanel } from "@/components/layout/Tabs";
 import { useEffect, useState, useRef } from "react";
-import EventRegistForm from "./components/EventRegistForm";
+import StoriesRegistForm from "./components/StoriesRegistForm";
 import Button from "@/components/common/Button";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import api from "@/lib/apiClient";
@@ -37,13 +37,14 @@ export default function StoriesDetail() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await api.get(`/api/v1/stories/detail/${emId}/KO`);
-        console.log("API 응답 결과:", res.data);
+        const resKO = await api.get(`/api/v1/stories/detail/${emId}/KO`);
+        const resEN = await api.get(`/api/v1/stories/detail/${emId}/EN`);
+        console.log("API 응답 결과:", resKO.data, resEN.data);
 
-        const list = Array.isArray(res.data?.data) ? res.data.data : [];
+        // const list = Array.isArray(resKO.data?.data) ? resKO.data.data : [];
 
-        const ko = list.find((item) => item.lang === "ko") || null;
-        const en = list.find((item) => item.lang === "en") || null;
+        const ko = resKO.data.data || [];
+        const en = resEN.data.data || [];
 
         console.log("koData:", ko);
         console.log("enData:", en);
@@ -354,7 +355,7 @@ export default function StoriesDetail() {
         <TabPanel>
           {!loading && (
             <>
-              <EventRegistForm
+              <StoriesRegistForm
                 ref={koFormRef}
                 data={koData}
                 setData={setKoData}
@@ -401,7 +402,7 @@ export default function StoriesDetail() {
         <TabPanel>
           {!loading && (
             <>
-              <EventRegistForm
+              <StoriesRegistForm
                 ref={enFormRef}
                 data={enData}
                 setData={setEnData}

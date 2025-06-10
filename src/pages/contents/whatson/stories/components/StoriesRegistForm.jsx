@@ -32,6 +32,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
   });
   const { register, setValue, getValues, watch, control } = methods;
   const editorRef = useRef();
+  const editorRef2 = useRef();
   const [brands, setBrands] = useState([]);
   const { showModal } = useModal();
 
@@ -42,6 +43,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [isManualEndInput, setIsManualEndInput] = useState(false);
   const [manualEndText, setManualEndText] = useState("");
+  const [isAddContent, setIsAddContent] = useState(false);
 
 
   useEffect(() => {
@@ -90,10 +92,12 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
 
   const onSubmit = async (data) => {
     const content = await editorRef.current.getContent();
+    const content1 = await editorRef2.current.getContent();
     console.log({
       ...data,
       brandIds: brands.map((e) => e._id),
       content,
+      content1
       // ...dateRange,
     });
   };
@@ -133,6 +137,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           manualEndInput: watch("manualEndInput"),
         };
         const content = await editorRef.current?.getContent?.();
+        const content1 = await editorRef2.current?.getContent?.();
         const description = watch("description");
   
         const [startHour, startMin] = startTime.split(":").map(Number);
@@ -147,7 +152,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         const endDateStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")}T${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
   
         if (!values.category) {
-          onError?.("카테고리를 선택해주세요.");
+          onError?.("카테고리를 입력해주세요.");
           return null;
         }
         if (!values.title) {
@@ -265,6 +270,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           imgPc: toImageMeta(values.imgPc),
           imgMo: toImageMeta(values.imgMo),
           content: content || "",
+          content1: content1 || "",
           description: description || "",
           startDate: startDateStr,
           endDate: values.manualEndInput ? null : endDateStr,
@@ -291,45 +297,145 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         onSubmit={methods.handleSubmit(onSubmit)}
         className="space-y-6 p-6"
       >
+
+        <Input label="제목" {...methods.register("title")} required maxLength={100} showDefaultInfo={true} />
+
+        {/* 내용 텍스트 공간 */}
+        <Textarea
+          id="description"
+          name="description"
+          label="디스크립션"
+          value={watch("description")}
+          onChange={(e) => setValue("description", e.target.value)}
+          required
+          maxLength={200}
+        />
+
         {/* 카테고리 + 상태 */}
+        <div className="flex justify-between items-end gap-4">
+          <div className="w-1/2">
+            <Input label="카테고리" {...methods.register("category")} maxLength={50} required />
+          </div>
+          <div className="w-1/2">
+            <Input
+              label="노출 순서"
+              {...methods.register("order")}
+              onInput={(e) => {
+                let val = e.target.value.replace(/[^0-9]/g, ""); // 숫자만
+
+                if (val !== "") {
+                  const num = Math.max(1, Math.min(100, parseInt(val)));
+                  val = String(num);
+                }
+
+                setValue("order", val === "" ? "" : Number(val));
+              }}
+              type="number"
+            />
+          </div>
+
+          
+        </div>
+        
         <div className="flex justify-between items-end">
-          <Select
-            label="카테고리"
-            {...methods.register("category")}
-            required
-            className="w-1/2"
-          >
-            <option value="">선택</option>
-            <option value="promotion">프로모션</option>
-            <option value="event">이벤트</option>
-          </Select>
-          <div className="flex items-center gap-4">
-  <p className="text-sm font-medium text-gray-800 whitespace-nowrap">
-    노출 여부
-  </p>
-  <div className="flex gap-4">
-    <Radio
-      name="status"
-      value="active"
-      label="사용"
-      checked={methods.watch("status") === "active"}
-      onChange={() => methods.setValue("status", "active")}
-    />
-    <Radio
-      name="status"
-      value="inactive"
-      label="미사용"
-      checked={methods.watch("status") === "inactive"}
-      onChange={() => methods.setValue("status", "inactive")}
-    />
-  </div>
-</div>
+          <div className="w-1/2">
+            <p className="mb-1 block pb-2 pl-1 text-sm font-medium text-gray-800">
+              노출 기간<span className="ml-1 text-red-500">*</span>
+            </p>
+            {/* 시작 날짜 + 시간 */}
+            <div className="flex items-center gap-4">
+              {/* 시작 날짜 + 시간 */}
+              <div className="flex items-center gap-2">
+                <Datepicker
+                  mode="single"
+                  selectedDate={startDate}
+                  onSingleChange={(date) => {
+                    setStartDate(date);
+                    setValue("startDate", date?.toISOString());
+                  }}
+                  readOnly={readOnly}
+                />
+                <input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="rounded border px-2 py-1"
+                  disabled={readOnly}
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="font-bold">~</span>
+                <Checkbox
+                  id="manualEnd"
+                  checked={isManualEndInput}
+                  onChange={(e) => {
+                    setIsManualEndInput(e.target.checked);
+                    setValue("manualEndInput", e.target.checked);
+                  }}
+                  disabled={readOnly}
+                />
+
+                {isManualEndInput ? (
+                  <input
+                    type="text"
+                    value={manualEndText}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setManualEndText(val);
+                      setValue("endInput", val);
+                    }}
+                    placeholder="공백 포함 최대 10자"
+                    className="w-52 rounded border px-2 py-1"
+                    disabled={readOnly}
+                  />
+                ) : (
+                  <>
+                    <Datepicker
+                      mode="single"
+                      selectedDate={endDate}
+                      onSingleChange={(date) => {
+                        setEndDate(date);
+                        setValue("endDate", date?.toISOString());
+                      }}
+                      readOnly={readOnly}
+                    />
+                    <input
+                      type="time"
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                      className="rounded border px-2 py-1"
+                      disabled={readOnly}
+                    />
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="w-1/2 flex items-center gap-4 justify-end">
+            <p className="text-sm font-medium text-gray-800 whitespace-nowrap">
+              노출 여부<span className="ml-1 text-red-500">*</span>
+            </p>
+            <div className="flex gap-4">
+              <Radio
+                name="status"
+                value="active"
+                label="사용"
+                checked={methods.watch("status") === "active"}
+                onChange={() => methods.setValue("status", "active")}
+              />
+              <Radio
+                name="status"
+                value="inactive"
+                label="미사용"
+                checked={methods.watch("status") === "inactive"}
+                onChange={() => methods.setValue("status", "inactive")}
+              />
+            </div>
+          </div>
         </div>
 
-        <Input label="노출 순서" {...methods.register("order")} type="number" required />
-        <Input label="타이틀" {...methods.register("title")} maxLength={50} required />
-
-        <div className="space-y-4">
+        <div className="space-y-2">
           <Upload
             key={`thumbnail-upload`}
             name="thumbnail"
@@ -344,151 +450,160 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
           
           />
-          <Upload name="banner" label="PC 본문 이미지" />
-          <Upload name="extraImage" label="모바일 본문 이미지" />
+          <Upload
+            name="banner"
+            label="페이지 상단 패턴 PC 이미지"
+            required
+            classification="stroies"
+            readOnly={readOnly}
+            value={watch("imgBodyPc")}
+            onChange={(file) => setValue("imgBodyPc", file)}
+            accept="image/png, image/jpeg, image/jpg, image/webp"
+            showDefaultInfo={true}
+            info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
+          />
+          <Upload
+            name="extraImage"
+            label="페이지 상단 패턴 모바일 이미지"
+            required
+            classification="stroies"
+            readOnly={readOnly}
+            value={watch("imgBodyMo")}
+            onChange={(file) => setValue("imgBodyPc", file)}
+            accept="image/png, image/jpeg, image/jpg, image/webp"
+            showDefaultInfo={true}
+            info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
+          />
         </div>
 
         <p className="mb-1 block pb-2 pl-1 text-sm font-medium text-gray-800">
-          상세 내용
+          내용<span className="text-red-500">*</span>
         </p>
         <Editor ref={editorRef} />
 
-        <p className="mb-1 block pb-2 pl-1 text-sm font-medium text-gray-800">
-          이벤트 기간<span className="ml-1 text-red-500">*</span>
-        </p>
-        {/* 시작 날짜 + 시간 */}
-        <div className="flex items-center gap-4">
-          {/* 시작 날짜 + 시간 */}
-          <div className="flex items-center gap-2">
-            <Datepicker
-              mode="single"
-              selectedDate={startDate}
-              onSingleChange={(date) => {
-                setStartDate(date);
-                setValue("startDate", date?.toISOString());
-              }}
-              readOnly={readOnly}
-            />
-            <input
-              type="time"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-              className="rounded border px-2 py-1"
-              disabled={readOnly}
-            />
-          </div>
 
-          <div className="flex items-center gap-2">
-            <span className="font-bold">~</span>
-            <Checkbox
-              id="manualEnd"
-              checked={isManualEndInput}
-              onChange={(e) => {
-                setIsManualEndInput(e.target.checked);
-                setValue("manualEndInput", e.target.checked);
-              }}
-              disabled={readOnly}
-            />
+        <Button
+          className="h-12 w-full"
+          onClick={() => { setIsAddContent(!isAddContent)}}
+        >
+          내용 추가
+        </Button>
 
-            {isManualEndInput ? (
-              <input
-                type="text"
-                value={manualEndText}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setManualEndText(val);
-                  setValue("endInput", val);
-                }}
-                placeholder="공백 포함 최대 10자"
-                className="w-52 rounded border px-2 py-1"
-                disabled={readOnly}
-              />
-            ) : (
-              <>
-                <Datepicker
-                  mode="single"
-                  selectedDate={endDate}
-                  onSingleChange={(date) => {
-                    setEndDate(date);
-                    setValue("endDate", date?.toISOString());
-                  }}
-                  readOnly={readOnly}
-                />
-                <input
-                  type="time"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  className="rounded border px-2 py-1"
-                  disabled={readOnly}
-                />
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* 진행 상태 라디오 버튼 */}
-        <div className="mt-4 flex items-center gap-4">
-          <p className="min-w-[80px] text-sm font-medium text-gray-800">
-            진행 상태<span className="ml-1 text-red-500">*</span>
+        <div className={`contetnt2 ${ !isAddContent && 'hidden'}`}>
+          <p className="mb-1 block pb-2 pl-1 text-sm font-medium text-gray-800">
+            내용 추가
           </p>
-          <Radio
-            name="progressStatus"
-            value="inProgress"
-            label="진행"
-            checked={watch("progressStatus") === "inProgress"}
-            onChange={() => setValue("progressStatus", "inProgress")}
-            disabled={readOnly}
+          <Editor ref={editorRef2} />
+        </div>
+
+
+
+        <div className="space-y-2 my-6">
+          <Upload
+            name="banner"
+            label="PC 스와이프이미지 1"
+            classification="stroies"
+            readOnly={readOnly}
+            value={watch("imgBodyPc")}
+            onChange={(file) => setValue("imgBodyPc", file)}
+            accept="image/png, image/jpeg, image/jpg, image/webp"
+            showDefaultInfo={true}
+            info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
           />
-          <Radio
-            name="progressStatus"
-            value="ended"
-            label="종료"
-            checked={watch("progressStatus") === "ended"}
-            onChange={() => setValue("progressStatus", "ended")}
-            disabled={readOnly}
+
+          <Upload
+            name="banner"
+            label="PC 스와이프이미지 2"
+            classification="stroies"
+            readOnly={readOnly}
+            value={watch("imgBodyPc")}
+            onChange={(file) => setValue("imgBodyPc", file)}
+            accept="image/png, image/jpeg, image/jpg, image/webp"
+            showDefaultInfo={true}
+            info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
+          />
+
+          <Upload
+            name="banner"
+            label="PC 스와이프이미지 3"
+            classification="stroies"
+            readOnly={readOnly}
+            value={watch("imgBodyPc")}
+            onChange={(file) => setValue("imgBodyPc", file)}
+            accept="image/png, image/jpeg, image/jpg, image/webp"
+            showDefaultInfo={true}
+            info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
           />
         </div>
 
-        <Row className="pb-4">
-          <Col className="flex-5">
-            <Input
-              label="노출 브랜드"
-              readOnly
-              required
-              value={brands.map((e) => e.brand).join(", ")}
-            />
-            <input
-              type="hidden"
-              {...methods.register("lifestyle.brand")}
-              value={brands.map((e) => e._id).join(",")}
-            />
-          </Col>
-          <Col className="self-end">
-            <Button
-              className="h-12 w-full"
-              onClick={() =>
-                showModal({
-                  title: "브랜드 선택",
-                  children: ({ closeModal }) => (
-                    <BrandList
-                      selected={brands.map((e) => e._id)}
-                      closeModal={closeModal}
-                      onConfirm={(result) => {
-                        setBrands(result);
-                        methods.setValue("lifestyle.brand", result.map((e) => e._id));
-                      }}
-                    />
-                  ),
-                  showCancel: true,
-                  customButton: true,
-                  size: "5xl",
-                })
-              }
-            >
-              관리
-            </Button>
-          </Col>
-        </Row>
+
+
+         <div className="space-y-2 my-6">
+          <Upload
+            name="extraImage"
+            label="MO 스와이프이미지 1"
+            classification="stroies"
+            readOnly={readOnly}
+            value={watch("imgBodyMo")}
+            onChange={(file) => setValue("imgBodyPc", file)}
+            accept="image/png, image/jpeg, image/jpg, image/webp"
+            showDefaultInfo={true}
+            info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
+          />
+          <Upload
+            name="extraImage"
+            label="MO 스와이프이미지 2"
+            classification="stroies"
+            readOnly={readOnly}
+            value={watch("imgBodyMo")}
+            onChange={(file) => setValue("imgBodyPc", file)}
+            accept="image/png, image/jpeg, image/jpg, image/webp"
+            showDefaultInfo={true}
+            info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
+          />
+          <Upload
+            name="extraImage"
+            label="MO 스와이프이미지 3"
+            classification="stroies"
+            readOnly={readOnly}
+            value={watch("imgBodyMo")}
+            onChange={(file) => setValue("imgBodyPc", file)}
+            accept="image/png, image/jpeg, image/jpg, image/webp"
+            showDefaultInfo={true}
+            info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
+          />
+        </div>
+
+
+        <div className="space-y-2">
+          <Upload
+            name="banner"
+            label="페이지 하단 패턴 PC 이미지"
+            required
+            classification="stroies"
+            readOnly={readOnly}
+            value={watch("imgBodyPc")}
+            onChange={(file) => setValue("imgBodyPc", file)}
+            accept="image/png, image/jpeg, image/jpg, image/webp"
+            showDefaultInfo={true}
+            info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
+          />
+          <Upload
+            name="extraImage"
+            label="페이지 하단 패턴 모바일 이미지"
+            required
+            classification="stroies"
+            readOnly={readOnly}
+            value={watch("imgBodyMo")}
+            onChange={(file) => setValue("imgBodyPc", file)}
+            accept="image/png, image/jpeg, image/jpg, image/webp"
+            showDefaultInfo={true}
+            info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
+          />
+        </div>
+
+        
+
       </form>
 
     </FormProvider>

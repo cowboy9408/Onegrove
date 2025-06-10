@@ -35,6 +35,7 @@ export default function StoriesListPage() {
   const [visibility, setVisibility] = useState(""); // 노출 여부
 
   const nameId = useId();
+  const nameCategory = useId();
 
   const size = 10;
 
@@ -136,26 +137,28 @@ export default function StoriesListPage() {
     <div>
       <SearchSection>
         <Box>
-          <Row>
+          <Row className="pb-4">
             <Col>
-              <Select
-                label="카테고리"
+              <Input
+                id={nameCategory}
+                label={"카테고리"}
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-              >
-                <option value="">전체</option>
-                <option value="이벤트">이벤트</option>
-                <option value="프로모션">프로모션</option>
-              </Select>
+                onClear={() => setCategory("")}
+              />
             </Col>
-            <p className="text-sm font-medium">게시글 등록일</p>
-            <DateRangePicker
-              startDate={dateRange.startDate}
-              endDate={dateRange.endDate}
-              onChange={({ startDate, endDate }) =>
-                setDateRange({ startDate, endDate })
-              }
-            />
+            <Col className="flex flex-col items-start gap-4">
+              <p className="text-sm font-medium">게시글 등록일</p>
+              <DateRangePicker
+                startDate={dateRange.startDate}
+                endDate={dateRange.endDate}
+                onChange={({ startDate, endDate }) =>
+                  setDateRange({ startDate, endDate })
+                }
+              />
+            </Col>
+          </Row>
+          <Row>
             <Col>
               <Input
                 id={nameId}
@@ -166,28 +169,33 @@ export default function StoriesListPage() {
               />
             </Col>
 
-            <span className="flex items-center text-sm font-medium whitespace-nowrap text-gray-800">
-              노출 여부
-            </span>
-            <Radio
-              id="visible"
-              name="visibility"
-              value="Y"
-              checked={visibility === "Y"}
-              onChange={(e) => setVisibility(e.target.value)}
-              label="노출"
-            />
-            <Radio
-              id="hidden"
-              name="visibility"
-              value="N"
-              checked={visibility === "N"}
-              onChange={(e) => setVisibility(e.target.value)}
-              label="미노출"
-            />
+            <Col className="flex flex-col items-start gap-4">
+              <span className="flex items-center text-sm font-medium whitespace-nowrap text-gray-800">
+                노출 여부
+              </span>
+              <div className="flex flex-row items-start gap-4">
+                <Radio
+                  id="visible"
+                  name="visibility"
+                  value="Y"
+                  checked={visibility === "Y"}
+                  onChange={(e) => setVisibility(e.target.value)}
+                  label="노출"
+                />
+                <Radio
+                  id="hidden"
+                  name="visibility"
+                  value="N"
+                  checked={visibility === "N"}
+                  onChange={(e) => setVisibility(e.target.value)}
+                  label="미노출"
+                />
+              </div>
+            </Col>
 
-            <Col className="self-end">
+            <Col className="flex self-end justify-center">
               <Button
+                className="self-end"
                 onClick={() => {
                   setPage(1);
                   setSearchParams({ name, category, visibility, page: 1 });
