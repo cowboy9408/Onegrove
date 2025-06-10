@@ -34,8 +34,8 @@ export default function OccupancyDetail() {
 
       setKoData(ko);
       setEnData(en);
-      setKoLocations(ko.officeList || []);
-      setEnLocations(en.officeList || []);
+      setKoLocations(ko.officeList || en.officeList || []);
+      setEnLocations(en.officeList || ko.officeList || []);
 
       setLoading(false);
     } catch (err) {
@@ -162,18 +162,9 @@ export default function OccupancyDetail() {
           freeHour: data.freeHour,
           useYn: data.useYn,
           mainImg: toImageMeta(data.mainImg, original.mainImg),
-          officeList: formValues.officeList,
+          officeList: data.officeList,
         };
-        console.log("저장 요청 - PC:", data.thumbImgPc);
-        console.log("저장 요청 - MO:", data.thumbImgMo);
-        console.log(
-          "변환된 PC:",
-          toImageMeta(data.thumbImgPc, original.thumbImgPc)
-        );
-        console.log(
-          "변환된 MO:",
-          toImageMeta(data.thumbImgMo, original.thumbImgMo)
-        );
+        console.log("최종 저장될 officeList:", formValues.officeList);
         console.log("저장 payload:", payload);
         console.log("payload.thumbImgPc:", payload.thumbImgPc);
 

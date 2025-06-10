@@ -3,21 +3,19 @@ import Button from "./Button"; // 기존 Button 컴포넌트 사용
 import { useFormContext } from "react-hook-form";
 
 export default function OfficeFloorForm({ value = [] }) {
-  const { setValue } = useFormContext();
+  const { setValue, trigger } = useFormContext();
   const [items, setItems] = useState(
     value.length ? value : [{ office: "", floor: "" }]
   );
 
   useEffect(() => {
-    const isSame = JSON.stringify(value) === JSON.stringify(items);
-    if (!isSame && value.length <= 4) {
-      setItems(value.length ? [...value] : [{ office: "", floor: "" }]);
-    }
-  }, [value]);
+    setItems(value.length ? [...value] : [{ office: "", floor: "" }]);
+  }, [JSON.stringify(value)]);
 
   const updateItems = (newItems) => {
     setItems(newItems);
     setValue("locations", newItems);
+    trigger("locations"); // <- 이게 없으면 submit 시 반영되지 않음
   };
 
   const handleChange = (index, key, val) => {
@@ -30,10 +28,13 @@ export default function OfficeFloorForm({ value = [] }) {
   };
 
   const handleAdd = () => {
-    if (items.length >= 4) {
+    const visibleItems = items.filter((item) => item.delYn !== "Y");
+
+    if (visibleItems.length >= 4) {
       alert("오피스는 최대 4개까지만 추가할 수 있습니다.");
       return;
     }
+
     const newItems = [...items, { office: "", floor: "" }];
     updateItems(newItems);
   };
@@ -75,23 +76,16 @@ export default function OfficeFloorForm({ value = [] }) {
                 <option value="B">B</option>
               </select>
             </div>
-
             <div className="min-w-[250px] flex-1">
-              <label className="mb-1 block text-sm">층 수 선택</label>
-              <select
+              <label className="mb-1 block text-sm">층 수 입력</label>
+              <input
+                type="text"
                 value={item.floor}
                 onChange={(e) => handleChange(index, "floor", e.target.value)}
+                placeholder="예: 3F"
                 className="w-full rounded border p-2"
-              >
-                <option value="">선택</option>
-                <option value="1F">1F</option>
-                <option value="2F">2F</option>
-                <option value="3F">3F</option>
-                <option value="4F">4F</option>
-                <option value="5F">5F</option>
-              </select>
+              />
             </div>
-
             <div className="flex items-end">
               {items.filter((i) => i.delYn !== "Y").length > 1 && (
                 <Button variant="outline" onClick={() => handleRemove(index)}>
