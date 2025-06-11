@@ -76,8 +76,10 @@ export default function OfficeFloorForm({ value = [], readOnly = false }) {
                 disabled={readOnly}
               >
                 <option value="">선택</option>
-                <option value="A">A</option>
-                <option value="B">B</option>
+                <option value="A">OFFICE A</option>
+                <option value="B">OFFICE B</option>
+                <option value="C">OFFICE C</option>
+                <option value="D">OFFICE D</option>
               </select>
             </div>
             <div className="min-w-[250px] flex-1">
@@ -101,7 +103,7 @@ export default function OfficeFloorForm({ value = [], readOnly = false }) {
           </div>
         ))}
 
-      {!readOnly && items.length < 4 && (
+      {!readOnly && items.filter((item) => item.delYn !== "Y").length < 4 && (
         <div className="text-right">
           <Button variant="default" onClick={handleAdd}>
             항목 추가
