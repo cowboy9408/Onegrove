@@ -6,7 +6,18 @@ import Upload from "@/components/common/Upload";
 import OfficeFloorForm from "@/components/common/OfficeFloorForm";
 
 const RegistForm = forwardRef(
-  ({ data, setData, lang, locations, setLocations, currentLang }, ref) => {
+  (
+    {
+      data,
+      setData,
+      lang,
+      locations,
+      setLocations,
+      currentLang,
+      readOnlyOffice = false,
+    },
+    ref
+  ) => {
     const methods = useForm({
       defaultValues: {
         companyName: "",
@@ -205,6 +216,7 @@ const RegistForm = forwardRef(
             <OfficeFloorForm
               value={watch("locations") || []}
               onChange={handleOfficeChange}
+              readOnly={readOnlyOffice}
             />
             <Input label="대표명" {...register("ceoName")} required />
             <Input label="전화번호" {...register("phone")} required />
