@@ -14,6 +14,7 @@ const MAX_KV_LENGTH = 4;
 
 const KeyVisualForm = forwardRef(({ data }, ref) => {
   const methods = useForm({
+    mode: "onChange",
     defaultValues: {
       kv: [
         { type: "image", title: "", subtitle: "", file1: null, file2: null },
@@ -81,10 +82,10 @@ const KeyVisualForm = forwardRef(({ data }, ref) => {
         return !item.title || !item.subtitle || !item.file1;
       });
 
-      // if (hasEmpty) {
-      //   alert("필수 항목이 비어 있습니다.");
-      //   return null;
-      // }
+      if (hasEmpty) {
+        alert("필수 항목이 비어 있습니다.");
+        return null;
+      }
 
       // API 전송용 데이터 포맷으로 변환
       const result = values.kv.map((item, index) => ({
@@ -187,7 +188,7 @@ const KeyVisualForm = forwardRef(({ data }, ref) => {
                 </Row>
 
                 <Row className="flex justify-center gap-2">
-                  {fields.length === index + 1 && fields.length < 4 && (
+                  {fields.length === index + 1 && fields.length < MAX_KV_LENGTH && (
                     <Button
                       type="button"
                       onClick={() =>

@@ -91,22 +91,30 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           patternTopMo: getCleanedImage(watch("patternTopMo")),
           patternBottomPc: getCleanedImage(watch("patternBottomPc")),
           patternBottomMo: getCleanedImage(watch("patternBottomMo")),
-          description: getCleanedImage(watch("description")),
+          storiesImgList1: getCleanedImage(watch("storiesImgList1")),
+          storiesImgList2: getCleanedImage(watch("storiesImgList2")),
+          storiesImgList3: getCleanedImage(watch("storiesImgList3"))
         };
         const content = await editorRef.current?.getContent?.();
         const content1 = await editorRef2.current?.getContent?.();
         const description = watch("description");
+        const storiesImgCaption1 = watch("storiesImgCaption1");
+        const storiesImgCaption2 = watch("storiesImgCaption2");
+        const storiesImgCaption3 = watch("storiesImgCaption3");
+
+
+        
   
         const [startHour, startMin] = startTime.split(":").map(Number);
         const [endHour, endMin] = endTime.split(":").map(Number);
   
         const start = new Date(startDate);
         start.setHours(startHour, startMin, 0, 0);
-        const startDateStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-${String(start.getDate()).padStart(2, "0")}T${String(startHour).padStart(2, "0")}:${String(startMin).padStart(2, "0")}`;
+        const startDateStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-${String(start.getDate()).padStart(2, "0")} ${String(startHour).padStart(2, "0")}:${String(startMin).padStart(2, "0")}`;
   
         const end = new Date(endDate);
         end.setHours(endHour, endMin, 0, 0);
-        const endDateStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")}T${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
+        const endDateStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")} ${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
   
         if (!values.category) {
           onError?.("카테고리를 입력해주세요.");
@@ -148,15 +156,13 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         console.log("검사 대상 값들:", {
           title: values.title,
           category: values.category,
-          startDate: startDate,
+          startDate: startDateStr,
           endDate: endDateStr,
           thumbImg: values.thumbImg,
           patternTopPc: values.patternTopPc,
           patternTopMo: values.patternTopMo,
           patternBottomPc: values.patternBottomPc,
           patternBottomMo: values.patternBottomMo,
-
-
           content,
           description,
         });
@@ -211,6 +217,13 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           patternTopMo: toImageMeta(values.patternTopMo),
           patternBottomPc: toImageMeta(values.patternBottomPc),
           patternBottomMo: toImageMeta(values.patternBottomMo),
+          storiesImgList1: toImageMeta(values.storiesImgList1),
+          storiesImgList2: toImageMeta(values.storiesImgList2),
+          storiesImgList3: toImageMeta(values.storiesImgList3),
+
+          storiesImgCaption1: storiesImgCaption1 || "",
+          storiesImgCaption2: storiesImgCaption2 || "",
+          storiesImgCaption3: storiesImgCaption3 || "",
           content: content || "",
           content1: content1 || "",
           description: description || "",
@@ -476,48 +489,6 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           <Input {...methods.register("storiesImgCaption3")} info="스와이프이미지 3 캡션 영역" />
         </div>
 
-
-
-         {/* <div className="space-y-2 my-6">
-          <Upload
-            name="extraImage"
-            label="MO 스와이프이미지 1"
-            classification="stroies"
-            readOnly={readOnly}
-            value={watch("imgBodyMo")}
-            onChange={(file) => setValue("imgBodyPc", file)}
-            accept="image/png, image/jpeg, image/jpg, image/webp"
-            showDefaultInfo={true}
-            info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
-          />
-          <Input {...methods.register("category")} info="MO 이미지 캡션 영역" />
-          <Upload
-            name="extraImage"
-            label="MO 스와이프이미지 2"
-            classification="stroies"
-            readOnly={readOnly}
-            value={watch("imgBodyMo")}
-            onChange={(file) => setValue("imgBodyPc", file)}
-            accept="image/png, image/jpeg, image/jpg, image/webp"
-            showDefaultInfo={true}
-            info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
-            className="mt-4"
-          />
-          <Input label="MO 이미지 2 캡션 영역" {...methods.register("category")} info="MO 이미지 캡션 영역" />
-          <Upload
-            name="extraImage"
-            label="MO 스와이프이미지 3"
-            classification="stroies"
-            readOnly={readOnly}
-            value={watch("imgBodyMo")}
-            onChange={(file) => setValue("imgBodyPc", file)}
-            accept="image/png, image/jpeg, image/jpg, image/webp"
-            showDefaultInfo={true}
-            info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
-            className="mt-4"
-          />
-          <Input label="MO 이미지 3 캡션 영역" {...methods.register("category")} info="MO 이미지 캡션 영역" />
-        </div> */}
 
 
         <div className="space-y-2">
