@@ -58,6 +58,7 @@ export default function TopContentForm({ data, setData }) {
                       {...field}
                       label="이미지"
                       error={errors.etc?.[index]?.image?.message}
+                      classification="whatson"
                     />
                   )}
                 />
