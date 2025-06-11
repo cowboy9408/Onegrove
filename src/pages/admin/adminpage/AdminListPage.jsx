@@ -24,11 +24,19 @@ export default function AdminListPage() {
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [searchStatus, setSearchStatus] = useState("");
+  const [checkedIds, setCheckedIds] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const nameId = useId();
   const emailId = useId();
 
   const size = 10;
+
+  const handleCheck = (id, checked) => {
+    setCheckedIds((prev) =>
+      checked ? [...prev, id] : prev.filter((v) => v !== id)
+    );
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,7 +74,7 @@ export default function AdminListPage() {
     };
 
     fetchData();
-  }, [page, name, email, searchStatus]);
+  }, [page, name, email, searchStatus, refreshKey]);
 
   return (
     <div>
@@ -143,7 +151,34 @@ export default function AdminListPage() {
           </Button>
           <Button
             className="bg-black text-white hover:bg-gray-800"
-            onClick={() => {}}
+            onClick={async () => {
+              if (checkedIds.length === 0) {
+                alert("삭제할 항목을 선택해주세요.");
+                return;
+              }
+
+              const confirmed =
+                window.confirm("선택한 관리자를 삭제하시겠습니까?");
+              if (!confirmed) return;
+
+              try {
+                const res = await api.post("/api/v1/user/admin/delete", {
+                  checkArr: checkedIds,
+                });
+
+                if (res.status === 200 || res.data.success) {
+                  alert("삭제가 완료되었습니다.");
+                  setCheckedIds([]);
+                  setPage(1);
+                  setRefreshKey((prev) => prev + 1);
+                } else {
+                  alert("삭제 실패: 서버 오류");
+                }
+              } catch (err) {
+                console.error("삭제 요청 실패:", err);
+                alert("삭제 중 오류가 발생했습니다.");
+              }
+            }}
           >
             삭제
           </Button>
@@ -155,14 +190,27 @@ export default function AdminListPage() {
             { key: "no", label: "번호" },
             { key: "type", label: "관리자 유형" },
             { key: "name", label: "이름" },
-            { key: "username", label: "아이디" },
+            {
+              key: "username",
+              label: "아이디",
+              render: (row) => (
+                <button
+                  className="text-black-600 underline"
+                  onClick={() => navigate(`/admin/detail/${row._id}`)}
+                >
+                  {row.username}
+                </button>
+              ),
+            },
             { key: "email", label: "이메일" },
             { key: "status", label: "계정 상태" },
             { key: "valuable", label: "사용 여부" },
             { key: "created_at", label: "등록일시" },
           ]}
           data={data}
-          link={{ base: "/admin", path: "no" }}
+          checkable={true}
+          checkedIds={checkedIds}
+          onCheck={handleCheck}
         />
         <Pagination
           current={page}

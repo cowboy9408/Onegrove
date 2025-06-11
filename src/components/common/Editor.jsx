@@ -79,8 +79,6 @@ const customInlineContentSpecs = {
   },
 };
 
-
-
 // 캡션 텍스트 명령
 const insertCaptionText = (editor) => ({
   title: "캡션 텍스트",
@@ -121,7 +119,8 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
       multi_column: multiColumnLocales.ko,
       placeholders: {
         ...locales.ko.placeholders,
-        emptyDocument: "텍스트를 입력하거나 명령을 입력하려면 '/'를 입력하세요.",
+        emptyDocument:
+          "텍스트를 입력하거나 명령을 입력하려면 '/'를 입력하세요.",
         default: "텍스트를 입력하거나 명령을 입력하려면 '/'를 입력하세요.",
         heading: "제목을 입력하거나 명령을 입력하려면 '/'를 입력하세요.",
       },
@@ -168,8 +167,8 @@ const Editor = forwardRef(({ initialContent, readOnly = false }, ref) => {
         editor={editor}
         slashMenu
         formattingToolbar={false}
-        className="relative editor-container"
-        theme={isDarkMode ? "dark" : "light"}
+        className="editor-container relative"
+        theme={isDarkMode ? "light" : "light"}
         editable={!readOnly}
       >
         <FormattingToolbarController

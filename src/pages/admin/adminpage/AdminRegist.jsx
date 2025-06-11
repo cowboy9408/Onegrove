@@ -3,6 +3,7 @@ import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import Radio from "@/components/common/Radio";
 import { useNavigate } from "react-router-dom";
+import api from "@/lib/apiClient";
 
 export default function AdminRegist() {
   const [form, setForm] = useState({
@@ -18,12 +19,54 @@ export default function AdminRegist() {
   });
   const navigate = useNavigate();
 
+  const getRoleValue = (role) => {
+    switch (role) {
+      case "admin":
+        return "NORMAL_ADMIN";
+      case "retail":
+        return "RETAIL_ADMIN";
+      case "manager":
+        return "OFFICE_ADMIN";
+      default:
+        return "NORMAL_ADMIN";
+    }
+  };
+
   const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = () => {
-    console.log("등록 요청:", form);
+  const handleSubmit = async () => {
+    if (form.password !== form.confirmPassword) {
+      alert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    const payload = {
+      username: form.username,
+      password: form.password,
+      passwordConfirm: form.confirmPassword,
+      name: form.name,
+      phoneNumber: `010-${form.phone?.replace(/[^0-9]/g, "").replace(/(\d{4})(\d{4})/, "$1-$2")}`,
+
+      email: form.email,
+      gender:
+        form.gender === "male" ? "M" : form.gender === "female" ? "F" : null,
+
+      role: getRoleValue(form.role),
+      companyId: 4,
+      isAdmin: "Y",
+      isUse: form.status === "active" ? "Y" : "N",
+    };
+
+    try {
+      await api.post("/api/v1/user/admin/insert", payload);
+      alert("등록이 완료되었습니다.");
+      navigate("/admin/list");
+    } catch (error) {
+      console.error("등록 오류:", error);
+      alert("등록에 실패했습니다. 관리자에게 문의하세요.");
+    }
   };
 
   return (

@@ -97,7 +97,7 @@ export const routeMeta = [
           },
           {
             uuid: "1e83ea43-0b00-4261-8c5a-a76102d971a0",
-            path: "/admin/list/:id",
+            path: "/admin/detail/:id",
             element: <AdminDetailPage />,
             title: "관리자 상세",
             hidden: true,
