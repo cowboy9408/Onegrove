@@ -112,10 +112,10 @@ export default function StoriesListPage() {
             return titleMatch && categoryMatch && visibilityMatch && dateMatch;
           });
 
-          const sorted = filtered.sort((a, b) => a.occupancy - b.occupancy);
+          // const sorted = filtered.sort((a, b) => a.occupancy - b.occupancy);
           const start = (page - 1) * size;
           const end = start + size;
-          const sliced = sorted.slice(start, end).map((row, idx) => ({
+          const sliced = filtered.slice(start, end).map((row, idx) => ({
             ...row,
             no: filtered.length - (start + idx),
           }));
