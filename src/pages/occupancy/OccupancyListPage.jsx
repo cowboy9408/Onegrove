@@ -129,8 +129,10 @@ export default function OccupancyListPage() {
                 }
               >
                 <option value="">전체</option>
-                <option value="A">A</option>
-                <option value="B">B</option>
+                <option value="A">OFFICE A</option>
+                <option value="B">OFFICE B</option>
+                <option value="C">OFFICE C</option>
+                <option value="D">OFFICE D</option>
               </Select>
             </Col>
 
