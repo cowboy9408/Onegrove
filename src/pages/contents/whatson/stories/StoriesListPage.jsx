@@ -35,6 +35,7 @@ export default function StoriesListPage() {
   const [visibility, setVisibility] = useState(""); // 노출 여부
 
   const nameId = useId();
+  const nameCategory = useId();
 
   const size = 10;
 
@@ -42,27 +43,51 @@ export default function StoriesListPage() {
     const fetchData = async () => {
       try {
         const res = await api.get("/api/v1/stories");
-        const json = res.data;
+        const json = res.data?.data || [];
+
+        // console.log("Fetched Stories Data:", json.sort((a, b) => a.id - b.id));
+        // console.log("Fetched Stories Data:", json.sort((a, b) => b.id - a.id));
 
         if (Array.isArray(json)) {
           const rows = json.map((item, index) => {
             const koItem = item.contentList.find((i) => i.lang === "KO") || {};
             const enItem = item.contentList.find((i) => i.lang === "EN") || {};
 
+            console.log("koItem:", koItem);
+            console.log("enItem:", enItem);
+
+            console.log("item:", koItem.category);
+
+
             return {
               originalIndex: item.id,
               _id: String(item.id),
               no: index + 1,
               occupancy: Number(koItem.sort) || 0,
-              name: koItem.category || "-",
+              category: koItem.category || "-",
               language:
                 koItem.lang && enItem.lang ? "both" : koItem.lang ? "ko" : "en",
               ko_title: koItem.title || "-",
               en_title: enItem.title || "-",
-              email: koItem.status || "진행중",
-              status: koItem.showYn || "미노출",
-              created_user: koItem.createUser || "-",
-              created_at: koItem.createDt || "-",
+              status: koItem.status || "진행중",
+              showYn: koItem.showYn || "미노출",
+
+
+              status_ko: koItem.status || "진행중",
+              status_en: enItem.status || "진행중",
+              showYn_ko: koItem.showYn || "미노출",
+              showYn_en: enItem.showYn || "미노출",
+
+              created_user_ko: koItem.createUser || "-",
+              created_user_en: enItem.createUser || "-",
+
+              created_at_ko: koItem.createDt || "-",
+              created_at_en: enItem.createDt || "-",
+              created_at: koItem.createDt || enItem.createDt || "-",
+
+
+              created_user: koItem.created_user || "-",
+              // created_at: koItem.createDcreateUsert || "-",
             };
           });
 
@@ -74,7 +99,7 @@ export default function StoriesListPage() {
               row.en_title.includes(name);
             const categoryMatch = category === "" || row.name === category;
             const visibilityMatch =
-              visibility === "" || row.status === visibility;
+              visibility === "" || row.showYn === visibility;
             const dateMatch =
               (!dateRange.startDate ||
                 new Date(row.created_at) >= new Date(dateRange.startDate)) &&
@@ -89,7 +114,7 @@ export default function StoriesListPage() {
           const end = start + size;
           const sliced = sorted.slice(start, end).map((row, idx) => ({
             ...row,
-            no: start + idx + 1,
+            no: filtered.length - (start + idx),
           }));
 
           setData(sliced);
@@ -112,26 +137,28 @@ export default function StoriesListPage() {
     <div>
       <SearchSection>
         <Box>
-          <Row>
+          <Row className="pb-4">
             <Col>
-              <Select
-                label="카테고리"
+              <Input
+                id={nameCategory}
+                label={"카테고리"}
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-              >
-                <option value="">전체</option>
-                <option value="이벤트">이벤트</option>
-                <option value="프로모션">프로모션</option>
-              </Select>
+                onClear={() => setCategory("")}
+              />
             </Col>
-            <p className="text-sm font-medium">게시글 등록일</p>
-            <DateRangePicker
-              startDate={dateRange.startDate}
-              endDate={dateRange.endDate}
-              onChange={({ startDate, endDate }) =>
-                setDateRange({ startDate, endDate })
-              }
-            />
+            <Col className="flex flex-col items-start gap-4">
+              <p className="text-sm font-medium">게시글 등록일</p>
+              <DateRangePicker
+                startDate={dateRange.startDate}
+                endDate={dateRange.endDate}
+                onChange={({ startDate, endDate }) =>
+                  setDateRange({ startDate, endDate })
+                }
+              />
+            </Col>
+          </Row>
+          <Row>
             <Col>
               <Input
                 id={nameId}
@@ -142,28 +169,33 @@ export default function StoriesListPage() {
               />
             </Col>
 
-            <span className="flex items-center text-sm font-medium whitespace-nowrap text-gray-800">
-              노출 여부
-            </span>
-            <Radio
-              id="visible"
-              name="visibility"
-              value="Y"
-              checked={visibility === "Y"}
-              onChange={(e) => setVisibility(e.target.value)}
-              label="노출"
-            />
-            <Radio
-              id="hidden"
-              name="visibility"
-              value="N"
-              checked={visibility === "N"}
-              onChange={(e) => setVisibility(e.target.value)}
-              label="미노출"
-            />
+            <Col className="flex flex-col items-start gap-4">
+              <span className="flex items-center text-sm font-medium whitespace-nowrap text-gray-800">
+                노출 여부
+              </span>
+              <div className="flex flex-row items-start gap-4">
+                <Radio
+                  id="visible"
+                  name="visibility"
+                  value="Y"
+                  checked={visibility === "Y"}
+                  onChange={(e) => setVisibility(e.target.value)}
+                  label="노출"
+                />
+                <Radio
+                  id="hidden"
+                  name="visibility"
+                  value="N"
+                  checked={visibility === "N"}
+                  onChange={(e) => setVisibility(e.target.value)}
+                  label="미노출"
+                />
+              </div>
+            </Col>
 
-            <Col className="self-end">
+            <Col className="flex self-end justify-center">
               <Button
+                className="self-end"
                 onClick={() => {
                   setPage(1);
                   setSearchParams({ name, category, visibility, page: 1 });
@@ -191,7 +223,6 @@ export default function StoriesListPage() {
             className="bg-black text-white hover:bg-gray-800"
             onClick={() => {
               if (checkedIds.length === 0) return;
-              console.log("삭제 버튼 클릭됨");
               showModal({
                 title: "스토리 삭제 확인",
                 message: "정말 삭제하시겠습니까?",
@@ -199,11 +230,13 @@ export default function StoriesListPage() {
                 confirmButton: "삭제",
                 onConfirm: async () => {
                   try {
-                    await api.post("/api/v1/stories/delete", {
-                      ids: checkedIds.map((id) => Number(id)),
-                    });
+                    await api.post("/api/v1/stories/delete", 
+                      checkedIds.map((id) => Number(id)),
+                    );
+                    console.log("삭제 성공");
                     setCheckedIds([]);
                     setPage(1);
+                    window.location.reload();
                   } catch (err) {
                     console.error("삭제 실패:", err);
                   }
@@ -220,7 +253,7 @@ export default function StoriesListPage() {
           columns={[
             { key: "no", label: "번호" },
             { key: "occupancy", label: "노출순서" },
-            { key: "name", label: "카테고리" },
+            { key: "category", label: "카테고리" },
             {
               key: "language",
               label: "언어",
@@ -236,15 +269,65 @@ export default function StoriesListPage() {
               label: "타이틀",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <div className="p-2">{row.ko_title}</div>
-                  <div className="p-2">{row.en_title}</div>
+                  <button
+                    className={`text-black-600 truncate p-2 text-left cursor-pointer ${row.ko_title !== "-" && row.ko_title !== null && "underline"}`}
+                    onClick={() =>
+                      navigate(`/contents/whatson/stories/${row.originalIndex}?lang=ko`)
+                    }
+                  >
+                    {row.ko_title}
+                  </button>
+                  <button
+                    className={`text-black-600 truncate p-2 text-left cursor-pointer ${row.en_title !== "-" && row.en_title !== null && "underline"}`}
+                    onClick={() =>
+                      navigate(`/contents/whatson/stories/${row.originalIndex}?lang=en`)
+                    }
+                  >
+                    {row.en_title}
+                  </button>
                 </div>
               ),
             },
-            { key: "email", label: "상태여부" },
-            { key: "status", label: "노출여부" },
-            { key: "created_user", label: "등록자" },
-            { key: "created_at", label: "등록일시" },
+            {
+              key: "status",
+              label: "상태여부",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="py-1">{row.status_ko}</div>
+                  <div className="py-1">{row.status_en}</div>
+                </div>
+              ),
+            },
+            {
+              key: "showYn",
+              label: "노출여부",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="py-1">{row.showYn_ko}</div>
+                  <div className="py-1">{row.showYn_en}</div>
+                </div>
+              ),
+            },
+            {
+              key: "created_user",
+              label: "등록자",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="py-1">{row.created_user_ko}</div>
+                  <div className="py-1">{row.created_user_en}</div>
+                </div>
+              ),
+            },
+            {
+              key: "created_at",
+              label: "등록일시",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="py-1">{row.created_at_ko}</div>
+                  <div className="py-1">{row.created_at_en}</div>
+                </div>
+              ),
+            },
           ]}
           data={data}
           link={{ base: "/admin", path: "no" }}
