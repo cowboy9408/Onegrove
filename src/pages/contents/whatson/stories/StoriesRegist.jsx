@@ -1,7 +1,7 @@
 import Section from "@/components/layout/Section";
 import Tabs, { TabPanel } from "@/components/layout/Tabs";
 import { useState, useRef } from "react";
-import EventRegistForm from "./components/EventRegistForm";
+import StoriesRegistForm from "./components/StoriesRegistForm";
 import Button from "@/components/common/Button";
 import { useNavigate } from "react-router-dom";
 import api from "@/lib/apiClient";
@@ -52,7 +52,7 @@ export default function StoriesRegist() {
       >
         <TabPanel>
           {/* 국문 폼 */}
-          <EventRegistForm
+          <StoriesRegistForm
             ref={koFormRef}
             data={koData}
             setData={setKoData}
@@ -62,7 +62,7 @@ export default function StoriesRegist() {
 
         <TabPanel>
           {/* 영문 폼 */}
-          <EventRegistForm
+          <StoriesRegistForm
             ref={enFormRef}
             data={enData}
             setData={setEnData}
