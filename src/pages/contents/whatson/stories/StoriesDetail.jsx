@@ -105,7 +105,7 @@ export default function StoriesDetail() {
 
         formRef.setValue("title", data.title || "");
         formRef.setValue("category", data.category || "");
-        formRef.setValue("order", data.sort || "");
+        formRef.setValue("order", data.sort.toString() || "");
         formRef.setValue("status", data.showYn === "Y" ? "active" : "inactive");
 
         formRef.setValue("thumbImg", patchImageMeta(data.thumbImg));
@@ -135,7 +135,7 @@ export default function StoriesDetail() {
         );
         formRef.setValue(
           "endDate",
-          data.endDate ? parseLocalDateTime(data.endDate) : null
+          data.endDt ? parseLocalDateTime(data.endDt) : null
         );
       };
 
@@ -201,7 +201,7 @@ export default function StoriesDetail() {
         const isInsert = !data.id;
         const payload = {
           ...(isInsert ? {} : { id: data.id }),
-          // eventId: koData?.eventId ?? enData?.eventId ?? defaultEventId,
+          // contentId: currentLang === 0 ? koData?.contentId : enData?.contentId,
           lang: data.lang,
           category: data.category,
           title: data.title,
@@ -216,18 +216,27 @@ export default function StoriesDetail() {
           content: data.content,
           addContent: data.content1,
           description: data.description || "",
-          startDt:
-            (typeof data.startDate === "string"
-              ? new Date(data.startDate)
-              : data.startDate
-            )?.toISOString() || null,
-          endDt: 
-            (typeof data.endDate === "string"
-              ? new Date(data.endDate)
-              : data.endDate
-            )?.toISOString() || null,
+          startDt: data.startDate || null,
+          endDt: data.endDate || null,
           delYn: "N",
+          storiesImgList: []
         };
+
+
+        payload.storiesImgList.push({
+          ...toImageMeta(data.storiesImgList1, original.storiesImgList1),
+          caption: data.storiesImgCaption1
+        });
+
+        payload.storiesImgList.push({
+          ...toImageMeta(data.storiesImgList2, original.storiesImgList2),
+          caption: data.storiesImgCaption2
+        });
+
+        payload.storiesImgList.push({
+          ...toImageMeta(data.storiesImgList3, original.storiesImgList3),
+          caption: data.storiesImgCaption3
+        });
 
         console.log("저장 payload:", payload);
 
@@ -249,7 +258,7 @@ export default function StoriesDetail() {
           {
             ...koValues,
             id: koData?.id ?? null,
-            lang: "ko",
+            lang: "KO",
           },
           koData || {}
         );
@@ -261,7 +270,7 @@ export default function StoriesDetail() {
           {
             ...enValues,
             id: enData?.id ?? null,
-            lang: "en",
+            lang: "EN",
           },
           enData || {}
         );

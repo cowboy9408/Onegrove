@@ -723,7 +723,7 @@ const EventRegistForm = forwardRef(
             value={watch("description")}
             onChange={(e) => setValue("description", e.target.value)}
             required
-            maxLength={130}
+            maxLength={250}
           />
         </form>
       </FormProvider>

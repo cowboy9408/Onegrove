@@ -71,10 +71,10 @@ const Input = forwardRef(function Input(
           } ${className}`}
           {...rest}
         />
-        {!rest.readOnly && (
+        {!rest.readOnly && !topLabel && (
           <label
             htmlFor={id}
-            className={`absolute -top-2 left-3 bg-white px-1 text-xs text-gray-300 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-gray-800 dark:bg-transparent dark:text-gray-100 dark:peer-placeholder-shown:text-gray-500 dark:peer-focus:text-gray-100 ${rest?.readOnly ? "" : ""}`}
+            className="..." // ← 사용 안 하므로 생략 가능
           >
             {label}
           </label>
