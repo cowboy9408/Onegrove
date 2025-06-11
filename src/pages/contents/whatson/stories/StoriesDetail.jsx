@@ -1,0 +1,413 @@
+import Section from "@/components/layout/Section";
+import Tabs, { TabPanel } from "@/components/layout/Tabs";
+import { useEffect, useState, useRef } from "react";
+import StoriesRegistForm from "./components/StoriesRegistForm";
+import Button from "@/components/common/Button";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import api from "@/lib/apiClient";
+import useModal from "@/hooks/useModal";
+
+export default function StoriesDetail() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialLang = searchParams.get("lang") || "ko";
+  const [currentLang, setCurrentLang] = useState(initialLang === "ko" ? 0 : 1);
+  const koFormRef = useRef();
+  const enFormRef = useRef();
+  const { showModal } = useModal();
+  const { emId } = useParams();
+  const [sharedCategory, setSharedCategory] = useState("");
+  const [isReadOnly, setIsReadOnly] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [sharedBrands, setSharedBrands] = useState([]);
+
+  // 국문 상태
+  const [koData, setKoData] = useState({});
+  // 영문 상태
+  const [enData, setEnData] = useState({});
+  const defaultEventId = 1;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const resKO = await api.get(`/api/v1/stories/detail/${emId}/KO`);
+        const resEN = await api.get(`/api/v1/stories/detail/${emId}/EN`);
+        console.log("API 응답 결과:", resKO.data, resEN.data);
+
+        // const list = Array.isArray(resKO.data?.data) ? resKO.data.data : [];
+
+        const ko = resKO.data.data || [];
+        const en = resEN.data.data || [];
+
+        console.log("koData:", ko);
+        console.log("enData:", en);
+
+        const patchedKo = ko
+          ? {
+              ...ko,
+            }
+          : null;
+
+        const patchedEn = en
+          ? {
+              ...en,
+            }
+          : null;
+
+        setKoData(patchedKo);
+        setEnData(patchedEn);
+        setLoading(false);
+      } catch (err) {
+        console.error("API 호출 실패:", err);
+        setKoData(null);
+        setEnData(null);
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [emId]);
+
+
+
+  const parseLocalDateTime = (str) => {
+    if (!str) return null;
+    const [datePart, timePart] = str.split(" "); // ex: "2025-05-27", "14:00"
+    const [year, month, day] = datePart.split("-").map(Number);
+    const [hour, minute] = timePart.split(":").map(Number);
+    // console.log(str, year, month, day, hour, minute);
+    return new Date(year, month - 1, day, hour, minute);
+  };
+
+  useEffect(() => {
+    if (!loading) {
+      const patchForm = (formRef, data, fallbackCategory = "") => {
+        if (!formRef) return;
+
+        console.log(">>> patchForm 호출 시점:", formRef.current);
+
+        const patchImageMeta = (img) => {
+          if (!img) return null;
+
+          const fileName = img.originalName || img.name;
+          const fallbackPath = fileName
+            ? `https://assets.onegrove.kr/dev/stories/${fileName}`
+            : null;
+
+          return {
+            ...img,
+            path: img.path || fallbackPath,
+            name: img.name || fileName,
+            status: img.status ?? "R",
+          };
+        };
+
+        if (!data || Object.keys(data).length === 0) return;
+
+        formRef.setValue("title", data.title || "");
+        formRef.setValue("category", data.category || "");
+        formRef.setValue("order", data.sort || "");
+        formRef.setValue("status", data.showYn === "Y" ? "active" : "inactive");
+
+        formRef.setValue("thumbImg", patchImageMeta(data.thumbImg));
+        formRef.setValue("patternTopPc", patchImageMeta(data.patternTopPc));
+        formRef.setValue("patternTopMo", patchImageMeta(data.patternTopMo));
+        formRef.setValue("patternBottomPc", patchImageMeta(data.patternBottomPc));
+        formRef.setValue("patternBottomMo", patchImageMeta(data.patternBottomMo));
+
+        if( data?.storiesImgList?.length > 0 ) {
+          data.storiesImgList.forEach((element, index) => {
+            formRef.setValue("storiesImgList" + (index+1), patchImageMeta(element));
+            if( element.caption !== undefined ) {
+              formRef.setValue("storiesImgCaption" + (index+1), element.caption);
+            }
+          });
+        }
+
+        formRef.setValue("content", data.content || "");
+        formRef.setValue("content1", data.addContent || "");
+        formRef.setValue("description", data.description || "");
+        formRef.setDescription?.(data.description || "");
+        formRef.setContent?.(data.content || "");
+        formRef.setContent?.(data.addContent || "");
+        formRef.setValue(
+          "startDate",
+          data.startDt ? parseLocalDateTime(data.startDt) : null
+        );
+        formRef.setValue(
+          "endDate",
+          data.endDate ? parseLocalDateTime(data.endDate) : null
+        );
+      };
+
+
+      patchForm(koFormRef.current, koData);
+      patchForm(enFormRef.current, enData);
+    }
+  }, [loading, koData, enData]);
+
+  useEffect(() => {
+    if (!loading) {
+      console.log("koFormRef.current:", koFormRef.current);
+      console.log("enFormRef.current:", enFormRef.current);
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    console.log(" KO 데이터:", koData);
+    console.log(" EN 데이터:", enData);
+  }, [koData, enData]);
+
+  const toImageMeta = (file, original) => {
+    const base = file || original;
+    if (!base) return null;
+
+    const originalName = base.originalName || base.name || "";
+    const extension = base.extension || "." + originalName.split(".").pop();
+
+    let path = "";
+    if (base.path) {
+      path = base.path;
+    } else if (originalName) {
+      path = `https://assets.onegrove.kr/dev/stories/${originalName}`;
+    }
+
+    return {
+      id: base.id ?? null,
+      originalName: originalName,
+      name: base.name ?? originalName,
+      size: base.size ?? 0,
+      extension: extension,
+      mime: base.mime || "image/jpeg",
+      classification: base.classification || "stories",
+      path: base.path || "",
+      status:
+        base.status !== undefined && base.status !== null
+          ? base.status
+          : file?.changed
+            ? "E"
+            : "R", // 수정 안 하면 R
+    };
+  };
+
+  const handleSave = async () => {
+    const showError = (msg) =>
+      showModal({
+        title: "입력 오류",
+        message: msg,
+        showCancel: false,
+      });
+    try {
+      const saveOne = async (data, original = {}) => {
+        const isInsert = !data.id;
+        const payload = {
+          ...(isInsert ? {} : { id: data.id }),
+          // eventId: koData?.eventId ?? enData?.eventId ?? defaultEventId,
+          lang: data.lang,
+          category: data.category,
+          title: data.title,
+          thumbImg: toImageMeta(data.thumbImg, original.thumbImg),
+          patternTopPc: toImageMeta(data.patternTopPc, original.patternTopPc),
+          patternTopMo: toImageMeta(data.patternTopMo, original.patternTopMo),
+          patternBottomPc: toImageMeta(data.patternBottomPc, original.patternBottomPc),
+          patternBottomMo: toImageMeta(data.patternBottomMo, original.patternBottomMo),
+
+          showYn: data.status === "status" ? "Y" : "N",
+          sort: data.order,
+          content: data.content,
+          addContent: data.content1,
+          description: data.description || "",
+          startDt:
+            (typeof data.startDate === "string"
+              ? new Date(data.startDate)
+              : data.startDate
+            )?.toISOString() || null,
+          endDt: 
+            (typeof data.endDate === "string"
+              ? new Date(data.endDate)
+              : data.endDate
+            )?.toISOString() || null,
+          delYn: "N",
+        };
+
+        console.log("저장 payload:", payload);
+
+        const apiUrl =
+          data?.id != null
+            ? "/api/v1/stories/update"
+            : "/api/v1/stories/insert";
+        const res = await api.post(apiUrl, payload);
+
+        console.log("응답 결과:", res.data);
+      };
+
+      if (currentLang === 0) {
+        const koValues = await koFormRef.current?.submit?.(showError);
+        if (!koValues) return;
+
+
+        await saveOne(
+          {
+            ...koValues,
+            id: koData?.id ?? null,
+            lang: "ko",
+          },
+          koData || {}
+        );
+      } else {
+        const enValues = await enFormRef.current?.submit?.(showError);
+        if (!enValues) return;
+
+        await saveOne(
+          {
+            ...enValues,
+            id: enData?.id ?? null,
+            lang: "en",
+          },
+          enData || {}
+        );
+      }
+
+      alert("저장 완료");
+      setIsReadOnly(true);
+      navigate("/contents/whatson/stories/list?refresh=" + Date.now());
+    } catch (err) {
+      console.error("저장 실패:", err);
+      alert("저장 실패. 다시 시도해주세요.");
+    }
+  };
+
+  return (
+    <Section>
+      <Tabs
+        tabs={[
+          { key: "kr", label: "국문" },
+          { key: "en", label: "영문" },
+        ]}
+        defaultIndex={currentLang}
+        onTabChange={(index) => {
+          // 탭 비활성화: 클릭 무시
+          if (!loading) setCurrentLang(index);
+        }}
+      >
+        <TabPanel>
+          {!loading && (
+            <>
+              <StoriesRegistForm
+                ref={koFormRef}
+                data={koData}
+                setData={setKoData}
+                lang="ko"
+              />
+              <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
+                <tbody>
+                  <tr>
+                    <th className="w-32 border bg-gray-100 px-4 py-2">
+                      등록일시
+                    </th>
+                    <td className="border px-4 py-2">
+                      {koData?.createDt || "-"}
+                    </td>
+                    <th className="w-32 border bg-gray-100 px-4 py-2">
+                      등록자
+                    </th>
+                    <td className="border px-4 py-2">
+                      {koData?.createUser || "-"}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className="border bg-gray-100 px-4 py-2">수정일시</th>
+                    <td className="border px-4 py-2">
+                      {koData?.updateDt || "-"}
+                    </td>
+                    <th className="border bg-gray-100 px-4 py-2">
+                      최근 수정자
+                    </th>
+                    <td className="border px-4 py-2">
+                      {koData?.updateUser || "-"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </>
+          )}
+        </TabPanel>
+
+        <TabPanel>
+          {!loading && (
+            <>
+              <StoriesRegistForm
+                ref={enFormRef}
+                data={enData}
+                setData={setEnData}
+                lang="en"
+              />
+              <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
+                <tbody>
+                  <tr>
+                    <th className="w-32 border bg-gray-100 px-4 py-2">
+                      등록일시
+                    </th>
+                    <td className="border px-4 py-2">
+                      {enData?.createDt || "-"}
+                    </td>
+                    <th className="w-32 border bg-gray-100 px-4 py-2">
+                      등록자
+                    </th>
+                    <td className="border px-4 py-2">
+                      {enData?.createUser || "-"}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className="border bg-gray-100 px-4 py-2">수정일시</th>
+                    <td className="border px-4 py-2">
+                      {enData?.updateDt || "-"}
+                    </td>
+                    <th className="border bg-gray-100 px-4 py-2">
+                      최근 수정자
+                    </th>
+                    <td className="border px-4 py-2">
+                      {enData?.updateUser || "-"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </>
+          )}
+        </TabPanel>
+      </Tabs>
+      <div className="flex justify-end gap-4 px-6 pb-6">
+        <Button
+          onClick={() =>
+            showModal({
+              title: "저장 확인",
+              message: "저장하시겠습니까?",
+              showCancel: true,
+              onConfirm: async () => {
+                await handleSave();
+                setIsReadOnly(true); // 저장 후 다시 읽기 전용
+              },
+            })
+          }
+        >
+          저장
+        </Button>
+
+        <Button
+          type="button"
+          className="bg-gray-200"
+          onClick={() =>
+            showModal({
+              title: "이동 확인",
+              message: "이전 페이지로 돌아갈 경우 입력한 정보가 사라집니다.",
+              showCancel: true,
+              onConfirm: () =>
+                navigate("/contents/whatson/stories/list?refresh=" + Date.now()),
+            })
+          }
+        >
+          목록
+        </Button>
+      </div>
+    </Section>
+  );
+}

@@ -50,6 +50,7 @@ import PopupRegist from "@/pages/popup/PopupRegist";
 import BrandDetail from "@/pages/retail/brand/BrandDetail";
 import PressDetail from "@/pages/contents/whatson/media/PressDetail";
 import EventDetail from "@/pages/contents/whatson/event/EventDetail";
+import StoriesDetail from "@/pages/contents/whatson/Stories/StoriesDetail";
 import SubmainLayout from "@/pages/submain/SubmainLayout";
 import LifeStylePage from "@/pages/submain/lifestyle/LifeStylePage";
 import WhatsonPage from "@/pages/submain/whatson/WhatsonPage";
@@ -96,7 +97,7 @@ export const routeMeta = [
           },
           {
             uuid: "1e83ea43-0b00-4261-8c5a-a76102d971a0",
-            path: "/admin/list/:id",
+            path: "/admin/detail/:id",
             element: <AdminDetailPage />,
             title: "관리자 상세",
             hidden: true,
@@ -368,6 +369,10 @@ export const routeMeta = [
                 permissions: ["Admin", "User"],
               },
 
+
+
+              
+
               {
                 uuid: "8275ec74-09ac-4b2a-9c65-78f5b75a06c7",
                 path: "/contents/whatson/stories/list",
@@ -386,6 +391,17 @@ export const routeMeta = [
                 hidden: true,
                 permissions: ["Admin", "User"],
               },
+
+              {
+                uuid: "46c071e4-7aa9-43b4-85bb-b8d9406433f3",
+                path: "/contents/whatson/stories/:emId",
+                group: "/contents/whatson/stories/",
+                element: <StoriesDetail />,
+                title: "Stories of One Grove 상세",
+                hidden: true,
+                permissions: ["Admin", "User"],
+              },
+
 
               {
                 uuid: "b277e917-fa13-4827-be23-2e2ca4164853",

@@ -270,6 +270,7 @@ export default function OccupancyDetail() {
                 locations={koLocations}
                 setLocations={setKoLocations}
                 currentLang={currentLang}
+                readOnlyOffice={false}
               />
             </>
           )}
@@ -285,6 +286,7 @@ export default function OccupancyDetail() {
                 locations={enLocations}
                 setLocations={setEnLocations}
                 currentLang={currentLang}
+                readOnlyOffice={true}
               />
             </>
           )}
