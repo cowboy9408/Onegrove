@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Button from "./Button"; // 기존 Button 컴포넌트 사용
 import { useFormContext } from "react-hook-form";
 
-export default function OfficeFloorForm({ value = [] }) {
+export default function OfficeFloorForm({ value = [], readOnly = false }) {
   const { setValue, trigger } = useFormContext();
   const [items, setItems] = useState(
     value.length ? value : [{ office: "", floor: "" }]
@@ -19,6 +19,7 @@ export default function OfficeFloorForm({ value = [] }) {
   };
 
   const handleChange = (index, key, val) => {
+    if (readOnly) return;
     const visibleItems = items.filter((item) => item.delYn !== "Y");
     const targetItem = visibleItems[index];
     const realIndex = items.findIndex((item) => item === targetItem);
@@ -28,6 +29,7 @@ export default function OfficeFloorForm({ value = [] }) {
   };
 
   const handleAdd = () => {
+    if (readOnly) return;
     const visibleItems = items.filter((item) => item.delYn !== "Y");
 
     if (visibleItems.length >= 4) {
@@ -40,6 +42,7 @@ export default function OfficeFloorForm({ value = [] }) {
   };
 
   const handleRemove = (index) => {
+    if (readOnly) return;
     const visibleItems = items.filter((item) => item.delYn !== "Y");
     const itemToRemove = visibleItems[index];
     if (!itemToRemove) return;
@@ -70,6 +73,7 @@ export default function OfficeFloorForm({ value = [] }) {
                 value={item.office}
                 onChange={(e) => handleChange(index, "office", e.target.value)}
                 className="w-full rounded border p-2"
+                disabled={readOnly}
               >
                 <option value="">선택</option>
                 <option value="A">A</option>
@@ -84,10 +88,11 @@ export default function OfficeFloorForm({ value = [] }) {
                 onChange={(e) => handleChange(index, "floor", e.target.value)}
                 placeholder="예: 3F"
                 className="w-full rounded border p-2"
+                disabled={readOnly}
               />
             </div>
             <div className="flex items-end">
-              {items.filter((i) => i.delYn !== "Y").length > 1 && (
+              {!readOnly && items.filter((i) => i.delYn !== "Y").length > 1 && (
                 <Button variant="outline" onClick={() => handleRemove(index)}>
                   삭제
                 </Button>
@@ -96,7 +101,7 @@ export default function OfficeFloorForm({ value = [] }) {
           </div>
         ))}
 
-      {items.length < 4 && (
+      {!readOnly && items.length < 4 && (
         <div className="text-right">
           <Button variant="default" onClick={handleAdd}>
             항목 추가
