@@ -165,7 +165,7 @@ export default function OccupancyDetail() {
           mainImg: toImageMeta(data.mainImg, original.mainImg),
           officeList: data.officeList,
         };
-        console.log("최종 저장될 officeList:", formValues.officeList);
+        console.log("payload.email:", payload.email);
         console.log("저장 payload:", payload);
         console.log("payload.thumbImgPc:", payload.thumbImgPc);
 
