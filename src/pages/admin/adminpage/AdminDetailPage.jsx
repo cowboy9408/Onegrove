@@ -239,12 +239,30 @@ export default function AdminDetailPage() {
       <div className="flex justify-end gap-3 px-6 pt-5 pb-6">
         <Button
           className="bg-black-100"
-          onClick={() => {
-            // TODO: 계정 잠금 해제 로직
-            alert("계정 잠금 해제 요청");
+          onClick={async () => {
+            try {
+              const payload = {
+                id: Number(id),
+                username: form.username,
+                email: form.email,
+              };
+
+              const res = await api.post("/api/v1/user/unlock", payload);
+
+              if (res.data.success) {
+                alert(
+                  "계정 잠금이 해제되었고, 이메일로 아이디 및 임시 비밀번호가 전송되었습니다."
+                );
+              } else {
+                alert("잠금 해제 실패: " + res.data.message);
+              }
+            } catch (error) {
+              console.error("계정 잠금 해제 오류:", error);
+              alert("서버 오류로 계정 잠금 해제에 실패했습니다.");
+            }
           }}
         >
-          계정 잠금 해제
+          계정 잠금(휴면) 해제
         </Button>
 
         <Button
