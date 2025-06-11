@@ -71,9 +71,10 @@ export default function StoriesDetail() {
 
   const parseLocalDateTime = (str) => {
     if (!str) return null;
-    const [datePart, timePart] = str.split("T"); // ex: "2025-05-27", "14:00"
+    const [datePart, timePart] = str.split(" "); // ex: "2025-05-27", "14:00"
     const [year, month, day] = datePart.split("-").map(Number);
     const [hour, minute] = timePart.split(":").map(Number);
+    // console.log(str, year, month, day, hour, minute);
     return new Date(year, month - 1, day, hour, minute);
   };
 
@@ -100,54 +101,47 @@ export default function StoriesDetail() {
           };
         };
 
-        formRef.setValue(
-          "progressStatus",
-          data?.progressYn === "Y" ? "inProgress" : "ended"
-        );
-
-        setTimeout(() => {
-          formRef.setValue("category", categoryCode);
-          formRef.current.setValue(
-            "progressStatus",
-            data?.progressYn === "Y" ? "inProgress" : "ended"
-          );
-        }, 0);
-
         if (!data || Object.keys(data).length === 0) return;
 
         formRef.setValue("title", data.title || "");
+        formRef.setValue("category", data.category || "");
+        formRef.setValue("order", data.sort || "");
         formRef.setValue("status", data.showYn === "Y" ? "active" : "inactive");
 
         formRef.setValue("thumbImg", patchImageMeta(data.thumbImg));
-        formRef.setValue("imgBodyPc", patchImageMeta(data.imgBodyPc));
-        formRef.setValue("imgBodyMo", patchImageMeta(data.imgBodyMo));
-        formRef.setValue("imgPc", patchImageMeta(data.imgPc));
-        formRef.setValue("imgMo", patchImageMeta(data.imgMo));
+        formRef.setValue("patternTopPc", patchImageMeta(data.patternTopPc));
+        formRef.setValue("patternTopMo", patchImageMeta(data.patternTopMo));
+        formRef.setValue("patternBottomPc", patchImageMeta(data.patternBottomPc));
+        formRef.setValue("patternBottomMo", patchImageMeta(data.patternBottomMo));
+
+        if( data?.storiesImgList?.length > 0 ) {
+          data.storiesImgList.forEach((element, index) => {
+            formRef.setValue("storiesImgList" + (index+1), patchImageMeta(element));
+            if( element.caption !== undefined ) {
+              formRef.setValue("storiesImgCaption" + (index+1), element.caption);
+            }
+          });
+        }
+
         formRef.setValue("content", data.content || "");
+        formRef.setValue("content1", data.addContent || "");
         formRef.setValue("description", data.description || "");
         formRef.setDescription?.(data.description || "");
         formRef.setContent?.(data.content || "");
+        formRef.setContent?.(data.addContent || "");
         formRef.setValue(
           "startDate",
-          data.startDate ? parseLocalDateTime(data.startDate) : null
+          data.startDt ? parseLocalDateTime(data.startDt) : null
         );
-        formRef.setValue("brandId", data.brandId ?? null);
-
-        const isManualEnd =
-          data.manualEndInput === true ||
-          (!!data.endInput &&
-            (data.endDate === null || data.endDate === undefined));
-        formRef.setValue("manualEndInput", isManualEnd);
-        formRef.setValue("endInput", isManualEnd ? data.endInput : "");
         formRef.setValue(
           "endDate",
-          !isManualEnd && data.endDate ? parseLocalDateTime(data.endDate) : null
+          data.endDate ? parseLocalDateTime(data.endDate) : null
         );
       };
 
 
-      patchForm(koFormRef.current, koData, sharedCategory);
-      patchForm(enFormRef.current, enData, sharedCategory);
+      patchForm(koFormRef.current, koData);
+      patchForm(enFormRef.current, enData);
     }
   }, [loading, koData, enData]);
 
@@ -174,7 +168,7 @@ export default function StoriesDetail() {
     if (base.path) {
       path = base.path;
     } else if (originalName) {
-      path = `https://d2md7choov3drl.cloudfront.net/stories/${originalName}`;
+      path = `https://assets.onegrove.kr/dev/stories/${originalName}`;
     }
 
     return {
@@ -207,33 +201,31 @@ export default function StoriesDetail() {
         const isInsert = !data.id;
         const payload = {
           ...(isInsert ? {} : { id: data.id }),
-          eventId: koData?.eventId ?? enData?.eventId ?? defaultEventId,
+          // eventId: koData?.eventId ?? enData?.eventId ?? defaultEventId,
           lang: data.lang,
           category: data.category,
           title: data.title,
           thumbImg: toImageMeta(data.thumbImg, original.thumbImg),
-          imgBodyPc: toImageMeta(data.imgBodyPc, original.imgBodyPc),
-          imgBodyMo: toImageMeta(data.imgBodyMo, original.imgBodyMo),
-          imgPc: toImageMeta(data.imgPc, original.imgPc),
-          imgMo: toImageMeta(data.imgMo, original.imgMo),
-          showYn: data.showYn,
-          progressYn: data.progressYn,
+          patternTopPc: toImageMeta(data.patternTopPc, original.patternTopPc),
+          patternTopMo: toImageMeta(data.patternTopMo, original.patternTopMo),
+          patternBottomPc: toImageMeta(data.patternBottomPc, original.patternBottomPc),
+          patternBottomMo: toImageMeta(data.patternBottomMo, original.patternBottomMo),
+
+          showYn: data.status === "status" ? "Y" : "N",
+          sort: data.order,
           content: data.content,
+          addContent: data.content1,
           description: data.description || "",
-          startDate:
+          startDt:
             (typeof data.startDate === "string"
               ? new Date(data.startDate)
               : data.startDate
             )?.toISOString() || null,
-          endDate: data.manualEndInput
-            ? null
-            : (typeof data.endDate === "string"
-                ? new Date(data.endDate)
-                : data.endDate
-              )?.toISOString() || null,
-          endInput: data.manualEndInput ? data.endInput : "",
-          manualEndInput: data.manualEndInput === true,
-          brandId: data.brandId ?? null,
+          endDt: 
+            (typeof data.endDate === "string"
+              ? new Date(data.endDate)
+              : data.endDate
+            )?.toISOString() || null,
           delYn: "N",
         };
 
@@ -252,16 +244,11 @@ export default function StoriesDetail() {
         const koValues = await koFormRef.current?.submit?.(showError);
         if (!koValues) return;
 
-        localStorage.setItem(
-          `manualEnd_ko_${emId}`,
-          koValues.manualEndInput ? "1" : "0"
-        );
 
         await saveOne(
           {
             ...koValues,
             id: koData?.id ?? null,
-            eventId: koData?.eventId ?? enData?.eventId ?? null,
             lang: "ko",
           },
           koData || {}
@@ -274,7 +261,6 @@ export default function StoriesDetail() {
           {
             ...enValues,
             id: enData?.id ?? null,
-            eventId: koData?.eventId ?? null,
             lang: "en",
           },
           enData || {}
@@ -283,19 +269,12 @@ export default function StoriesDetail() {
 
       alert("저장 완료");
       setIsReadOnly(true);
-      navigate("/contents/whatson/event/list?refresh=" + Date.now());
+      navigate("/contents/whatson/stories/list?refresh=" + Date.now());
     } catch (err) {
       console.error("저장 실패:", err);
       alert("저장 실패. 다시 시도해주세요.");
     }
   };
-
-  useEffect(() => {
-    return () => {
-      localStorage.removeItem(`manualEnd_ko_${emId}`);
-      localStorage.removeItem(`manualEnd_en_${emId}`);
-    };
-  }, [emId]);
 
   return (
     <Section>
@@ -318,10 +297,6 @@ export default function StoriesDetail() {
                 data={koData}
                 setData={setKoData}
                 lang="ko"
-                brands={sharedBrands}
-                setBrands={setSharedBrands}
-                category={sharedCategory}
-                setCategory={setSharedCategory}
               />
               <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
                 <tbody>
@@ -330,7 +305,7 @@ export default function StoriesDetail() {
                       등록일시
                     </th>
                     <td className="border px-4 py-2">
-                      {koData?.createDatetime || "-"}
+                      {koData?.createDt || "-"}
                     </td>
                     <th className="w-32 border bg-gray-100 px-4 py-2">
                       등록자
@@ -342,7 +317,7 @@ export default function StoriesDetail() {
                   <tr>
                     <th className="border bg-gray-100 px-4 py-2">수정일시</th>
                     <td className="border px-4 py-2">
-                      {koData?.updateDatetime || "-"}
+                      {koData?.updateDt || "-"}
                     </td>
                     <th className="border bg-gray-100 px-4 py-2">
                       최근 수정자
@@ -365,10 +340,6 @@ export default function StoriesDetail() {
                 data={enData}
                 setData={setEnData}
                 lang="en"
-                brands={sharedBrands}
-                setBrands={setSharedBrands}
-                category={sharedCategory}
-                setCategory={setSharedCategory}
               />
               <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
                 <tbody>
@@ -377,7 +348,7 @@ export default function StoriesDetail() {
                       등록일시
                     </th>
                     <td className="border px-4 py-2">
-                      {enData?.createDatetime || "-"}
+                      {enData?.createDt || "-"}
                     </td>
                     <th className="w-32 border bg-gray-100 px-4 py-2">
                       등록자
@@ -389,7 +360,7 @@ export default function StoriesDetail() {
                   <tr>
                     <th className="border bg-gray-100 px-4 py-2">수정일시</th>
                     <td className="border px-4 py-2">
-                      {enData?.updateDatetime || "-"}
+                      {enData?.updateDt || "-"}
                     </td>
                     <th className="border bg-gray-100 px-4 py-2">
                       최근 수정자
@@ -430,7 +401,7 @@ export default function StoriesDetail() {
               message: "이전 페이지로 돌아갈 경우 입력한 정보가 사라집니다.",
               showCancel: true,
               onConfirm: () =>
-                navigate("/contents/whatson/event/list?refresh=" + Date.now()),
+                navigate("/contents/whatson/stories/list?refresh=" + Date.now()),
             })
           }
         >

@@ -53,10 +53,10 @@ export default function StoriesListPage() {
             const koItem = item.contentList.find((i) => i.lang === "KO") || {};
             const enItem = item.contentList.find((i) => i.lang === "EN") || {};
 
-            console.log("koItem:", koItem);
-            console.log("enItem:", enItem);
+            // console.log("koItem:", koItem);
+            // console.log("enItem:", enItem);
 
-            console.log("item:", koItem.category);
+            // console.log("item:", koItem.category);
 
 
             return {

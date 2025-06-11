@@ -15,7 +15,6 @@ import Editor from "@/components/common/Editor";
 import Button from "@/components/common/Button";
 import Row from "@/components/layout/Row";
 import Col from "@/components/layout/Col";
-import BrandList from "@/components/modal/BrandList";
 import useModal from "@/hooks/useModal";
 import api from "@/lib/apiClient";
 import Textarea from "@/components/common/Textarea";
@@ -27,67 +26,21 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
     mode: "onChange",
     defaultValues: {
       status: "inactive",
-      progressStatus: "inProgress",
     },
   });
   const { register, setValue, getValues, watch, control } = methods;
   const editorRef = useRef();
   const editorRef2 = useRef();
-  const [brands, setBrands] = useState([]);
   const { showModal } = useModal();
 
   const [startDate, setStartDate] = useState(new Date());
   const [startTime, setStartTime] = useState("00:00");
   const [endDate, setEndDate] = useState(null);
   const [endTime, setEndTime] = useState("00:00");
-  const [categoryOptions, setCategoryOptions] = useState([]);
-  const [isManualEndInput, setIsManualEndInput] = useState(false);
-  const [manualEndText, setManualEndText] = useState("");
   const [isAddContent, setIsAddContent] = useState(false);
 
 
-  useEffect(() => {
-      // 카테고리 불러오기
-      const fetchCategories = async () => {
-        try {
-          const res = await api.get("/api/v1/event-promotion/item/category");
-          if (res.data?.success) {
-            setCategoryOptions(res.data.data);
-          }
-        } catch (err) {
-          console.error("카테고리 로딩 실패", err);
-        }
-      };
-  
-      fetchCategories();
-    }, []);
-  
-    useEffect(() => {
-      const fetchBrandName = async () => {
-        const brandId = watch("brandId"); // watch는 즉시 값 반영이 어려울 수 있으므로 변수로 추출
-        if (!brandId) return;
-  
-        try {
-          const res = await api.get("/api/v1/event-promotion/item/brand?lang=ko");
-          const brandList = res.data?.data ?? [];
-  
-          const found = brandList.find((b) => String(b.id) === String(brandId));
-  
-          if (found) {
-            setBrands([{ _id: found.id, brand: found.brandName }]);
-          }
-        } catch (err) {
-          console.error("브랜드 정보 불러오기 실패", err);
-        }
-      };
-  
-      fetchBrandName();
-    }, [watch("brandId")]);
-  
-    useEffect(() => {
-      register("manualEndInput");
-      register("endInput");
-    }, [register]);
+
 
 
   const onSubmit = async (data) => {
@@ -95,7 +48,6 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
     const content1 = await editorRef2.current.getContent();
     console.log({
       ...data,
-      brandIds: brands.map((e) => e._id),
       content,
       content1
       // ...dateRange,
@@ -123,18 +75,23 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
     }
   }, [data]);
 
+
+
   useImperativeHandle(ref, () => ({
       submit: async (onError) => {
+        const getCleanedImage = (img) => {
+          if (img?.status === "D") return null;
+          return img;
+        };
+
         const values = {
           ...getValues(),
-          thumbImg: watch("thumbImg"),
-          imgBodyPc: watch("imgBodyPc"),
-          imgBodyMo: watch("imgBodyMo"),
-          imgPc: watch("imgPc"),
-          imgMo: watch("imgMo"),
-          description: watch("description"),
-          endInput: watch("endInput"),
-          manualEndInput: watch("manualEndInput"),
+          thumbImg: getCleanedImage(watch("thumbImg")),
+          patternTopPc: getCleanedImage(watch("patternTopPc")),
+          patternTopMo: getCleanedImage(watch("patternTopMo")),
+          patternBottomPc: getCleanedImage(watch("patternBottomPc")),
+          patternBottomMo: getCleanedImage(watch("patternBottomMo")),
+          description: getCleanedImage(watch("description")),
         };
         const content = await editorRef.current?.getContent?.();
         const content1 = await editorRef2.current?.getContent?.();
@@ -160,11 +117,11 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           return null;
         }
         if (
-          !values.imgPc ||
-          !values.imgMo ||
           !values.thumbImg ||
-          !values.imgBodyPc ||
-          !values.imgBodyMo
+          !values.patternTopPc ||
+          !values.patternTopMo ||
+          !values.patternBottomPc ||
+          !values.patternBottomMo
         ) {
           onError?.("이미지를 모두 등록해주세요.");
           return null;
@@ -178,23 +135,11 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           onError?.("이벤트 시작일과 종료일을 선택해주세요.");
           return null;
         }
-        if (!values.manualEndInput && (!endDate || !endTime)) {
+        if (!endDate) {
           onError?.("이벤트 종료일과 시간을 선택해주세요.");
           return null;
         }
   
-        if (
-          values.manualEndInput &&
-          (!values.endInput || values.endInput.trim() === "")
-        ) {
-          onError?.("종료 조건 텍스트를 입력해주세요.");
-          return null;
-        }
-  
-        if (brands.length === 0) {
-          onError?.("브랜드를 선택해주세요.");
-          return null;
-        }
         if (!description || description.trim() === "") {
           onError?.("디스크립션을 입력해주세요.");
           return null;
@@ -204,33 +149,30 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           title: values.title,
           category: values.category,
           startDate: startDate,
-          endDate: values.manualEndInput ? null : endDateStr,
-          endInput: values.manualEndInput ? values.endInput : null,
-  
+          endDate: endDateStr,
           thumbImg: values.thumbImg,
-          imgBodyPc: values.imgBodyPc,
-          imgBodyMo: values.imgBodyMo,
-          imgPc: values.imgPc,
-          imgMo: values.imgMo,
+          patternTopPc: values.patternTopPc,
+          patternTopMo: values.patternTopMo,
+          patternBottomPc: values.patternBottomPc,
+          patternBottomMo: values.patternBottomMo,
+
+
           content,
           description,
-          brands,
         });
   
         if (
           !values.title?.trim() ||
           !values.category ||
           !startDate ||
-          (!values.manualEndInput && !endDate) ||
-          (values.manualEndInput && !values.endInput?.trim()) ||
+          !endDate ||
           !values.thumbImg ||
-          !values.imgBodyPc ||
-          !values.imgBodyMo ||
-          !values.imgPc ||
-          !values.imgMo ||
+          !values.patternTopPc ||
+          !values.patternTopMo ||
+          !values.patternBottomPc ||
+          !values.patternBottomMo ||
           !content?.trim() ||
-          //        // !description?.trim() ||
-          brands.length === 0
+          !description?.trim()
         ) {
           alert("모든 필수 항목을 입력해주세요.");
           return null;
@@ -249,10 +191,10 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             size: file.size,
             extension: "." + (file.originalName || file.name).split(".").pop(),
             mime: file.type || "image/png",
-            classification: "event-promotion",
+            classification: "stories",
             path:
               file.path ||
-              `https://assets.onegrove.kr/dev/event-promotion/${file.originalName || file.name}`,
+              `https://assets.onegrove.kr/dev/stories/${file.originalName || file.name}`,
             status: file.status || "C",
           };
         };
@@ -261,23 +203,19 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           eventId: data?.id ?? null,
           lang,
           showYn: values.status === "active" ? "Y" : "N",
-          sort: Number(values.order) || 1,
+          order: Number(values.order) || 1,
           category: values.category,
           title: values.title || "",
           thumbImg: toImageMeta(values.thumbImg),
-          imgBodyPc: toImageMeta(values.imgBodyPc),
-          imgBodyMo: toImageMeta(values.imgBodyMo),
-          imgPc: toImageMeta(values.imgPc),
-          imgMo: toImageMeta(values.imgMo),
+          patternTopPc: toImageMeta(values.patternTopPc),
+          patternTopMo: toImageMeta(values.patternTopMo),
+          patternBottomPc: toImageMeta(values.patternBottomPc),
+          patternBottomMo: toImageMeta(values.patternBottomMo),
           content: content || "",
           content1: content1 || "",
           description: description || "",
           startDate: startDateStr,
-          endDate: values.manualEndInput ? null : endDateStr,
-          endInput: values.manualEndInput ? values.endInput : null,
-          manualEndInput: values.manualEndInput,
-          progressYn: values.progressStatus === "inProgress" ? "Y" : "N",
-          brandId: brands[0]?._id ?? null,
+          endDate: endDateStr,
           delYn: "N",
         };
       },
@@ -367,49 +305,22 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
 
               <div className="flex items-center gap-2">
                 <span className="font-bold">~</span>
-                <Checkbox
-                  id="manualEnd"
-                  checked={isManualEndInput}
-                  onChange={(e) => {
-                    setIsManualEndInput(e.target.checked);
-                    setValue("manualEndInput", e.target.checked);
-                  }}
-                  disabled={readOnly}
-                />
-
-                {isManualEndInput ? (
-                  <input
-                    type="text"
-                    value={manualEndText}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setManualEndText(val);
-                      setValue("endInput", val);
+                  <Datepicker
+                    mode="single"
+                    selectedDate={endDate}
+                    onSingleChange={(date) => {
+                      setEndDate(date);
+                      setValue("endDate", date?.toISOString());
                     }}
-                    placeholder="공백 포함 최대 10자"
-                    className="w-52 rounded border px-2 py-1"
+                    readOnly={readOnly}
+                  />
+                  <input
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    className="rounded border px-2 py-1"
                     disabled={readOnly}
                   />
-                ) : (
-                  <>
-                    <Datepicker
-                      mode="single"
-                      selectedDate={endDate}
-                      onSingleChange={(date) => {
-                        setEndDate(date);
-                        setValue("endDate", date?.toISOString());
-                      }}
-                      readOnly={readOnly}
-                    />
-                    <input
-                      type="time"
-                      value={endTime}
-                      onChange={(e) => setEndTime(e.target.value)}
-                      className="rounded border px-2 py-1"
-                      disabled={readOnly}
-                    />
-                  </>
-                )}
               </div>
             </div>
           </div>
@@ -439,38 +350,39 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         <div className="space-y-2">
           <Upload
             key={`thumbnail-upload`}
-            name="thumbnail"
+            name="thumbImg"
             label="썸네일 이미지"
             required
             classification="stroies"
             readOnly={readOnly}
-            value={watch("imgPc")}
-            onChange={(file) => setValue("imgPc", file)}
+            value={watch("thumbImg")}
+            onChange={(file) => setValue("thumbImg", file)}
             accept="image/png, image/jpeg, image/jpg, image/webp"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
           
           />
           <Upload
-            name="banner"
+            key={`patternTopPc-upload`}
+            name="patternTopPc"
             label="페이지 상단 패턴 PC 이미지"
             required
             classification="stroies"
             readOnly={readOnly}
-            value={watch("imgBodyPc")}
-            onChange={(file) => setValue("imgBodyPc", file)}
+            value={watch("patternTopPc")}
+            onChange={(file) => setValue("patternTopPc", file)}
             accept="image/png, image/jpeg, image/jpg, image/webp"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
           />
           <Upload
-            name="extraImage"
+            name="patternTopMo"
             label="페이지 상단 패턴 모바일 이미지"
             required
             classification="stroies"
             readOnly={readOnly}
-            value={watch("imgBodyMo")}
-            onChange={(file) => setValue("imgBodyPc", file)}
+            value={watch("patternTopMo")}
+            onChange={(file) => setValue("patternTopMo", file)}
             accept="image/png, image/jpeg, image/jpg, image/webp"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
@@ -480,7 +392,18 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         <p className="mb-1 block pb-2 pl-1 text-sm font-medium text-gray-800">
           내용<span className="text-red-500">*</span>
         </p>
-        <Editor ref={editorRef} />
+        <Controller
+          name="content"
+          control={control}
+          render={({ field }) => (
+            <Editor
+              ref={editorRef}
+              readOnly={readOnly}
+              initialContent={field.value}
+              onChange={(val) => field.onChange(val)} // 에디터 내부 값 변경을 폼과 동기화
+            />
+          )}
+        />
 
 
         <Button
@@ -494,57 +417,68 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           <p className="mb-1 block pb-2 pl-1 text-sm font-medium text-gray-800">
             내용 추가
           </p>
-          <Editor ref={editorRef2} />
+          <Controller
+            name="content2"
+            control={control}
+            render={({ field }) => (
+              <Editor
+                ref={editorRef2}
+                readOnly={readOnly}
+                initialContent={field.value}
+                onChange={(val) => field.onChange(val)} // 에디터 내부 값 변경을 폼과 동기화
+              />
+            )}
+          />
         </div>
 
 
 
         <div className="space-y-2 my-6">
           <Upload
-            name="banner"
-            label="PC 스와이프이미지 1"
+            name="storiesImgList1"
+            label="스와이프이미지 1"
             classification="stroies"
             readOnly={readOnly}
-            value={watch("imgBodyPc")}
-            onChange={(file) => setValue("imgBodyPc", file)}
+            value={watch("storiesImgList1")}
+            onChange={(file) => setValue("storiesImgList1", file)}
             accept="image/png, image/jpeg, image/jpg, image/webp"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
           />
-          <Input {...methods.register("category")} info="PC 이미지 1 캡션 영역" />
+          <Input {...methods.register("storiesImgCaption1")} info="스와이프이미지 1 캡션 영역" />
 
           <Upload
-            name="banner"
-            label="PC 스와이프이미지 2"
+            name="storiesImgList2"
+            label="스와이프이미지 2"
             classification="stroies"
             readOnly={readOnly}
-            value={watch("imgBodyPc")}
-            onChange={(file) => setValue("imgBodyPc", file)}
+            value={watch("storiesImgList2")}
+            onChange={(file) => setValue("storiesImgList2", file)}
             accept="image/png, image/jpeg, image/jpg, image/webp"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
             className="mt-4"
           />
-          <Input {...methods.register("category")} info="PC 이미지 캡션 영역" />
+          <Input {...methods.register("storiesImgCaption2")} info="스와이프이미지 2 캡션 영역" />
 
           <Upload
-            name="banner"
-            label="PC 스와이프이미지 3"
+            name="storiesImgList3"
+            label="스와이프이미지 3"
             classification="stroies"
             readOnly={readOnly}
-            value={watch("imgBodyPc")}
-            onChange={(file) => setValue("imgBodyPc", file)}
+            value={watch("storiesImgList3")}
+            onChange={(file) => setValue("storiesImgList3", file)}
             accept="image/png, image/jpeg, image/jpg, image/webp"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
             className="mt-4"
           />
-          <Input {...methods.register("category")} info="PC 이미지 캡션 영역" />
+          <Input {...methods.register("storiesImgCaption3")} info="스와이프이미지 3 캡션 영역" />
         </div>
 
 
 
-         <div className="space-y-2 my-6">
+         {/* <div className="space-y-2 my-6">
           <Upload
             name="extraImage"
             label="MO 스와이프이미지 1"
@@ -583,30 +517,30 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             className="mt-4"
           />
           <Input label="MO 이미지 3 캡션 영역" {...methods.register("category")} info="MO 이미지 캡션 영역" />
-        </div>
+        </div> */}
 
 
         <div className="space-y-2">
           <Upload
-            name="banner"
+            name="patternBottomPc"
             label="페이지 하단 패턴 PC 이미지"
             required
             classification="stroies"
             readOnly={readOnly}
-            value={watch("imgBodyPc")}
-            onChange={(file) => setValue("imgBodyPc", file)}
+            value={watch("patternBottomPc")}
+            onChange={(file) => setValue("patternBottomPc", file)}
             accept="image/png, image/jpeg, image/jpg, image/webp"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
           />
           <Upload
-            name="extraImage"
+            name="patternBottomMo"
             label="페이지 하단 패턴 모바일 이미지"
             required
             classification="stroies"
             readOnly={readOnly}
-            value={watch("imgBodyMo")}
-            onChange={(file) => setValue("imgBodyPc", file)}
+            value={watch("patternBottomMo")}
+            onChange={(file) => setValue("patternBottomMo", file)}
             accept="image/png, image/jpeg, image/jpg, image/webp"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
