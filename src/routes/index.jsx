@@ -12,7 +12,7 @@ import RetailLayout from "@/pages/retail/RetailLayout";
 import ContentsLayout from "@/pages/contents/ContentsLayout";
 import WhatsonLayout from "@/pages/contents/whatson/WhatsonLayout";
 import OfficeLayout from "@/pages/office/OfficeLayout";
-import InquiryLayout from "@/pages/inquiry/InquiryLayout";
+
 import SystemLayout from "@/pages/system/SystemLayout";
 import EventLayout from "@/pages/contents/whatson/event/EventLayout";
 import StoriesLayout from "@/pages/contents/whatson/stories/StoriesLayout";
@@ -35,7 +35,7 @@ import PressListPage from "@/pages/contents/whatson/media/PressListPage";
 import Meeting from "@/pages/office/meeting/Meeting";
 import Visit from "@/pages/office/visit/Visit";
 import Sleep from "@/pages/office/sleep/Sleep";
-import FnqListPage from "@/pages/inquiry/client/FnqListPage";
+import InquiryListPage from "@/pages/inquiry/client/InquiryListPage";
 import MeetingListPage from "@/pages/system/meeting/MeetingListPage";
 import EventRegist from "@/pages/contents/whatson/event/EventRegist";
 import StoriesRegist from "@/pages/contents/whatson/stories/StoriesRegist";
@@ -529,23 +529,13 @@ export const routeMeta = [
         ],
       },
       {
-        uuid: "1ba90607-e1b4-4075-9b2d-c28a56559cb1",
+        uuid: "e1582c44-00e8-4667-8361-dff7da5d9964",
         path: "/inquiry",
-        element: <InquiryLayout />,
-        title: "고객 문의",
-        icon: <CircleHelpIcon size={18} />,
+        element: <InquiryListPage />,
+        title: "고객 문의 관리",
+        icon: <BellIcon size={18} />,
         hidden: false,
         permissions: ["Admin", "User"],
-        children: [
-          {
-            uuid: "e1582c44-00e8-4667-8361-dff7da5d9964",
-            path: "/inquiry/client",
-            element: <FnqListPage />,
-            title: "고객 문의 관리",
-            hidden: false,
-            permissions: ["Admin", "User"],
-          },
-        ],
       },
       {
         uuid: "c9c84ed1-a896-4d9b-b659-cd6a43dc8cd2",

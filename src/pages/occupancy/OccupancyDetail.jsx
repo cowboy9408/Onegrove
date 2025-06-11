@@ -6,6 +6,7 @@ import Button from "@/components/common/Button";
 import RegistForm from "./component/RegistForm";
 import api from "@/lib/apiClient";
 import useModal from "@/hooks/useModal";
+import cloneDeep from "lodash/cloneDeep";
 
 export default function OccupancyDetail() {
   const navigate = useNavigate();
@@ -34,8 +35,8 @@ export default function OccupancyDetail() {
 
       setKoData(ko);
       setEnData(en);
-      setKoLocations(ko.officeList || []);
-      setEnLocations(en.officeList || []);
+      setKoLocations(ko.officeList ?? cloneDeep(en.officeList || []));
+      setEnLocations(en.officeList ?? cloneDeep(ko.officeList || []));
 
       setLoading(false);
     } catch (err) {
@@ -162,18 +163,9 @@ export default function OccupancyDetail() {
           freeHour: data.freeHour,
           useYn: data.useYn,
           mainImg: toImageMeta(data.mainImg, original.mainImg),
-          officeList: formValues.officeList,
+          officeList: data.officeList,
         };
-        console.log("저장 요청 - PC:", data.thumbImgPc);
-        console.log("저장 요청 - MO:", data.thumbImgMo);
-        console.log(
-          "변환된 PC:",
-          toImageMeta(data.thumbImgPc, original.thumbImgPc)
-        );
-        console.log(
-          "변환된 MO:",
-          toImageMeta(data.thumbImgMo, original.thumbImgMo)
-        );
+        console.log("최종 저장될 officeList:", formValues.officeList);
         console.log("저장 payload:", payload);
         console.log("payload.thumbImgPc:", payload.thumbImgPc);
 
@@ -278,6 +270,7 @@ export default function OccupancyDetail() {
                 locations={koLocations}
                 setLocations={setKoLocations}
                 currentLang={currentLang}
+                readOnlyOffice={false}
               />
             </>
           )}
@@ -293,6 +286,7 @@ export default function OccupancyDetail() {
                 locations={enLocations}
                 setLocations={setEnLocations}
                 currentLang={currentLang}
+                readOnlyOffice={true}
               />
             </>
           )}

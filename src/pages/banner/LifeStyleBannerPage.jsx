@@ -27,6 +27,7 @@ export default function MainBannerPage() {
       if (!data) return;
 
       const mapped = {
+        id: data.id,
         title: data.title,
         subtitle: data.subTitle,
         url: data.url,
@@ -37,9 +38,9 @@ export default function MainBannerPage() {
       };
 
       if (langCode === "ko") {
-        setKoData({ banner: mapped });
+        setKoData(mapped);
       } else {
-        setEnData({ banner: mapped });
+        setEnData(mapped);
       }
     } catch (error) {
       console.error("데이터 불러오기 실패", error);
@@ -51,36 +52,60 @@ export default function MainBannerPage() {
     fetchBannerData(lang);
   }, [currentLang]);
 
-  const handleSave = async () => {
+  const handleClickSave = async () => {
     const isKorean = currentLang === 0;
     const ref = isKorean ? koRef : enRef;
 
-    const menuCode = "bn0103";
-    const langCode = isKorean ? "KO" : "EN";
+    const payload = await ref.current?.submit?.((message) => {
+      showModal({
+        title: "필수 항목을 모두 입력해주세요.",
+        message,
+        showCancel: false,
+      });
+    });
 
-    const payload = await ref.current?.submit();
     if (!payload) return;
 
-    console.log("전송할 payload:", payload);
+    showModal({
+      title: "저장 확인",
+      message: "입력한 내용을 저장하시겠습니까?",
+      showCancel: true,
+      onConfirm: () => handleSave(payload),
+    });
+  };
+
+  const handleSave = async (payload) => {
+    const isUpdate = !!payload.id;
+    const apiUrl = isUpdate ? "/api/v1/banner/update" : "/api/v1/banner/insert";
 
     try {
-      await api.post("/api/v1/banner/insert", payload);
-      alert("저장 완료");
-
-      window.location.reload();
+      await api.post(apiUrl, payload);
+      showModal({
+        title: "완료",
+        message: isUpdate ? "수정이 완료되었습니다." : "등록이 완료되었습니다.",
+        showCancel: false,
+      });
     } catch (error) {
-      console.error("저장 실패 (post)", error);
-      alert("저장에 실패했습니다.");
+      console.error("저장 실패", error);
+      showModal({
+        title: "오류",
+        message: "저장 중 오류가 발생했습니다.",
+        showCancel: false,
+      });
       return;
     }
+
+    // 저장 후 데이터 새로 고침
+    const menuCode = "bn0103";
+    const langCode = payload.lang;
 
     try {
       const res = await api.get(`/api/v1/banner/${menuCode}/${langCode}`);
       const data = res.data?.data;
-
       if (!data) return;
 
       const mapped = {
+        id: data.id,
         title: data.title,
         subtitle: data.subTitle,
         url: data.url,
@@ -90,13 +115,13 @@ export default function MainBannerPage() {
         image2: data.moImg,
       };
 
-      if (isKorean) {
-        setKoData({ banner: mapped });
+      if (langCode === "KO") {
+        setKoData(mapped);
       } else {
-        setEnData({ banner: mapped });
+        setEnData(mapped);
       }
     } catch (error) {
-      console.error("조회 실패 (get)", error);
+      console.error("조회 실패", error);
     }
   };
 
@@ -131,18 +156,7 @@ export default function MainBannerPage() {
         </TabPanel>
       </Tabs>
       <div className="flex justify-end gap-4 px-6 pb-6">
-        <Button
-          onClick={() =>
-            showModal({
-              title: "저장 확인",
-              message: "입력한 내용을 저장하시겠습니까?",
-              showCancel: true,
-              onConfirm: handleSave,
-            })
-          }
-        >
-          저장
-        </Button>
+        <Button onClick={handleClickSave}>저장</Button>
       </div>
     </Section>
   );
