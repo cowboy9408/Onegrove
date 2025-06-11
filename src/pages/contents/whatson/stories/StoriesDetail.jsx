@@ -19,13 +19,6 @@ export default function StoriesDetail() {
   const [sharedCategory, setSharedCategory] = useState("");
   const [isReadOnly, setIsReadOnly] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [categoryOptions, setCategoryOptions] = useState([]);
-  const resolveCategoryCode = (input) => {
-    const matched = categoryOptions.find(
-      (opt) => opt.code === input || opt.name === input || opt.value === input
-    );
-    return matched?.code || "";
-  };
   const [sharedBrands, setSharedBrands] = useState([]);
 
   // 국문 상태
@@ -52,14 +45,12 @@ export default function StoriesDetail() {
         const patchedKo = ko
           ? {
               ...ko,
-              category: resolveCategoryCode(ko.category),
             }
           : null;
 
         const patchedEn = en
           ? {
               ...en,
-              category: resolveCategoryCode(en.category),
             }
           : null;
 
@@ -74,36 +65,9 @@ export default function StoriesDetail() {
       }
     };
     fetchData();
-  }, [emId, categoryOptions]);
+  }, [emId]);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await api.get("/api/v1/event-promotion/item/category");
-        if (res.data?.success) {
-          setCategoryOptions(res.data.data); //
-        }
-      } catch (err) {
-        console.error("카테고리 로딩 실패", err);
-      }
-    };
 
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    if (categoryOptions.length === 0) return;
-
-    setKoData((prev) => ({
-      ...prev,
-      category: resolveCategoryCode(prev?.category),
-    }));
-
-    setEnData((prev) => ({
-      ...prev,
-      category: resolveCategoryCode(prev?.category),
-    }));
-  }, [categoryOptions]);
 
   const parseLocalDateTime = (str) => {
     if (!str) return null;
@@ -114,7 +78,7 @@ export default function StoriesDetail() {
   };
 
   useEffect(() => {
-    if (!loading && categoryOptions.length > 0) {
+    if (!loading) {
       const patchForm = (formRef, data, fallbackCategory = "") => {
         if (!formRef) return;
 
@@ -141,9 +105,6 @@ export default function StoriesDetail() {
           data?.progressYn === "Y" ? "inProgress" : "ended"
         );
 
-        const categoryCode = resolveCategoryCode(
-          data?.categoryCode ?? fallbackCategory
-        );
         setTimeout(() => {
           formRef.setValue("category", categoryCode);
           formRef.current.setValue(
@@ -184,14 +145,11 @@ export default function StoriesDetail() {
         );
       };
 
-      const sharedCategory = resolveCategoryCode(
-        koData?.categoryCode || enData?.categoryCode || ""
-      );
 
       patchForm(koFormRef.current, koData, sharedCategory);
       patchForm(enFormRef.current, enData, sharedCategory);
     }
-  }, [loading, koData, enData, categoryOptions]);
+  }, [loading, koData, enData]);
 
   useEffect(() => {
     if (!loading) {
