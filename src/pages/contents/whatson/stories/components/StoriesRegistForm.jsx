@@ -55,8 +55,11 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
   };
 
   useEffect(() => {
-    if (data?.startDate) {
-      const start = new Date(data.startDate);
+    console.log('start ---', data,  data.startDate, data.endDate)
+    if (data?.startDt) {
+      const start = new Date(data.startDt);
+
+      
       setStartDate(start);
 
       // 시간 문자열로 변환 (ex: "09:30")
@@ -65,8 +68,8 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
       setStartTime(`${hh}:${mm}`);
     }
 
-    if (data?.endDate) {
-      const end = new Date(data.endDate);
+    if (data?.endDt) {
+      const end = new Date(data.endDt);
       setEndDate(end);
 
       const hh = String(end.getHours()).padStart(2, "0");
@@ -310,7 +313,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
               <div className="flex items-center gap-2">
                 <Datepicker
                   mode="single"
-                  selectedDate={startDate}
+                  selectedDate={new Date(startDate?.toISOString())}
                   onSingleChange={(date) => {
                     setStartDate(date);
                     setValue("startDate", date?.toISOString());
@@ -330,7 +333,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
                 <span className="font-bold">~</span>
                   <Datepicker
                     mode="single"
-                    selectedDate={endDate}
+                    selectedDate={new Date(endDate ? endDate.toISOString() : null)}
                     onSingleChange={(date) => {
                       setEndDate(date);
                       setValue("endDate", date?.toISOString());
