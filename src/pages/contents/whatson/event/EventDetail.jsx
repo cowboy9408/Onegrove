@@ -117,7 +117,7 @@ export default function EventDetail() {
       const patchForm = (formRef, data, fallbackCategory = "") => {
         if (!formRef) return;
 
-        console.log(">>> patchForm 호출 시점:", formRef.current);
+        // console.log(">>> patchForm 호출 시점:", formRef.current);
 
         const patchImageMeta = (img) => {
           if (!img) return null;
