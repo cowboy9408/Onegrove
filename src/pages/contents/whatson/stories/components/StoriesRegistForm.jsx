@@ -252,7 +252,6 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         editorRef.current?.setContent?.(html);
       },
       setContent2: (html) => {
-        console.log('abcd', html);
         editorRef2.current?.setContent?.(html);
       },
     }));
