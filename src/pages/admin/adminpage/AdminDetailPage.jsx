@@ -28,7 +28,7 @@ export default function AdminDetailPage() {
         if (res.data.success && res.data.data) {
           const data = res.data.data;
           setForm({
-            role: mapRoleToForm(data.role),
+            role: data.role,
             status: data.isUse === "Y" ? "active" : "inactive",
             name: data.name || "",
             gender: mapGender(data.gender),
@@ -51,21 +51,21 @@ export default function AdminDetailPage() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const mapRoleToForm = (role) => {
-    switch (role.toUpperCase()) {
-      case "NORMAL_ADMIN":
-      case "ADMIN":
-        return "admin";
-      case "RETAIL_ADMIN":
-      case "RETAIL":
-        return "retail";
-      case "OFFICE_ADMIN":
-      case "MANAGER":
-        return "manager";
-      default:
-        return "admin";
-    }
-  };
+  // const mapRoleToForm = (role) => {
+  //   switch (role.toUpperCase()) {
+  //     case "NORMAL_ADMIN":
+  //     case "ADMIN":
+  //       return "admin";
+  //     case "RETAIL_ADMIN":
+  //     case "RETAIL":
+  //       return "retail";
+  //     case "OFFICE_ADMIN":
+  //     case "MANAGER":
+  //       return "manager";
+  //     default:
+  //       return "admin";
+  //   }
+  // };
 
   const mapGender = (gender) => {
     switch (gender) {
@@ -96,12 +96,7 @@ export default function AdminDetailPage() {
       const payload = {
         id: Number(id),
         companyId: 3,
-        role:
-          form.role === "admin"
-            ? "Admin"
-            : form.role === "retail"
-              ? "Retail"
-              : "Manager",
+        role: form.role,
         name: form.name,
         phoneNumber: formatPhoneNumber(form.phone),
 
@@ -134,23 +129,23 @@ export default function AdminDetailPage() {
               <Radio
                 name="role"
                 label="일반"
-                value="admin"
-                checked={form.role === "admin"}
-                onChange={() => handleChange("role", "admin")}
+                value="NORMAL_ADMIN"
+                checked={form.role === "NORMAL_ADMIN"}
+                onChange={() => handleChange("role", "NORMAL_ADMIN")}
               />
               <Radio
                 name="role"
                 label="리테일"
-                value="retail"
-                checked={form.role === "retail"}
-                onChange={() => handleChange("role", "retail")}
+                value="RETAIL_ADMIN"
+                checked={form.role === "RETAIL_ADMIN"}
+                onChange={() => handleChange("role", "RETAIL_ADMIN")}
               />
               <Radio
                 name="role"
                 label="오피스"
-                value="manager"
-                checked={form.role === "manager"}
-                onChange={() => handleChange("role", "manager")}
+                value="OFFICE_ADMIN"
+                checked={form.role === "OFFICE_ADMIN"}
+                onChange={() => handleChange("role", "OFFICE_ADMIN")}
               />
             </div>
           </div>

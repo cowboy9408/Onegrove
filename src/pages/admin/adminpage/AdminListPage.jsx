@@ -18,19 +18,43 @@ export default function AdminListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const [name, setName] = useState(searchParams.get("name") || "");
-  const [email, setEmail] = useState(searchParams.get("email") || "");
-  const [page, setPage] = useState(searchParams.get("page") || 1);
+  const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
-  const [searchStatus, setSearchStatus] = useState("");
   const [checkedIds, setCheckedIds] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
+  const defaultFilter = {
+    name: "",
+    email: "",
+    status: "",
+    type: "",
+  };
+  const [searchFilter, setSearchFilter] = useState(defaultFilter);
+  const [activeFilter, setActiveFilter] = useState(defaultFilter);
 
   const nameId = useId();
   const emailId = useId();
 
   const size = 10;
+
+  const mapRoleToLabel = (role) => {
+    switch (role) {
+      case "SUPER_ADMIN":
+        return "슈퍼관리자";
+      case "NORMAL_ADMIN":
+        return "일반 관리자";
+      case "RETAIL_ADMIN":
+        return "리테일 관리자";
+      case "OFFICE_ADMIN":
+        return "오피스 관리자";
+      case "OFFICE_SECRETARY_ADMIN":
+        return "입주사총무팀";
+      case "MEMBER":
+        return "회원";
+      default:
+        return "알 수 없음";
+    }
+  };
 
   const handleCheck = (id, checked) => {
     setCheckedIds((prev) =>
@@ -41,22 +65,53 @@ export default function AdminListPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const params = {
-          page,
-          name,
-          email,
-          status: searchStatus,
-        };
-
-        const response = await api.get("/api/v1/user/admin", { params });
+        const response = await api.get("/api/v1/user/admin");
         const res = response.data;
 
         if (res.success) {
+          let allData = res.data;
+
+          console.log(
+            "item.isUse 실제 값들:",
+            allData.map((item) => item.isUse)
+          );
+
+          let filtered = allData;
+
+          if (activeFilter.type) {
+            filtered = filtered.filter(
+              (item) => item.role === activeFilter.type
+            );
+          }
+
+          if (activeFilter.name) {
+            filtered = filtered.filter((item) =>
+              item.name?.includes(activeFilter.name)
+            );
+          }
+
+          if (activeFilter.email) {
+            filtered = filtered.filter((item) =>
+              item.username?.includes(activeFilter.email)
+            );
+          }
+
+          if (activeFilter.status === "active") {
+            filtered = filtered.filter((item) => item.isUse === "사용");
+          } else if (activeFilter.status === "inactive") {
+            filtered = filtered.filter((item) => item.isUse === "미사용");
+          }
+
+          // 페이지네이션 처리
+          const startIndex = (page - 1) * size;
+          const paginated = filtered.slice(startIndex, startIndex + size);
+
+          // 데이터 형식을 맞춰서 상태에 저장
           setData(
-            res.data.map((item) => ({
+            paginated.map((item) => ({
               no: item.rownum,
               _id: item.id,
-              type: item.role,
+              type: mapRoleToLabel(item.role),
               occupancy: "", // 입주사 없음
               name: item.name,
               username: item.username,
@@ -66,7 +121,8 @@ export default function AdminListPage() {
               created_at: item.createDatetime?.split("T")[0],
             }))
           );
-          setTotal(res.data.length); // 실제 total 값이 없으므로 추후 백엔드 개선 필요
+
+          setTotal(filtered.length); // 필터링된 전체 개수
         }
       } catch (error) {
         console.error("API 요청 실패:", error);
@@ -74,7 +130,7 @@ export default function AdminListPage() {
     };
 
     fetchData();
-  }, [page, name, email, searchStatus, refreshKey]);
+  }, [page, activeFilter, refreshKey]);
 
   return (
     <div>
@@ -82,29 +138,39 @@ export default function AdminListPage() {
         <Box>
           <Row>
             <Col>
-              <Select label={"관리자 유형"}>
+              <Select
+                label={"관리자 유형"}
+                value={searchFilter.type}
+                onChange={(e) =>
+                  setSearchFilter({ ...searchFilter, type: e.target.value })
+                }
+              >
                 <option value="">전체</option>
-                <option value="">일반</option>
-                <option value="">리테일</option>
-                <option value="">오피스</option>
+                <option value="NORMAL_ADMIN">일반 관리자</option>
+                <option value="RETAIL_ADMIN">리테일 관리자</option>
+                <option value="OFFICE_ADMIN">오피스 관리자</option>
               </Select>
             </Col>
             <Col>
               <Input
                 id={nameId}
                 label={"이름"}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onClear={() => setName("")}
+                value={searchFilter.name}
+                onChange={(e) =>
+                  setSearchFilter({ ...searchFilter, name: e.target.value })
+                }
+                onClear={() => setSearchFilter({ ...searchFilter, name: "" })}
               />
             </Col>
             <Col>
               <Input
                 id={emailId}
                 label={"아이디"}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onClear={() => setName("")}
+                value={searchFilter.email}
+                onChange={(e) =>
+                  setSearchFilter({ ...searchFilter, email: e.target.value })
+                }
+                onClear={() => setSearchFilter({ ...searchFilter, email: "" })}
               />
             </Col>
             <Col className="flex items-center gap-4">
@@ -113,25 +179,41 @@ export default function AdminListPage() {
                 name="status"
                 value="active"
                 label="사용"
-                checked={searchStatus === "active"}
-                onChange={() => setSearchStatus("active")}
+                checked={searchFilter.status === "active"}
+                onChange={() =>
+                  setSearchFilter({ ...searchFilter, status: "active" })
+                }
               />
               <Radio
                 name="status"
                 value="inactive"
                 label="미사용"
-                checked={searchStatus === "inactive"}
-                onChange={() => setSearchStatus("inactive")}
+                checked={searchFilter.status === "inactive"}
+                onChange={() =>
+                  setSearchFilter({ ...searchFilter, status: "inactive" })
+                }
               />
             </Col>
             <Col className="self-end">
               <Button
-                className={"h-12 w-full"}
                 onClick={() => {
-                  setSearchParams({ name, email, page });
+                  setPage(1);
+                  setActiveFilter(searchFilter);
+                  setSearchParams({ ...searchFilter, page: 1 });
                 }}
               >
                 검색
+              </Button>
+              <Button
+                variant="outline" // 혹은 스타일 지정
+                onClick={() => {
+                  setSearchFilter(defaultFilter); // 필터 UI 초기화
+                  setActiveFilter(defaultFilter); // 필터 상태 초기화
+                  setPage(1); // 페이지 초기화
+                  setSearchParams({ page: 1 }); // URL 파라미터 초기화
+                }}
+              >
+                초기화
               </Button>
             </Col>
           </Row>
@@ -204,7 +286,11 @@ export default function AdminListPage() {
             },
             { key: "email", label: "이메일" },
             { key: "status", label: "계정 상태" },
-            { key: "valuable", label: "사용 여부" },
+            {
+              key: "valuable",
+              label: "사용 여부",
+              render: (row) => row.valuable,
+            },
             { key: "created_at", label: "등록일시" },
           ]}
           data={data}
