@@ -7,6 +7,8 @@ import FormTextarea from "@/components/form/FormTextarea";
 import Box from "@/components/layout/Box";
 import Row from "@/components/layout/Row";
 import Title from "@/components/layout/Title";
+import Col from "@/components/layout/Col";
+import Input from "@/components/common/Input";
 
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -134,49 +136,6 @@ export default function EtcContentForm({ data }) {
                     />
                   </Row>
                 )}
-                <Row className="pb-4">
-                  <Col className="flex-5">
-                    <Input
-                      label="콘텐츠 등록"
-                      readOnly
-                      required
-                      value={contents.map((e) => e.title).join(", ")}
-                    />
-                    <FormInput
-                      className="hidden"
-                      fieldName={`whatson.contents`}
-                      {...register(`whatson.contents`)}
-                    />
-                  </Col>
-                  <Col className="self-end">
-                    <Button
-                      className="h-12 w-full"
-                      onClick={() =>
-                        showModal({
-                          title: "콘텐츠 검색",
-                          children: ({ closeModal }) => (
-                            <WhatsOnList
-                              selected={[1, 2]}
-                              closeModal={closeModal}
-                              onConfirm={(result) => {
-                                setContents(result);
-                                setValue(
-                                  "whatson.contents",
-                                  result.map((e) => e._id)
-                                );
-                              }}
-                            />
-                          ),
-                          showCancel: true,
-                          customButton: true,
-                          size: "5xl",
-                        })
-                      }
-                    >
-                      관리
-                    </Button>
-                  </Col>
-                </Row>
               </Box>
             );
           }}
