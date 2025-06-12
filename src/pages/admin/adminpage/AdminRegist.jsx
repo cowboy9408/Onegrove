@@ -37,6 +37,18 @@ export default function AdminRegist() {
   };
 
   const handleSubmit = async () => {
+    if (
+      !form.name ||
+      !form.username ||
+      !form.password ||
+      !form.confirmPassword ||
+      !form.phone ||
+      !form.email
+    ) {
+      alert("모든 필수 항목을 입력해주세요.");
+      return;
+    }
+
     if (form.password !== form.confirmPassword) {
       alert("비밀번호가 일치하지 않습니다.");
       return;
@@ -51,12 +63,14 @@ export default function AdminRegist() {
 
       email: form.email,
       gender:
-        form.gender === "male" ? "M" : form.gender === "female" ? "F" : null,
+        form.gender === "male" ? "M" : form.gender === "female" ? "W" : null,
 
       role: form.role,
       companyId: 4,
       isAdmin: "Y",
       isUse: form.status === "active" ? "Y" : "N",
+      isManager: "N",
+      isReservation: "Y",
     };
 
     try {
@@ -65,7 +79,14 @@ export default function AdminRegist() {
       navigate("/admin/list");
     } catch (error) {
       console.error("등록 오류:", error);
-      alert("등록에 실패했습니다. 관리자에게 문의하세요.");
+      if (
+        error?.response?.data?.message?.includes("Duplicate entry") &&
+        error?.response?.data?.message?.includes("UQ_username")
+      ) {
+        alert("이미 존재하는 아이디입니다. 다른 아이디를 입력해주세요.");
+      } else {
+        alert("등록에 실패했습니다. 관리자에게 문의하세요.");
+      }
     }
   };
 
