@@ -10,27 +10,46 @@ import Row from "../layout/Row";
 export default function WhatsOnList({ selected, onConfirm, closeModal }) {
   const [items, setItems] = useState([]);
   const [checked, setChecked] = useState(selected);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    // TODO: Fetch DATA
-    setItems([
-      {
-        _id: 1,
-        menu: "Event&Promotion",
-        title: "버거킹 모든 고객에게 쿠폰 무료 증정",
-        begin_at: "2025-05-01",
-        end_at: "2025-05-31",
-        useYn: "사용",
-      },
-      {
-        _id: 2,
-        menu: "Stories of One Grove",
-        title: "원그로브 소식을 가장 빠르게 만나는 법",
-        begin_at: "2025-05-01",
-        end_at: "2025-05-31",
-        useYn: "사용",
-      },
-    ]);
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch("/api/v1/main/content/category");
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setCategories(json.data); // [{ code, value }]
+        }
+      } catch (error) {
+        console.error("카테고리 불러오기 실패:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/api/v1/main/content/list?lang=KO");
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          const mapped = json.data.map((item) => ({
+            _id: item.contentId,
+            menu: item.category,
+            title: item.title,
+            begin_at: item.startDt,
+            end_at: item.endDt,
+            useYn: "사용", // 혹시 사용 여부 필드가 필요 없다면 삭제 가능
+          }));
+          setItems(mapped);
+        }
+      } catch (error) {
+        console.error("데이터 불러오기 실패:", error);
+      }
+    };
+
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -46,8 +65,12 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
           <Row>
             <Col>
               <Select label="메뉴명" topLabel={false}>
-                <option value="">Event&Promotion</option>
-                <option value="">Stories of One Grove</option>
+                <option value="">전체</option>
+                {categories.map((cat) => (
+                  <option key={cat.code} value={cat.code}>
+                    {cat.value}
+                  </option>
+                ))}
               </Select>
             </Col>
             <Col>

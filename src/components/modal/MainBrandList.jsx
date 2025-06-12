@@ -15,6 +15,23 @@ export default function BrandList({ selected = [], onConfirm, closeModal }) {
   const [checked, setChecked] = useState(selected.map(String)); // 체크된 ID (문자열로 변환)
   const [keyword, setKeyword] = useState(""); // 검색어
   const { showModal } = useModal();
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(""); // 선택된 카테고리
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get("/api/v1/brand/category");
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          setCategories(res.data.data);
+        }
+      } catch (err) {
+        console.error("카테고리 불러오기 실패:", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -53,8 +70,18 @@ export default function BrandList({ selected = [], onConfirm, closeModal }) {
         <Box>
           <Row>
             <Col>
-              <Select label="대표 카테고리" topLabel={false}>
+              <Select
+                label="대표 카테고리"
+                topLabel={false}
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              >
                 <option value="">전체</option>
+                {categories.map((cat) => (
+                  <option key={cat.code} value={cat.code}>
+                    {cat.value}
+                  </option>
+                ))}
               </Select>
             </Col>
             <Col>

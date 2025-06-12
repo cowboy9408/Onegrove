@@ -46,13 +46,9 @@ export default function MainPage() {
 
     setEtc([
       {
-        type: "simple",
-        image: { name: "", url: "", size: 0 },
-        url: "https://www.onegrove.kr",
-      },
-      {
         type: "complex",
-        image: { name: "", url: "", size: 0 },
+        imagePC: { name: "", url: "", size: 0 },
+        imageMO: { name: "", url: "", size: 0 },
         title: "title",
         subtitle: "subtitle",
         detail: "detail",
