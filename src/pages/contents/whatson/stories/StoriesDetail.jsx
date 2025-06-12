@@ -198,9 +198,9 @@ export default function StoriesDetail() {
       });
     try {
       const saveOne = async (data, original = {}) => {
-        const isInsert = !data.id;
+        const isInsert = !koData?.id && !enData?.id;
         const payload = {
-          ...(isInsert ? {} : { id: data.id }),
+          ...(isInsert ? {} : { id: koData?.id || enData?.id }),
           // contentId: currentLang === 0 ? koData?.contentId : enData?.contentId,
           lang: data.lang,
           category: data.category,
@@ -221,21 +221,6 @@ export default function StoriesDetail() {
           delYn: "N",
           storiesImgList: data.storiesImgList || []
         };
-
-        // payload.storiesImgList.push({
-        //   ...toImageMeta(data.storiesImgList1, original.storiesImgList1),
-        //   caption: data.storiesImgCaption1
-        // });
-
-        // payload.storiesImgList.push({
-        //   ...toImageMeta(data.storiesImgList2, original.storiesImgList2),
-        //   caption: data.storiesImgCaption2
-        // });
-
-        // payload.storiesImgList.push({
-        //   ...toImageMeta(data.storiesImgList3, original.storiesImgList3),
-        //   caption: data.storiesImgCaption3
-        // });
 
         console.log("저장 payload:", payload, data);
 
