@@ -6,23 +6,10 @@ import Box from "@/components/layout/Box";
 import Col from "@/components/layout/Col";
 import Row from "@/components/layout/Row";
 import Title from "@/components/layout/Title";
-import BrandList from "@/components/modal/BrandList";
+import BrandList from "@/components/modal/MainBrandList";
 import useModal from "@/hooks/useModal";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useId, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { z } from "zod";
-
-const schema = z.object({
-  lifestyle: z.object({
-    subtitle1: z
-      .string()
-      .min(1, "서브타이틀은 필수값입니다.")
-      .max(100, "서브타이틀은 200자 이내여야 합니다."),
-    subtitle2: z.string().max(150, "서브타이틀은 150자 이내여야 합니다."),
-    brand: z.array(z.number()),
-  }),
-});
 
 export default function LifestyleForm({ data }) {
   const subtitleId1 = useId();
@@ -31,7 +18,6 @@ export default function LifestyleForm({ data }) {
   const { showModal } = useModal();
 
   const methods = useForm({
-    resolver: zodResolver(schema),
     defaultValues: {
       lifestyle: {
         subtitle1: "",

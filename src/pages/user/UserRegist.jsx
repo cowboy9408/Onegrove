@@ -50,7 +50,7 @@ export default function AdminRegist() {
       phoneNumber: `010-${form.phone?.replace(/[^0-9]/g, "").replace(/(\d{4})(\d{4})/, "$1-$2")}`,
       email: form.email,
       gender:
-        form.gender === "male" ? "M" : form.gender === "female" ? "F" : null,
+        form.gender === "male" ? "M" : form.gender === "female" ? "W" : null,
 
       role: "MEMBER", // 고정
       companyId: 5,
