@@ -3,11 +3,11 @@ import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import Radio from "@/components/common/Radio";
 import { useNavigate } from "react-router-dom";
+import api from "@/lib/apiClient";
 import Select from "@/components/common/Select";
 
-export default function UserRegist() {
+export default function AdminRegist() {
   const [form, setForm] = useState({
-    role: "admin",
     status: "active",
     name: "",
     gender: "",
@@ -16,34 +16,78 @@ export default function UserRegist() {
     confirmPassword: "",
     phone: "",
     email: "",
-    agent: "yes",
   });
   const navigate = useNavigate();
+
+  // const getRoleValue = (role) => {
+  //   switch (role) {
+  //     case "admin":
+  //       return "NORMAL_ADMIN";
+  //     case "retail":
+  //       return "RETAIL_ADMIN";
+  //     case "manager":
+  //       return "OFFICE_ADMIN";
+  //     default:
+  //       return "NORMAL_ADMIN";
+  //   }
+  // };
 
   const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = () => {
-    console.log("등록 요청:", form);
-    // 실제 등록 API 호출 로직 추가
+  const handleSubmit = async () => {
+    if (form.password !== form.confirmPassword) {
+      alert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    const payload = {
+      username: form.username,
+      password: form.password,
+      passwordConfirm: form.confirmPassword,
+      name: form.name,
+      phoneNumber: `010-${form.phone?.replace(/[^0-9]/g, "").replace(/(\d{4})(\d{4})/, "$1-$2")}`,
+      email: form.email,
+      gender:
+        form.gender === "male" ? "M" : form.gender === "female" ? "F" : null,
+
+      role: "MEMBER", // 고정
+      companyId: 5,
+      isAdmin: "N", // 고정
+      isUse: form.status === "active" ? "Y" : "N",
+      isManager: "N", // 고정
+      isReservation: "Y", // 고정
+    };
+
+    try {
+      await api.post("/api/v1/user/member/insert", payload);
+      alert("등록이 완료되었습니다.");
+      navigate("/user");
+    } catch (error) {
+      console.error("등록 오류:", error);
+      alert("등록에 실패했습니다. 관리자에게 문의하세요.");
+    }
   };
 
   return (
     <div className="max-w mx-auto space-y-6 rounded-lg bg-white p-6 shadow-md">
       {/* 라디오 그룹: 계정 유형 & 사용 여부 */}
       <div className="flex flex-wrap gap-8">
-        <Select
-          label="입주사"
-          value={form.company}
-          onChange={(e) => handleChange("company", e.target.value)}
-          className="w-[735px]"
-        >
-          <option value="">선택하세요</option>
-          <option value="LG">입주사1</option>
-          <option value="삼성">입주사2</option>
-          <option value="카카오">입주사3</option>
-        </Select>
+        <div>
+          <Select
+            label="입주사"
+            value={form.company}
+            onChange={(e) => handleChange("company", e.target.value)}
+            className="w-[735px]"
+            required
+          >
+            <option value="">선택하세요</option>
+            <option value="LG">입주사1</option>
+            <option value="삼성">입주사2</option>
+            <option value="카카오">입주사3</option>
+          </Select>
+        </div>
 
         <div>
           <p className="mb-2 text-sm font-medium text-gray-800">사용 여부</p>
@@ -123,6 +167,7 @@ export default function UserRegist() {
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-800">
             전화번호
+            <span className="text-red-500">*</span>
           </label>
           <div className="flex items-center">
             <span className="rounded-l-md px-3 py-2 text-base">010 -</span>
@@ -141,6 +186,7 @@ export default function UserRegist() {
           label="이메일"
           value={form.email}
           onChange={(e) => handleChange("email", e.target.value)}
+          required
         />
       </div>
 
@@ -150,7 +196,7 @@ export default function UserRegist() {
         <Button
           type="button"
           className="bg-gray-200"
-          onClick={() => navigate("/user")}
+          onClick={() => navigate("/admin/list")}
         >
           목록
         </Button>
