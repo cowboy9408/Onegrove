@@ -91,30 +91,13 @@ export default function PopupRegist() {
             </div>
 
             {/* 언어 */}
-            <div className="flex-1">
-              <p className="mb-2 text-sm font-medium">언어</p>
-              <div className="flex gap-4">
-                <Radio
-                  name="language"
-                  value="ko"
-                  checked={form.language === "ko"}
-                  onChange={(e) => handleChange("language", e.target.value)}
-                  label="한국어"
-                />
-                <Radio
-                  name="language"
-                  value="en"
-                  checked={form.language === "en"}
-                  onChange={(e) => handleChange("language", e.target.value)}
-                  label="영어"
-                />
-              </div>
-            </div>
           </div>
 
           {/* 노출 기간 */}
           <div>
-            <p className="mb-2 text-sm font-medium">노출 기간</p>
+            <p className="mb-2 text-sm font-medium">
+              노출 기간<span className="ml-1 text-red-500">*</span>
+            </p>
             <Datepicker
               startDate={form.period.startDate}
               endDate={form.period.endDate}
@@ -124,7 +107,14 @@ export default function PopupRegist() {
 
           {/* 팝업 이미지 업로드 */}
           <Upload
-            name="popupImage"
+            name="ImgPc"
+            label="팝업 이미지 업로드"
+            required
+            defaultValue={form.image}
+            onChange={(val) => handleChange("image", val)}
+          />
+          <Upload
+            name="ImgMo"
             label="팝업 이미지 업로드"
             required
             defaultValue={form.image}
@@ -137,33 +127,8 @@ export default function PopupRegist() {
             value={form.url}
             onChange={(e) => handleChange("url", e.target.value)}
             placeholder="https://example.com"
+            required
           />
-
-          <Input
-            label="버튼명"
-            value={form.buttonLabel}
-            onChange={(e) => handleChange("buttonLabel", e.target.value)}
-            placeholder="예: 자세히 보기"
-          />
-
-          <div className="flex gap-6">
-            <div className="flex-1">
-              <Input
-                label="버튼 글자색 (예: #ffffff)"
-                value={form.buttonTextColor}
-                onChange={(e) =>
-                  handleChange("buttonTextColor", e.target.value)
-                }
-              />
-            </div>
-            <div className="flex-1">
-              <Input
-                label="버튼 배경색 (예: #000000)"
-                value={form.buttonBgColor}
-                onChange={(e) => handleChange("buttonBgColor", e.target.value)}
-              />
-            </div>
-          </div>
 
           {/* 하단 버튼 */}
           <div className="flex justify-end gap-4 px-6 pb-6">
