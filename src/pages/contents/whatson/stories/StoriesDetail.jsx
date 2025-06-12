@@ -178,7 +178,7 @@ export default function StoriesDetail() {
       size: base.size ?? 0,
       extension: extension,
       mime: base.mime || "image/jpeg",
-      classification: base.classification || "stories",
+      classification: base.classification || "StoriesImg",
       path: base.path || "",
       status:
         base.status !== undefined && base.status !== null
@@ -198,9 +198,9 @@ export default function StoriesDetail() {
       });
     try {
       const saveOne = async (data, original = {}) => {
-        const isInsert = !data.id;
+        const isInsert = !koData?.id && !enData?.id;
         const payload = {
-          ...(isInsert ? {} : { id: data.id }),
+          ...(isInsert ? {} : { id: koData?.id || enData?.id }),
           // contentId: currentLang === 0 ? koData?.contentId : enData?.contentId,
           lang: data.lang,
           category: data.category,
@@ -212,33 +212,17 @@ export default function StoriesDetail() {
           patternBottomMo: toImageMeta(data.patternBottomMo, original.patternBottomMo),
 
           showYn: data.status === "status" ? "Y" : "N",
-          sort: data.order,
+          sort: data.sort,
           content: data.content,
           addContent: data.content1,
           description: data.description || "",
-          startDt: data.startDate || null,
-          endDt: data.endDate || null,
+          startDt: data.startDt || null,
+          endDt: data.endDt || null,
           delYn: "N",
-          storiesImgList: []
+          storiesImgList: data.storiesImgList || []
         };
 
-
-        payload.storiesImgList.push({
-          ...toImageMeta(data.storiesImgList1, original.storiesImgList1),
-          caption: data.storiesImgCaption1
-        });
-
-        payload.storiesImgList.push({
-          ...toImageMeta(data.storiesImgList2, original.storiesImgList2),
-          caption: data.storiesImgCaption2
-        });
-
-        payload.storiesImgList.push({
-          ...toImageMeta(data.storiesImgList3, original.storiesImgList3),
-          caption: data.storiesImgCaption3
-        });
-
-        console.log("저장 payload:", payload);
+        console.log("저장 payload:", payload, data);
 
         const apiUrl =
           data?.id != null

@@ -55,8 +55,11 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
   };
 
   useEffect(() => {
-    if (data?.startDate) {
-      const start = new Date(data.startDate);
+    console.log('start ---', data,  data.startDate, data.endDate)
+    if (data?.startDt) {
+      const start = new Date(data.startDt);
+
+      
       setStartDate(start);
 
       // 시간 문자열로 변환 (ex: "09:30")
@@ -65,8 +68,8 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
       setStartTime(`${hh}:${mm}`);
     }
 
-    if (data?.endDate) {
-      const end = new Date(data.endDate);
+    if (data?.endDt) {
+      const end = new Date(data.endDt);
       setEndDate(end);
 
       const hh = String(end.getHours()).padStart(2, "0");
@@ -197,19 +200,19 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             size: file.size,
             extension: "." + (file.originalName || file.name).split(".").pop(),
             mime: file.type || "image/png",
-            classification: "stories",
+            classification: "StoriesImg",
             path:
               file.path ||
-              `https://assets.onegrove.kr/dev/stories/${file.originalName || file.name}`,
+              `https://assets.onegrove.kr/dev/StoriesImg/${file.originalName || file.name}`,
             status: file.status || "C",
           };
         };
   
         return {
-          eventId: data?.id ?? null,
+          id: data?.id ?? null,
           lang,
           showYn: values.status === "active" ? "Y" : "N",
-          order: Number(values.order) || 1,
+          sort: values.order.toString() || "",
           category: values.category,
           title: values.title || "",
           thumbImg: toImageMeta(values.thumbImg),
@@ -217,18 +220,28 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           patternTopMo: toImageMeta(values.patternTopMo),
           patternBottomPc: toImageMeta(values.patternBottomPc),
           patternBottomMo: toImageMeta(values.patternBottomMo),
-          storiesImgList1: toImageMeta(values.storiesImgList1),
-          storiesImgList2: toImageMeta(values.storiesImgList2),
-          storiesImgList3: toImageMeta(values.storiesImgList3),
-
-          storiesImgCaption1: storiesImgCaption1 || "",
-          storiesImgCaption2: storiesImgCaption2 || "",
-          storiesImgCaption3: storiesImgCaption3 || "",
+          storiesImgList: [
+            {
+              ...toImageMeta(values.storiesImgList1),
+              caption: values.storiesImgCaption1 || "",
+              sort: "1"
+            },
+            {
+              ...toImageMeta(values.storiesImgList2),
+              caption: values.storiesImgCaption1 || "",
+              sort: "2"
+            },
+            {
+              ...toImageMeta(values.storiesImgList3),
+              caption: values.storiesImgCaption1 || "",
+              sort: "3"
+            },
+          ],
           content: content || "",
           content1: content1 || "",
           description: description || "",
-          startDate: startDateStr,
-          endDate: endDateStr,
+          startDt: startDateStr,
+          endDt: endDateStr,
           delYn: "N",
         };
       },
@@ -300,7 +313,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
               <div className="flex items-center gap-2">
                 <Datepicker
                   mode="single"
-                  selectedDate={startDate}
+                  selectedDate={new Date(startDate?.toISOString())}
                   onSingleChange={(date) => {
                     setStartDate(date);
                     setValue("startDate", date?.toISOString());
@@ -320,7 +333,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
                 <span className="font-bold">~</span>
                   <Datepicker
                     mode="single"
-                    selectedDate={endDate}
+                    selectedDate={new Date(endDate ? endDate.toISOString() : null)}
                     onSingleChange={(date) => {
                       setEndDate(date);
                       setValue("endDate", date?.toISOString());
@@ -366,7 +379,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             name="thumbImg"
             label="썸네일 이미지"
             required
-            classification="stroies"
+            classification="StoriesImg"
             readOnly={readOnly}
             value={watch("thumbImg")}
             onChange={(file) => setValue("thumbImg", file)}
@@ -380,7 +393,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             name="patternTopPc"
             label="페이지 상단 패턴 PC 이미지"
             required
-            classification="stroies"
+            classification="StoriesImg"
             readOnly={readOnly}
             value={watch("patternTopPc")}
             onChange={(file) => setValue("patternTopPc", file)}
@@ -392,7 +405,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             name="patternTopMo"
             label="페이지 상단 패턴 모바일 이미지"
             required
-            classification="stroies"
+            classification="StoriesImg"
             readOnly={readOnly}
             value={watch("patternTopMo")}
             onChange={(file) => setValue("patternTopMo", file)}
@@ -450,7 +463,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           <Upload
             name="storiesImgList1"
             label="스와이프이미지 1"
-            classification="stroies"
+            classification="StoriesImg"
             readOnly={readOnly}
             value={watch("storiesImgList1")}
             onChange={(file) => setValue("storiesImgList1", file)}
@@ -463,7 +476,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           <Upload
             name="storiesImgList2"
             label="스와이프이미지 2"
-            classification="stroies"
+            classification="StoriesImg"
             readOnly={readOnly}
             value={watch("storiesImgList2")}
             onChange={(file) => setValue("storiesImgList2", file)}
@@ -477,7 +490,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           <Upload
             name="storiesImgList3"
             label="스와이프이미지 3"
-            classification="stroies"
+            classification="StoriesImg"
             readOnly={readOnly}
             value={watch("storiesImgList3")}
             onChange={(file) => setValue("storiesImgList3", file)}
@@ -496,7 +509,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             name="patternBottomPc"
             label="페이지 하단 패턴 PC 이미지"
             required
-            classification="stroies"
+            classification="StoriesImg"
             readOnly={readOnly}
             value={watch("patternBottomPc")}
             onChange={(file) => setValue("patternBottomPc", file)}
@@ -508,7 +521,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             name="patternBottomMo"
             label="페이지 하단 패턴 모바일 이미지"
             required
-            classification="stroies"
+            classification="StoriesImg"
             readOnly={readOnly}
             value={watch("patternBottomMo")}
             onChange={(file) => setValue("patternBottomMo", file)}
