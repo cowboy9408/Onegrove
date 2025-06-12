@@ -6,7 +6,6 @@ import WhatsOnForm from "./components/WhatsOnForm";
 import LifestyleForm from "./components/LifestyleForm";
 import WorkForm from "./components/WorkForm";
 import EtcContentForm from "./components/EtcContentForm";
-import BannerForm from "./components/BannerForm";
 
 export default function MainPage() {
   const [keyVisual, setKeyVisual] = useState([]);
@@ -14,7 +13,6 @@ export default function MainPage() {
   const [lifestyle, setLifestyle] = useState({});
   const [work, setWork] = useState({});
   const [etc, setEtc] = useState([]);
-  const [banner, setBanner] = useState({});
 
   useEffect(() => {
     // TODO: fetch data
@@ -48,13 +46,9 @@ export default function MainPage() {
 
     setEtc([
       {
-        type: "simple",
-        image: { name: "", url: "", size: 0 },
-        url: "https://www.onegrove.kr",
-      },
-      {
         type: "complex",
-        image: { name: "", url: "", size: 0 },
+        imagePC: { name: "", url: "", size: 0 },
+        imageMO: { name: "", url: "", size: 0 },
         title: "title",
         subtitle: "subtitle",
         detail: "detail",
@@ -62,17 +56,6 @@ export default function MainPage() {
         url: "https://www.onegrove.kr",
       },
     ]);
-
-    setBanner({
-      displayYn: "Y",
-      title: "title",
-      subtitle: "subtitle",
-      image: { name: "", url: "", size: 0 },
-      button: "button",
-      bg: "DBDBDB",
-      color: "222222",
-      url: "https://www.onegrove.kr",
-    });
   }, []);
 
   return (
@@ -90,7 +73,6 @@ export default function MainPage() {
           <LifestyleForm data={lifestyle} />
           <WorkForm data={work} />
           <EtcContentForm data={etc} />
-          <BannerForm data={banner} />
         </TabPanel>
 
         <TabPanel>
@@ -100,7 +82,6 @@ export default function MainPage() {
           <LifestyleForm data={lifestyle} />
           <WorkForm data={work} />
           <EtcContentForm data={etc} />
-          <BannerForm data={banner} />
         </TabPanel>
       </Tabs>
     </Section>

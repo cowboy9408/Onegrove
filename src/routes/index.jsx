@@ -60,6 +60,7 @@ import LifeStyleBannerPage from "@/pages/banner/LifeStyleBannerPage";
 import WorkBannerPage from "@/pages/banner/WhatsonBannerPage";
 import AboutBannerPage from "@/pages/banner/AboutBannerPage";
 import UserDetailPage from "@/pages/user/UserDetailPage";
+import AffairDetailPage from "@/pages/admin/adminpage/AffairDetailPage";
 
 export const routeMeta = [
   {
@@ -127,6 +128,19 @@ export const routeMeta = [
             path: "/admin/affair/regist",
             element: <AffairRegist />,
             title: "입주사 총무팀 등록",
+            hidden: true,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "OFFICE_ADMIN",
+              "RETAIL_ADMIN",
+            ],
+          },
+          {
+            uuid: "d3487af9-b3eb-430c-887b-c599041597e7",
+            path: "/admin/affair/detail/:id",
+            element: <AffairDetailPage />,
+            title: "입주사 총무팀 상세",
             hidden: true,
             permissions: [
               "SUPER_ADMIN",
