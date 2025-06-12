@@ -105,7 +105,7 @@ export default function StoriesDetail() {
 
         formRef.setValue("title", data.title || "");
         formRef.setValue("category", data.category || "");
-        formRef.setValue("order", data.sort || "");
+        formRef.setValue("order", data.sort.toString() || "");
         formRef.setValue("status", data.showYn === "Y" ? "active" : "inactive");
 
         formRef.setValue("thumbImg", patchImageMeta(data.thumbImg));
@@ -135,7 +135,7 @@ export default function StoriesDetail() {
         );
         formRef.setValue(
           "endDate",
-          data.endDate ? parseLocalDateTime(data.endDate) : null
+          data.endDt ? parseLocalDateTime(data.endDt) : null
         );
       };
 
@@ -178,7 +178,7 @@ export default function StoriesDetail() {
       size: base.size ?? 0,
       extension: extension,
       mime: base.mime || "image/jpeg",
-      classification: base.classification || "stories",
+      classification: base.classification || "StoriesImg",
       path: base.path || "",
       status:
         base.status !== undefined && base.status !== null
@@ -198,10 +198,10 @@ export default function StoriesDetail() {
       });
     try {
       const saveOne = async (data, original = {}) => {
-        const isInsert = !data.id;
+        const isInsert = !koData?.id && !enData?.id;
         const payload = {
-          ...(isInsert ? {} : { id: data.id }),
-          // eventId: koData?.eventId ?? enData?.eventId ?? defaultEventId,
+          ...(isInsert ? {} : { id: koData?.id || enData?.id }),
+          // contentId: currentLang === 0 ? koData?.contentId : enData?.contentId,
           lang: data.lang,
           category: data.category,
           title: data.title,
@@ -212,24 +212,17 @@ export default function StoriesDetail() {
           patternBottomMo: toImageMeta(data.patternBottomMo, original.patternBottomMo),
 
           showYn: data.status === "status" ? "Y" : "N",
-          sort: data.order,
+          sort: data.sort,
           content: data.content,
           addContent: data.content1,
           description: data.description || "",
-          startDt:
-            (typeof data.startDate === "string"
-              ? new Date(data.startDate)
-              : data.startDate
-            )?.toISOString() || null,
-          endDt: 
-            (typeof data.endDate === "string"
-              ? new Date(data.endDate)
-              : data.endDate
-            )?.toISOString() || null,
+          startDt: data.startDt || null,
+          endDt: data.endDt || null,
           delYn: "N",
+          storiesImgList: data.storiesImgList || []
         };
 
-        console.log("저장 payload:", payload);
+        console.log("저장 payload:", payload, data);
 
         const apiUrl =
           data?.id != null
@@ -249,7 +242,7 @@ export default function StoriesDetail() {
           {
             ...koValues,
             id: koData?.id ?? null,
-            lang: "ko",
+            lang: "KO",
           },
           koData || {}
         );
@@ -261,7 +254,7 @@ export default function StoriesDetail() {
           {
             ...enValues,
             id: enData?.id ?? null,
-            lang: "en",
+            lang: "EN",
           },
           enData || {}
         );

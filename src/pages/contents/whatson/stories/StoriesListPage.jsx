@@ -50,13 +50,13 @@ export default function StoriesListPage() {
 
         if (Array.isArray(json)) {
           const rows = json.map((item, index) => {
-            const koItem = item.contentList.find((i) => i.lang === "KO") || {};
-            const enItem = item.contentList.find((i) => i.lang === "EN") || {};
+            const koItem = item.contentList.find((i) => i.lang.toUpperCase() === "KO") || {};
+            const enItem = item.contentList.find((i) => i.lang.toUpperCase() === "EN") || {};
 
             // console.log("koItem:", koItem);
             // console.log("enItem:", enItem);
 
-            // console.log("item:", koItem.category);
+            console.log("item:", item, koItem, enItem);
 
 
             return {
@@ -64,7 +64,10 @@ export default function StoriesListPage() {
               _id: String(item.id),
               no: index + 1,
               occupancy: Number(koItem.sort) || 0,
-              category: koItem.category || "-",
+              ko_occupancy: Number(koItem.sort) || "-",
+              en_occupancy: Number(enItem.sort) || "-",
+              ko_category: koItem.category || "-",
+              en_category: enItem.category || "-",
               language:
                 koItem.lang && enItem.lang ? "both" : koItem.lang ? "ko" : "en",
               ko_title: koItem.title || "-",
@@ -109,10 +112,10 @@ export default function StoriesListPage() {
             return titleMatch && categoryMatch && visibilityMatch && dateMatch;
           });
 
-          const sorted = filtered.sort((a, b) => a.occupancy - b.occupancy);
+          // const sorted = filtered.sort((a, b) => a.occupancy - b.occupancy);
           const start = (page - 1) * size;
           const end = start + size;
-          const sliced = sorted.slice(start, end).map((row, idx) => ({
+          const sliced = filtered.slice(start, end).map((row, idx) => ({
             ...row,
             no: filtered.length - (start + idx),
           }));
@@ -252,8 +255,22 @@ export default function StoriesListPage() {
         <DataTable
           columns={[
             { key: "no", label: "번호" },
-            { key: "occupancy", label: "노출순서" },
-            { key: "category", label: "카테고리" },
+            { key: "occupancy", label: "노출순서",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="p-2 font-medium">{row.ko_occupancy}</div>
+                  <div className="p-2 font-medium">{row.en_occupancy}</div>
+                </div>
+              ),
+            },
+            { key: "category", label: "카테고리",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="p-2 font-medium">{row.ko_category}</div>
+                  <div className="p-2 font-medium">{row.en_category}</div>
+                </div>
+              ),
+            },
             {
               key: "language",
               label: "언어",
@@ -293,8 +310,8 @@ export default function StoriesListPage() {
               label: "상태여부",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <div className="py-1">{row.status_ko}</div>
-                  <div className="py-1">{row.status_en}</div>
+                  <div className="py-2">{row.status_ko}</div>
+                  <div className="py-2">{row.status_en}</div>
                 </div>
               ),
             },
@@ -303,8 +320,8 @@ export default function StoriesListPage() {
               label: "노출여부",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <div className="py-1">{row.showYn_ko}</div>
-                  <div className="py-1">{row.showYn_en}</div>
+                  <div className="py-2">{row.showYn_ko}</div>
+                  <div className="py-2">{row.showYn_en}</div>
                 </div>
               ),
             },
@@ -313,8 +330,8 @@ export default function StoriesListPage() {
               label: "등록자",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <div className="py-1">{row.created_user_ko}</div>
-                  <div className="py-1">{row.created_user_en}</div>
+                  <div className="py-2">{row.created_user_ko}</div>
+                  <div className="py-2">{row.created_user_en}</div>
                 </div>
               ),
             },
@@ -323,8 +340,8 @@ export default function StoriesListPage() {
               label: "등록일시",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <div className="py-1">{row.created_at_ko}</div>
-                  <div className="py-1">{row.created_at_en}</div>
+                  <div className="py-2">{row.created_at_ko}</div>
+                  <div className="py-2">{row.created_at_en}</div>
                 </div>
               ),
             },
