@@ -59,7 +59,7 @@ export default function EtcContentForm({ data }) {
 
             return (
               <Box className="mb-2 rounded-md border-2 border-gray-200">
-                <Title title={`■ 연계 콘텐츠 영역 ${index + 1}`} />
+                <Title title={`■ 연계 콘텐츠 영역 `} />
                 <Row className="pb-4"></Row>
                 <Row className="pb-4">
                   <Upload
