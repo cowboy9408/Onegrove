@@ -135,18 +135,47 @@ export default function EtcContentForm({ data }) {
                   </Row>
                 )}
                 <Row className="pb-4">
-                  <FormInput
-                    id={`url-${field.id}`}
-                    label="URL"
-                    fieldName={`etc.${index}.url`}
-                    maxLength={1000}
-                    showDefaultInfo={true}
-                    required
-                    placeholder="URL을 입력해주세요"
-                    {...register(`etc.${index}.url`)}
-                    error={errors.etc?.[index]?.url?.message}
-                    onClear={() => resetField(`etc.${index}.url`)}
-                  />
+                  <Col className="flex-5">
+                    <Input
+                      label="콘텐츠 등록"
+                      readOnly
+                      required
+                      value={contents.map((e) => e.title).join(", ")}
+                    />
+                    <FormInput
+                      className="hidden"
+                      fieldName={`whatson.contents`}
+                      {...register(`whatson.contents`)}
+                    />
+                  </Col>
+                  <Col className="self-end">
+                    <Button
+                      className="h-12 w-full"
+                      onClick={() =>
+                        showModal({
+                          title: "콘텐츠 검색",
+                          children: ({ closeModal }) => (
+                            <WhatsOnList
+                              selected={[1, 2]}
+                              closeModal={closeModal}
+                              onConfirm={(result) => {
+                                setContents(result);
+                                setValue(
+                                  "whatson.contents",
+                                  result.map((e) => e._id)
+                                );
+                              }}
+                            />
+                          ),
+                          showCancel: true,
+                          customButton: true,
+                          size: "5xl",
+                        })
+                      }
+                    >
+                      관리
+                    </Button>
+                  </Col>
                 </Row>
               </Box>
             );
