@@ -72,7 +72,7 @@ export default function UserDetailPage() {
     switch (gender) {
       case "M":
         return "male";
-      case "F":
+      case "W":
         return "female";
       default:
         return "";
@@ -110,8 +110,8 @@ export default function UserDetailPage() {
         gender:
           form.gender === "male" ? "M" : form.gender === "female" ? "W" : "",
         isUse: form.status === "active" ? "Y" : "N",
-        isManager: "N",
-        // isReservation: "Y",
+        isManager: "Y",
+        isReservation: "Y",
       };
 
       const res = await api.post("/api/v1/user/member/update", payload);

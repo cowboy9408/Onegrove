@@ -6,13 +6,50 @@ import FormRadioGroup from "@/components/form/FormRadioGroup";
 import Box from "@/components/layout/Box";
 import Row from "@/components/layout/Row";
 import Title from "@/components/layout/Title";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { z } from "zod";
+
+const schema = z.object({
+  kv: z
+    .array(
+      z.object({
+        type: z
+          .string()
+          .nullable()
+          .refine((val) => !!val, {
+            message: "콘텐츠 형식을 선택해주세요.",
+          }),
+        // file: z
+        //   .object({
+        //     name: z.string(),
+        //     url: z.string().url(),
+        //     size: z.number(),
+        //   })
+        //   .nullable()
+        //   .refine((val) => !!val?.url, {
+        //     message: "파일을 업로드해주세요",
+        //   }),
+        title: z
+          .string()
+          .min(1, "타이틀은 필수값입니다.")
+          .max(50, "타이틀은 50자 이내여야 합니다."),
+        subtitle: z
+          .string()
+          .min(1, "서브타이틀은 필수값입니다.")
+          .max(100, "서브타이틀은 100자 이내여야 합니다."),
+      })
+    )
+    .min(1, "최소 1개는 입력해야 합니다")
+    .max(4, "최대 4개까지만 입력 가능합니다"),
+});
 
 const MAX_KV_LENGTH = 4;
 
 export default function KeyVisualForm({ data }) {
   const methods = useForm({
+    resolver: zodResolver(schema),
     defaultValues: {
       kv: [{ type: "image", title: "", subtitle: "" }],
     },

@@ -6,7 +6,7 @@ import Box from "@/components/layout/Box";
 import Col from "@/components/layout/Col";
 import Row from "@/components/layout/Row";
 import Title from "@/components/layout/Title";
-import BrandList from "@/components/modal/BrandList";
+import BrandList from "@/components/modal/MainBrandList";
 import useModal from "@/hooks/useModal";
 import { useEffect, useId, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";

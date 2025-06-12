@@ -10,37 +10,8 @@ import Row from "@/components/layout/Row";
 import Title from "@/components/layout/Title";
 import WhatsOnList from "@/components/modal/WhatsOnList";
 import useModal from "@/hooks/useModal";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useId, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { z } from "zod";
-
-const schema = z.object({
-  whatson: z.object({
-    subtitle: z
-      .string()
-      .min(1, "서브타이틀은 필수값입니다.")
-      .max(200, "서브타이틀은 200자 이내여야 합니다."),
-    type: z
-      .string()
-      .nullable()
-      .refine((val) => !!val, {
-        message: "강조 콘텐츠 요소를 선택해주세요.",
-      }),
-    // image: z
-    //   .object({
-    //     name: z.string(),
-    //     url: z.string().url(),
-    //     size: z.number(),
-    //   })
-    //   .nullable()
-    //   .refine((val) => !!val?.url, {
-    //     message: "파일을 업로드해주세요",
-    //   }),
-    url: z.string().url("유효한 URL 이 아닙니다."),
-    contents: z.array(z.number()),
-  }),
-});
 
 export default function WhatsOnForm({ data }) {
   const subtitleId = useId();
@@ -49,7 +20,6 @@ export default function WhatsOnForm({ data }) {
   const { showModal } = useModal();
 
   const methods = useForm({
-    resolver: zodResolver(schema),
     defaultValues: {
       whatson: {
         subtitle: "",

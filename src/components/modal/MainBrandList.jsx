@@ -22,10 +22,10 @@ export default function BrandList({ selected = [], onConfirm, closeModal }) {
         const res = await api.get("/api/v1/main/brand/list?lang=KO");
         if (res.data?.success && Array.isArray(res.data.data)) {
           const parsed = res.data.data.map((item) => ({
-            _id: String(item.id),
-            id: item.id,
+            _id: String(item.brandId),
+            id: item.brandId,
             category: item.category || "-",
-            brandName: item.brandName || "-",
+            brandName: item.name || "-",
           }));
 
           setItems(parsed);
