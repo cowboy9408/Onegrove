@@ -357,6 +357,7 @@ const RegistForm = forwardRef(
                   // message: "127 이하의 숫자만 입력 가능합니다.",
                 },
               })}
+              info="예약시간은 127시간까지만 입력 가능"
             />
           </div>
         </form>

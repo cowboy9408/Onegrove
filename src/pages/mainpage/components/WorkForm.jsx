@@ -5,38 +5,9 @@ import FormTextarea from "@/components/form/FormTextarea";
 import Box from "@/components/layout/Box";
 import Row from "@/components/layout/Row";
 import Title from "@/components/layout/Title";
-import { fileSchema } from "@/validation/schemas/fileSchema";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Info } from "lucide-react";
 import { useEffect, useId } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { z } from "zod";
-
-const schema = z.object({
-  work: z.object({
-    subtitle1: z
-      .string()
-      .min(1, "서브타이틀은 필수값입니다.")
-      .max(50, "서브타이틀은 50자 이내여야 합니다."),
-    subtitle2: z.string().max(50, "서브타이틀은 150자 이내여야 합니다."),
-    file: z
-      .array(fileSchema)
-      .min(3, "이미지는 최소 3개를 등록해야 합니다.")
-      .refine(
-        (files) => {
-          return files
-            .slice(0, 3)
-            .every(
-              (file) => file.name && file.url && typeof file.size === "number"
-            );
-        },
-        {
-          message: "최소 3개의 이미지 정보는 필수입니다.",
-          path: ["file"],
-        }
-      ),
-  }),
-});
 
 const MAX_WORK_IMAGE_LENGTH = 10;
 
@@ -45,7 +16,6 @@ export default function WorkForm({ data }) {
   const subtitleId2 = useId();
 
   const methods = useForm({
-    resolver: zodResolver(schema),
     defaultValues: {
       work: {
         subtitle1: "",
