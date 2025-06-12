@@ -124,11 +124,11 @@ export default function StoriesDetail() {
         }
 
         formRef.setValue("content", data.content || "");
-        formRef.setValue("content1", data.addContent || "");
+        formRef.setValue("addContent", data.addContent || "");
         formRef.setValue("description", data.description || "");
         formRef.setDescription?.(data.description || "");
         formRef.setContent?.(data.content || "");
-        formRef.setContent?.(data.addContent || "");
+        formRef.setContent2?.(data.addContent || "");
         formRef.setValue(
           "startDate",
           data.startDt ? parseLocalDateTime(data.startDt) : null
@@ -214,7 +214,7 @@ export default function StoriesDetail() {
           showYn: data.status === "status" ? "Y" : "N",
           sort: data.sort,
           content: data.content,
-          addContent: data.content1,
+          addContent: data.addContent,
           description: data.description || "",
           startDt: data.startDt || null,
           endDt: data.endDt || null,

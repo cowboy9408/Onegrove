@@ -45,17 +45,17 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
 
   const onSubmit = async (data) => {
     const content = await editorRef.current.getContent();
-    const content1 = await editorRef2.current.getContent();
+    const addContent = await editorRef2.current.getContent();
     console.log({
       ...data,
       content,
-      content1
+      addContent
       // ...dateRange,
     });
   };
 
   useEffect(() => {
-    console.log('start ---', data,  data.startDate, data.endDate)
+    // console.log('start ---', data,  data.startDate, data.endDate)
     if (data?.startDt) {
       const start = new Date(data.startDt);
 
@@ -75,6 +75,10 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
       const hh = String(end.getHours()).padStart(2, "0");
       const mm = String(end.getMinutes()).padStart(2, "0");
       setEndTime(`${hh}:${mm}`);
+    }
+
+    if(data?.addContent !== "" && data?.addContent !== null) {
+      setIsAddContent(true);
     }
   }, [data]);
 
@@ -99,13 +103,8 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           storiesImgList3: getCleanedImage(watch("storiesImgList3"))
         };
         const content = await editorRef.current?.getContent?.();
-        const content1 = await editorRef2.current?.getContent?.();
+        const addContent = await editorRef2.current?.getContent?.();
         const description = watch("description");
-        const storiesImgCaption1 = watch("storiesImgCaption1");
-        const storiesImgCaption2 = watch("storiesImgCaption2");
-        const storiesImgCaption3 = watch("storiesImgCaption3");
-
-
         
   
         const [startHour, startMin] = startTime.split(":").map(Number);
@@ -238,7 +237,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             },
           ],
           content: content || "",
-          content1: content1 || "",
+          addContent: addContent || "",
           description: description || "",
           startDt: startDateStr,
           endDt: endDateStr,
@@ -251,6 +250,10 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
       },
       setContent: (html) => {
         editorRef.current?.setContent?.(html);
+      },
+      setContent2: (html) => {
+        console.log('abcd', html);
+        editorRef2.current?.setContent?.(html);
       },
     }));
 
@@ -383,7 +386,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             readOnly={readOnly}
             value={watch("thumbImg")}
             onChange={(file) => setValue("thumbImg", file)}
-            accept="image/png, image/jpeg, image/jpg, image/webp"
+            accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
           
@@ -397,7 +400,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             readOnly={readOnly}
             value={watch("patternTopPc")}
             onChange={(file) => setValue("patternTopPc", file)}
-            accept="image/png, image/jpeg, image/jpg, image/webp"
+            accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
           />
@@ -409,7 +412,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             readOnly={readOnly}
             value={watch("patternTopMo")}
             onChange={(file) => setValue("patternTopMo", file)}
-            accept="image/png, image/jpeg, image/jpg, image/webp"
+            accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
           />
@@ -444,7 +447,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             내용 추가
           </p>
           <Controller
-            name="content2"
+            name="addContent"
             control={control}
             render={({ field }) => (
               <Editor
@@ -467,7 +470,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             readOnly={readOnly}
             value={watch("storiesImgList1")}
             onChange={(file) => setValue("storiesImgList1", file)}
-            accept="image/png, image/jpeg, image/jpg, image/webp"
+            accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
           />
@@ -480,7 +483,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             readOnly={readOnly}
             value={watch("storiesImgList2")}
             onChange={(file) => setValue("storiesImgList2", file)}
-            accept="image/png, image/jpeg, image/jpg, image/webp"
+            accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
             className="mt-4"
@@ -494,7 +497,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             readOnly={readOnly}
             value={watch("storiesImgList3")}
             onChange={(file) => setValue("storiesImgList3", file)}
-            accept="image/png, image/jpeg, image/jpg, image/webp"
+            accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
             className="mt-4"
@@ -513,7 +516,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             readOnly={readOnly}
             value={watch("patternBottomPc")}
             onChange={(file) => setValue("patternBottomPc", file)}
-            accept="image/png, image/jpeg, image/jpg, image/webp"
+            accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
           />
@@ -525,7 +528,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             readOnly={readOnly}
             value={watch("patternBottomMo")}
             onChange={(file) => setValue("patternBottomMo", file)}
-            accept="image/png, image/jpeg, image/jpg, image/webp"
+            accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
           />
