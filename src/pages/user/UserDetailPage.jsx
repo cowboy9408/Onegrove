@@ -225,6 +225,27 @@ export default function UserDetailPage() {
             onChange={(e) => handleChange("email", e.target.value)}
           />
         </div>
+        <div>
+          <p className="mb-2 text-sm font-medium text-gray-800">
+            회의실 예약 기능
+          </p>
+          <div className="flex gap-4">
+            <Radio
+              name="gender"
+              label="가능"
+              value="male"
+              checked={form.gender === "male"}
+              onChange={() => handleChange("gender", "male")}
+            />
+            <Radio
+              name="gender"
+              label="불가"
+              value="female"
+              checked={form.gender === "female"}
+              onChange={() => handleChange("gender", "female")}
+            />
+          </div>
+        </div>
       </div>
       <div className="flex justify-end gap-3 px-6 pt-5 pb-6">
         <Button
