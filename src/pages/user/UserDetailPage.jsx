@@ -4,8 +4,9 @@ import Radio from "@/components/common/Radio";
 import Button from "@/components/common/Button";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "@/lib/apiClient";
+import Select from "@/components/common/Select";
 
-export default function AdminDetailPage() {
+export default function UserDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   console.log("현재 상세 페이지 ID:", id);
@@ -23,7 +24,7 @@ export default function AdminDetailPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await api.get(`/api/v1/user/admin/${id}`);
+        const res = await api.get(`/api/v1/user/member/${id}`);
         console.log("조회 응답:", res.data);
         if (res.data.success && res.data.data) {
           const data = res.data.data;
@@ -110,13 +111,13 @@ export default function AdminDetailPage() {
           form.gender === "male" ? "M" : form.gender === "female" ? "W" : "",
         isUse: form.status === "active" ? "Y" : "N",
         isManager: "N",
-        isReservation: "Y",
+        // isReservation: "Y",
       };
 
-      const res = await api.post("/api/v1/user/admin/update", payload);
+      const res = await api.post("/api/v1/user/member/update", payload);
       if (res.data.success) {
         alert("수정이 완료되었습니다.");
-        navigate("/admin/list");
+        navigate("/user/list");
       } else {
         alert("수정 실패: " + res.data.message);
       }
@@ -131,30 +132,17 @@ export default function AdminDetailPage() {
       <div className="max-w mx-auto space-y-6 rounded-lg bg-white p-6 shadow-md">
         <div className="flex flex-wrap gap-8">
           <div>
-            <p className="mb-2 text-sm font-medium text-gray-800">계정 유형</p>
-            <div className="flex gap-4">
-              <Radio
-                name="role"
-                label="일반"
-                value="NORMAL_ADMIN"
-                checked={form.role === "NORMAL_ADMIN"}
-                onChange={() => handleChange("role", "NORMAL_ADMIN")}
-              />
-              <Radio
-                name="role"
-                label="리테일"
-                value="RETAIL_ADMIN"
-                checked={form.role === "RETAIL_ADMIN"}
-                onChange={() => handleChange("role", "RETAIL_ADMIN")}
-              />
-              <Radio
-                name="role"
-                label="오피스"
-                value="OFFICE_ADMIN"
-                checked={form.role === "OFFICE_ADMIN"}
-                onChange={() => handleChange("role", "OFFICE_ADMIN")}
-              />
-            </div>
+            <Select
+              label="입주사"
+              value={form.company}
+              onChange={(e) => handleChange("company", e.target.value)}
+              className="w-[735px]"
+            >
+              <option value="">선택하세요</option>
+              <option value="LG">입주사1</option>
+              <option value="삼성">입주사2</option>
+              <option value="카카오">입주사3</option>
+            </Select>
           </div>
 
           <div>
@@ -283,10 +271,7 @@ export default function AdminDetailPage() {
           수정
         </Button>
 
-        <Button
-          className="bg-black-200"
-          onClick={() => navigate("/admin/list")}
-        >
+        <Button className="bg-black-200" onClick={() => navigate("/user")}>
           목록
         </Button>
       </div>

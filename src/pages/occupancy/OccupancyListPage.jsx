@@ -286,8 +286,8 @@ export default function OccupancyListPage() {
             { key: "floor", label: "층수" },
             { key: "phone", label: "입주자 연락처" },
             { key: "status", label: "사용 여부" },
-            { key: "created_user", label: "등록일자" },
-            { key: "created_at", label: "등록자" },
+            { key: "created_user", label: "등록자" },
+            { key: "created_at", label: "등록일자" },
           ]}
           data={data}
           link={{ base: "/admin", path: "no" }}
