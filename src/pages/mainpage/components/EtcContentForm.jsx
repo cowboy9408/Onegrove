@@ -137,10 +137,6 @@ export default function EtcContentForm({ data }) {
             );
           }}
         </FieldGroup>
-
-        <Row className="justify-end">
-          <Button type="submit">저장</Button>
-        </Row>
       </form>
     </FormProvider>
   );
