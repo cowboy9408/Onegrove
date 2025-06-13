@@ -166,7 +166,7 @@ export const routeMeta = [
           "RETAIL_ADMIN",
           "OFFICE_ADMIN",
           "OFFICE_SECRETARY_ADMIN",
-          "User",
+          "MEMBER",
         ],
       },
       {
@@ -183,7 +183,7 @@ export const routeMeta = [
           "RETAIL_ADMIN",
           "OFFICE_ADMIN",
           "OFFICE_SECRETARY_ADMIN",
-          "User",
+          "MEMBER",
         ],
       },
       {
