@@ -6,6 +6,8 @@ import WhatsOnForm from "./components/WhatsOnForm";
 import LifestyleForm from "./components/LifestyleForm";
 import WorkForm from "./components/WorkForm";
 import EtcContentForm from "./components/EtcContentForm";
+import WhatsonContent from "./components/WhatsonContent";
+import { useForm, FormProvider } from "react-hook-form";
 
 export default function MainPage() {
   const [keyVisual, setKeyVisual] = useState([]);
@@ -13,6 +15,17 @@ export default function MainPage() {
   const [lifestyle, setLifestyle] = useState({});
   const [work, setWork] = useState({});
   const [etc, setEtc] = useState([]);
+  const methods = useForm({
+    defaultValues: {
+      contents: [
+        {
+          ids: [],
+          selectedTitles: "",
+          uploadFile: null,
+        },
+      ],
+    },
+  });
 
   useEffect(() => {
     // TODO: fetch data
@@ -24,8 +37,8 @@ export default function MainPage() {
     setWhatsOn({
       subtitle: "subtitle",
       type: "image",
+      image: { name: "", url: "", size: 0 },
       url: "http://www.onegrove.kr",
-      contents: [],
     });
 
     setLifestyle({
@@ -59,31 +72,35 @@ export default function MainPage() {
   }, []);
 
   return (
-    <Section>
-      <Tabs
-        tabs={[
-          { key: "kr", label: "국문" },
-          { key: "en", label: "영문" },
-        ]}
-      >
-        <TabPanel>
-          {/* 국문 폼 */}
-          <KeyVisualForm data={keyVisual} />
-          <WhatsOnForm data={whatsOn} />
-          <LifestyleForm data={lifestyle} />
-          <WorkForm data={work} />
-          <EtcContentForm data={etc} />
-        </TabPanel>
+    <FormProvider {...methods}>
+      <Section>
+        <Tabs
+          tabs={[
+            { key: "kr", label: "국문" },
+            { key: "en", label: "영문" },
+          ]}
+        >
+          <TabPanel>
+            {/* 국문 폼 */}
+            <KeyVisualForm data={keyVisual} />
+            <WhatsOnForm data={whatsOn} />
+            <WhatsonContent />
+            <LifestyleForm data={lifestyle} />
+            <WorkForm data={work} />
+            <EtcContentForm data={etc} />
+          </TabPanel>
 
-        <TabPanel>
-          {/* 영문 폼 */}
-          <KeyVisualForm data={keyVisual} />
-          <WhatsOnForm data={whatsOn} />
-          <LifestyleForm data={lifestyle} />
-          <WorkForm data={work} />
-          <EtcContentForm data={etc} />
-        </TabPanel>
-      </Tabs>
-    </Section>
+          <TabPanel>
+            {/* 영문 폼 */}
+            <KeyVisualForm data={keyVisual} />
+            <WhatsOnForm data={whatsOn} />
+            <WhatsonContent />
+            <LifestyleForm data={lifestyle} />
+            <WorkForm data={work} />
+            <EtcContentForm data={etc} />
+          </TabPanel>
+        </Tabs>
+      </Section>
+    </FormProvider>
   );
 }

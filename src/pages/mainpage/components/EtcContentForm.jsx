@@ -95,7 +95,7 @@ export default function EtcContentForm({ data }) {
                       id={`subtitle-${field.id}`}
                       label="서브타이틀"
                       fieldName={`etc.${index}.subtitle`}
-                      maxLength={50}
+                      maxLength={100}
                       showDefaultInfo={true}
                       required
                       placeholder="서브타이틀을 입력해주세요."
@@ -111,7 +111,7 @@ export default function EtcContentForm({ data }) {
                       id={`detail-${field.id}`}
                       label="상세내용"
                       placeholder="상세내용을 입력해주세요"
-                      maxLength={100}
+                      maxLength={200}
                       {...register(`etc.${index}.detail`)}
                       error={errors.etc?.[index]?.detail?.message}
                     />
