@@ -19,6 +19,7 @@ export default function UserDetailPage() {
     username: "",
     phone: "",
     email: "",
+    isReservation: "N",
   });
 
   useEffect(() => {
@@ -38,6 +39,7 @@ export default function UserDetailPage() {
               ? data.phoneNumber.split("-").slice(1).join("-")
               : data.phoneNumber || "",
             email: data.email || "",
+            isReservation: data.isReservation === "Y" ? "Y" : "N",
           });
         }
       } catch (err) {
@@ -110,8 +112,8 @@ export default function UserDetailPage() {
         gender:
           form.gender === "male" ? "M" : form.gender === "female" ? "W" : "",
         isUse: form.status === "active" ? "Y" : "N",
-        isManager: "Y",
-        isReservation: "Y",
+        isManager: "N",
+        isReservation: form.isReservation,
       };
 
       const res = await api.post("/api/v1/user/member/update", payload);
@@ -231,18 +233,18 @@ export default function UserDetailPage() {
           </p>
           <div className="flex gap-4">
             <Radio
-              name="gender"
+              name="isReservation"
               label="가능"
-              value="male"
-              checked={form.gender === "male"}
-              onChange={() => handleChange("gender", "male")}
+              value="Y"
+              checked={form.isReservation === "Y"}
+              onChange={() => handleChange("isReservation", "Y")}
             />
             <Radio
-              name="gender"
+              name="isReservation"
               label="불가"
-              value="female"
-              checked={form.gender === "female"}
-              onChange={() => handleChange("gender", "female")}
+              value="N"
+              checked={form.isReservation === "N"}
+              onChange={() => handleChange("isReservation", "N")}
             />
           </div>
         </div>

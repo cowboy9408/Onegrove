@@ -16,6 +16,7 @@ export default function AdminRegist() {
     confirmPassword: "",
     phone: "",
     email: "",
+    isReservation: "N",
   });
   const navigate = useNavigate();
 
@@ -57,7 +58,7 @@ export default function AdminRegist() {
       isAdmin: "N", // 고정
       isUse: form.status === "active" ? "Y" : "N",
       isManager: "N", // 고정
-      isReservation: "Y", // 고정
+      isReservation: form.isReservation,
     };
 
     try {
@@ -195,18 +196,18 @@ export default function AdminRegist() {
         </p>
         <div className="flex gap-4">
           <Radio
-            name="gender"
+            name="isReservation"
             label="가능"
-            value="male"
-            checked={form.gender === "male"}
-            onChange={() => handleChange("gender", "male")}
+            value="Y"
+            checked={form.isReservation === "Y"}
+            onChange={() => handleChange("isReservation", "Y")}
           />
           <Radio
-            name="gender"
+            name="isReservation"
             label="불가"
-            value="female"
-            checked={form.gender === "female"}
-            onChange={() => handleChange("gender", "female")}
+            value="N"
+            checked={form.isReservation === "N"}
+            onChange={() => handleChange("isReservation", "N")}
           />
         </div>
       </div>
