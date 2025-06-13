@@ -56,7 +56,7 @@ export default function StoriesListPage() {
             // console.log("koItem:", koItem);
             // console.log("enItem:", enItem);
 
-            console.log("item:", item, koItem, enItem);
+            // console.log("item:", item, koItem, enItem);
 
 
             return {
