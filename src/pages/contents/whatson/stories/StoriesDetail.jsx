@@ -211,7 +211,7 @@ export default function StoriesDetail() {
           patternBottomPc: toImageMeta(data.patternBottomPc, original.patternBottomPc),
           patternBottomMo: toImageMeta(data.patternBottomMo, original.patternBottomMo),
 
-          showYn: data.status === "status" ? "Y" : "N",
+          showYn: data.showYn === "Y" ? "Y" : "N",
           sort: data.sort,
           content: data.content,
           addContent: data.addContent,
