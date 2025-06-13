@@ -119,7 +119,7 @@ export default function UserDetailPage() {
       const res = await api.post("/api/v1/user/member/update", payload);
       if (res.data.success) {
         alert("수정이 완료되었습니다.");
-        navigate("/user/list");
+        navigate("/user");
       } else {
         alert("수정 실패: " + res.data.message);
       }

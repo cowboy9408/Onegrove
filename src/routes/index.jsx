@@ -571,7 +571,7 @@ export const routeMeta = [
                 path: "/contents/whatson/stories/list",
 
                 element: <StoriesListPage />,
-                title: "Stories of One Grove 리스트",
+                title: "Stories of One Grove",
                 hidden: false,
                 permissions: [
                   "SUPER_ADMIN",

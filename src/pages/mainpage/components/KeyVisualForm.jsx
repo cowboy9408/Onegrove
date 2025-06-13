@@ -16,182 +16,184 @@ import Button from "@/components/common/Button";
 
 const MAX_KV_LENGTH = 4;
 
-const KeyVisualForm = forwardRef(({ data = [], lang = "KO" }, ref) => {
-  const methods = useForm({
-    defaultValues: { kv: data && Array.isArray(data) ? data : [] },
-  });
-  const { control, register, reset, resetField, getValues } = methods;
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "kv",
-  });
-
-  useEffect(() => {
-    reset({
-      kv:
-        Array.isArray(data) && data.length > 0
-          ? data
-          : [
-              {
-                type: "image",
-                title: "",
-                subtitle: "",
-                file1: null,
-                file2: null,
-              },
-            ],
+const KeyVisualForm = forwardRef(
+  ({ data = [], lang = "KO", mainId = null }, ref) => {
+    const methods = useForm({
+      defaultValues: { kv: data && Array.isArray(data) ? data : [] },
     });
-  }, [data]);
+    const { control, register, reset, resetField, getValues } = methods;
 
-  useImperativeHandle(ref, () => ({
-    submit: async (onError) => {
-      const inputList = getValues("kv") || [];
-      const validList = inputList.filter(
-        (item) =>
-          item.title && item.subtitle && item.file1?.path && item.file2?.path
-      );
+    const { fields, append, remove } = useFieldArray({
+      control,
+      name: "kv",
+    });
 
-      if (!validList || validList.length === 0) {
-        return onError?.("Key Visual 항목이 없습니다.");
-      }
+    useEffect(() => {
+      reset({
+        kv:
+          Array.isArray(data) && data.length > 0
+            ? data
+            : [
+                {
+                  type: "image",
+                  title: "",
+                  subtitle: "",
+                  file1: null,
+                  file2: null,
+                },
+              ],
+      });
+    }, [data]);
 
-      // 기존 ID 리스트
-      const previousIds = (data || []).map((d) => d.id).filter(Boolean);
-      const currentIds = validList.map((item) => item.id).filter(Boolean);
-      const deletedIds = previousIds.filter((id) => !currentIds.includes(id));
+    useImperativeHandle(ref, () => ({
+      submit: async (onError) => {
+        const inputList = getValues("kv") || [];
+        const validList = inputList.filter(
+          (item) =>
+            item.title && item.subtitle && item.file1?.path && item.file2?.path
+        );
 
-      return {
-        currentUser: 1,
-        mainId: 44,
-        lang: lang.toUpperCase(),
-        keyVisualList: [
-          ...validList.map((item, index) => ({
-            currentUser: 1,
-            mainId: 44,
-            id: item.id ?? null,
-            title: item.title,
-            subTitle: item.subtitle,
-            contentType: item.type === "image" ? "I" : "V",
-            sort: String(index + 1),
-            delYn: null,
-            pcFile: item.file1,
-            moFile: item.file2,
-          })),
-          ...deletedIds.map((id) => ({
-            currentUser: 1,
-            mainId: 44,
-            id,
-            delYn: "Y",
-          })),
-        ],
-      };
-    },
-  }));
+        if (!validList || validList.length === 0) {
+          return onError?.("Key Visual 항목이 없습니다.");
+        }
 
-  return (
-    <FormProvider {...methods}>
-      <form className="space-y-8 p-4">
-        <FieldGroup name="kv">
-          {({ fields, field, index, append, remove }) => (
-            <Box
-              key={field.id}
-              className="mb-2 rounded-md border-2 border-gray-200"
-            >
-              <Title title={`■ Key Visual 이미지 ${index + 1}`} />
+        // 기존 ID 리스트
+        const previousIds = (data || []).map((d) => d.id).filter(Boolean);
+        const currentIds = validList.map((item) => item.id).filter(Boolean);
+        const deletedIds = previousIds.filter((id) => !currentIds.includes(id));
 
-              <Row className="pb-4">
-                <FormRadioGroup
-                  name={`kv.${index}.type`}
-                  label="콘텐츠 형식"
-                  options={[
-                    { label: "이미지", value: "image" },
-                    { label: "영상", value: "video" },
-                  ]}
-                  required
-                />
-              </Row>
+        return {
+          currentUser: 1,
+          ...(mainId ? { mainId } : {}),
+          lang: lang.toUpperCase(),
+          keyVisualList: [
+            ...validList.map((item, index) => ({
+              currentUser: 1,
+              ...(mainId ? { mainId } : {}),
+              id: item.id ?? null,
+              title: item.title,
+              subTitle: item.subtitle,
+              contentType: item.type === "image" ? "I" : "V",
+              sort: String(index + 1),
+              delYn: null,
+              pcFile: item.file1,
+              moFile: item.file2,
+            })),
+            ...deletedIds.map((id) => ({
+              currentUser: 1,
+              ...(mainId ? { mainId } : {}),
+              id,
+              delYn: "Y",
+            })),
+          ],
+        };
+      },
+    }));
 
-              <Row className="pb-4">
-                <Controller
-                  name={`kv.${index}.file1`}
-                  control={control}
-                  render={({ field }) => (
-                    <Upload
-                      {...field}
-                      label="PC 이미지"
-                      acceptWith={`kv.${index}.type`}
-                    />
-                  )}
-                />
-              </Row>
+    return (
+      <FormProvider {...methods}>
+        <form className="space-y-8 p-4">
+          <FieldGroup name="kv">
+            {({ fields, field, index, append, remove }) => (
+              <Box
+                key={field.id}
+                className="mb-2 rounded-md border-2 border-gray-200"
+              >
+                <Title title={`■ Key Visual 이미지 ${index + 1}`} />
 
-              <Row className="pb-4">
-                <Controller
-                  name={`kv.${index}.file2`}
-                  control={control}
-                  render={({ field }) => (
-                    <Upload
-                      {...field}
-                      label="MO 이미지"
-                      acceptWith={`kv.${index}.type`}
-                    />
-                  )}
-                />
-              </Row>
+                <Row className="pb-4">
+                  <FormRadioGroup
+                    name={`kv.${index}.type`}
+                    label="콘텐츠 형식"
+                    options={[
+                      { label: "이미지", value: "image" },
+                      { label: "영상", value: "video" },
+                    ]}
+                    required
+                  />
+                </Row>
 
-              <Row className="pb-4">
-                <FormInput
-                  label="타이틀"
-                  fieldName={`kv.${index}.title`}
-                  maxLength={50}
-                  required
-                  placeholder="타이틀 입력"
-                  {...register(`kv.${index}.title`)}
-                  onClear={() => resetField(`kv.${index}.title`)}
-                />
-              </Row>
+                <Row className="pb-4">
+                  <Controller
+                    name={`kv.${index}.file1`}
+                    control={control}
+                    render={({ field }) => (
+                      <Upload
+                        {...field}
+                        label="PC 이미지"
+                        acceptWith={`kv.${index}.type`}
+                      />
+                    )}
+                  />
+                </Row>
 
-              <Row className="pb-4">
-                <FormInput
-                  label="서브타이틀"
-                  fieldName={`kv.${index}.subtitle`}
-                  maxLength={100}
-                  required
-                  placeholder="서브타이틀 입력"
-                  {...register(`kv.${index}.subtitle`)}
-                  onClear={() => resetField(`kv.${index}.subtitle`)}
-                />
-              </Row>
+                <Row className="pb-4">
+                  <Controller
+                    name={`kv.${index}.file2`}
+                    control={control}
+                    render={({ field }) => (
+                      <Upload
+                        {...field}
+                        label="MO 이미지"
+                        acceptWith={`kv.${index}.type`}
+                      />
+                    )}
+                  />
+                </Row>
 
-              <Row className="flex justify-center gap-2">
-                {fields.length < MAX_KV_LENGTH &&
-                  index === fields.length - 1 && (
+                <Row className="pb-4">
+                  <FormInput
+                    label="타이틀"
+                    fieldName={`kv.${index}.title`}
+                    maxLength={50}
+                    required
+                    placeholder="타이틀 입력"
+                    {...register(`kv.${index}.title`)}
+                    onClear={() => resetField(`kv.${index}.title`)}
+                  />
+                </Row>
+
+                <Row className="pb-4">
+                  <FormInput
+                    label="서브타이틀"
+                    fieldName={`kv.${index}.subtitle`}
+                    maxLength={100}
+                    required
+                    placeholder="서브타이틀 입력"
+                    {...register(`kv.${index}.subtitle`)}
+                    onClear={() => resetField(`kv.${index}.subtitle`)}
+                  />
+                </Row>
+
+                <Row className="flex justify-center gap-2">
+                  {fields.length < MAX_KV_LENGTH &&
+                    index === fields.length - 1 && (
+                      <Button
+                        type="button"
+                        onClick={() =>
+                          append({ type: "image", title: "", subtitle: "" })
+                        }
+                      >
+                        추가
+                      </Button>
+                    )}
+                  {index > 0 && (
                     <Button
                       type="button"
-                      onClick={() =>
-                        append({ type: "image", title: "", subtitle: "" })
-                      }
+                      color="red"
+                      onClick={() => remove(index)}
                     >
-                      추가
+                      삭제
                     </Button>
                   )}
-                {index > 0 && (
-                  <Button
-                    type="button"
-                    color="red"
-                    onClick={() => remove(index)}
-                  >
-                    삭제
-                  </Button>
-                )}
-              </Row>
-            </Box>
-          )}
-        </FieldGroup>
-      </form>
-    </FormProvider>
-  );
-});
+                </Row>
+              </Box>
+            )}
+          </FieldGroup>
+        </form>
+      </FormProvider>
+    );
+  }
+);
 
 export default KeyVisualForm;

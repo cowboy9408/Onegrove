@@ -10,7 +10,7 @@ import Title from "@/components/layout/Title";
 import { FormProvider, useForm } from "react-hook-form";
 import { forwardRef, useImperativeHandle, useId, useEffect } from "react";
 
-const WhatsOnForm = forwardRef(({ data }, ref) => {
+const WhatsOnForm = forwardRef(({ data, mainId = null, lang = "KO" }, ref) => {
   const subtitleId = useId();
   const urlId = useId();
 
@@ -56,17 +56,17 @@ const WhatsOnForm = forwardRef(({ data }, ref) => {
 
       return {
         currentUser: 1,
-        mainId: 45,
-        lang: "KO", // 또는 동적으로 넘길 수도 있음
+        ...(mainId ? { mainId } : {}),
+        lang: lang.toUpperCase(),
         mainWhat: {
           currentUser: 1,
-          mainId: 45,
+          ...(mainId ? { mainId } : {}),
           id: data?.id ?? null,
           subTitle: value.subtitle,
           contentType: value.type === "image" ? "I" : "V",
           file: value.image,
           url: value.url,
-          embeded: "", // 필요 시 수정
+          embeded: value.type === "video" ? value.embeded || "" : "",
         },
       };
     },

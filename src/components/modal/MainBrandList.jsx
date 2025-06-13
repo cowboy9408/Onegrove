@@ -12,11 +12,22 @@ import api from "@/lib/apiClient";
 export default function BrandList({ selected = [], onConfirm, closeModal }) {
   const [items, setItems] = useState([]); // 전체 목록
   const [filteredItems, setFilteredItems] = useState([]); // 검색 결과
-  const [checked, setChecked] = useState(selected.map(String)); // 체크된 ID (문자열로 변환)
+  const [checked, setChecked] = useState([]);
   const [keyword, setKeyword] = useState(""); // 검색어
   const { showModal } = useModal();
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(""); // 선택된 카테고리
+
+  useEffect(() => {
+    setChecked(selected.map(String));
+  }, [selected]);
+
+  useEffect(() => {
+    if (items.length > 0) {
+      setFilteredItems(items); // 처음 필터 설정
+      setChecked(selected.map(String)); // ensure reset even after brand load
+    }
+  }, [items]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -110,10 +121,11 @@ export default function BrandList({ selected = [], onConfirm, closeModal }) {
           checkable
           checkedIds={checked}
           onCheck={(id, isChecked) => {
-            console.log("체크된 id:", id, "체크 상태:", isChecked);
             const idStr = String(id);
             setChecked((prev) =>
-              isChecked ? [...prev, idStr] : prev.filter((v) => v !== idStr)
+              isChecked
+                ? [...new Set([...prev, idStr])]
+                : prev.filter((v) => v !== idStr)
             );
           }}
         />
