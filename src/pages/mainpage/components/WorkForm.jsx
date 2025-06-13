@@ -54,7 +54,7 @@ export default function WorkForm({ data }) {
               label="서브타이틀1"
               required
               placeholder="서브타이틀을 입력해주세요"
-              maxLength={100}
+              maxLength={50}
               {...register("work.subtitle1")}
               error={errors.work?.subtitle1?.message}
             />
@@ -64,7 +64,7 @@ export default function WorkForm({ data }) {
               id={subtitleId2}
               label="서브타이틀2"
               placeholder="서브타이틀을 입력해주세요"
-              maxLength={150}
+              maxLength={50}
               {...register("work.subtitle2")}
               error={errors.work?.subtitle2?.message}
             />

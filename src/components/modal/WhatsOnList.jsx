@@ -6,6 +6,7 @@ import Select from "../common/Select";
 import Box from "../layout/Box";
 import Col from "../layout/Col";
 import Row from "../layout/Row";
+import api from "@/lib/apiClient";
 
 export default function WhatsOnList({ selected, onConfirm, closeModal }) {
   const [items, setItems] = useState([]);
@@ -15,8 +16,8 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch("/api/v1/main/content/category");
-        const json = await res.json();
+        const res = await api.get("/api/v1/main/content/category");
+        const json = res.data;
         if (json.success && Array.isArray(json.data)) {
           setCategories(json.data); // [{ code, value }]
         }
@@ -31,8 +32,8 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("/api/v1/main/content/list?lang=KO");
-        const json = await res.json();
+        const res = await api.get("/api/v1/main/content/list?lang=KO");
+        const json = res.data;
         if (json.success && Array.isArray(json.data)) {
           const mapped = json.data.map((item) => ({
             _id: item.contentId,
@@ -51,12 +52,6 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
 
     fetchData();
   }, []);
-
-  useEffect(() => {
-    if (onConfirm) {
-      onConfirm(items.filter((item) => checked.includes(item._id)));
-    }
-  }, [items, checked, onConfirm]);
 
   return (
     <>
