@@ -5,51 +5,16 @@ import FormInput from "@/components/form/FormInput";
 import FormRadioGroup from "@/components/form/FormRadioGroup";
 import FormTextarea from "@/components/form/FormTextarea";
 import Box from "@/components/layout/Box";
-import Col from "@/components/layout/Col";
 import Row from "@/components/layout/Row";
 import Title from "@/components/layout/Title";
-import WhatsOnList from "@/components/modal/WhatsOnList";
-import useModal from "@/hooks/useModal";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useId, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { z } from "zod";
-
-const schema = z.object({
-  whatson: z.object({
-    subtitle: z
-      .string()
-      .min(1, "서브타이틀은 필수값입니다.")
-      .max(200, "서브타이틀은 200자 이내여야 합니다."),
-    type: z
-      .string()
-      .nullable()
-      .refine((val) => !!val, {
-        message: "강조 콘텐츠 요소를 선택해주세요.",
-      }),
-    // image: z
-    //   .object({
-    //     name: z.string(),
-    //     url: z.string().url(),
-    //     size: z.number(),
-    //   })
-    //   .nullable()
-    //   .refine((val) => !!val?.url, {
-    //     message: "파일을 업로드해주세요",
-    //   }),
-    url: z.string().url("유효한 URL 이 아닙니다."),
-    contents: z.array(z.number()),
-  }),
-});
 
 export default function WhatsOnForm({ data }) {
   const subtitleId = useId();
   const urlId = useId();
 
-  const { showModal } = useModal();
-
   const methods = useForm({
-    resolver: zodResolver(schema),
     defaultValues: {
       whatson: {
         subtitle: "",
@@ -64,11 +29,8 @@ export default function WhatsOnForm({ data }) {
     register,
     resetField,
     formState: { errors },
-    setValue,
     reset,
   } = methods;
-
-  const [contents, setContents] = useState([]);
 
   useEffect(() => {
     reset({ whatson: data });
@@ -125,49 +87,6 @@ export default function WhatsOnForm({ data }) {
               error={errors.whatson?.url?.message}
               onClear={() => resetField(`whatson.url`)}
             />
-          </Row>
-          <Row className="pb-4">
-            <Col className="flex-5">
-              <Input
-                label="콘텐츠 등록"
-                readOnly
-                required
-                value={contents.map((e) => e.title).join(", ")}
-              />
-              <FormInput
-                className="hidden"
-                fieldName={`whatson.contents`}
-                {...register(`whatson.contents`)}
-              />
-            </Col>
-            <Col className="self-end">
-              <Button
-                className="h-12 w-full"
-                onClick={() =>
-                  showModal({
-                    title: "콘텐츠 검색",
-                    children: ({ closeModal }) => (
-                      <WhatsOnList
-                        selected={[1, 2]}
-                        closeModal={closeModal}
-                        onConfirm={(result) => {
-                          setContents(result);
-                          setValue(
-                            "whatson.contents",
-                            result.map((e) => e._id)
-                          );
-                        }}
-                      />
-                    ),
-                    showCancel: true,
-                    customButton: true,
-                    size: "5xl",
-                  })
-                }
-              >
-                관리
-              </Button>
-            </Col>
           </Row>
         </Box>
 
