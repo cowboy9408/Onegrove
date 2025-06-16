@@ -10,7 +10,7 @@ import api from "@/lib/apiClient";
 
 export default function WhatsOnList({ selected, onConfirm, closeModal }) {
   const [items, setItems] = useState([]);
-  const [checked, setChecked] = useState(selected);
+  const [checked, setChecked] = useState(() => selected.map((s) => String(s)));
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
@@ -36,9 +36,10 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
         const json = res.data;
         if (json.success && Array.isArray(json.data)) {
           const mapped = json.data.map((item) => ({
-            _id: item.contentId,
+            _id: String(item.contentId),
             menu: item.category,
             title: item.title,
+            categoryCode: item.categoryCode,
             begin_at: item.startDt,
             end_at: item.endDt,
             useYn: "사용", // 혹시 사용 여부 필드가 필요 없다면 삭제 가능
@@ -52,6 +53,8 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
 
     fetchData();
   }, []);
+
+  console.log("✔ checkedIds:", checked);
 
   return (
     <>
@@ -86,11 +89,9 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
           ]}
           data={items}
           checkable
-          checkedIds={checked}
+          checkedIds={checked.map(String)}
           onCheck={(id, checked) => {
-            setChecked((prev) =>
-              checked ? [...prev, id] : prev.filter((v) => v !== id)
-            );
+            setChecked(checked ? [id] : []);
           }}
         />
       </div>
@@ -105,7 +106,15 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
         <button
           className="cursor-pointer rounded-md bg-black px-4 py-2 text-sm text-white transition hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-300"
           onClick={() => {
-            onConfirm(items.filter((item) => checked.includes(item._id)));
+            onConfirm(
+              items
+                .filter((item) => checked.includes(String(item._id)))
+                .map((item) => ({
+                  _id: item._id,
+                  title: item.title,
+                  categoryCode: item.categoryCode,
+                }))
+            );
             closeModal();
           }}
         >

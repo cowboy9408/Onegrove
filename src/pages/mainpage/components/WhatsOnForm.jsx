@@ -50,7 +50,12 @@ const WhatsOnForm = forwardRef(({ data, mainId = null, lang = "KO" }, ref) => {
     submit: async (onError) => {
       const value = getValues("whatson");
 
-      if (!value.subtitle || !value.url || !value.image?.path) {
+      const hadFileBefore = !!data?.file?.path;
+      const hasFileNow = !!value?.image?.path;
+
+      const isDeleted = hadFileBefore && !hasFileNow;
+
+      if (!value.subtitle || !value.url || (!hasFileNow && !isDeleted)) {
         return onError?.("필수 값이 누락되었습니다.");
       }
 
@@ -64,8 +69,9 @@ const WhatsOnForm = forwardRef(({ data, mainId = null, lang = "KO" }, ref) => {
           id: data?.id ?? null,
           subTitle: value.subtitle,
           contentType: value.type === "image" ? "I" : "V",
-          file: value.image,
+          file: isDeleted ? null : value.image,
           url: value.url,
+          delYn: isDeleted ? "Y" : null,
           embeded: value.type === "video" ? value.embeded || "" : "",
         },
       };

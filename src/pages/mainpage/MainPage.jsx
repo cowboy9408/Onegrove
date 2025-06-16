@@ -27,8 +27,14 @@ export default function MainPage() {
   const lifestyleKRRef = useRef();
   const lifestyleENRef = useRef();
 
-  const [work, setWork] = useState({});
-  const [etc, setEtc] = useState([]);
+  const [work, setWork] = useState({ ko: {}, en: {} });
+  const workKRRef = useRef();
+  const workENRef = useRef();
+
+  const [etc, setEtc] = useState({ ko: {}, en: {} });
+  const etcKRRef = useRef();
+  const etcENRef = useRef();
+
   const methods = useForm({
     defaultValues: {
       sets: [
@@ -45,8 +51,17 @@ export default function MainPage() {
       const res = await api.get(`/api/v1/main/${lang}`);
       const data = res?.data?.data;
 
-      if (!res.data?.success) {
-        console.error(`${lang} 응답 실패`, res.data);
+      if (!res.data?.success || !data) {
+        console.error(`${lang} 응답 실패 또는 데이터 없음`, res.data);
+        setWhatsOn((prev) => ({
+          ...prev,
+          [lang]: {},
+        }));
+        setLifestyle((prev) => ({
+          ...prev,
+          [lang]: {},
+        }));
+        setKeyVisuals((prev) => ({ ...prev, [lang]: [] }));
         return;
       }
 
@@ -68,6 +83,50 @@ export default function MainPage() {
           ...data.lifeRes,
           brand: data.lifeRes?.brandList?.map((b) => b.brandId) || [],
         },
+      }));
+
+      setWork((prev) => ({
+        ...prev,
+        [lang]: {
+          id: data.workRes?.id ?? null,
+          subTitle1: data.workRes?.subTitle1 || "",
+          subTitle2: data.workRes?.subTitle2 || "",
+          file: (data.workRes?.workImgList || []).map((item) => ({
+            ...item.file,
+            id: item.id,
+            fileId: item.file?.id,
+            sort: item.sort,
+            isDeleted: item.delYn === "Y",
+          })),
+        },
+      }));
+
+      setEtc((prev) => ({
+        ...prev,
+        [lang]: [
+          {
+            id: data.linkedContentRes?.id ?? null,
+            title: data.linkedContentRes?.title ?? "",
+            subtitle: data.linkedContentRes?.subTitle ?? "",
+            detail: data.linkedContentRes?.content ?? "",
+            button: data.linkedContentRes?.btnName ?? "",
+            imagePC: data.linkedContentRes?.pcImg ?? null,
+            imageMO: data.linkedContentRes?.moImg ?? null,
+            contents: data.linkedContentRes?.contentId
+              ? [
+                  {
+                    _id: data.linkedContentRes.contentId,
+                    categoryCode: data.linkedContentRes.contentCategoryCode,
+                    title: data.linkedContentRes.contentTitle,
+                  },
+                ]
+              : [],
+            //
+            contentId: data.linkedContentRes?.contentId,
+            contentCategoryCode: data.linkedContentRes?.contentCategoryCode,
+            contentTitle: data.linkedContentRes?.contentTitle,
+          },
+        ],
       }));
 
       if (!data || !Array.isArray(data.keyVisualList)) {
@@ -155,6 +214,51 @@ export default function MainPage() {
     }
   };
 
+  const handleSaveWork = async (lang) => {
+    const ref = lang === "ko" ? workKRRef : workENRef;
+    const payload = await ref.current?.submit((msg) => alert(msg));
+    if (!payload) return;
+
+    try {
+      const res = await api.post("/api/v1/main/insert/mainWork", {
+        lang: lang.toUpperCase(),
+        ...payload,
+      });
+
+      if (res.data?.success) {
+        alert("Work 저장 완료");
+        await fetchMainData(lang);
+      } else {
+        alert("저장 실패: " + res.data?.message);
+      }
+    } catch (e) {
+      alert("저장 중 오류 발생");
+      console.error(e);
+    }
+  };
+
+  const handleSaveEtcContent = async (lang) => {
+    const ref = lang === "ko" ? etcKRRef : etcENRef;
+    const payload = await ref.current?.submit((msg) => alert(msg));
+    if (!payload) return;
+
+    try {
+      const res = await api.post(
+        "/api/v1/main/insert/mainLinkedContent",
+        payload
+      );
+      if (res.data?.success) {
+        alert(`${lang.toUpperCase()} 연계 콘텐츠 저장 완료`);
+        await fetchMainData(lang); // 필요 시 최신 데이터 반영
+      } else {
+        alert("저장 실패: " + res.data?.message);
+      }
+    } catch (e) {
+      alert("저장 중 오류 발생");
+      console.error(e);
+    }
+  };
+
   return (
     <FormProvider {...methods}>
       <Section>
@@ -195,8 +299,24 @@ export default function MainPage() {
             <div className="my-4 flex justify-end">
               <Button onClick={() => handleSaveLifestyle("ko")}>저장</Button>
             </div>
-            <WorkForm data={work} />
-            <EtcContentForm data={etc} />
+            <WorkForm
+              ref={workKRRef}
+              data={work.ko}
+              lang="ko"
+              mainId={mainIds.ko}
+            />
+            <div className="my-4 flex justify-end">
+              <Button onClick={() => handleSaveWork("ko")}>저장</Button>
+            </div>
+            <EtcContentForm
+              ref={etcKRRef}
+              data={etc.ko}
+              lang="ko"
+              mainId={mainIds.ko}
+            />
+            <div className="my-4 flex justify-end">
+              <Button onClick={() => handleSaveEtcContent("ko")}>저장</Button>
+            </div>
           </TabPanel>
 
           <TabPanel>
@@ -229,8 +349,24 @@ export default function MainPage() {
             <div className="my-4 flex justify-end">
               <Button onClick={() => handleSaveLifestyle("en")}>저장</Button>
             </div>
-            <WorkForm data={work} />
-            <EtcContentForm data={etc} />
+            <WorkForm
+              ref={workENRef}
+              data={work.en}
+              lang="en"
+              mainId={mainIds.en}
+            />
+            <div className="my-4 flex justify-end">
+              <Button onClick={() => handleSaveWork("en")}>저장</Button>
+            </div>
+            <EtcContentForm
+              ref={etcENRef}
+              data={etc.en}
+              lang="en"
+              mainId={mainIds.en}
+            />
+            <div className="my-4 flex justify-end">
+              <Button onClick={() => handleSaveEtcContent("en")}>저장</Button>
+            </div>
           </TabPanel>
         </Tabs>
       </Section>
