@@ -27,7 +27,10 @@ export default function MainPage() {
   const lifestyleKRRef = useRef();
   const lifestyleENRef = useRef();
 
-  const [work, setWork] = useState({});
+  const [work, setWork] = useState({ ko: {}, en: {} });
+  const workKRRef = useRef();
+  const workENRef = useRef();
+
   const [etc, setEtc] = useState([]);
   const methods = useForm({
     defaultValues: {
@@ -45,8 +48,17 @@ export default function MainPage() {
       const res = await api.get(`/api/v1/main/${lang}`);
       const data = res?.data?.data;
 
-      if (!res.data?.success) {
-        console.error(`${lang} 응답 실패`, res.data);
+      if (!res.data?.success || !data) {
+        console.error(`${lang} 응답 실패 또는 데이터 없음`, res.data);
+        setWhatsOn((prev) => ({
+          ...prev,
+          [lang]: {},
+        }));
+        setLifestyle((prev) => ({
+          ...prev,
+          [lang]: {},
+        }));
+        setKeyVisuals((prev) => ({ ...prev, [lang]: [] }));
         return;
       }
 
@@ -67,6 +79,22 @@ export default function MainPage() {
         [lang]: {
           ...data.lifeRes,
           brand: data.lifeRes?.brandList?.map((b) => b.brandId) || [],
+        },
+      }));
+
+      setWork((prev) => ({
+        ...prev,
+        [lang]: {
+          id: data.workRes?.id ?? null,
+          subTitle1: data.workRes?.subTitle1 || "",
+          subTitle2: data.workRes?.subTitle2 || "",
+          file: (data.workRes?.workImgList || []).map((item) => ({
+            ...item.file,
+            id: item.id,
+            fileId: item.file?.id,
+            sort: item.sort,
+            isDeleted: item.delYn === "Y",
+          })),
         },
       }));
 
@@ -155,6 +183,29 @@ export default function MainPage() {
     }
   };
 
+  const handleSaveWork = async (lang) => {
+    const ref = lang === "ko" ? workKRRef : workENRef;
+    const payload = await ref.current?.submit((msg) => alert(msg));
+    if (!payload) return;
+
+    try {
+      const res = await api.post("/api/v1/main/insert/mainWork", {
+        lang: lang.toUpperCase(),
+        ...payload,
+      });
+
+      if (res.data?.success) {
+        alert("Work 저장 완료");
+        await fetchMainData(lang);
+      } else {
+        alert("저장 실패: " + res.data?.message);
+      }
+    } catch (e) {
+      alert("저장 중 오류 발생");
+      console.error(e);
+    }
+  };
+
   return (
     <FormProvider {...methods}>
       <Section>
@@ -195,7 +246,15 @@ export default function MainPage() {
             <div className="my-4 flex justify-end">
               <Button onClick={() => handleSaveLifestyle("ko")}>저장</Button>
             </div>
-            <WorkForm data={work} />
+            <WorkForm
+              ref={workKRRef}
+              data={work.ko}
+              lang="ko"
+              mainId={mainIds.ko}
+            />
+            <div className="my-4 flex justify-end">
+              <Button onClick={() => handleSaveWork("ko")}>저장</Button>
+            </div>
             <EtcContentForm data={etc} />
           </TabPanel>
 
@@ -229,7 +288,15 @@ export default function MainPage() {
             <div className="my-4 flex justify-end">
               <Button onClick={() => handleSaveLifestyle("en")}>저장</Button>
             </div>
-            <WorkForm data={work} />
+            <WorkForm
+              ref={workENRef}
+              data={work.en}
+              lang="en"
+              mainId={mainIds.en}
+            />
+            <div className="my-4 flex justify-end">
+              <Button onClick={() => handleSaveWork("en")}>저장</Button>
+            </div>
             <EtcContentForm data={etc} />
           </TabPanel>
         </Tabs>
