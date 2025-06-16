@@ -19,6 +19,7 @@ export default function UserDetailPage() {
     username: "",
     phone: "",
     email: "",
+    isReservation: "N",
   });
 
   useEffect(() => {
@@ -38,6 +39,7 @@ export default function UserDetailPage() {
               ? data.phoneNumber.split("-").slice(1).join("-")
               : data.phoneNumber || "",
             email: data.email || "",
+            isReservation: data.isReservation === "Y" ? "Y" : "N",
           });
         }
       } catch (err) {
@@ -110,14 +112,14 @@ export default function UserDetailPage() {
         gender:
           form.gender === "male" ? "M" : form.gender === "female" ? "W" : "",
         isUse: form.status === "active" ? "Y" : "N",
-        isManager: "Y",
-        isReservation: "Y",
+        isManager: "N",
+        isReservation: form.isReservation,
       };
 
       const res = await api.post("/api/v1/user/member/update", payload);
       if (res.data.success) {
         alert("수정이 완료되었습니다.");
-        navigate("/user/list");
+        navigate("/user");
       } else {
         alert("수정 실패: " + res.data.message);
       }
@@ -224,6 +226,27 @@ export default function UserDetailPage() {
             value={form.email}
             onChange={(e) => handleChange("email", e.target.value)}
           />
+        </div>
+        <div>
+          <p className="mb-2 text-sm font-medium text-gray-800">
+            회의실 예약 기능
+          </p>
+          <div className="flex gap-4">
+            <Radio
+              name="isReservation"
+              label="가능"
+              value="Y"
+              checked={form.isReservation === "Y"}
+              onChange={() => handleChange("isReservation", "Y")}
+            />
+            <Radio
+              name="isReservation"
+              label="불가"
+              value="N"
+              checked={form.isReservation === "N"}
+              onChange={() => handleChange("isReservation", "N")}
+            />
+          </div>
         </div>
       </div>
       <div className="flex justify-end gap-3 px-6 pt-5 pb-6">
