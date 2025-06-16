@@ -83,7 +83,7 @@ export default function StoriesDetail() {
       const patchForm = (formRef, data, fallbackCategory = "") => {
         if (!formRef) return;
 
-        console.log(">>> patchForm 호출 시점:", formRef.current);
+        // console.log(">>> patchForm 호출 시점:", formRef.current);
 
         const patchImageMeta = (img) => {
           if (!img) return null;
@@ -124,11 +124,11 @@ export default function StoriesDetail() {
         }
 
         formRef.setValue("content", data.content || "");
-        formRef.setValue("content1", data.addContent || "");
+        formRef.setValue("addContent", data.addContent || "");
         formRef.setValue("description", data.description || "");
         formRef.setDescription?.(data.description || "");
         formRef.setContent?.(data.content || "");
-        formRef.setContent?.(data.addContent || "");
+        formRef.setContent2?.(data.addContent || "");
         formRef.setValue(
           "startDate",
           data.startDt ? parseLocalDateTime(data.startDt) : null
@@ -211,10 +211,10 @@ export default function StoriesDetail() {
           patternBottomPc: toImageMeta(data.patternBottomPc, original.patternBottomPc),
           patternBottomMo: toImageMeta(data.patternBottomMo, original.patternBottomMo),
 
-          showYn: data.status === "status" ? "Y" : "N",
+          showYn: data.showYn === "Y" ? "Y" : "N",
           sort: data.sort,
           content: data.content,
-          addContent: data.content1,
+          addContent: data.addContent,
           description: data.description || "",
           startDt: data.startDt || null,
           endDt: data.endDt || null,

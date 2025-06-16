@@ -399,6 +399,7 @@ const BrandRegistForm = forwardRef(({ lang, readOnly = false }, ref) => {
                 {...register(`openingHours.${day}.time`)}
                 width="w-[280px]"
                 disabled={readOnly}
+                placeholder="입력 예시: 10:30 ~ 22:00"
               />
               <Controller
                 name={`openingHours.${day}.holiday`}
