@@ -7,10 +7,10 @@ import FormTextarea from "@/components/form/FormTextarea";
 import Box from "@/components/layout/Box";
 import Row from "@/components/layout/Row";
 import Title from "@/components/layout/Title";
-import { useEffect, useId, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { forwardRef, useImperativeHandle, useId, useEffect } from "react";
 
-export default function WhatsOnForm({ data }) {
+const WhatsOnForm = forwardRef(({ data, mainId = null, lang = "KO" }, ref) => {
   const subtitleId = useId();
   const urlId = useId();
 
@@ -20,7 +20,7 @@ export default function WhatsOnForm({ data }) {
         subtitle: "",
         type: "image",
         url: "",
-        contents: [],
+        image: null,
       },
     },
   });
@@ -28,21 +28,53 @@ export default function WhatsOnForm({ data }) {
   const {
     register,
     resetField,
-    formState: { errors },
+    getValues,
     reset,
+    formState: { errors },
   } = methods;
 
   useEffect(() => {
-    reset({ whatson: data });
+    if (data) {
+      reset({
+        whatson: {
+          subtitle: data.subTitle || "",
+          type: data.contentType === "V" ? "video" : "image",
+          url: data.url || "",
+          image: data.file || null,
+        },
+      });
+    }
   }, [data, reset]);
 
-  const onSubmit = (data) => {
-    console.log(data);
-  };
+  useImperativeHandle(ref, () => ({
+    submit: async (onError) => {
+      const value = getValues("whatson");
+
+      if (!value.subtitle || !value.url || !value.image?.path) {
+        return onError?.("필수 값이 누락되었습니다.");
+      }
+
+      return {
+        currentUser: 1,
+        ...(mainId ? { mainId } : {}),
+        lang: lang.toUpperCase(),
+        mainWhat: {
+          currentUser: 1,
+          ...(mainId ? { mainId } : {}),
+          id: data?.id ?? null,
+          subTitle: value.subtitle,
+          contentType: value.type === "image" ? "I" : "V",
+          file: value.image,
+          url: value.url,
+          embeded: value.type === "video" ? value.embeded || "" : "",
+        },
+      };
+    },
+  }));
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-8 p-4">
+      <form className="space-y-8 p-4">
         <Box className="mb-2 rounded-md border-2 border-gray-200">
           <Title title={`■ What\`s On 영역`} />
           <Row className="pb-4">
@@ -89,11 +121,9 @@ export default function WhatsOnForm({ data }) {
             />
           </Row>
         </Box>
-
-        <Row className="justify-end">
-          <Button type="submit">저장</Button>
-        </Row>
       </form>
     </FormProvider>
   );
-}
+});
+
+export default WhatsOnForm;
