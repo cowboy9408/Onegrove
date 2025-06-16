@@ -31,7 +31,10 @@ export default function MainPage() {
   const workKRRef = useRef();
   const workENRef = useRef();
 
-  const [etc, setEtc] = useState([]);
+  const [etc, setEtc] = useState({ ko: {}, en: {} });
+  const etcKRRef = useRef();
+  const etcENRef = useRef();
+
   const methods = useForm({
     defaultValues: {
       sets: [
@@ -96,6 +99,34 @@ export default function MainPage() {
             isDeleted: item.delYn === "Y",
           })),
         },
+      }));
+
+      setEtc((prev) => ({
+        ...prev,
+        [lang]: [
+          {
+            id: data.linkedContentRes?.id ?? null,
+            title: data.linkedContentRes?.title ?? "",
+            subtitle: data.linkedContentRes?.subTitle ?? "",
+            detail: data.linkedContentRes?.content ?? "",
+            button: data.linkedContentRes?.btnName ?? "",
+            imagePC: data.linkedContentRes?.pcImg ?? null,
+            imageMO: data.linkedContentRes?.moImg ?? null,
+            contents: data.linkedContentRes?.contentId
+              ? [
+                  {
+                    _id: data.linkedContentRes.contentId,
+                    categoryCode: data.linkedContentRes.contentCategoryCode,
+                    title: data.linkedContentRes.contentTitle,
+                  },
+                ]
+              : [],
+            //
+            contentId: data.linkedContentRes?.contentId,
+            contentCategoryCode: data.linkedContentRes?.contentCategoryCode,
+            contentTitle: data.linkedContentRes?.contentTitle,
+          },
+        ],
       }));
 
       if (!data || !Array.isArray(data.keyVisualList)) {
@@ -206,6 +237,28 @@ export default function MainPage() {
     }
   };
 
+  const handleSaveEtcContent = async (lang) => {
+    const ref = lang === "ko" ? etcKRRef : etcENRef;
+    const payload = await ref.current?.submit((msg) => alert(msg));
+    if (!payload) return;
+
+    try {
+      const res = await api.post(
+        "/api/v1/main/insert/mainLinkedContent",
+        payload
+      );
+      if (res.data?.success) {
+        alert(`${lang.toUpperCase()} 연계 콘텐츠 저장 완료`);
+        await fetchMainData(lang); // 필요 시 최신 데이터 반영
+      } else {
+        alert("저장 실패: " + res.data?.message);
+      }
+    } catch (e) {
+      alert("저장 중 오류 발생");
+      console.error(e);
+    }
+  };
+
   return (
     <FormProvider {...methods}>
       <Section>
@@ -255,7 +308,15 @@ export default function MainPage() {
             <div className="my-4 flex justify-end">
               <Button onClick={() => handleSaveWork("ko")}>저장</Button>
             </div>
-            <EtcContentForm data={etc} />
+            <EtcContentForm
+              ref={etcKRRef}
+              data={etc.ko}
+              lang="ko"
+              mainId={mainIds.ko}
+            />
+            <div className="my-4 flex justify-end">
+              <Button onClick={() => handleSaveEtcContent("ko")}>저장</Button>
+            </div>
           </TabPanel>
 
           <TabPanel>
@@ -297,7 +358,15 @@ export default function MainPage() {
             <div className="my-4 flex justify-end">
               <Button onClick={() => handleSaveWork("en")}>저장</Button>
             </div>
-            <EtcContentForm data={etc} />
+            <EtcContentForm
+              ref={etcENRef}
+              data={etc.en}
+              lang="en"
+              mainId={mainIds.en}
+            />
+            <div className="my-4 flex justify-end">
+              <Button onClick={() => handleSaveEtcContent("en")}>저장</Button>
+            </div>
           </TabPanel>
         </Tabs>
       </Section>
