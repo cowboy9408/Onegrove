@@ -6,7 +6,7 @@ import WhatsOnForm from "./components/WhatsOnForm";
 import LifestyleForm from "./components/LifestyleForm";
 import WorkForm from "./components/WorkForm";
 import EtcContentForm from "./components/EtcContentForm";
-import WhatsonContent from "./components/WhatsonContent";
+import WhatContent from "./components/WhatsonContent";
 import { useForm, FormProvider } from "react-hook-form";
 import api from "@/lib/apiClient";
 import Button from "@/components/common/Button";
@@ -22,6 +22,11 @@ export default function MainPage() {
   const [whatsOn, setWhatsOn] = useState({ ko: {}, en: {} });
   const whatsOnKRRef = useRef();
   const whatsOnENRef = useRef();
+
+  const [whatContent, setWhatContent] = useState({ ko: [], en: [] });
+
+  const whatContentKRRef = useRef();
+  const whatContentENRef = useRef();
 
   const [lifestyle, setLifestyle] = useState({ ko: {}, en: {} });
   const lifestyleKRRef = useRef();
@@ -42,6 +47,10 @@ export default function MainPage() {
           content1: { ids: [], selectedTitles: "", uploadFile: null },
           content2: { ids: [], selectedTitles: "", uploadFile: null },
         },
+      ],
+      contents: [
+        { ids: [], selectedTitles: "", uploadFile: null }, // 1번
+        { ids: [], selectedTitles: "", uploadFile: null }, // 2번
       ],
     },
   });
@@ -75,6 +84,41 @@ export default function MainPage() {
       setWhatsOn((prev) => ({
         ...prev,
         [lang]: data.whatRes || {},
+      }));
+
+      setWhatContent((prev) => ({
+        ...prev,
+        [lang]: (data.whatContentList || []).map((item, i) => ({
+          id: item.id ?? null,
+          contents: item.contentId
+            ? [
+                {
+                  _id: item.contentId,
+                  categoryCode: item.contentCategoryCode,
+                  title: item.contentTitle ?? "",
+                },
+              ]
+            : [],
+          // 아래 세 값도 항상 props로 넘겨줘야 Form에서 기본 값 표시됨
+          contentId: item.contentId ?? null,
+          contentCategoryCode: item.contentCategoryCode ?? "",
+          contentTitle: item.contentTitle ?? "",
+          selectedTitles: item.contentTitle ?? "",
+          uploadFile: item.file?.path
+            ? {
+                id: item.file?.id ?? null,
+                originalName: item.file?.originalName ?? "",
+                name: item.file?.name ?? "",
+                path: item.file?.path ?? "",
+                size: item.file?.size ?? 0,
+                extension: item.file?.extension ?? "",
+                mime: item.file?.mime ?? "",
+                classification: item.file?.classification ?? null,
+                status: item.file?.status ?? "R",
+              }
+            : null,
+          sort: item.sort ?? i + 1,
+        })),
       }));
 
       setLifestyle((prev) => ({
@@ -195,6 +239,28 @@ export default function MainPage() {
     }
   };
 
+  const handleSaveWhatContent = async (lang) => {
+    const ref = lang === "ko" ? whatContentKRRef : whatContentENRef;
+    const payload = await ref.current?.submit((msg) => alert(msg));
+    if (!payload) return;
+
+    try {
+      const res = await api.post(
+        "/api/v1/main/insert/mainWhatContent",
+        payload
+      );
+      if (res.data?.success) {
+        alert(`${lang.toUpperCase()} 콘텐츠 저장 완료`);
+        await fetchMainData(lang);
+      } else {
+        alert("저장 실패: " + res.data?.message);
+      }
+    } catch (e) {
+      alert("저장 중 오류 발생");
+      console.error(e);
+    }
+  };
+
   const handleSaveLifestyle = async (lang) => {
     const ref = lang === "ko" ? lifestyleKRRef : lifestyleENRef;
     const payload = await ref.current?.submit((msg) => alert(msg));
@@ -289,7 +355,15 @@ export default function MainPage() {
               <Button onClick={() => handleSaveWhatsOn("ko")}>저장</Button>
             </div>
 
-            <WhatsonContent />
+            <WhatContent
+              ref={whatContentKRRef}
+              data={whatContent.ko}
+              lang="ko"
+              mainId={mainIds.ko}
+            />
+            <div className="my-4 flex justify-end">
+              <Button onClick={() => handleSaveWhatContent("ko")}>저장</Button>
+            </div>
             <LifestyleForm
               ref={lifestyleKRRef}
               data={lifestyle.ko}
@@ -339,7 +413,15 @@ export default function MainPage() {
             <div className="my-4 flex justify-end">
               <Button onClick={() => handleSaveWhatsOn("en")}>저장</Button>
             </div>
-            <WhatsonContent />
+            <WhatContent
+              ref={whatContentENRef}
+              data={whatContent.en}
+              lang="en"
+              mainId={mainIds.en}
+            />
+            <div className="my-4 flex justify-end">
+              <Button onClick={() => handleSaveWhatContent("en")}>저장</Button>
+            </div>
             <LifestyleForm
               ref={lifestyleENRef}
               data={lifestyle.en}
