@@ -37,7 +37,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
   const [startTime, setStartTime] = useState("00:00");
   const [endDate, setEndDate] = useState(null);
   const [endTime, setEndTime] = useState("00:00");
-  const [isAddContent, setIsAddContent] = useState(false);
+  const [isAddContent, setIsAddContent] = useState(true);
 
 
 

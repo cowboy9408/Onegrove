@@ -50,27 +50,27 @@ export default function Meeting({
           ))}
         </Select>
         <Button
-  onClick={() => {
-    showModal({
-      title: "회의실 에약하기",
-      size: "lg",
-      confirmButton: "저장",
-      customButton: true,
-      showCancel: true,
-      children: ({ closeModal }) => (
-        <ReservationForm
-          room={selectedRoom}
-          onSubmit={(newEvent) => {
-            onConfirm?.(newEvent); // 외부 처리기 전달
-            closeModal();
+          onClick={() => {
+            showModal({
+              title: "회의실 에약하기",
+              size: "lg",
+              confirmButton: "저장",
+              customButton: true,
+              showCancel: true,
+              children: ({ closeModal }) => (
+                <ReservationForm
+                  room={selectedRoom}
+                  onSubmit={(newEvent) => {
+                    onConfirm?.(newEvent); // 외부 처리기 전달
+                    closeModal();
+                  }}
+                />
+              ),
+            });
           }}
-        />
-      ),
-    });
-  }}
->
-  예약하기
-</Button>
+        >
+          예약하기
+        </Button>
       </div>
 
       <div className="overflow-hidden bg-white p-4 rounded-xl shadow-md space-y-4">
