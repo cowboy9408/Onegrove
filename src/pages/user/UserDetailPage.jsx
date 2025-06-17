@@ -21,6 +21,22 @@ export default function UserDetailPage() {
     email: "",
     isReservation: "N",
   });
+  const [companyOptions, setCompanyOptions] = useState([]);
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const res = await api.get("/api/v1/user/company");
+        if (res.data?.success) {
+          setCompanyOptions(res.data.data);
+        }
+      } catch (err) {
+        console.error("입주사 목록 로딩 실패:", err);
+      }
+    };
+
+    fetchCompanies();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,6 +49,7 @@ export default function UserDetailPage() {
             role: data.role,
             status: data.isUse === "Y" ? "active" : "inactive",
             name: data.name || "",
+            company: data.companyId ?? "",
             gender: mapGender(data.gender),
             username: data.username || "",
             phone: data.phoneNumber?.startsWith("010-")
@@ -103,7 +120,7 @@ export default function UserDetailPage() {
     try {
       const payload = {
         id: Number(id),
-        companyId: 4,
+        companyId: form.company,
         role: form.role,
         name: form.name,
         phoneNumber: formatPhoneNumber(form.phone),
@@ -137,13 +154,15 @@ export default function UserDetailPage() {
             <Select
               label="입주사"
               value={form.company}
-              onChange={(e) => handleChange("company", e.target.value)}
+              onChange={(e) => handleChange("company", Number(e.target.value))}
               className="w-[735px]"
             >
               <option value="">선택하세요</option>
-              <option value="LG">입주사1</option>
-              <option value="삼성">입주사2</option>
-              <option value="카카오">입주사3</option>
+              {companyOptions.map((item) => (
+                <option key={item.companyId} value={item.companyId}>
+                  {item.companyName}
+                </option>
+              ))}
             </Select>
           </div>
 
