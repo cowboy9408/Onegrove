@@ -77,7 +77,6 @@ const KeyVisualForm = forwardRef(({ data }, ref) => {
       // 필수 입력 체크
       console.log("Form Values:", values);
 
-      
       const hasEmpty = values.kv.some((item) => {
         return !item.title || !item.subtitle || !item.file1;
       });
@@ -188,21 +187,25 @@ const KeyVisualForm = forwardRef(({ data }, ref) => {
                 </Row>
 
                 <Row className="flex justify-center gap-2">
-                  {fields.length === index + 1 && fields.length < MAX_KV_LENGTH && (
-                    <Button
-                      type="button"
-                      onClick={() =>
-                        append({ type: "image", title: "", subtitle: "" })
-                      }
-                    >
-                      추가
-                    </Button>
-                  )}
+                  {fields.length === index + 1 &&
+                    fields.length < MAX_KV_LENGTH && (
+                      <Button
+                        type="button"
+                        onClick={() =>
+                          append({ type: "image", title: "", subtitle: "" })
+                        }
+                      >
+                        추가
+                      </Button>
+                    )}
                   {index > 0 && (
                     <Button
                       type="button"
                       color="red"
-                      onClick={() => remove(index)}
+                      onClick={() => {
+                        methods.setValue(`kv.${index}.file1.status`, "D");
+                        methods.setValue(`kv.${index}.file2.status`, "D");
+                      }}
                     >
                       삭제
                     </Button>
