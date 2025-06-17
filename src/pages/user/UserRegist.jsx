@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import Radio from "@/components/common/Radio";
@@ -19,6 +19,28 @@ export default function AdminRegist() {
     isReservation: "N",
   });
   const navigate = useNavigate();
+  const [companyOptions, setCompanyOptions] = useState([]);
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const res = await api.get("/api/v1/user/company");
+        if (res.data?.success) {
+          const seen = new Set();
+          const unique = res.data.data.filter((item) => {
+            if (seen.has(item.companyId)) return false;
+            seen.add(item.companyId);
+            return true;
+          });
+          setCompanyOptions(unique);
+        }
+      } catch (error) {
+        console.error("입주사 목록 불러오기 실패:", error);
+      }
+    };
+
+    fetchCompanies();
+  }, []);
 
   // const getRoleValue = (role) => {
   //   switch (role) {
@@ -54,7 +76,7 @@ export default function AdminRegist() {
         form.gender === "male" ? "M" : form.gender === "female" ? "W" : null,
 
       role: "MEMBER", // 고정
-      companyId: 5,
+      companyId: form.company,
       isAdmin: "N", // 고정
       isUse: form.status === "active" ? "Y" : "N",
       isManager: "N", // 고정
@@ -63,6 +85,7 @@ export default function AdminRegist() {
 
     try {
       await api.post("/api/v1/user/member/insert", payload);
+
       alert("등록이 완료되었습니다.");
       navigate("/user");
     } catch (error) {
@@ -79,14 +102,16 @@ export default function AdminRegist() {
           <Select
             label="입주사"
             value={form.company}
-            onChange={(e) => handleChange("company", e.target.value)}
+            onChange={(e) => handleChange("company", Number(e.target.value))}
             className="w-[735px]"
             required
           >
             <option value="">선택하세요</option>
-            <option value="LG">입주사1</option>
-            <option value="삼성">입주사2</option>
-            <option value="카카오">입주사3</option>
+            {companyOptions.map((item) => (
+              <option key={item.companyId} value={item.companyId}>
+                {item.companyName}
+              </option>
+            ))}
           </Select>
         </div>
 

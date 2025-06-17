@@ -82,7 +82,7 @@ const WhatsOnForm = forwardRef(({ data, mainId = null, lang = "KO" }, ref) => {
     <FormProvider {...methods}>
       <form className="space-y-8 p-4">
         <Box className="mb-2 rounded-md border-2 border-gray-200">
-          <Title title={`■ What\`s On 영역`} />
+          <Title title={`■ What's On 영역`} />
           <Row className="pb-4">
             <FormTextarea
               id={subtitleId}
