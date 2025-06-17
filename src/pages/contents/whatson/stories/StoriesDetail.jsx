@@ -168,7 +168,7 @@ export default function StoriesDetail() {
     if (base.path) {
       path = base.path;
     } else if (originalName) {
-      path = `https://assets.onegrove.kr/dev/stories/${originalName}`;
+      path = `https://assets.onegrove.kr/dev/StoriesImg/${originalName}`;
     }
 
     return {
@@ -221,6 +221,12 @@ export default function StoriesDetail() {
           delYn: "N",
           storiesImgList: data.storiesImgList || []
         };
+
+        if( currentLang === 0 && koData?.contentId ) {
+          payload.contentId = koData?.contentId;
+        } else if ( currentLang === 1 && enData?.contentId ) {
+          payload.contentId = enData?.contentId;
+        }
 
         console.log("저장 payload:", payload, data);
 
