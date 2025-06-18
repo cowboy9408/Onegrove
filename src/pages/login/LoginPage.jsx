@@ -21,17 +21,27 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    const res = await getUserInfo(username, password);
-    console.log("로그인 응답 확인:", res);
+    try {
+      const res = await getUserInfo(username, password);
+      console.log("로그인 응답 확인:", res);
 
-    setAccessToken(res.accessToken);
-    setRefreshToken(res.refreshToken);
-    setName(res.name);
+      setAccessToken(res.accessToken);
+      setRefreshToken(res.refreshToken);
+      setName(res.name);
 
-    localStorage.setItem("accessToken", res.accessToken);
-    localStorage.setItem("refreshToken", res.refreshToken);
+      localStorage.setItem("accessToken", res.accessToken);
+      localStorage.setItem("refreshToken", res.refreshToken);
 
-    navigate("/");
+      navigate("/");
+    } catch (err) {
+      console.error("로그인 실패", err);
+
+      showModal({
+        title: "로그인 실패",
+        message: err?.response?.data?.message,
+        showCancel: true,
+      });
+    }
   };
 
   useEffect(() => {

@@ -132,7 +132,7 @@ export function ModalProvider({ children }) {
               <div className="mb-6 text-sm text-gray-600 dark:text-gray-300">
                 {customContentRef
                   ? customContentRef({ closeModal: closeModal })
-                  : customContent || <p>{message}</p>}
+                  : customContent || <p className="whitespace-pre-line">{message}</p>}
               </div>
 
               {!customButton && (
