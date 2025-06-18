@@ -289,6 +289,7 @@ const EventRegistForm = forwardRef(
           content,
           description,
           brands,
+          sort: values.sort,
         });
 
         if (
