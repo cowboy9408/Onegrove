@@ -103,7 +103,7 @@ export default function BrandList({ selected = [], onConfirm, closeModal }) {
                 onChange={(e) => setKeyword(e.target.value)}
               />
             </Col>
-            <Col className="self-end">
+            <Col className="flex self-end gap-2">
               <Button className="h-12 w-full" onClick={handleSearch}>
                 검색
               </Button>

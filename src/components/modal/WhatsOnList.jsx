@@ -74,7 +74,7 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
             <Col>
               <Input label="타이틀" topLabel={false} />
             </Col>
-            <Col className="self-end">
+            <Col className="flex self-end gap-2">
               <Button className={"h-12 w-full"}>검색</Button>
             </Col>
           </Row>

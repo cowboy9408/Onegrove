@@ -120,7 +120,7 @@ export default function BrandIntroForm({ data, setData }) {
                 {...register("brandIntro.relatedBrands")}
               />
             </Col>
-            <Col className="self-end">
+            <Col className="flex self-end gap-2">
             <Button
   className="h-12 w-full"
   onClick={() =>
