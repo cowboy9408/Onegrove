@@ -196,9 +196,9 @@ export default function StoriesListPage() {
               </div>
             </Col>
 
-            <Col className="flex self-end justify-center">
+            <Col className="flex self-end gap-2 justify-center">
               <Button
-                className="self-end"
+                className="flex self-end gap-2"
                 onClick={() => {
                   setPage(1);
                   setSearchParams({ name, category, visibility, page: 1 });

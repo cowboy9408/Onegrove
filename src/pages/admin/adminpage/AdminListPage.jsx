@@ -200,7 +200,7 @@ export default function AdminListPage() {
                 }
               />
             </Col>
-            <Col className="self-end">
+            <Col className="flex self-end gap-2">
               <Button
                 onClick={() => {
                   setPage(1);

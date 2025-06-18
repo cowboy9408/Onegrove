@@ -646,7 +646,7 @@ const EventRegistForm = forwardRef(
                 }
               />
             </Col>
-            <Col className="self-end">
+            <Col className="flex self-end gap-2">
               <Button
                 onClick={() =>
                   showModal({
