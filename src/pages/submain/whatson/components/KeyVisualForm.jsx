@@ -1,4 +1,10 @@
-import Button from "@/components/common/Button";
+import { useEffect, forwardRef, useImperativeHandle } from "react";
+import {
+  useForm,
+  FormProvider,
+  Controller,
+  useFieldArray,
+} from "react-hook-form";
 import Upload from "@/components/common/Upload";
 import FieldGroup from "@/components/form/FieldGroup";
 import FormInput from "@/components/form/FormInput";
@@ -6,42 +12,108 @@ import FormRadioGroup from "@/components/form/FormRadioGroup";
 import Box from "@/components/layout/Box";
 import Row from "@/components/layout/Row";
 import Title from "@/components/layout/Title";
-import { useEffect } from "react";
-import { FormProvider, useForm, Controller } from "react-hook-form";
+import Button from "@/components/common/Button";
 
 const MAX_KV_LENGTH = 4;
 
-export default function KeyVisualForm({ data, setData }) {
-  const methods = useForm({
-    defaultValues: {
-      kv: [
-        { type: "image", title: "", subtitle: "", file1: null, file2: null },
-      ],
-    },
-  });
+const KeyVisualForm = forwardRef(
+  ({ data = [], lang = "KO", mainId = null }, ref) => {
+    const methods = useForm({
+      defaultValues: { kv: data && Array.isArray(data) ? data : [] },
+    });
+    const { control, register, reset, resetField, getValues } = methods;
+    const watch = methods.watch;
+    const { fields, append, remove } = useFieldArray({
+      control,
+      name: "kv",
+    });
 
-  const { handleSubmit, reset, resetField, register } = methods;
+    useEffect(() => {
+      reset({
+        kv:
+          Array.isArray(data) && data.length > 0
+            ? data
+            : [
+                {
+                  type: "image",
+                  title: "",
+                  subtitle: "",
+                  file1: null,
+                  file2: null,
+                },
+              ],
+      });
+    }, [data]);
 
-  useEffect(() => {
-    if (Array.isArray(data) && data.length > 0) {
-      reset({ kv: data });
-    }
-  }, []); // 의존성 줄이기
+    useImperativeHandle(ref, () => ({
+      submit: async (onError) => {
+        const inputList = getValues("kv") || [];
+        const originalList = data || [];
 
-  const onSubmit = (formValues) => {
-    setData(formValues.kv);
-  };
+        const prepareFile = (file, fallback) => {
+          if (!file || !file.path) return {};
 
-  return (
-    <FormProvider {...methods}>
-      {/*폼을 제출하면 상위에 전달 */}
-      <form onBlur={handleSubmit(onSubmit)} className="space-y-8 p-4">
-        <FieldGroup name="kv">
-          {({ fields, field, index, append, remove }) => {
-            const idTitle = `title-${field.id}`;
-            const idSubtitle = `subtitle-${field.id}`;
+          return {
+            path: file.path,
+            originalName: file.originalName ?? fallback?.originalName ?? "",
+            name: file.name ?? fallback?.name ?? "",
+            extension: file.extension ?? fallback?.extension ?? "",
+            mime: file.mime ?? fallback?.mime ?? "",
+            classification:
+              file.classification ?? fallback?.classification ?? "lifestyle",
+            size: file.size ?? fallback?.size ?? 0,
+            status:
+              file.status ??
+              (fallback
+                ? file.path !== fallback.path
+                  ? "E" // 변경됨
+                  : "R" // 유지됨
+                : "C"), // 새로 추가
+          };
+        };
 
-            return (
+        const validList = inputList.map((item, index) => {
+          const origin = originalList.find((o) => o.id === item.id) ?? {};
+
+          const result = {
+            id: item.id ?? null,
+            contentType: item.type === "image" ? "I" : "V",
+            title: item.title,
+            subTitle: item.subtitle,
+            sort: index + 1,
+            delYn: "N",
+            contentFilePc: prepareFile(item.file1, origin.contentFilePc),
+            contentFileMo: prepareFile(item.file2, origin.contentFileMo),
+          };
+
+          return result;
+        });
+
+        const currentIds = validList.map((v) => v.id).filter(Boolean);
+        const deletedIds = (originalList || [])
+          .map((d) => d.id)
+          .filter((id) => !currentIds.includes(id));
+
+        return {
+          id: mainId ?? 0,
+          lang: lang.toLowerCase(),
+          delYn: "N",
+          keyVisual: [
+            ...validList,
+            ...deletedIds.map((id) => ({
+              id,
+              delYn: "Y",
+            })),
+          ],
+        };
+      },
+    }));
+
+    return (
+      <FormProvider {...methods}>
+        <form className="space-y-8 p-4">
+          <FieldGroup name="kv">
+            {({ fields, field, index, append, remove }) => (
               <Box
                 key={field.id}
                 className="mb-2 rounded-md border-2 border-gray-200"
@@ -63,38 +135,57 @@ export default function KeyVisualForm({ data, setData }) {
                 <Row className="pb-4">
                   <Controller
                     name={`kv.${index}.file1`}
-                    control={methods.control}
-                    render={({ field }) => (
-                      <Upload
-                        {...field}
-                        label="PC 이미지"
-                        acceptWith={`kv.${index}.type`}
-                      />
-                    )}
+                    control={control}
+                    render={({ field }) => {
+                      const type = watch(`kv.${index}.type`); // 'image' or 'video'
+                      const isVideo = type === "video";
+                      return (
+                        <Upload
+                          {...field}
+                          name={`kv.${index}.file1`}
+                          value={field.value}
+                          onChange={(val) => field.onChange(val)}
+                          label={isVideo ? "PC 영상" : "PC 이미지"}
+                          accept={isVideo ? "video/*" : "image/*"}
+                          required
+                          classification="lifestyle"
+                        />
+                      );
+                    }}
                   />
                 </Row>
+
                 <Row className="pb-4">
                   <Controller
                     name={`kv.${index}.file2`}
-                    control={methods.control}
-                    render={({ field }) => (
-                      <Upload
-                        {...field}
-                        label="MO 이미지"
-                        acceptWith={`kv.${index}.type`}
-                      />
-                    )}
+                    control={control}
+                    render={({ field }) => {
+                      const type = watch(`kv.${index}.type`);
+                      const isVideo = type === "video";
+                      return (
+                        <Upload
+                          {...field}
+                          name={`kv.${index}.file2`}
+                          value={field.value}
+                          onChange={(val) => field.onChange(val)}
+                          label={isVideo ? "MO 영상" : "MO 이미지"}
+                          accept={isVideo ? "video/*" : "image/*"}
+                          required
+                          classification="lifestyle"
+                        />
+                      );
+                    }}
                   />
                 </Row>
 
                 <Row className="pb-4">
                   <FormInput
-                    id={idTitle}
                     label="타이틀"
                     fieldName={`kv.${index}.title`}
                     maxLength={50}
+                    showDefaultInfo
                     required
-                    placeholder="타이틀을 입력해주세요"
+                    placeholder="타이틀 입력"
                     {...register(`kv.${index}.title`)}
                     onClear={() => resetField(`kv.${index}.title`)}
                   />
@@ -102,28 +193,29 @@ export default function KeyVisualForm({ data, setData }) {
 
                 <Row className="pb-4">
                   <FormInput
-                    id={idSubtitle}
                     label="서브타이틀"
                     fieldName={`kv.${index}.subtitle`}
                     maxLength={100}
+                    showDefaultInfo
                     required
-                    placeholder="서브타이틀을 입력해주세요."
+                    placeholder="서브타이틀 입력"
                     {...register(`kv.${index}.subtitle`)}
                     onClear={() => resetField(`kv.${index}.subtitle`)}
                   />
                 </Row>
 
                 <Row className="flex justify-center gap-2">
-                  {fields.length === index + 1 && fields.length < 4 && (
-                    <Button
-                      type="button"
-                      onClick={() =>
-                        append({ type: "image", title: "", subtitle: "" })
-                      }
-                    >
-                      추가
-                    </Button>
-                  )}
+                  {fields.length < MAX_KV_LENGTH &&
+                    index === fields.length - 1 && (
+                      <Button
+                        type="button"
+                        onClick={() =>
+                          append({ type: "image", title: "", subtitle: "" })
+                        }
+                      >
+                        추가
+                      </Button>
+                    )}
                   {index > 0 && (
                     <Button
                       type="button"
@@ -135,10 +227,12 @@ export default function KeyVisualForm({ data, setData }) {
                   )}
                 </Row>
               </Box>
-            );
-          }}
-        </FieldGroup>
-      </form>
-    </FormProvider>
-  );
-}
+            )}
+          </FieldGroup>
+        </form>
+      </FormProvider>
+    );
+  }
+);
+
+export default KeyVisualForm;

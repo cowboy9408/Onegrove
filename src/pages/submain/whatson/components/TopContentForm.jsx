@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm, Controller } from "react-hook-form";
 import Button from "@/components/common/Button";
 import Upload from "@/components/common/Upload";
@@ -7,6 +7,7 @@ import FieldGroup from "@/components/form/FieldGroup";
 import Box from "@/components/layout/Box";
 import Row from "@/components/layout/Row";
 import Title from "@/components/layout/Title";
+import api from "@/lib/apiClient";
 
 const MAX_ETC_LENGTH = 5;
 const defaultItem = {
@@ -24,9 +25,9 @@ export default function TopContentForm({ data, setData }) {
   const {
     formState: { errors },
     reset,
-    handleSubmit,
     setValue,
   } = methods;
+  const [storiesList, setStoriesList] = useState([]);
 
   useEffect(() => {
     if (Array.isArray(data) && data.length > 0) {
@@ -34,13 +35,26 @@ export default function TopContentForm({ data, setData }) {
     }
   }, [data]);
 
-  const onSubmit = (formValues) => {
-    setData(formValues.etc);
-  };
+  useEffect(() => {
+    const fetchStories = async () => {
+      try {
+        const res = await api.get(
+          "/api/v1/event-promotion/stories-list?lang=ko"
+        );
+        if (res.data.success) {
+          setStoriesList(res.data.data);
+        }
+      } catch (error) {
+        console.error("콘텐츠 리스트 불러오기 실패:", error);
+      }
+    };
+
+    fetchStories();
+  }, []);
 
   return (
     <FormProvider {...methods}>
-      <form onBlur={handleSubmit(onSubmit)} className="space-y-8 p-4">
+      <form className="space-y-8 p-4">
         <FieldGroup name="etc">
           {({ fields, field, index, append, remove }) => (
             <Box
@@ -74,10 +88,12 @@ export default function TopContentForm({ data, setData }) {
                   }
                   required
                 >
-                  <option value="simple">도시에서 만나는 유일한 숲</option>
-                  <option value="complex">
-                    서울에서 가장 젊고 활력 넘치는 땅, 마곡
-                  </option>
+                  <option value="">선택해주세요</option>
+                  {storiesList.map((item) => (
+                    <option key={item.storiesId} value={item.storiesId}>
+                      {item.title}
+                    </option>
+                  ))}
                 </Select>
               </Row>
 

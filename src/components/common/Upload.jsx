@@ -91,18 +91,34 @@ export default function Upload({
       return;
     }
 
-    if (!selectedFile.type.startsWith("image/")) {
-      setLocalError("이미지 파일만 업로드할 수 있습니다.");
-      return;
-    }
+    // 파일 타입 확인
+    const isImage = selectedFile.type.startsWith("image/");
+    const isVideo = selectedFile.type.startsWith("video/");
 
-    const maxSize = 20 * 1024 * 1024; // 20MB
-    if (selectedFile.size > maxSize) {
+    // 용량 제한
+    const maxImageSize = 20 * 1024 * 1024; // 20MB
+    const maxVideoSize = 200 * 1024 * 1024; // 200MB
+
+    if (isImage && selectedFile.size > maxImageSize) {
       showModal({
         title: "업로드 오류",
         message: "20MB가 넘는 이미지는 등록할 수 없습니다.",
         showCancel: false,
       });
+      return;
+    }
+
+    if (isVideo && selectedFile.size > maxVideoSize) {
+      showModal({
+        title: "업로드 오류",
+        message: "200MB가 넘는 영상은 등록할 수 없습니다.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    if (!isImage && !isVideo) {
+      setLocalError("이미지 또는 영상 파일만 업로드할 수 있습니다.");
       return;
     }
 
