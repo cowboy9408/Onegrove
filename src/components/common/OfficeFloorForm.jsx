@@ -1,12 +1,31 @@
 import { useState, useEffect } from "react";
 import Button from "./Button"; // 기존 Button 컴포넌트 사용
 import { useFormContext } from "react-hook-form";
+import api from "@/lib/apiClient";
 
 export default function OfficeFloorForm({ value = [], readOnly = false }) {
   const { setValue, trigger } = useFormContext();
   const [items, setItems] = useState(
     value.length ? value : [{ office: "", floor: "" }]
   );
+  const [officeOptions, setOfficeOptions] = useState([]);
+
+  useEffect(() => {
+    const fetchOfficeOptions = async () => {
+      try {
+        const res = await api.get("/api/v1/company/office/list");
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          setOfficeOptions(res.data.data); // { code, value }
+        } else {
+          console.warn("오피스 데이터 형식 오류");
+        }
+      } catch (err) {
+        console.error("오피스 리스트 호출 실패:", err);
+      }
+    };
+
+    fetchOfficeOptions();
+  }, []);
 
   useEffect(() => {
     setItems(value.length ? [...value] : [{ office: "", floor: "" }]);
@@ -76,10 +95,11 @@ export default function OfficeFloorForm({ value = [], readOnly = false }) {
                 disabled={readOnly}
               >
                 <option value="">선택</option>
-                <option value="A">OFFICE A</option>
-                <option value="B">OFFICE B</option>
-                <option value="C">OFFICE C</option>
-                <option value="D">OFFICE D</option>
+                {officeOptions.map((opt) => (
+                  <option key={opt.code} value={opt.code}>
+                    {opt.value}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="min-w-[250px] flex-1">

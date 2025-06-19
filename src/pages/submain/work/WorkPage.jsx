@@ -1,82 +1,10 @@
 import Section from "@/components/layout/Section";
 import Tabs, { TabPanel } from "@/components/layout/Tabs";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import KeyVisualForm from "./components/KeyVisualForm";
-import WorkForm from "./components/WorkForm";
 import api from "@/lib/apiClient";
 import Button from "@/components/common/Button";
-
-function mapResponseToFormData(resData) {
-  const kv =
-    resData.keyVisual?.map((item) => ({
-      type: item.contentType === "V" ? "video" : "image",
-      file1: {
-        name: "",
-        url: item.contentFilePc?.url || "",
-        size: 0,
-      },
-      file2: {
-        name: "",
-        url: item.contentFilePc?.url || "",
-        size: 0,
-      },
-      title: item.title || "",
-      subtitle: item.subTitle || "",
-    })) || [];
-
-  const keyVisual =
-    kv.length > 0
-      ? kv
-      : [
-          {
-            type: "image",
-            file1: { name: "", url: "", size: 0 },
-            file2: { name: "", url: "", size: 0 },
-            title: "",
-            subtitle: "",
-          },
-        ];
-
-  const work =
-    resData.work?.map((item) => ({
-      type: item.type || "simple",
-      image: {
-        name: "",
-        url: item.imgPc?.url || "",
-        size: 0,
-      },
-    })) || [];
-
-  return { keyVisual, work };
-}
-
-function mapFormDataToRequest(formData, lang, id = null) {
-  return {
-    id: id ?? 1,
-    lang,
-    delYn: "N",
-
-    keyVisual: formData.keyVisual.map((item, index) => ({
-      id: null,
-      contentType: item.type === "video" ? "V" : "I",
-      contentFilePc: item.file?.url ? { url: item.file.url } : null,
-      contentFileMo: item.file?.url ? { url: item.file.url } : null,
-      title: item.title || "",
-      subTitle: item.subtitle || "",
-      sort: index + 1,
-      delYn: "N",
-    })),
-
-    topContents: formData.etc.map((item, index) => ({
-      id: null,
-      type: item.type,
-      imgPc: item.image?.url ? { url: item.image.url } : null,
-      imgMo: item.image?.url ? { url: item.image.url } : null,
-      sort: index + 1,
-      delYn: "N",
-    })),
-  };
-}
+import WorkForm from "./components/WorkForm";
 
 export default function WorkPage() {
   const emptyData = {
@@ -84,42 +12,54 @@ export default function WorkPage() {
     etc: [],
   };
 
-  const [krData, setKrData] = useState(emptyData);
-  const [enData, setEnData] = useState(emptyData);
+  const keyVisualKRRef = useRef();
+  const keyVisualENRef = useRef();
+
+  const [keyVisuals, setKeyVisuals] = useState({
+    ko: [],
+    en: [],
+  });
+
+  const [ids, setIds] = useState({
+    ko: null,
+    en: null,
+  });
+
   const [currentLang, setCurrentLang] = useState(0);
-  const [krId, setKrId] = useState(null);
-  const [enId, setEnId] = useState(null);
 
   useEffect(() => {
+    const langCode = currentLang === 0 ? "KO" : "EN";
+    const langKey = langCode.toLowerCase();
+
     const fetchData = async () => {
-      const lang = currentLang === 0 ? "ko" : "en";
-
       try {
-        const res = await api.get(
-          "/api/v1/event-promotion/contents",
-          {
-            params: { lang },
-          },
-          {
-            withCredentials: true,
-          }
-        );
+        const res = await api.get(`/api/v1/work/${langCode}`, {
+          withCredentials: true,
+        });
 
-        const mapped = mapResponseToFormData(res.data.data);
+        const item = res.data;
 
-        if (lang === "ko") {
-          setKrId(res.data.data.id);
-          setKrData(mapped);
-        } else {
-          setEnId(res.data.data.id);
-          setEnData(mapped);
-        }
-      } catch {
-        if (lang === "ko") {
-          setKrData(emptyData);
-        } else {
-          setEnData(emptyData);
-        }
+        const mergedKV = item?.keyVisualList?.map((v) => ({
+          id: v.id,
+          type: v.type === "V" ? "video" : "image",
+          title: v.title ?? "",
+          subtitle: v.subTitle ?? "",
+          file1: v.pcImg ? { ...v.pcImg, status: "R" } : null, // status를 명시
+          file2: v.moImg ? { ...v.moImg, status: "R" } : null,
+        }));
+
+        setKeyVisuals((prev) => {
+          if (JSON.stringify(prev[langKey]) === JSON.stringify(mergedKV))
+            return prev;
+          return { ...prev, [langKey]: mergedKV };
+        });
+
+        setIds((prev) => {
+          if (prev[langKey] === item?.id) return prev;
+          return { ...prev, [langKey]: item?.id ?? null };
+        });
+      } catch (err) {
+        console.error("조회 실패:", err);
       }
     };
 
@@ -127,16 +67,15 @@ export default function WorkPage() {
   }, [currentLang]);
 
   const handleSave = async () => {
+    const lang = currentLang === 0 ? "ko" : "en";
+    const ref = currentLang === 0 ? keyVisualKRRef : keyVisualENRef;
+
     try {
-      if (currentLang === 0) {
-        const krPayload = mapFormDataToRequest(krData, "ko", krId);
-        await api.post("/api/v1/event-promotion/contents/insert", krPayload);
-        alert("국문 저장 완료");
-      } else {
-        const enPayload = mapFormDataToRequest(enData, "en", enId);
-        await api.post("/api/v1/event-promotion/contents/insert", enPayload);
-        alert("영문 저장 완료");
-      }
+      const result = await ref.current.submit((err) => alert(err));
+      if (!result) return;
+
+      await api.post("/api/v1/work/update", result);
+      alert(lang === "ko" ? "국문 저장 완료" : "영문 저장 완료");
       window.location.reload();
     } catch (error) {
       console.error("저장 오류:", error);
@@ -156,32 +95,28 @@ export default function WorkPage() {
       >
         <TabPanel>
           <KeyVisualForm
-            data={krData.keyVisual || []}
+            ref={keyVisualKRRef}
+            lang="ko"
+            mainId={ids.ko}
+            data={keyVisuals.ko}
             setData={(newVal) =>
-              setKrData((prev) => ({ ...prev, keyVisual: newVal }))
+              setKeyVisuals((prev) => ({ ...prev, ko: newVal }))
             }
           />
-          <WorkForm
-            data={krData.work}
-            setData={(newVal) =>
-              setKrData((prev) => ({ ...prev, work: newVal }))
-            }
-          />
+          <WorkForm />
         </TabPanel>
 
         <TabPanel>
           <KeyVisualForm
-            data={krData.keyVisual || []}
+            ref={keyVisualENRef}
+            lang="en"
+            mainId={ids.en}
+            data={keyVisuals.en}
             setData={(newVal) =>
-              setEnData((prev) => ({ ...prev, keyVisual: newVal }))
+              setKeyVisuals((prev) => ({ ...prev, en: newVal }))
             }
           />
-          <WorkForm
-            data={enData.work}
-            setData={(newVal) =>
-              setEnData((prev) => ({ ...prev, work: newVal }))
-            }
-          />
+          <WorkForm />
         </TabPanel>
       </Tabs>
       <div className="mt-8 flex justify-end">
