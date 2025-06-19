@@ -103,7 +103,7 @@ export default function BrandList({ selected = [], onConfirm, closeModal }) {
                 onChange={(e) => setKeyword(e.target.value)}
               />
             </Col>
-            <Col className="flex self-end gap-2">
+            <Col className="flex gap-2 self-end">
               <Button className="h-12 w-full" onClick={handleSearch}>
                 검색
               </Button>
@@ -145,10 +145,10 @@ export default function BrandList({ selected = [], onConfirm, closeModal }) {
               checked.includes(item._id)
             );
 
-            if (selectedBrands.length > 1) {
+            if (selectedBrands.length > 20) {
               showModal({
                 title: "안내",
-                children: <p>브랜드는 1개만 선택 가능합니다.</p>,
+                children: <p>브랜드는 최대 20개 선택 가능합니다.</p>,
                 showCancel: false,
               });
               return;
