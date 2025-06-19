@@ -154,7 +154,7 @@ const LifestyleForm = forwardRef(
                   {...register(`lifestyle.brand`)}
                 />
               </Col>
-              <Col className="flex self-end gap-2">
+              <Col className="flex gap-2 self-end">
                 <Button
                   className="h-12 w-full"
                   onClick={() =>

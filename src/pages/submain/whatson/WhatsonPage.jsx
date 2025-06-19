@@ -20,6 +20,13 @@ export default function WhatsonPage() {
     en: [],
   });
 
+  const topContentKRRef = useRef();
+  const topContentENRef = useRef();
+  const [topContents, setTopContents] = useState({
+    ko: [],
+    en: [],
+  });
+
   const [ids, setIds] = useState({
     ko: null,
     en: null,
@@ -41,6 +48,7 @@ export default function WhatsonPage() {
 
         if (!item || item.lang !== lang) {
           setKeyVisuals((prev) => ({ ...prev, [lang]: [] }));
+          setTopContents((prev) => ({ ...prev, [lang]: [] }));
           setIds((prev) => ({ ...prev, [lang]: null }));
           return;
         }
@@ -54,7 +62,20 @@ export default function WhatsonPage() {
           subtitle: v.subTitle ?? "",
         }));
 
+        const transformedTopContents = (item.topContents || []).map((v) => ({
+          id: v.id,
+          type: v.storiesId ?? "",
+          image: v.imgPc
+            ? {
+                ...v.imgPc,
+                url: v.imgPc.path,
+                name: v.imgPc.originalName,
+              }
+            : { name: "", url: "", size: 0 },
+        }));
+
         setKeyVisuals((prev) => ({ ...prev, [lang]: mergedKV }));
+        setTopContents((prev) => ({ ...prev, [lang]: transformedTopContents }));
         setIds((prev) => ({ ...prev, [lang]: item.id || null }));
       } catch (err) {
         console.error("조회 실패:", err);
@@ -68,16 +89,46 @@ export default function WhatsonPage() {
 
   const handleSave = async () => {
     const lang = currentLang === 0 ? "ko" : "en";
-    const ref = currentLang === 0 ? keyVisualKRRef : keyVisualENRef;
+    const kvRef = currentLang === 0 ? keyVisualKRRef : keyVisualENRef;
+    const topRef = currentLang === 0 ? topContentKRRef : topContentENRef;
 
     try {
-      const result = await ref.current.submit((err) => alert(err));
-      if (!result) return;
+      const keyVisualResult = await kvRef.current.submit((err) => alert(err));
+      const topContentResult = await topRef.current.submit((err) => alert(err));
 
-      console.log("전송 데이터 확인:", result);
-      await api.post("/api/v1/event-promotion/contents/insert", result);
-      alert(lang === "ko" ? "국문 저장 완료" : "영문 저장 완료");
-      window.location.reload();
+      const eventId = ids[lang] ?? null;
+
+      const keyVisual = keyVisualResult.keyVisual.map((item) => ({
+        ...item,
+        eventId,
+      }));
+
+      const topContents = topContentResult.map((item) => ({
+        ...item,
+        eventId,
+      }));
+
+      if (!keyVisualResult || !topContentResult) return;
+
+      const payload = {
+        id: eventId,
+        lang,
+        delYn: "N",
+        keyVisual,
+        topContents,
+      };
+
+      const res = await api.post(
+        "/api/v1/event-promotion/contents/insert",
+        payload
+      );
+      console.log(payload);
+      if (res.data?.success) {
+        alert(lang === "ko" ? "국문 저장 완료" : "영문 저장 완료");
+        // window.location.reload();
+      } else {
+        alert("저장 실패: " + (res.data?.message || "알 수 없는 오류"));
+      }
     } catch (error) {
       console.error("저장 오류:", error);
       alert("저장 중 오류가 발생했습니다.");
@@ -104,7 +155,14 @@ export default function WhatsonPage() {
               setKeyVisuals((prev) => ({ ...prev, ko: newVal }))
             }
           />
-          <TopContentForm />
+          <TopContentForm
+            ref={topContentKRRef}
+            data={topContents.ko}
+            eventId={ids.ko}
+            setData={(newVal) =>
+              setTopContents((prev) => ({ ...prev, ko: newVal }))
+            }
+          />
         </TabPanel>
 
         <TabPanel>
@@ -117,7 +175,14 @@ export default function WhatsonPage() {
               setKeyVisuals((prev) => ({ ...prev, en: newVal }))
             }
           />
-          <TopContentForm />
+          <TopContentForm
+            ref={topContentENRef}
+            data={topContents.en}
+            eventId={ids.en}
+            setData={(newVal) =>
+              setTopContents((prev) => ({ ...prev, en: newVal }))
+            }
+          />
         </TabPanel>
       </Tabs>
       <div className="mt-8 flex justify-end">

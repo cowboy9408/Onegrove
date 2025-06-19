@@ -100,10 +100,19 @@ const KeyVisualForm = forwardRef(
           delYn: "N",
           keyVisual: [
             ...validList,
-            ...deletedIds.map((id) => ({
-              id,
-              delYn: "Y",
-            })),
+            ...deletedIds.map((id) => {
+              const origin = originalList.find((o) => o.id === id);
+              return {
+                id,
+                contentType: origin?.contentType ?? "I",
+                title: origin?.title ?? "",
+                subTitle: origin?.subTitle ?? "",
+                sort: origin?.sort ?? 0,
+                delYn: "Y",
+                contentFilePc: origin?.contentFilePc ?? {},
+                contentFileMo: origin?.contentFileMo ?? {},
+              };
+            }),
           ],
         };
       },
@@ -148,7 +157,7 @@ const KeyVisualForm = forwardRef(
                           label={isVideo ? "PC 영상" : "PC 이미지"}
                           accept={isVideo ? "video/*" : "image/*"}
                           required
-                          classification="lifestyle"
+                          classification="whatson"
                         />
                       );
                     }}
@@ -171,7 +180,7 @@ const KeyVisualForm = forwardRef(
                           label={isVideo ? "MO 영상" : "MO 이미지"}
                           accept={isVideo ? "video/*" : "image/*"}
                           required
-                          classification="lifestyle"
+                          classification="whatson"
                         />
                       );
                     }}
