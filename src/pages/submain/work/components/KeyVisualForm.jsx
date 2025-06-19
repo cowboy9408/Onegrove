@@ -22,11 +22,10 @@ const KeyVisualForm = forwardRef(
       defaultValues: { kv: data && Array.isArray(data) ? data : [] },
     });
     const { control, register, reset, resetField, getValues } = methods;
-    const watch = methods.watch;
+
     const { fields, append, remove } = useFieldArray({
       control,
       name: "kv",
-      keyName: "formId",
     });
 
     useEffect(() => {
@@ -44,86 +43,49 @@ const KeyVisualForm = forwardRef(
                 },
               ],
       });
-    }, [JSON.stringify(data)]);
+    }, [data]);
 
     useImperativeHandle(ref, () => ({
       submit: async (onError) => {
         const inputList = getValues("kv") || [];
-        const originalList = data || [];
+        const validList = inputList.filter(
+          (item) =>
+            item.title && item.subtitle && item.file1?.path && item.file2?.path
+        );
 
-        const prepareFile = (file, fallback) => {
-          if (!file || !file.path) return fallback ?? null;
+        if (!validList || validList.length === 0) {
+          return onError?.("Key Visual 항목이 없습니다.");
+        }
 
-          return {
-            path: file.path,
-            originalName: file.originalName ?? fallback?.originalName ?? "",
-            name: file.name ?? fallback?.name ?? "",
-            extension: file.extension ?? fallback?.extension ?? "",
-            mime: file.mime ?? fallback?.mime ?? "",
-            classification:
-              file.classification ?? fallback?.classification ?? "Work",
-            size: file.size ?? fallback?.size ?? 0,
-            status:
-              file.status ??
-              (fallback
-                ? file.path !== fallback.path
-                  ? "E" // 변경됨
-                  : "R" // 유지됨
-                : "C"), // 새로 추가
-          };
-        };
-
-        const validList = inputList.map((item, index) => {
-          const origin = originalList.find((o) => o.id === item.id) ?? {};
-
-          const result = {
-            id: item.id ?? null,
-            contentType: item.type === "image" ? "I" : "V",
-            title: item.title,
-            subTitle: item.subtitle,
-            sort: index + 1,
-            delYn: "N",
-            contentFilePc: prepareFile(item.file1, origin.contentFilePc),
-            contentFileMo: prepareFile(item.file2, origin.contentFileMo),
-          };
-
-          return result;
-        });
-
-        const currentIds = validList.map((v) => v.id).filter(Boolean);
-        const deletedIds = (originalList || [])
-          .map((d) => d.id)
-          .filter((id) => !currentIds.includes(id));
+        // 기존 ID 리스트
+        const previousIds = (data || []).map((d) => d.id).filter(Boolean);
+        const currentIds = validList.map((item) => item.id).filter(Boolean);
+        const deletedIds = previousIds.filter((id) => !currentIds.includes(id));
 
         return {
-          id: mainId ?? undefined,
+          currentUser: 1,
+          ...(mainId ? { mainId } : {}),
           lang: lang.toUpperCase(),
-          keyVisualList: validList
-            .map((v, index) => ({
-              id: v.id,
-              title: v.title,
-              subTitle: v.subTitle,
-              type: v.contentType,
-              sort: (index + 1).toString(),
+          keyVisualList: [
+            ...validList.map((item, index) => ({
+              currentUser: 1,
+              ...(mainId ? { mainId } : {}),
+              id: item.id ?? null,
+              title: item.title,
+              subTitle: item.subtitle,
+              type: item.type === "image" ? "I" : "V",
+              sort: String(index + 1),
               delYn: "N",
-              pcImg: v.contentFilePc,
-              moImg: v.contentFileMo,
-            }))
-            .concat(
-              deletedIds.map((id) => {
-                const origin = originalList.find((d) => d.id === id) ?? {};
-                return {
-                  id,
-                  delYn: "Y",
-                  title: origin.title ?? "",
-                  subTitle: origin.subTitle ?? "",
-                  type: origin.type ?? "I",
-                  sort: origin.sort?.toString() ?? "0",
-                  pcImg: origin.contentFilePc ?? null,
-                  moImg: origin.contentFileMo ?? null,
-                };
-              })
-            ),
+              pcImg: item.file1,
+              moImg: item.file2,
+            })),
+            ...deletedIds.map((id) => ({
+              currentUser: 1,
+              ...(mainId ? { mainId } : {}),
+              id,
+              delYn: "Y",
+            })),
+          ],
         };
       },
     }));
@@ -155,22 +117,13 @@ const KeyVisualForm = forwardRef(
                   <Controller
                     name={`kv.${index}.file1`}
                     control={control}
-                    render={({ field }) => {
-                      const type = watch(`kv.${index}.type`); // 'image' or 'video'
-                      const isVideo = type === "video";
-                      return (
-                        <Upload
-                          {...field}
-                          name={`kv.${index}.file1`}
-                          value={field.value}
-                          onChange={(val) => field.onChange(val)}
-                          label={isVideo ? "PC 영상" : "PC 이미지"}
-                          accept={isVideo ? "video/*" : "image/*"}
-                          required
-                          classification="lifestyle"
-                        />
-                      );
-                    }}
+                    render={({ field }) => (
+                      <Upload
+                        {...field}
+                        label="PC 이미지"
+                        acceptWith={`kv.${index}.type`}
+                      />
+                    )}
                   />
                 </Row>
 
@@ -178,22 +131,13 @@ const KeyVisualForm = forwardRef(
                   <Controller
                     name={`kv.${index}.file2`}
                     control={control}
-                    render={({ field }) => {
-                      const type = watch(`kv.${index}.type`);
-                      const isVideo = type === "video";
-                      return (
-                        <Upload
-                          {...field}
-                          name={`kv.${index}.file2`}
-                          value={field.value}
-                          onChange={(val) => field.onChange(val)}
-                          label={isVideo ? "MO 영상" : "MO 이미지"}
-                          accept={isVideo ? "video/*" : "image/*"}
-                          required
-                          classification="lifestyle"
-                        />
-                      );
-                    }}
+                    render={({ field }) => (
+                      <Upload
+                        {...field}
+                        label="MO 이미지"
+                        acceptWith={`kv.${index}.type`}
+                      />
+                    )}
                   />
                 </Row>
 
@@ -202,7 +146,6 @@ const KeyVisualForm = forwardRef(
                     label="타이틀"
                     fieldName={`kv.${index}.title`}
                     maxLength={50}
-                    showDefaultInfo
                     required
                     placeholder="타이틀 입력"
                     {...register(`kv.${index}.title`)}
@@ -215,7 +158,6 @@ const KeyVisualForm = forwardRef(
                     label="서브타이틀"
                     fieldName={`kv.${index}.subtitle`}
                     maxLength={100}
-                    showDefaultInfo
                     required
                     placeholder="서브타이틀 입력"
                     {...register(`kv.${index}.subtitle`)}

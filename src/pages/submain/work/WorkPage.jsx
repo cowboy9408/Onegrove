@@ -20,6 +20,13 @@ export default function WorkPage() {
     en: [],
   });
 
+  const workKRRef = useRef();
+  const workENRef = useRef();
+  const [workContents, setWorkContents] = useState({
+    ko: [],
+    en: [],
+  });
+
   const [ids, setIds] = useState({
     ko: null,
     en: null,
@@ -28,38 +35,48 @@ export default function WorkPage() {
   const [currentLang, setCurrentLang] = useState(0);
 
   useEffect(() => {
-    const langCode = currentLang === 0 ? "KO" : "EN";
-    const langKey = langCode.toLowerCase();
-
     const fetchData = async () => {
+      const lang = currentLang === 0 ? "ko" : "en";
+
       try {
-        const res = await api.get(`/api/v1/work/${langCode}`, {
+        const res = await api.get(`/api/v1/work/${lang}`, {
           withCredentials: true,
         });
 
-        const item = res.data;
+        const item = res.data?.data;
 
-        const mergedKV = item?.keyVisualList?.map((v) => ({
+        if (!item || item.lang?.toLowerCase() !== lang) {
+          setKeyVisuals((prev) => ({ ...prev, [lang]: [] }));
+          setWorkContents((prev) => ({ ...prev, [lang]: [] }));
+          setIds((prev) => ({ ...prev, [lang]: null }));
+          return;
+        }
+
+        const mergedKV = (item.keyVisualList || []).map((v) => ({
           id: v.id,
           type: v.type === "V" ? "video" : "image",
+          file1: v.pcImg ?? null,
+          file2: v.moImg ?? null,
           title: v.title ?? "",
           subtitle: v.subTitle ?? "",
-          file1: v.pcImg ? { ...v.pcImg, status: "R" } : null, // status를 명시
-          file2: v.moImg ? { ...v.moImg, status: "R" } : null,
         }));
 
-        setKeyVisuals((prev) => {
-          if (JSON.stringify(prev[langKey]) === JSON.stringify(mergedKV))
-            return prev;
-          return { ...prev, [langKey]: mergedKV };
-        });
+        const mergedWork = (item.contentList || []).map((v) => ({
+          id: v.id,
+          title: v.title ?? "",
+          subtitle: v.subTitle ?? "",
+          file1: v.pcImg ?? null,
+          file2: v.moImg ?? null,
+        }));
 
-        setIds((prev) => {
-          if (prev[langKey] === item?.id) return prev;
-          return { ...prev, [langKey]: item?.id ?? null };
-        });
+        setKeyVisuals((prev) => ({ ...prev, [lang]: mergedKV }));
+        setWorkContents((prev) => ({ ...prev, [lang]: mergedWork }));
+        setIds((prev) => ({ ...prev, [lang]: item.id || null }));
       } catch (err) {
         console.error("조회 실패:", err);
+        setKeyVisuals((prev) => ({ ...prev, [lang]: [] }));
+        setWorkContents((prev) => ({ ...prev, [lang]: [] }));
+        setIds((prev) => ({ ...prev, [lang]: null }));
       }
     };
 
@@ -68,17 +85,26 @@ export default function WorkPage() {
 
   const handleSave = async () => {
     const lang = currentLang === 0 ? "ko" : "en";
-    const ref = currentLang === 0 ? keyVisualKRRef : keyVisualENRef;
+    const kvRef = currentLang === 0 ? keyVisualKRRef : keyVisualENRef;
+    const workRef = currentLang === 0 ? workKRRef : workENRef;
 
     try {
-      const result = await ref.current.submit((err) => alert(err));
-      if (!result) return;
+      const kvResult = await kvRef.current.submit((err) => alert(err));
+      const contentList = await workRef.current.submit((err) => alert(err));
+      if (!kvResult || !contentList) return;
 
-      await api.post("/api/v1/work/update", result);
-      alert(lang === "ko" ? "국문 저장 완료" : "영문 저장 완료");
+      const payload = {
+        id: kvResult.mainId || null,
+        lang: lang.toUpperCase(),
+        keyVisualList: kvResult.keyVisualList,
+        contentList: contentList,
+      };
+
+      await api.post("/api/v1/work/update", payload);
+      alert(lang === "ko" ? "저장 완료 (국문)" : "저장 완료 (영문)");
       window.location.reload();
-    } catch (error) {
-      console.error("저장 오류:", error);
+    } catch (err) {
+      console.error("저장 오류:", err);
       alert("저장 중 오류가 발생했습니다.");
     }
   };
@@ -103,7 +129,13 @@ export default function WorkPage() {
               setKeyVisuals((prev) => ({ ...prev, ko: newVal }))
             }
           />
-          <WorkForm />
+          <WorkForm
+            ref={workKRRef}
+            data={workContents.ko}
+            setData={(newVal) =>
+              setWorkContents((prev) => ({ ...prev, ko: newVal }))
+            }
+          />
         </TabPanel>
 
         <TabPanel>
@@ -116,7 +148,13 @@ export default function WorkPage() {
               setKeyVisuals((prev) => ({ ...prev, en: newVal }))
             }
           />
-          <WorkForm />
+          <WorkForm
+            ref={workENRef}
+            data={workContents.en}
+            setData={(newVal) =>
+              setWorkContents((prev) => ({ ...prev, en: newVal }))
+            }
+          />
         </TabPanel>
       </Tabs>
       <div className="mt-8 flex justify-end">
