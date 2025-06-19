@@ -199,7 +199,6 @@ const RegistForm = forwardRef(
             office: item.office?.trim(),
             floor: item.floor?.trim(),
             sort: idx + 1,
-            delYn: "N",
           }));
 
         return {

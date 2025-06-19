@@ -313,7 +313,7 @@ export const routeMeta = [
         element: <PopupListPage />,
         title: "팝업 관리",
         icon: <BellIcon size={18} />,
-        hidden: false,
+        hidden: true,
         permissions: [
           "SUPER_ADMIN",
           "NORMAL_ADMIN",
@@ -812,7 +812,7 @@ export const routeMeta = [
         element: <InquiryListPage />,
         title: "고객 문의 관리",
         icon: <BellIcon size={18} />,
-        hidden: false,
+        hidden: true,
         permissions: [
           "SUPER_ADMIN",
           "NORMAL_ADMIN",
@@ -827,7 +827,7 @@ export const routeMeta = [
         element: <SystemLayout />,
         title: "시스템 관리",
         icon: <SettingsGearIcon size={18} />,
-        hidden: false,
+        hidden: true,
         permissions: [
           "SUPER_ADMIN",
           "NORMAL_ADMIN",
