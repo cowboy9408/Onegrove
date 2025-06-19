@@ -99,7 +99,9 @@ export default function OccupancyListPage() {
         const formatted = filtered.map((item) => {
           const koContent = item.contentList.find((c) => c.lang === "KO") || {};
           const enContent = item.contentList.find((c) => c.lang === "EN") || {};
-          const officeNames = item.officeList.map((o) => o.office).join(", ");
+          const officeNames = item.officeList
+            .map((o) => officeMap[o.office] || o.office)
+            .join(", ");
           const floorNames = item.officeList.map((o) => o.floor).join(", ");
 
           return {
@@ -153,10 +155,10 @@ export default function OccupancyListPage() {
                 }
               >
                 <option value="">전체</option>
-                <option value="A">OFFICE A</option>
-                <option value="B">OFFICE B</option>
-                <option value="C">OFFICE C</option>
-                <option value="D">OFFICE D</option>
+                <option value="OFFICE A">OFFICE A</option>
+                <option value="OFFICE B">OFFICE B</option>
+                <option value="OFFICE C">OFFICE C</option>
+                <option value="OFFICE D">OFFICE D</option>
               </Select>
             </Col>
 
