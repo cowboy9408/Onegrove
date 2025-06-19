@@ -29,7 +29,7 @@ export default function PasswordResetModal({ closeModal }) {
   };
 
   return (
-    <div className="flex h-50 flex-col justify-between space-y-6">
+    <div className="flex h-50 flex-col justify-between">
       <Input
         placeholder="이메일을 입력하세요"
         value={email}
