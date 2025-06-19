@@ -196,9 +196,11 @@ export default function StoriesDetail() {
         message: msg,
         showCancel: false,
       });
+    
     try {
       const saveOne = async (data, original = {}) => {
         const isInsert = !koData?.id && !enData?.id;
+
         const payload = {
           ...(isInsert ? {} : { id: koData?.id || enData?.id }),
           // contentId: currentLang === 0 ? koData?.contentId : enData?.contentId,
@@ -218,14 +220,17 @@ export default function StoriesDetail() {
           description: data.description || "",
           startDt: data.startDt || null,
           endDt: data.endDt || null,
-          delYn: "N",
-          storiesImgList: data.storiesImgList || []
+          delYn: "N"
         };
 
         if( currentLang === 0 && koData?.contentId ) {
           payload.contentId = koData?.contentId;
         } else if ( currentLang === 1 && enData?.contentId ) {
           payload.contentId = enData?.contentId;
+        }
+
+        if( data.storiesImgList?.length > 0 ) {
+          payload.storiesImgList = data.storiesImgList;
         }
 
         console.log("저장 payload:", payload, data);

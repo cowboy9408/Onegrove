@@ -206,6 +206,21 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             status: file.status || "C",
           };
         };
+
+        const storiesImgList = [1, 2, 3]
+          .map((i) => {
+            const img = values[`storiesImgList${i}`];
+            if (!img) return null;
+            return {
+              ...toImageMeta(img),
+              caption: values[`storiesImgCaption${i}`] || "",
+            };
+          })
+          .filter((item) => item !== null)
+          .map((item, index) => ({
+            ...item,
+            sort: (index + 1).toString(),
+        }));
   
         return {
           id: data?.id ?? null,
@@ -219,23 +234,24 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           patternTopMo: toImageMeta(values.patternTopMo),
           patternBottomPc: toImageMeta(values.patternBottomPc),
           patternBottomMo: toImageMeta(values.patternBottomMo),
-          storiesImgList: [
-            {
-              ...toImageMeta(values.storiesImgList1),
-              caption: values.storiesImgCaption1 || "",
-              sort: "1"
-            },
-            {
-              ...toImageMeta(values.storiesImgList2),
-              caption: values.storiesImgCaption1 || "",
-              sort: "2"
-            },
-            {
-              ...toImageMeta(values.storiesImgList3),
-              caption: values.storiesImgCaption1 || "",
-              sort: "3"
-            },
-          ],
+          storiesImgList,
+          // storiesImgList: [
+          //   {
+          //     ...toImageMeta(values.storiesImgList1),
+          //     caption: values.storiesImgCaption1 || "",
+          //     sort: "1"
+          //   },
+          //   {
+          //     ...toImageMeta(values.storiesImgList2),
+          //     caption: values.storiesImgCaption1 || "",
+          //     sort: "2"
+          //   },
+          //   {
+          //     ...toImageMeta(values.storiesImgList3),
+          //     caption: values.storiesImgCaption1 || "",
+          //     sort: "3"
+          //   },
+          // ],
           content: content || "",
           addContent: addContent || "",
           description: description || "",
@@ -335,7 +351,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
                 <span className="font-bold">~</span>
                   <Datepicker
                     mode="single"
-                    selectedDate={new Date(endDate ? endDate.toISOString() : null)}
+                    selectedDate={new Date(endDate ? endDate.toISOString() : new Date())}
                     onSingleChange={(date) => {
                       setEndDate(date);
                       setValue("endDate", date?.toISOString());
