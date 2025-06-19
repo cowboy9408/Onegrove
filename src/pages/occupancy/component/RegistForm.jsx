@@ -192,14 +192,13 @@ const RegistForm = forwardRef(
           };
         };
 
-        const sortedOfficeList = (values.locations || [])
-          .filter((item) => item.delYn !== "Y")
-          .map((item, idx) => ({
-            id: item.id ?? null,
-            office: item.office?.trim(),
-            floor: item.floor?.trim(),
-            sort: idx + 1,
-          }));
+        const sortedOfficeList = (values.locations || []).map((item, idx) => ({
+          id: item.id ?? null,
+          office: item.office?.trim(),
+          floor: item.floor?.trim(),
+          sort: idx + 1,
+          delYn: item.delYn ?? "N", // 삭제 여부 반드시 포함
+        }));
 
         return {
           id: data?.id,

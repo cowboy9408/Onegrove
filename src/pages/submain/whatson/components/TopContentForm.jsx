@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { FormProvider, useForm, Controller } from "react-hook-form";
 import Button from "@/components/common/Button";
 import Upload from "@/components/common/Upload";
@@ -15,7 +15,7 @@ const defaultItem = {
   image: { name: "", url: "", size: 0 },
 };
 
-export default function TopContentForm({ data, setData }) {
+const TopContentForm = forwardRef(({ data, setData }, ref) => {
   const methods = useForm({
     defaultValues: {
       etc: [defaultItem], // 기본 1개
@@ -28,6 +28,8 @@ export default function TopContentForm({ data, setData }) {
     setValue,
   } = methods;
   const [storiesList, setStoriesList] = useState([]);
+  const [deletedIds, setDeletedIds] = useState([]);
+  const [deletedItems, setDeletedItems] = useState([]);
 
   useEffect(() => {
     if (Array.isArray(data) && data.length > 0) {
@@ -52,6 +54,87 @@ export default function TopContentForm({ data, setData }) {
     fetchStories();
   }, []);
 
+  useImperativeHandle(ref, () => ({
+    async submit(onError) {
+      const isValid = await methods.trigger();
+      if (!isValid) {
+        onError?.("입력값을 확인해주세요.");
+        return null;
+      }
+
+      const values = methods.getValues();
+
+      const prepareFile = (file, fallback) => {
+        if (!file || !file.path) return {};
+        const id = file.id;
+
+        return {
+          ...(typeof id === "number" ? { id } : {}),
+          path: file.path,
+          originalName: file.originalName ?? fallback?.originalName ?? "",
+          name: file.name ?? fallback?.name ?? "",
+          extension: file.extension ?? fallback?.extension ?? "",
+          mime: file.mime ?? fallback?.mime ?? "",
+          classification:
+            file.classification ?? fallback?.classification ?? "whatson",
+          size: file.size ?? fallback?.size ?? 0,
+          status:
+            file.status ??
+            (fallback
+              ? file.path !== fallback.path
+                ? "E" // 변경됨
+                : "R" // 유지됨
+              : "C"), // 새로 추가
+        };
+      };
+
+      const transformed = values.etc.map((item, index) => {
+        const selectedStory = storiesList.find(
+          (story) => String(story.storiesId) === String(item.type)
+        );
+
+        return {
+          id: item.id ?? null,
+          eventId: null,
+          storiesId: Number(item.type),
+          storiesTitle: selectedStory?.title ?? "",
+          imgPc: prepareFile(item.image, item.prevImage),
+          imgMo: null,
+          sort: index + 1,
+          delYn: "N",
+        };
+      });
+
+      const result = [
+        ...transformed,
+        ...deletedIds
+          .filter((id) => typeof id === "number")
+          .map((id) => {
+            const deletedItem = deletedItems.find((d) => d.id === id);
+            if (!deletedItem) return null;
+
+            const selectedStory = storiesList.find(
+              (story) => String(story.storiesId) === String(deletedItem.type)
+            );
+
+            return {
+              id: deletedItem.id,
+              eventId: null,
+              storiesId: Number(deletedItem.type),
+              storiesTitle: selectedStory?.title ?? "",
+              imgPc: prepareFile(deletedItem.image, deletedItem.prevImage),
+              imgMo: null,
+              sort: 0,
+              delYn: "Y",
+            };
+          })
+          .filter(Boolean),
+      ];
+      console.log("TopContentForm 제출 데이터:", result);
+      return result;
+    },
+  }));
+
   return (
     <FormProvider {...methods}>
       <form className="space-y-8 p-4">
@@ -73,28 +156,32 @@ export default function TopContentForm({ data, setData }) {
                       label="이미지"
                       error={errors.etc?.[index]?.image?.message}
                       classification="whatson"
+                      required
                     />
                   )}
                 />
               </Row>
 
               <Row className="pb-4">
-                <Select
-                  id={`etc.${index}.type`}
-                  label="콘텐츠 등록"
-                  value={field.type}
-                  onChange={(e) =>
-                    setValue(`etc.${index}.type`, e.target.value)
-                  }
-                  required
-                >
-                  <option value="">선택해주세요</option>
-                  {storiesList.map((item) => (
-                    <option key={item.storiesId} value={item.storiesId}>
-                      {item.title}
-                    </option>
-                  ))}
-                </Select>
+                <Controller
+                  name={`etc.${index}.type`}
+                  control={methods.control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      id={`etc.${index}.type`}
+                      label="콘텐츠 등록"
+                      required
+                    >
+                      <option value="">선택해주세요</option>
+                      {storiesList.map((item) => (
+                        <option key={item.storiesId} value={item.storiesId}>
+                          {item.title}
+                        </option>
+                      ))}
+                    </Select>
+                  )}
+                />
               </Row>
 
               <Row className="flex justify-center gap-2">
@@ -111,7 +198,14 @@ export default function TopContentForm({ data, setData }) {
                   <Button
                     type="button"
                     color="red"
-                    onClick={() => remove(index)}
+                    onClick={() => {
+                      const currentItem = methods.getValues(`etc.${index}`);
+                      if (currentItem?.id) {
+                        setDeletedIds((prev) => [...prev, currentItem.id]);
+                        setDeletedItems((prev) => [...prev, currentItem]);
+                      }
+                      remove(index);
+                    }}
                   >
                     삭제
                   </Button>
@@ -123,4 +217,5 @@ export default function TopContentForm({ data, setData }) {
       </form>
     </FormProvider>
   );
-}
+});
+export default TopContentForm;
