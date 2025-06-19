@@ -15,7 +15,7 @@ const defaultItem = {
   image: { name: "", url: "", size: 0 },
 };
 
-const TopContentForm = forwardRef(({ data, setData, eventId }, ref) => {
+const TopContentForm = forwardRef(({ data, setData }, ref) => {
   const methods = useForm({
     defaultValues: {
       etc: [defaultItem], // 기본 1개
@@ -29,6 +29,7 @@ const TopContentForm = forwardRef(({ data, setData, eventId }, ref) => {
   } = methods;
   const [storiesList, setStoriesList] = useState([]);
   const [deletedIds, setDeletedIds] = useState([]);
+  const [deletedItems, setDeletedItems] = useState([]);
 
   useEffect(() => {
     if (Array.isArray(data) && data.length > 0) {
@@ -75,7 +76,7 @@ const TopContentForm = forwardRef(({ data, setData, eventId }, ref) => {
           extension: file.extension ?? fallback?.extension ?? "",
           mime: file.mime ?? fallback?.mime ?? "",
           classification:
-            file.classification ?? fallback?.classification ?? "lifestyle",
+            file.classification ?? fallback?.classification ?? "whatson",
           size: file.size ?? fallback?.size ?? 0,
           status:
             file.status ??
@@ -109,17 +110,27 @@ const TopContentForm = forwardRef(({ data, setData, eventId }, ref) => {
         ...deletedIds
           .filter((id) => typeof id === "number")
           .map((id) => {
-            const deletedItem = data.find((d) => d.id === id);
+            const deletedItem = deletedItems.find((d) => d.id === id);
             if (!deletedItem) return null;
 
+            const selectedStory = storiesList.find(
+              (story) => String(story.storiesId) === String(deletedItem.type)
+            );
+
             return {
-              ...deletedItem,
+              id: deletedItem.id,
+              eventId: null,
+              storiesId: Number(deletedItem.type),
+              storiesTitle: selectedStory?.title ?? "",
+              imgPc: prepareFile(deletedItem.image, deletedItem.prevImage),
+              imgMo: null,
+              sort: 0,
               delYn: "Y",
             };
           })
           .filter(Boolean),
       ];
-
+      console.log("TopContentForm 제출 데이터:", result);
       return result;
     },
   }));
@@ -188,8 +199,10 @@ const TopContentForm = forwardRef(({ data, setData, eventId }, ref) => {
                     type="button"
                     color="red"
                     onClick={() => {
-                      if (field.id) {
-                        setDeletedIds((prev) => [...prev, field.id]);
+                      const currentItem = methods.getValues(`etc.${index}`);
+                      if (currentItem?.id) {
+                        setDeletedIds((prev) => [...prev, currentItem.id]);
+                        setDeletedItems((prev) => [...prev, currentItem]);
                       }
                       remove(index);
                     }}

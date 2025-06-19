@@ -96,6 +96,8 @@ export default function WhatsonPage() {
       const keyVisualResult = await kvRef.current.submit((err) => alert(err));
       const topContentResult = await topRef.current.submit((err) => alert(err));
 
+      console.log("TopContent submit result:", topContentResult);
+
       const eventId = ids[lang] ?? null;
 
       const keyVisual = keyVisualResult.keyVisual.map((item) => ({
@@ -105,7 +107,8 @@ export default function WhatsonPage() {
 
       const topContents = topContentResult.map((item) => ({
         ...item,
-        eventId,
+        eventId: item.eventId ?? eventId,
+        delYn: item.delYn ?? "N",
       }));
 
       if (!keyVisualResult || !topContentResult) return;
@@ -125,7 +128,7 @@ export default function WhatsonPage() {
       console.log(payload);
       if (res.data?.success) {
         alert(lang === "ko" ? "국문 저장 완료" : "영문 저장 완료");
-        // window.location.reload();
+        window.location.reload();
       } else {
         alert("저장 실패: " + (res.data?.message || "알 수 없는 오류"));
       }

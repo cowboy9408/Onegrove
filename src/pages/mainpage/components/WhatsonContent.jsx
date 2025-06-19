@@ -76,7 +76,7 @@ const WhatContentForm = forwardRef(
               : null;
             return {
               id: item.id ?? null,
-              contentId: firstContent?._id,
+              contentId: firstContent?._id ? Number(firstContent._id) : null,
               contentCategoryCode: firstContent?.categoryCode,
               sort: index + 1,
               img: {
@@ -162,7 +162,7 @@ const WhatContentForm = forwardRef(
                       {...register(`${name}.${index}.contents`)}
                     />
                   </Col>
-                  <Col className="flex self-end gap-2">
+                  <Col className="flex gap-2 self-end">
                     <Button
                       className="h-12 w-full"
                       onClick={() => {
