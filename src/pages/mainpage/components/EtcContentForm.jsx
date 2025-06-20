@@ -188,7 +188,7 @@ const EtcContentForm = forwardRef(
                       id={`button`}
                       label="버튼명"
                       fieldName={`etc.button`}
-                      maxLength={100}
+                      maxLength={50}
                       showDefaultInfo={true}
                       required
                       placeholder="버튼명을 입력해주세요."
