@@ -50,6 +50,16 @@ const KeyVisualForm = forwardRef(
         const inputList = getValues("kv") || [];
         const originalList = data || [];
 
+        const isValid = inputList.every(
+          (item) =>
+            item.title && item.subtitle && item.file1?.path && item.file2?.path
+        );
+
+        if (!isValid) {
+          onError?.("필수 항목을 모두 입력해 주세요.");
+          return null;
+        }
+
         const prepareFile = (file, fallback) => {
           if (!file || !file.path) return fallback ?? null;
 
@@ -128,7 +138,6 @@ const KeyVisualForm = forwardRef(
                       { label: "이미지", value: "image" },
                       { label: "영상", value: "video" },
                     ]}
-                    required
                   />
                 </Row>
 

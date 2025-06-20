@@ -5,6 +5,7 @@ import Radio from "@/components/common/Radio";
 import { useNavigate } from "react-router-dom";
 import api from "@/lib/apiClient";
 import Select from "@/components/common/Select";
+import useModal from "@/hooks/useModal";
 
 export default function AdminRegist() {
   const [form, setForm] = useState({
@@ -19,6 +20,7 @@ export default function AdminRegist() {
     isReservation: "N",
   });
   const navigate = useNavigate();
+  const { showModal } = useModal();
   const [companyOptions, setCompanyOptions] = useState([]);
 
   useEffect(() => {
@@ -60,8 +62,29 @@ export default function AdminRegist() {
   };
 
   const handleSubmit = async () => {
+    if (
+      !form.name ||
+      !form.username ||
+      !form.password ||
+      !form.confirmPassword ||
+      !form.phone ||
+      !form.email ||
+      !form.company // 입주사 추가
+    ) {
+      showModal({
+        title: "필수 항목 누락",
+        message: "모든 필수 항목을 입력해주세요.",
+        showCancel: false,
+      });
+      return;
+    }
+
     if (form.password !== form.confirmPassword) {
-      alert("비밀번호가 일치하지 않습니다.");
+      showModal({
+        title: "비밀번호 확인",
+        message: "비밀번호가 일치하지 않습니다.",
+        showCancel: false,
+      });
       return;
     }
 
@@ -83,15 +106,29 @@ export default function AdminRegist() {
       isReservation: form.isReservation,
     };
 
-    try {
-      await api.post("/api/v1/user/member/insert", payload);
-
-      alert("등록이 완료되었습니다.");
-      navigate("/user");
-    } catch (error) {
-      console.error("등록 오류:", error);
-      alert("등록에 실패했습니다. 관리자에게 문의하세요.");
-    }
+    showModal({
+      title: "등록 확인",
+      message: "입력한 정보로 등록하시겠습니까?",
+      showCancel: true,
+      onConfirm: async () => {
+        try {
+          await api.post("/api/v1/user/member/insert", payload);
+          showModal({
+            title: "등록 완료",
+            message: "등록이 완료되었습니다.",
+            showCancel: false,
+            onConfirm: () => navigate("/user"),
+          });
+        } catch (error) {
+          console.error("등록 오류:", error);
+          showModal({
+            title: "등록 실패",
+            message: "등록에 실패했습니다. 관리자에게 문의하세요.",
+            showCancel: false,
+          });
+        }
+      },
+    });
   };
 
   return (
@@ -241,9 +278,16 @@ export default function AdminRegist() {
       <div className="flex justify-end gap-4 px-6 pb-6">
         <Button onClick={handleSubmit}>등록</Button>
         <Button
-          type="button"
-          className="bg-gray-200"
-          onClick={() => navigate("/admin/list")}
+          className="bg-black-200"
+          onClick={() =>
+            showModal({
+              title: "이동 확인",
+              message:
+                "목록으로 돌아가면 입력한 정보가 사라집니다. 이동하시겠습니까?",
+              showCancel: true,
+              onConfirm: () => navigate("/user"),
+            })
+          }
         >
           목록
         </Button>

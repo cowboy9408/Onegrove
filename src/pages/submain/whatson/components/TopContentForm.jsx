@@ -56,9 +56,9 @@ const TopContentForm = forwardRef(({ data, setData }, ref) => {
 
   useImperativeHandle(ref, () => ({
     async submit(onError) {
-      const isValid = await methods.trigger();
+      const isValid = await methods.trigger("etc");
       if (!isValid) {
-        onError?.("입력값을 확인해주세요.");
+        onError?.("필수 항목을 모두 입력해 주세요.");
         return null;
       }
 
@@ -149,6 +149,14 @@ const TopContentForm = forwardRef(({ data, setData }, ref) => {
               <Row className="pb-4">
                 <Controller
                   name={`etc.${index}.image`}
+                  rules={{
+                    required: "필수 항목을 확인해주세요.",
+                    validate: (file) => {
+                      if (!file || !file.path)
+                        return "필수 항목을 확인해주세요.";
+                      return true;
+                    },
+                  }}
                   control={methods.control}
                   render={({ field }) => (
                     <Upload
@@ -166,11 +174,15 @@ const TopContentForm = forwardRef(({ data, setData }, ref) => {
                 <Controller
                   name={`etc.${index}.type`}
                   control={methods.control}
+                  rules={{
+                    validate: (v) => v !== "" || "콘텐츠를 선택해 주세요.",
+                  }}
                   render={({ field }) => (
                     <Select
                       {...field}
                       id={`etc.${index}.type`}
                       label="콘텐츠 등록"
+                      error={errors.etc?.[index]?.type?.message}
                       required
                     >
                       <option value="">선택해주세요</option>

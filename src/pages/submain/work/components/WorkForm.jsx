@@ -40,8 +40,14 @@ const WorkForm = forwardRef(function WorkForm({ data, setData }, ref) {
           item.title && item.subtitle && item.file1?.path && item.file2?.path
       );
 
-      if (!validList || validList.length === 0) {
-        return onError?.("Work 콘텐츠 항목이 없습니다.");
+      const isValid = inputList.every(
+        (item) =>
+          item.title && item.subtitle && item.file1?.path && item.file2?.path
+      );
+
+      if (!isValid) {
+        onError?.("필수 항목을 모두 입력해 주세요.");
+        return null;
       }
 
       // 기존 ID 리스트 vs 현재 유효 리스트 비교
@@ -95,6 +101,7 @@ const WorkForm = forwardRef(function WorkForm({ data, setData }, ref) {
                         {...field}
                         label="PC 이미지"
                         acceptWith={`work.${index}.type`}
+                        required
                       />
                     )}
                   />
@@ -108,6 +115,7 @@ const WorkForm = forwardRef(function WorkForm({ data, setData }, ref) {
                         {...field}
                         label="MO 이미지"
                         acceptWith={`work.${index}.type`}
+                        required
                       />
                     )}
                   />

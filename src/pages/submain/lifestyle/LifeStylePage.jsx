@@ -4,8 +4,10 @@ import { useEffect, useState, useRef } from "react";
 import KeyVisualForm from "./components/KeyVisualForm";
 import api from "@/lib/apiClient";
 import Button from "@/components/common/Button";
+import useModal from "@/hooks/useModal";
 
 export default function LifeStylePage() {
+  const { showModal } = useModal();
   const emptyData = {
     keyVisual: [],
     etc: [],
@@ -68,15 +70,36 @@ export default function LifeStylePage() {
     const ref = currentLang === 0 ? keyVisualKRRef : keyVisualENRef;
 
     try {
-      const result = await ref.current.submit((err) => alert(err));
+      const result = await ref.current.submit((err) => {
+        showModal({
+          title: "필수 항목 누락",
+          message: err,
+          showCancel: false,
+        });
+      });
+
       if (!result) return;
 
       await api.post("/api/v1/lifestyle/insert", result);
-      alert(lang === "ko" ? "국문 저장 완료" : "영문 저장 완료");
-      window.location.reload();
+
+      showModal({
+        title: "저장 완료",
+        message:
+          lang === "ko"
+            ? "국문 저장이 완료되었습니다."
+            : "영문 저장이 완료되었습니다.",
+        showCancel: false,
+        onConfirm: () => {
+          window.location.reload();
+        },
+      });
     } catch (error) {
       console.error("저장 오류:", error);
-      alert("저장 중 오류가 발생했습니다.");
+      showModal({
+        title: "저장 오류",
+        message: "저장 중 오류가 발생했습니다.",
+        showCancel: false,
+      });
     }
   };
 

@@ -61,7 +61,7 @@ const WorkForm = forwardRef(
           (img) => !img?.isDeleted && img?.path
         );
         if (!work.subtitle1 || !hasValidImage) {
-          return onError?.("모든 필드를 입력해주세요.");
+          return onError?.("필수 항목을 확인해주세요.");
         }
 
         // 1. 기존 이미지 ID 목록

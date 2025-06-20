@@ -5,8 +5,10 @@ import KeyVisualForm from "./components/KeyVisualForm";
 import api from "@/lib/apiClient";
 import Button from "@/components/common/Button";
 import WorkForm from "./components/WorkForm";
+import useModal from "@/hooks/useModal";
 
 export default function WorkPage() {
+  const { showModal } = useModal();
   const emptyData = {
     keyVisual: [],
     etc: [],
@@ -89,8 +91,22 @@ export default function WorkPage() {
     const workRef = currentLang === 0 ? workKRRef : workENRef;
 
     try {
-      const kvResult = await kvRef.current.submit((err) => alert(err));
-      const contentList = await workRef.current.submit((err) => alert(err));
+      const kvResult = await kvRef.current.submit((err) =>
+        showModal({
+          title: "필수 항목 누락",
+          message: err,
+          showCancel: false,
+        })
+      );
+
+      const contentList = await workRef.current.submit((err) =>
+        showModal({
+          title: "필수 항목 누락",
+          message: err,
+          showCancel: false,
+        })
+      );
+
       if (!kvResult || !contentList) return;
 
       const payload = {
@@ -100,12 +116,32 @@ export default function WorkPage() {
         contentList: contentList,
       };
 
-      await api.post("/api/v1/work/update", payload);
-      alert(lang === "ko" ? "저장 완료 (국문)" : "저장 완료 (영문)");
-      window.location.reload();
+      const res = await api.post("/api/v1/work/update", payload);
+
+      if (res.data?.success) {
+        showModal({
+          title: "저장 완료",
+          message:
+            lang === "ko"
+              ? "국문 저장이 완료되었습니다."
+              : "영문 저장이 완료되었습니다.",
+          showCancel: false,
+          onConfirm: () => window.location.reload(),
+        });
+      } else {
+        showModal({
+          title: "저장 실패",
+          message: res.data?.message || "알 수 없는 오류가 발생했습니다.",
+          showCancel: false,
+        });
+      }
     } catch (err) {
       console.error("저장 오류:", err);
-      alert("저장 중 오류가 발생했습니다.");
+      showModal({
+        title: "저장 오류",
+        message: "저장 중 오류가 발생했습니다.",
+        showCancel: false,
+      });
     }
   };
 

@@ -53,8 +53,14 @@ const KeyVisualForm = forwardRef(
             item.title && item.subtitle && item.file1?.path && item.file2?.path
         );
 
-        if (!validList || validList.length === 0) {
-          return onError?.("Key Visual 항목이 없습니다.");
+        const isValid = inputList.every(
+          (item) =>
+            item.title && item.subtitle && item.file1?.path && item.file2?.path
+        );
+
+        if (!isValid) {
+          onError?.("필수 항목을 모두 입력해 주세요.");
+          return null;
         }
 
         // 기존 ID 리스트
@@ -109,7 +115,6 @@ const KeyVisualForm = forwardRef(
                       { label: "이미지", value: "image" },
                       { label: "영상", value: "video" },
                     ]}
-                    required
                   />
                 </Row>
 
@@ -122,6 +127,7 @@ const KeyVisualForm = forwardRef(
                         {...field}
                         label="PC 이미지"
                         acceptWith={`kv.${index}.type`}
+                        required
                       />
                     )}
                   />
@@ -136,6 +142,7 @@ const KeyVisualForm = forwardRef(
                         {...field}
                         label="MO 이미지"
                         acceptWith={`kv.${index}.type`}
+                        required
                       />
                     )}
                   />
