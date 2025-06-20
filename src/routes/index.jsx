@@ -57,7 +57,7 @@ import OccupancyDetail from "@/pages/occupancy/OccupancyDetail";
 import MainBannerPage from "@/pages/banner/MainBannerPage";
 import WhatsonBannerPage from "@/pages/banner/WhatsonBannerPage";
 import LifeStyleBannerPage from "@/pages/banner/LifeStyleBannerPage";
-import WorkBannerPage from "@/pages/banner/WhatsonBannerPage";
+import WorkBannerPage from "@/pages/banner/WorkBannerPage";
 import AboutBannerPage from "@/pages/banner/AboutBannerPage";
 import UserDetailPage from "@/pages/user/UserDetailPage";
 import AffairDetailPage from "@/pages/admin/adminpage/AffairDetailPage";
@@ -313,7 +313,7 @@ export const routeMeta = [
         element: <PopupListPage />,
         title: "팝업 관리",
         icon: <BellIcon size={18} />,
-        hidden: false,
+        hidden: true,
         permissions: [
           "SUPER_ADMIN",
           "NORMAL_ADMIN",
@@ -676,36 +676,6 @@ export const routeMeta = [
           //   ],
           // },
           {
-            uuid: "87072701-2246-4ec6-8e76-e50906be08b2",
-            path: "/contents/work",
-            element: <></>,
-            title: "Work",
-            hidden: false,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-              "User",
-            ],
-            children: [
-              {
-                uuid: "a79c9432-b510-4a3e-aa63-21046b90d625",
-                path: "/contents/work/guest",
-                element: <></>,
-                title: "Guest Services",
-                hidden: false,
-                permissions: [
-                  "SUPER_ADMIN",
-                  "NORMAL_ADMIN",
-                  "RETAIL_ADMIN",
-                  "OFFICE_ADMIN",
-                  "User",
-                ],
-              },
-            ],
-          },
-          {
             uuid: "cf1a5e95-944c-4a37-8333-1c7e89507f6e",
             path: "/contents/about",
             element: <></>,
@@ -757,7 +727,7 @@ export const routeMeta = [
         element: <OfficeLayout />,
         title: "오피스 관리",
         icon: <CalendarDaysIcon size={18} />,
-        hidden: false,
+        hidden: true,
         permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN", "MEMBER"],
         children: [
           {
@@ -812,7 +782,7 @@ export const routeMeta = [
         element: <InquiryListPage />,
         title: "고객 문의 관리",
         icon: <BellIcon size={18} />,
-        hidden: false,
+        hidden: true,
         permissions: [
           "SUPER_ADMIN",
           "NORMAL_ADMIN",
@@ -827,7 +797,7 @@ export const routeMeta = [
         element: <SystemLayout />,
         title: "시스템 관리",
         icon: <SettingsGearIcon size={18} />,
-        hidden: false,
+        hidden: true,
         permissions: [
           "SUPER_ADMIN",
           "NORMAL_ADMIN",

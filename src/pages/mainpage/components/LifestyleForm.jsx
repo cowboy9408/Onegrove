@@ -70,7 +70,7 @@ const LifestyleForm = forwardRef(
         const value = getValues("lifestyle");
 
         if (!value.subtitle1 || value.brand.length === 0) {
-          return onError?.("필수 입력값을 모두 입력해주세요.");
+          return onError?.("필수 항목을 확인해주세요.");
         }
 
         const originalList = data?.brandList || [];
@@ -154,7 +154,7 @@ const LifestyleForm = forwardRef(
                   {...register(`lifestyle.brand`)}
                 />
               </Col>
-              <Col className="flex self-end gap-2">
+              <Col className="flex gap-2 self-end">
                 <Button
                   className="h-12 w-full"
                   onClick={() =>

@@ -2,38 +2,84 @@ import Button from "@/components/common/Button";
 import Upload from "@/components/common/Upload";
 import FieldGroup from "@/components/form/FieldGroup";
 import FormInput from "@/components/form/FormInput";
-import FormRadioGroup from "@/components/form/FormRadioGroup";
 import Box from "@/components/layout/Box";
 import Row from "@/components/layout/Row";
 import Title from "@/components/layout/Title";
-import { useEffect } from "react";
-import { FormProvider, useForm, Controller } from "react-hook-form";
+import { useEffect, forwardRef, useImperativeHandle } from "react";
+import {
+  FormProvider,
+  useForm,
+  Controller,
+  useFieldArray,
+} from "react-hook-form";
 
 const MAX_WORK_LENGTH = 6;
 
-export default function WorkForm({ data, setData }) {
+const WorkForm = forwardRef(function WorkForm({ data, setData }, ref) {
   const methods = useForm({
     defaultValues: {
       work: [{ title: "", subtitle: "", file1: null, file2: null }],
     },
   });
 
-  const { handleSubmit, reset, resetField, register } = methods;
+  const { reset, resetField, register, getValues } = methods;
 
   useEffect(() => {
     if (Array.isArray(data) && data.length > 0) {
       reset({ work: data });
     }
-  }, []); // 의존성 줄이기
+  }, [data]); // 언어 탭 전환 시 반영되도록
 
-  const onSubmit = (formValues) => {
-    setData(formValues.work);
-  };
+  useImperativeHandle(ref, () => ({
+    submit: async (onError) => {
+      const inputList = methods.getValues("work") || [];
+
+      // 유효한 항목만 필터링
+      const validList = inputList.filter(
+        (item) =>
+          item.title && item.subtitle && item.file1?.path && item.file2?.path
+      );
+
+      const isValid = inputList.every(
+        (item) =>
+          item.title && item.subtitle && item.file1?.path && item.file2?.path
+      );
+
+      if (!isValid) {
+        onError?.("필수 항목을 모두 입력해 주세요.");
+        return null;
+      }
+
+      // 기존 ID 리스트 vs 현재 유효 리스트 비교
+      const previousIds = (data || []).map((d) => d.id).filter(Boolean);
+      const currentIds = validList.map((item) => item.id).filter(Boolean);
+      const deletedIds = previousIds.filter((id) => !currentIds.includes(id));
+
+      // 최종 결과 리턴
+      return [
+        ...validList.map((item, index) => ({
+          currentUser: 1,
+          id: item.id ?? null,
+          title: item.title,
+          subTitle: item.subtitle,
+          sort: String(index + 1),
+          delYn: "N",
+          pcImg: item.file1,
+          moImg: item.file2,
+        })),
+        ...deletedIds.map((id) => ({
+          currentUser: 1,
+          id,
+          delYn: "Y",
+        })),
+      ];
+    },
+  }));
 
   return (
     <FormProvider {...methods}>
       {/*폼을 제출하면 상위에 전달 */}
-      <form onBlur={handleSubmit(onSubmit)} className="space-y-8 p-4">
+      <form className="space-y-8 p-4">
         <FieldGroup name="work">
           {({ fields, field, index, append, remove }) => {
             const idTitle = `title-${field.id}`;
@@ -55,6 +101,7 @@ export default function WorkForm({ data, setData }) {
                         {...field}
                         label="PC 이미지"
                         acceptWith={`work.${index}.type`}
+                        required
                       />
                     )}
                   />
@@ -68,6 +115,7 @@ export default function WorkForm({ data, setData }) {
                         {...field}
                         label="MO 이미지"
                         acceptWith={`work.${index}.type`}
+                        required
                       />
                     )}
                   />
@@ -127,4 +175,6 @@ export default function WorkForm({ data, setData }) {
       </form>
     </FormProvider>
   );
-}
+});
+
+export default WorkForm;

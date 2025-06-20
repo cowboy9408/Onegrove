@@ -4,53 +4,61 @@ import { useEffect, useState, useRef } from "react";
 import KeyVisualForm from "./components/KeyVisualForm";
 import api from "@/lib/apiClient";
 import Button from "@/components/common/Button";
+import useModal from "@/hooks/useModal";
 
 export default function LifeStylePage() {
-  const krRef = useRef();
-  const enRef = useRef();
+  const { showModal } = useModal();
   const emptyData = {
     keyVisual: [],
+    etc: [],
   };
 
-  const [krData, setKrData] = useState(emptyData);
-  const [enData, setEnData] = useState(emptyData);
+  const keyVisualKRRef = useRef();
+  const keyVisualENRef = useRef();
+
+  const [keyVisuals, setKeyVisuals] = useState({
+    ko: [],
+    en: [],
+  });
+
+  const [ids, setIds] = useState({
+    ko: null,
+    en: null,
+  });
+
   const [currentLang, setCurrentLang] = useState(0);
-  const [krId, setKrId] = useState(null);
-  const [enId, setEnId] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       const lang = currentLang === 0 ? "ko" : "en";
-      const res = await api.get(`/api/v1/lifestyle?lang=${lang}`);
-      const keyVisual = res.data?.data || [];
 
-      console.log("Fetched Key Visual Data:", keyVisual);
+      try {
+        const res = await api.get("/api/v1/lifestyle", {
+          params: { lang },
+          withCredentials: true,
+        });
 
-      const mapped = keyVisual.map((item, index) => ({
-        // ...item.keyVisual,
-        id: item?.id || null,
-        contentType: item?.keyVisual?.[0]?.contentType || "I",
-        contentFilePc: item?.keyVisual?.[0]?.contentFilePc || null,
-        contentFileMo: item?.keyVisual?.[0]?.contentFileMo || null,
-        title: item?.keyVisual?.[0]?.title || "",
-        subtitle: item?.keyVisual?.[0]?.subTitle || "",
-        sort: (index+1) || 1,
-        delYn: item?.keyVisual?.[0]?.delYn || "N",
-        type: item.contentType === "V" ? "video" : "image",
-      }));
+        // 같은 언어(lang)의 keyVisual 항목들을 모두 병합
+        const items = res.data.data?.filter((item) => item.lang === lang) || [];
+        const mergedKV = items.flatMap((item) =>
+          item?.keyVisual?.map((v) => ({
+            id: v.id,
+            type: v.contentType === "V" ? "video" : "image",
+            file1: v.contentFilePc ? { ...v.contentFilePc } : null,
+            file2: v.contentFileMo ? { ...v.contentFileMo } : null,
+            title: v.title ?? "",
+            subtitle: v.subTitle ?? "",
+          }))
+        );
 
-      
-
-      const id = res.data?.data?.id || 1;
-
-      console.log("Mapped Key Visual Data:", mapped, id);
-
-      if (lang === "ko") {
-        setKrData({ keyVisual: mapped });
-        setKrId(id);
-      } else {
-        setEnData({ keyVisual: mapped });
-        setEnId(id);
+        // 최신 아이템 ID 하나만 대표로 사용 (예: 가장 마지막 ID)
+        const latestItem = items[items.length - 1];
+        setKeyVisuals((prev) => ({ ...prev, [lang]: mergedKV }));
+        setIds((prev) => ({ ...prev, [lang]: latestItem?.id || null }));
+      } catch (err) {
+        console.error("조회 실패:", err);
+        setKeyVisuals((prev) => ({ ...prev, [lang]: [] }));
+        setIds((prev) => ({ ...prev, [lang]: null }));
       }
     };
 
@@ -58,63 +66,40 @@ export default function LifeStylePage() {
   }, [currentLang]);
 
   const handleSave = async () => {
-    const isKorean = currentLang === 0;
-    const ref = isKorean ? krRef : enRef;
-    const lang = isKorean ? "ko" : "en";
-    const id = isKorean ? krId : enId;
-
-    const keyVisual = await ref.current?.submit();
-
-    
-    if (!keyVisual) return;
-
-    const payload = {
-      lifeId: id ?? 0,
-      lang: lang,
-      delYn: "N",
-      keyVisual: keyVisual,
-    };
-
-    console.log("Key Visual to Save:", payload);
+    const lang = currentLang === 0 ? "ko" : "en";
+    const ref = currentLang === 0 ? keyVisualKRRef : keyVisualENRef;
 
     try {
-      await api.post("/api/v1/lifestyle/insert", payload);
-      alert("저장 완료");
+      const result = await ref.current.submit((err) => {
+        showModal({
+          title: "필수 항목 누락",
+          message: err,
+          showCancel: false,
+        });
+      });
 
-      //저장 후 새로고침 시 데이터를 다시 가져오기
-      const res = await api.get(`/api/v1/lifestyle?lang=${lang}`);
-      const newKeyVisual = res.data?.data || [];
-      const newId = res.data?.data?.id;
+      if (!result) return;
 
-      // const mapped = newKeyVisual.map((item) => ({
-      //   ...item,
-      //   contentFilePc: item.contentFilePc,
-      //   contentFileMo: item.contentFileMo,
-      // }));
+      await api.post("/api/v1/lifestyle/insert", result);
 
-      const mapped = newKeyVisual.map((item, index) => ({
-        // ...item.keyVisual,
-        id: item?.id || null,
-        contentType: item?.keyVisual?.[0]?.contentType || "I",
-        contentFilePc: item?.keyVisual?.[0]?.contentFilePc || null,
-        contentFileMo: item?.keyVisual?.[0]?.contentFileMo || null,
-        title: item?.keyVisual?.[0]?.title || "",
-        subtitle: item?.keyVisual?.[0]?.subTitle || "",
-        sort: (index+1) || 1,
-        delYn: item?.keyVisual?.[0]?.delYn || "N",
-        type: item.contentType === "V" ? "video" : "image",
-      }));
-
-      if (isKorean) {
-        setKrData({ keyVisual: mapped });
-        setKrId(newId);
-      } else {
-        setEnData({ keyVisual: mapped });
-        setEnId(newId);
-      }
+      showModal({
+        title: "저장 완료",
+        message:
+          lang === "ko"
+            ? "국문 저장이 완료되었습니다."
+            : "영문 저장이 완료되었습니다.",
+        showCancel: false,
+        onConfirm: () => {
+          window.location.reload();
+        },
+      });
     } catch (error) {
-      console.error("저장 실패", error);
-      alert("저장에 실패했습니다.");
+      console.error("저장 오류:", error);
+      showModal({
+        title: "저장 오류",
+        message: "저장 중 오류가 발생했습니다.",
+        showCancel: false,
+      });
     }
   };
 
@@ -129,11 +114,27 @@ export default function LifeStylePage() {
         onTabChange={(index) => setCurrentLang(index)}
       >
         <TabPanel>
-          <KeyVisualForm ref={krRef} data={krData.keyVisual} />
+          <KeyVisualForm
+            ref={keyVisualKRRef}
+            lang="ko"
+            mainId={ids.ko}
+            data={keyVisuals.ko}
+            setData={(newVal) =>
+              setKeyVisuals((prev) => ({ ...prev, ko: newVal }))
+            }
+          />
         </TabPanel>
 
         <TabPanel>
-          <KeyVisualForm ref={enRef} data={enData.keyVisual} />
+          <KeyVisualForm
+            ref={keyVisualENRef}
+            lang="en"
+            mainId={ids.en}
+            data={keyVisuals.en}
+            setData={(newVal) =>
+              setKeyVisuals((prev) => ({ ...prev, en: newVal }))
+            }
+          />
         </TabPanel>
       </Tabs>
       <div className="mt-8 flex justify-end">

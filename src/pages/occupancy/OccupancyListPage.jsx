@@ -23,6 +23,8 @@ export default function OccupancyListPage() {
   const [page, setPage] = useState(searchParams.get("page") || 1);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
+  const [officeOptions, setOfficeOptions] = useState([]);
+  const [officeMap, setOfficeMap] = useState({}); // code → label 매핑
 
   const size = 10;
 
@@ -42,6 +44,25 @@ export default function OccupancyListPage() {
   };
 
   useEffect(() => {
+    const fetchOfficeOptions = async () => {
+      try {
+        const res = await api.get("/api/v1/company/office/list");
+        if (res.data.success && Array.isArray(res.data.data)) {
+          const map = {};
+          res.data.data.forEach((opt) => {
+            map[opt.code] = opt.value;
+          });
+          setOfficeOptions(res.data.data);
+          setOfficeMap(map);
+        }
+      } catch (err) {
+        console.error("오피스 코드 목록 불러오기 실패:", err);
+      }
+    };
+    fetchOfficeOptions();
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await api.get("/api/v1/company", {
@@ -53,7 +74,10 @@ export default function OccupancyListPage() {
         //
         const filtered = result.filter((item) => {
           const koContent = item.contentList.find((c) => c.lang === "KO") || {};
-          const officeNames = item.officeList.map((o) => o.office).join(", ");
+          const officeNames = item.officeList
+            .map((o) => officeMap[o.office] || o.office)
+            .join(", ");
+
           const floorNames = item.officeList.map((o) => o.floor).join(", ");
 
           const nameMatch =
@@ -75,7 +99,9 @@ export default function OccupancyListPage() {
         const formatted = filtered.map((item) => {
           const koContent = item.contentList.find((c) => c.lang === "KO") || {};
           const enContent = item.contentList.find((c) => c.lang === "EN") || {};
-          const officeNames = item.officeList.map((o) => o.office).join(", ");
+          const officeNames = item.officeList
+            .map((o) => officeMap[o.office] || o.office)
+            .join(", ");
           const floorNames = item.officeList.map((o) => o.floor).join(", ");
 
           return {
@@ -102,7 +128,7 @@ export default function OccupancyListPage() {
     };
 
     fetchData();
-  }, [page, refreshKey]);
+  }, [page, refreshKey, officeMap]);
 
   return (
     <div>
@@ -129,10 +155,10 @@ export default function OccupancyListPage() {
                 }
               >
                 <option value="">전체</option>
-                <option value="A">OFFICE A</option>
-                <option value="B">OFFICE B</option>
-                <option value="C">OFFICE C</option>
-                <option value="D">OFFICE D</option>
+                <option value="OFFICE A">OFFICE A</option>
+                <option value="OFFICE B">OFFICE B</option>
+                <option value="OFFICE C">OFFICE C</option>
+                <option value="OFFICE D">OFFICE D</option>
               </Select>
             </Col>
 

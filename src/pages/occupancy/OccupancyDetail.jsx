@@ -296,7 +296,18 @@ export default function OccupancyDetail() {
       <div className="flex justify-end gap-4 px-6 pb-6">
         <Button onClick={handleSave}>저장</Button>
 
-        <Button onClick={() => navigate("/occupancy?refresh=" + Date.now())}>
+        <Button
+          type="button"
+          className="bg-gray-200"
+          onClick={() =>
+            showModal({
+              title: "이동 확인",
+              message: "입력된 내용이 사라집니다. 목록으로 돌아가시겠습니까?",
+              showCancel: true,
+              onConfirm: () => navigate("/occupancy"),
+            })
+          }
+        >
           목록
         </Button>
       </div>

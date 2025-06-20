@@ -1,4 +1,10 @@
-import Button from "@/components/common/Button";
+import { useEffect, forwardRef, useImperativeHandle } from "react";
+import {
+  useForm,
+  FormProvider,
+  Controller,
+  useFieldArray,
+} from "react-hook-form";
 import Upload from "@/components/common/Upload";
 import FieldGroup from "@/components/form/FieldGroup";
 import FormInput from "@/components/form/FormInput";
@@ -6,115 +12,127 @@ import FormRadioGroup from "@/components/form/FormRadioGroup";
 import Box from "@/components/layout/Box";
 import Row from "@/components/layout/Row";
 import Title from "@/components/layout/Title";
-import { useEffect } from "react";
-import { FormProvider, useForm, Controller } from "react-hook-form";
-import { forwardRef, useImperativeHandle } from "react";
+import Button from "@/components/common/Button";
 
 const MAX_KV_LENGTH = 4;
 
-const KeyVisualForm = forwardRef(({ data }, ref) => {
-  const methods = useForm({
-    mode: "onChange",
-    defaultValues: {
-      kv: [
-        { type: "image", title: "", subtitle: "", file1: null },
-      ],
-    },
-  });
+const KeyVisualForm = forwardRef(
+  ({ data = [], lang = "KO", mainId = null }, ref) => {
+    const methods = useForm({
+      defaultValues: { kv: data && Array.isArray(data) ? data : [] },
+    });
+    const { control, register, reset, resetField, getValues } = methods;
+    const watch = methods.watch;
+    const { fields, append, remove } = useFieldArray({
+      control,
+      name: "kv",
+    });
 
-  const { reset, resetField, register, getValues } = methods;
-  
-
-  useEffect(() => {
-    if (Array.isArray(data)) {
-      const mappedData =
-        data.length > 0
-          ? data.map((item) => ({
-              ...item,
-              file1: item.contentFilePc?.path
-                ? { path: item.contentFilePc.path }
-                : null,
-              file2: item.contentFileMo?.path
-                ? { path: item.contentFileMo.path }
-                : null,
-            }))
-          : [
-              {
-                type: "image",
-                title: "",
-                subtitle: "",
-                file1: null,
-                file2: null,
-              },
-            ];
-
-      reset({ kv: mappedData });
-    }
-  }, [data]);
-
-  const toImageMeta = (file) => {
-    if (!file || !file.path) return null;
-
-    const originalName = file.originalName || file.name || "";
-    const extension = file.extension || "." + originalName.split(".").pop();
-
-    return {
-      id: file.id ?? null,
-      originalName,
-      name: file.name ?? originalName,
-      size: file.size ?? 0,
-      extension,
-      mime: file.mime || "image/jpeg",
-      classification: file.classification || "whatson",
-      path: file.path,
-      status: file.status ?? "C", // 기본은 신규
-    };
-  };
-
-  useImperativeHandle(ref, () => ({
-    submit: async () => {
-      const values = getValues();
-
-      // 필수 입력 체크
-      console.log("Form Values:", values);
-
-      
-      const hasEmpty = values.kv.some((item) => {
-        return !item.title || !item.subtitle || !item.file1;
+    useEffect(() => {
+      reset({
+        kv:
+          Array.isArray(data) && data.length > 0
+            ? data
+            : [
+                {
+                  type: "image",
+                  title: "",
+                  subtitle: "",
+                  file1: null,
+                  file2: null,
+                },
+              ],
       });
+    }, [data]);
 
-      if (hasEmpty) {
-        alert("필수 항목이 비어 있습니다.");
-        return null;
-      }
+    useImperativeHandle(ref, () => ({
+      submit: async (onError) => {
+        const inputList = getValues("kv") || [];
+        const originalList = data || [];
 
-      // API 전송용 데이터 포맷으로 변환
-      const result = values.kv.map((item, index) => ({
-        id: item.id ?? null, // <-- 기존 ID 유지
-        contentType: item.type === "video" ? "V" : "I",
-        contentFilePc: toImageMeta(item.file1),
-        contentFileMo: toImageMeta(item.file2),
-        title: item.title,
-        subTitle: item.subtitle,
-        sort: index + 1,
-        delYn:
-          item.file1?.status === "D" && item.file2?.status === "D" ? "Y" : "N",
-      }));
+        const isValid = inputList.every(
+          (item) =>
+            item.title && item.subtitle && item.file1?.path && item.file2?.path
+        );
 
-      return result;
-    },
-  }));
+        if (!isValid) {
+          onError?.("필수 항목을 모두 입력해 주세요.");
+          return null;
+        }
 
-  return (
-    <FormProvider {...methods}>
-      {/*폼을 제출하면 상위에 전달 */}
-      <form className="space-y-8 p-4">
-        <FieldGroup name="kv">
-          {({ fields, field, index, append, remove }) => {
-            const idTitle = `title-${field.id}`;
-            const idSubtitle = `subtitle-${field.id}`;
+        const prepareFile = (file, fallback) => {
+          if (!file || !file.path) return {};
 
-            return (
+          return {
+            path: file.path,
+            originalName: file.originalName ?? fallback?.originalName ?? "",
+            name: file.name ?? fallback?.name ?? "",
+            extension: file.extension ?? fallback?.extension ?? "",
+            mime: file.mime ?? fallback?.mime ?? "",
+            classification:
+              file.classification ?? fallback?.classification ?? "whatson",
+            size: file.size ?? fallback?.size ?? 0,
+            status:
+              file.status ??
+              (fallback
+                ? file.path !== fallback.path
+                  ? "E" // 변경됨
+                  : "R" // 유지됨
+                : "C"), // 새로 추가
+          };
+        };
+
+        const validList = inputList.map((item, index) => {
+          const origin = originalList.find((o) => o.id === item.id) ?? {};
+
+          const result = {
+            id: item.id ?? null,
+            contentType: item.type === "image" ? "I" : "V",
+            title: item.title,
+            subTitle: item.subtitle,
+            sort: index + 1,
+            delYn: "N",
+            contentFilePc: prepareFile(item.file1, origin.contentFilePc),
+            contentFileMo: prepareFile(item.file2, origin.contentFileMo),
+          };
+
+          return result;
+        });
+
+        const currentIds = validList.map((v) => v.id).filter(Boolean);
+        const deletedIds = (originalList || [])
+          .map((d) => d.id)
+          .filter((id) => !currentIds.includes(id));
+
+        return {
+          id: mainId ?? 0,
+          lang: lang.toLowerCase(),
+          delYn: "N",
+          keyVisual: [
+            ...validList,
+            ...deletedIds.map((id) => {
+              const origin = originalList.find((o) => o.id === id);
+              return {
+                id,
+                contentType: origin?.contentType ?? "I",
+                title: origin?.title ?? "",
+                subTitle: origin?.subTitle ?? "",
+                sort: origin?.sort ?? 0,
+                delYn: "Y",
+                contentFilePc: origin?.contentFilePc ?? {},
+                contentFileMo: origin?.contentFileMo ?? {},
+              };
+            }),
+          ],
+        };
+      },
+    }));
+
+    return (
+      <FormProvider {...methods}>
+        <form className="space-y-8 p-4">
+          <FieldGroup name="kv">
+            {({ fields, field, index, append, remove }) => (
               <Box
                 key={field.id}
                 className="mb-2 rounded-md border-2 border-gray-200"
@@ -129,48 +147,63 @@ const KeyVisualForm = forwardRef(({ data }, ref) => {
                       { label: "이미지", value: "image" },
                       { label: "영상", value: "video" },
                     ]}
-                    required
                   />
                 </Row>
 
                 <Row className="pb-4">
                   <Controller
                     name={`kv.${index}.file1`}
-                    control={methods.control}
-                    render={({ field }) => (
-                      <Upload
-                        {...field}
-                        label="PC 이미지"
-                        preview
-                        acceptWith={`kv.${index}.type`}
-                        classification="whatson"
-                      />
-                    )}
+                    control={control}
+                    render={({ field }) => {
+                      const type = watch(`kv.${index}.type`); // 'image' or 'video'
+                      const isVideo = type === "video";
+                      return (
+                        <Upload
+                          {...field}
+                          name={`kv.${index}.file1`}
+                          value={field.value}
+                          onChange={(val) => field.onChange(val)}
+                          label={isVideo ? "PC 영상" : "PC 이미지"}
+                          accept={isVideo ? "video/*" : "image/*"}
+                          required
+                          classification="whatson"
+                        />
+                      );
+                    }}
                   />
                 </Row>
+
                 <Row className="pb-4">
                   <Controller
                     name={`kv.${index}.file2`}
-                    control={methods.control}
-                    render={({ field }) => (
-                      <Upload
-                        {...field}
-                        label="MO 이미지"
-                        acceptWith={`kv.${index}.type`}
-                        classification="whatson"
-                      />
-                    )}
+                    control={control}
+                    render={({ field }) => {
+                      const type = watch(`kv.${index}.type`);
+                      const isVideo = type === "video";
+                      return (
+                        <Upload
+                          {...field}
+                          name={`kv.${index}.file2`}
+                          value={field.value}
+                          onChange={(val) => field.onChange(val)}
+                          label={isVideo ? "MO 영상" : "MO 이미지"}
+                          accept={isVideo ? "video/*" : "image/*"}
+                          required
+                          classification="whatson"
+                        />
+                      );
+                    }}
                   />
                 </Row>
 
                 <Row className="pb-4">
                   <FormInput
-                    id={idTitle}
                     label="타이틀"
                     fieldName={`kv.${index}.title`}
                     maxLength={50}
+                    showDefaultInfo
                     required
-                    placeholder="타이틀을 입력해주세요"
+                    placeholder="타이틀 입력"
                     {...register(`kv.${index}.title`)}
                     onClear={() => resetField(`kv.${index}.title`)}
                   />
@@ -178,28 +211,29 @@ const KeyVisualForm = forwardRef(({ data }, ref) => {
 
                 <Row className="pb-4">
                   <FormInput
-                    id={idSubtitle}
                     label="서브타이틀"
                     fieldName={`kv.${index}.subtitle`}
                     maxLength={100}
+                    showDefaultInfo
                     required
-                    placeholder="서브타이틀을 입력해주세요."
+                    placeholder="서브타이틀 입력"
                     {...register(`kv.${index}.subtitle`)}
                     onClear={() => resetField(`kv.${index}.subtitle`)}
                   />
                 </Row>
 
                 <Row className="flex justify-center gap-2">
-                  {fields.length === index + 1 && fields.length < MAX_KV_LENGTH && (
-                    <Button
-                      type="button"
-                      onClick={() =>
-                        append({ type: "image", title: "", subtitle: "" })
-                      }
-                    >
-                      추가
-                    </Button>
-                  )}
+                  {fields.length < MAX_KV_LENGTH &&
+                    index === fields.length - 1 && (
+                      <Button
+                        type="button"
+                        onClick={() =>
+                          append({ type: "image", title: "", subtitle: "" })
+                        }
+                      >
+                        추가
+                      </Button>
+                    )}
                   {index > 0 && (
                     <Button
                       type="button"
@@ -211,12 +245,12 @@ const KeyVisualForm = forwardRef(({ data }, ref) => {
                   )}
                 </Row>
               </Box>
-            );
-          }}
-        </FieldGroup>
-      </form>
-    </FormProvider>
-  );
-});
+            )}
+          </FieldGroup>
+        </form>
+      </FormProvider>
+    );
+  }
+);
 
 export default KeyVisualForm;

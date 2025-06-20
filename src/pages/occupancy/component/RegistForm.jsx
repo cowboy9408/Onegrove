@@ -99,11 +99,6 @@ const RegistForm = forwardRef(
         const locations = values.locations || [];
         const isValid = await methods.trigger();
 
-        if (!values.mainImage || !values.mainImage.path) {
-          onError?.("대표 이미지를 등록해주세요.");
-          return null;
-        }
-
         if (!isValid) {
           const errors = methods.formState.errors;
 
@@ -153,6 +148,10 @@ const RegistForm = forwardRef(
           setTimeout(() => onError?.("대표명을 입력해주세요."), 0);
           return null;
         }
+        if (!values.mainImage || !values.mainImage.path) {
+          onError?.("대표 이미지를 등록해주세요.");
+          return null;
+        }
         if (!values.phone) {
           setTimeout(() => onError?.("전화번호를 입력해주세요."), 0);
           return null;
@@ -192,15 +191,13 @@ const RegistForm = forwardRef(
           };
         };
 
-        const sortedOfficeList = (values.locations || [])
-          .filter((item) => item.delYn !== "Y")
-          .map((item, idx) => ({
-            id: item.id ?? null,
-            office: item.office?.trim(),
-            floor: item.floor?.trim(),
-            sort: idx + 1,
-            delYn: "N",
-          }));
+        const sortedOfficeList = (values.locations || []).map((item, idx) => ({
+          id: item.id ?? null,
+          office: item.office?.trim(),
+          floor: item.floor?.trim(),
+          sort: idx + 1,
+          delYn: item.delYn ?? "N", // 삭제 여부 반드시 포함
+        }));
 
         return {
           id: data?.id,
@@ -226,6 +223,7 @@ const RegistForm = forwardRef(
           <div className="mx-auto max-w-3xl space-y-6 rounded-lg bg-white p-8">
             <Input
               label="입주사명"
+              required
               {...register("companyName", {
                 required: "입주사명을 입력해주세요.",
                 validate: (value) =>
@@ -267,6 +265,7 @@ const RegistForm = forwardRef(
             />
             <Input
               label="대표명"
+              required
               {...register("ceoName", {
                 required: "대표명을 입력해주세요.",
                 validate: (value) =>

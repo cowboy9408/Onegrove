@@ -6,7 +6,7 @@ import api from "@/lib/apiClient";
 import Button from "@/components/common/Button";
 import useModal from "@/hooks/useModal";
 
-export default function MainBannerPage() {
+export default function WorkBannerPage() {
   const koRef = useRef();
   const enRef = useRef();
 
