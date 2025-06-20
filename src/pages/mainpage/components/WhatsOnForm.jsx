@@ -56,7 +56,7 @@ const WhatsOnForm = forwardRef(({ data, mainId = null, lang = "KO" }, ref) => {
       const isDeleted = hadFileBefore && !hasFileNow;
 
       if (!value.subtitle || !value.url || (!hasFileNow && !isDeleted)) {
-        return onError?.("필수 값이 누락되었습니다.");
+        return onError?.("필수 항목을 확인해주세요.");
       }
 
       return {
@@ -91,6 +91,7 @@ const WhatsOnForm = forwardRef(({ data, mainId = null, lang = "KO" }, ref) => {
               maxLength={200}
               {...register("whatson.subtitle")}
               error={errors.whatson?.subtitle?.message}
+              required
             />
           </Row>
 
@@ -102,7 +103,6 @@ const WhatsOnForm = forwardRef(({ data, mainId = null, lang = "KO" }, ref) => {
                 { label: "이미지", value: "image" },
                 { label: "영상", value: "video" },
               ]}
-              required
               error={errors.whatson?.type?.message}
             />
           </Row>
@@ -111,6 +111,7 @@ const WhatsOnForm = forwardRef(({ data, mainId = null, lang = "KO" }, ref) => {
               name={`whatson.image`}
               label="이미지"
               error={errors.whatson?.image?.message}
+              required
             />
           </Row>
           <Row className="pb-4">

@@ -90,7 +90,7 @@ const EtcContentForm = forwardRef(
           !content.button ||
           !content.contents?.length
         ) {
-          return onError?.("필수 입력값이 누락되었습니다.");
+          return onError?.("필수 항목을 확인해주세요.");
         }
 
         const first = content.contents[0];
@@ -132,11 +132,13 @@ const EtcContentForm = forwardRef(
                       name={`etc.imagePC`}
                       label={`PC 이미지`}
                       error={errors.etc?.image?.message}
+                      required
                     />
                     <Upload
                       name={`etc.imageMO`}
                       label={`MO 이미지`}
                       error={errors.etc?.image?.message}
+                      required
                     />
                   </Row>
 
@@ -210,7 +212,7 @@ const EtcContentForm = forwardRef(
                         {...register("etc.contents", { required: true })}
                       />
                     </Col>
-                    <Col className="flex self-end gap-2">
+                    <Col className="flex gap-2 self-end">
                       <Button
                         className="h-12 w-full"
                         onClick={() =>

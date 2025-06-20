@@ -10,8 +10,11 @@ import WhatContent from "./components/WhatsonContent";
 import { useForm, FormProvider } from "react-hook-form";
 import api from "@/lib/apiClient";
 import Button from "@/components/common/Button";
+import useModal from "@/hooks/useModal";
 
 export default function MainPage() {
+  const { showModal } = useModal(); // MainPage 함수 내 선언
+
   const keyVisualKRRef = useRef();
   const keyVisualENRef = useRef();
   const [keyVisuals, setKeyVisuals] = useState({
@@ -204,44 +207,86 @@ export default function MainPage() {
 
   const handleSaveKeyVisual = async (lang) => {
     const ref = lang === "ko" ? keyVisualKRRef : keyVisualENRef;
-    const payload = await ref.current?.submit((msg) => alert(msg));
+    const payload = await ref.current?.submit((msg) =>
+      showModal({
+        title: "입력 확인",
+        message: msg || "필수 항목을 입력해주세요.",
+        showCancel: false,
+      })
+    );
     if (!payload) return;
 
     try {
       const res = await api.post("/api/v1/main/insert/keyVisual", payload);
       if (res.data?.success) {
-        alert(`${lang.toUpperCase()} 저장 완료`);
-        await fetchMainData(lang); // 다시 조회해서 반영
+        showModal({
+          title: "저장 완료",
+          message: `${lang.toUpperCase()} Key Visual 저장이 완료되었습니다.`,
+          showCancel: false,
+        });
+        await fetchMainData(lang);
       } else {
-        alert("저장 실패: " + res.data?.message);
+        showModal({
+          title: "저장 실패",
+          message: res.data?.message || "서버 응답 오류입니다.",
+          showCancel: false,
+        });
       }
     } catch (e) {
-      alert("저장 중 오류 발생");
+      showModal({
+        title: "오류 발생",
+        message: "저장 중 오류가 발생했습니다.",
+        showCancel: false,
+      });
       console.error(e);
     }
   };
   const handleSaveWhatsOn = async (lang) => {
     const ref = lang === "ko" ? whatsOnKRRef : whatsOnENRef;
-    const payload = await ref.current?.submit((msg) => alert(msg));
+    const payload = await ref.current?.submit((msg) =>
+      showModal({
+        title: "입력 확인",
+        message: msg || "필수 항목을 입력해주세요.",
+        showCancel: false,
+      })
+    );
     if (!payload) return;
 
     try {
       const res = await api.post("/api/v1/main/insert/mainWhat", payload);
       if (res.data?.success) {
-        alert(`${lang.toUpperCase()} What's On 저장 완료`);
-        await fetchMainData(lang); // 최신 데이터 다시 로드
+        showModal({
+          title: "저장 완료",
+          message: `${lang.toUpperCase()} What's On 저장이 완료되었습니다.`,
+          showCancel: false,
+        });
+        await fetchMainData(lang);
       } else {
-        alert("저장 실패: " + res.data?.message);
+        showModal({
+          title: "저장 실패",
+          message: res.data?.message || "서버 응답 오류입니다.",
+          showCancel: false,
+        });
       }
     } catch (e) {
-      alert("저장 중 오류 발생");
+      showModal({
+        title: "오류 발생",
+        message: "저장 중 오류가 발생했습니다.",
+        showCancel: false,
+      });
       console.error(e);
     }
   };
 
   const handleSaveWhatContent = async (lang) => {
     const ref = lang === "ko" ? whatContentKRRef : whatContentENRef;
-    const payload = await ref.current?.submit((msg) => alert(msg));
+    const payload = await ref.current?.submit((msg) =>
+      showModal({
+        title: "입력 확인",
+        message: msg || "필수 항목을 입력해주세요.",
+        showCancel: false,
+      })
+    );
     if (!payload) return;
 
     try {
@@ -250,39 +295,75 @@ export default function MainPage() {
         payload
       );
       if (res.data?.success) {
-        alert(`${lang.toUpperCase()} 콘텐츠 저장 완료`);
+        showModal({
+          title: "저장 완료",
+          message: `${lang.toUpperCase()} 콘텐츠 저장이 완료되었습니다.`,
+          showCancel: false,
+        });
         await fetchMainData(lang);
       } else {
-        alert("저장 실패: " + res.data?.message);
+        showModal({
+          title: "저장 실패",
+          message: res.data?.message || "서버 응답 오류입니다.",
+          showCancel: false,
+        });
       }
     } catch (e) {
-      alert("저장 중 오류 발생");
+      showModal({
+        title: "오류 발생",
+        message: "저장 중 오류가 발생했습니다.",
+        showCancel: false,
+      });
       console.error(e);
     }
   };
 
   const handleSaveLifestyle = async (lang) => {
     const ref = lang === "ko" ? lifestyleKRRef : lifestyleENRef;
-    const payload = await ref.current?.submit((msg) => alert(msg));
+    const payload = await ref.current?.submit((msg) =>
+      showModal({
+        title: "입력 확인",
+        message: msg || "필수 항목을 입력해주세요.",
+        showCancel: false,
+      })
+    );
     if (!payload) return;
 
     try {
       const res = await api.post("/api/v1/main/insert/mainLife", payload);
       if (res.data?.success) {
-        alert(`${lang.toUpperCase()} Lifestyle 저장 완료`);
-        await fetchMainData(lang); // 최신 데이터 반영
+        showModal({
+          title: "저장 완료",
+          message: `${lang.toUpperCase()} Lifestyle 저장이 완료되었습니다.`,
+          showCancel: false,
+        });
+        await fetchMainData(lang);
       } else {
-        alert("저장 실패: " + res.data?.message);
+        showModal({
+          title: "저장 실패",
+          message: res.data?.message || "서버 응답 오류입니다.",
+          showCancel: false,
+        });
       }
     } catch (e) {
-      alert("저장 중 오류 발생");
+      showModal({
+        title: "오류 발생",
+        message: "저장 중 오류가 발생했습니다.",
+        showCancel: false,
+      });
       console.error(e);
     }
   };
 
   const handleSaveWork = async (lang) => {
     const ref = lang === "ko" ? workKRRef : workENRef;
-    const payload = await ref.current?.submit((msg) => alert(msg));
+    const payload = await ref.current?.submit((msg) =>
+      showModal({
+        title: "입력 확인",
+        message: msg || "필수 항목을 입력해주세요.",
+        showCancel: false,
+      })
+    );
     if (!payload) return;
 
     try {
@@ -292,20 +373,38 @@ export default function MainPage() {
       });
 
       if (res.data?.success) {
-        alert("Work 저장 완료");
+        showModal({
+          title: "저장 완료",
+          message: "Work 저장이 완료되었습니다.",
+          showCancel: false,
+        });
         await fetchMainData(lang);
       } else {
-        alert("저장 실패: " + res.data?.message);
+        showModal({
+          title: "저장 실패",
+          message: res.data?.message || "서버 응답 오류입니다.",
+          showCancel: false,
+        });
       }
     } catch (e) {
-      alert("저장 중 오류 발생");
+      showModal({
+        title: "오류 발생",
+        message: "저장 중 오류가 발생했습니다.",
+        showCancel: false,
+      });
       console.error(e);
     }
   };
 
   const handleSaveEtcContent = async (lang) => {
     const ref = lang === "ko" ? etcKRRef : etcENRef;
-    const payload = await ref.current?.submit((msg) => alert(msg));
+    const payload = await ref.current?.submit((msg) =>
+      showModal({
+        title: "입력 확인",
+        message: msg || "필수 항목을 입력해주세요.",
+        showCancel: false,
+      })
+    );
     if (!payload) return;
 
     try {
@@ -314,13 +413,25 @@ export default function MainPage() {
         payload
       );
       if (res.data?.success) {
-        alert(`${lang.toUpperCase()} 연계 콘텐츠 저장 완료`);
-        await fetchMainData(lang); // 필요 시 최신 데이터 반영
+        showModal({
+          title: "저장 완료",
+          message: `${lang.toUpperCase()} 연계 콘텐츠 저장이 완료되었습니다.`,
+          showCancel: false,
+        });
+        await fetchMainData(lang);
       } else {
-        alert("저장 실패: " + res.data?.message);
+        showModal({
+          title: "저장 실패",
+          message: res.data?.message || "서버 응답 오류입니다.",
+          showCancel: false,
+        });
       }
     } catch (e) {
-      alert("저장 중 오류 발생");
+      showModal({
+        title: "오류 발생",
+        message: "저장 중 오류가 발생했습니다.",
+        showCancel: false,
+      });
       console.error(e);
     }
   };

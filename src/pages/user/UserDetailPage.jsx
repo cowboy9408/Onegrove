@@ -5,10 +5,12 @@ import Button from "@/components/common/Button";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "@/lib/apiClient";
 import Select from "@/components/common/Select";
+import useModal from "@/hooks/useModal";
 
 export default function UserDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showModal } = useModal();
   console.log("현재 상세 페이지 ID:", id);
 
   const [form, setForm] = useState({
@@ -111,39 +113,71 @@ export default function UserDetailPage() {
   };
 
   const handleUpdate = async () => {
-    if (!form.name || !form.username || !form.phone || !form.email) {
-      alert("모든 필수 항목을 입력해주세요.");
+    if (
+      !form.name ||
+      !form.username ||
+      !form.password ||
+      !form.confirmPassword ||
+      !form.phone ||
+      !form.email ||
+      !form.company
+    ) {
+      showModal({
+        title: "필수 항목 누락",
+        message: "모든 필수 항목을 입력해주세요.",
+        showCancel: false,
+      });
       return;
     }
 
     console.log("폼 데이터:", form);
-    try {
-      const payload = {
-        id: Number(id),
-        companyId: form.company,
-        role: form.role,
-        name: form.name,
-        phoneNumber: formatPhoneNumber(form.phone),
 
-        email: form.email,
-        gender:
-          form.gender === "male" ? "M" : form.gender === "female" ? "W" : "",
-        isUse: form.status === "active" ? "Y" : "N",
-        isManager: "N",
-        isReservation: form.isReservation,
-      };
+    const payload = {
+      id: Number(id),
+      companyId: form.company,
+      role: form.role,
+      name: form.name,
+      phoneNumber: formatPhoneNumber(form.phone),
 
-      const res = await api.post("/api/v1/user/member/update", payload);
-      if (res.data.success) {
-        alert("수정이 완료되었습니다.");
-        navigate("/user");
-      } else {
-        alert("수정 실패: " + res.data.message);
-      }
-    } catch (error) {
-      console.error("수정 요청 실패:", error);
-      alert("서버 오류로 수정에 실패했습니다.");
-    }
+      email: form.email,
+      gender:
+        form.gender === "male" ? "M" : form.gender === "female" ? "W" : "",
+      isUse: form.status === "active" ? "Y" : "N",
+      isManager: "N",
+      isReservation: form.isReservation,
+    };
+
+    showModal({
+      title: "수정 확인",
+      message: "입력한 정보로 수정하시겠습니까?",
+      showCancel: true,
+      onConfirm: async () => {
+        try {
+          const res = await api.post("/api/v1/user/member/update", payload);
+          if (res.data.success) {
+            showModal({
+              title: "수정 완료",
+              message: "수정이 완료되었습니다.",
+              showCancel: false,
+              onConfirm: () => navigate("/user"),
+            });
+          } else {
+            showModal({
+              title: "수정 실패",
+              message: res.data.message || "수정에 실패했습니다.",
+              showCancel: false,
+            });
+          }
+        } catch (error) {
+          console.error("수정 요청 실패:", error);
+          showModal({
+            title: "서버 오류",
+            message: "서버 오류로 수정에 실패했습니다.",
+            showCancel: false,
+          });
+        }
+      },
+    });
   };
 
   return (
@@ -154,8 +188,10 @@ export default function UserDetailPage() {
             <Select
               label="입주사"
               value={form.company}
+              re
               onChange={(e) => handleChange("company", Number(e.target.value))}
               className="w-[735px]"
+              required
             >
               <option value="">선택하세요</option>
               {companyOptions.map((item) => (
@@ -192,6 +228,7 @@ export default function UserDetailPage() {
             label="이름"
             value={form.name}
             onChange={(e) => handleChange("name", e.target.value)}
+            required
           />
           <div>
             <p className="mb-2 text-sm font-medium text-gray-800">성별</p>
@@ -220,6 +257,7 @@ export default function UserDetailPage() {
             value={form.username}
             onChange={(e) => handleChange("username", e.target.value)}
             disabled
+            required
           />
         </div>
 
@@ -227,6 +265,7 @@ export default function UserDetailPage() {
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-800">
               전화번호
+              <span className="text-red-500">*</span>
             </label>
             <div className="flex items-center">
               <span className="rounded-l-md px-3 py-2 text-base">010 -</span>
@@ -244,6 +283,7 @@ export default function UserDetailPage() {
             label="이메일"
             value={form.email}
             onChange={(e) => handleChange("email", e.target.value)}
+            required
           />
         </div>
         <div>
@@ -313,7 +353,18 @@ export default function UserDetailPage() {
           수정
         </Button>
 
-        <Button className="bg-black-200" onClick={() => navigate("/user")}>
+        <Button
+          className="bg-black-200"
+          onClick={() =>
+            showModal({
+              title: "이동 확인",
+              message:
+                "목록으로 돌아가면 입력한 정보가 사라집니다. 이동하시겠습니까?",
+              showCancel: true,
+              onConfirm: () => navigate("/user"),
+            })
+          }
+        >
           목록
         </Button>
       </div>
