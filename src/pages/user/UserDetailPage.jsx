@@ -116,8 +116,6 @@ export default function UserDetailPage() {
     if (
       !form.name ||
       !form.username ||
-      !form.password ||
-      !form.confirmPassword ||
       !form.phone ||
       !form.email ||
       !form.company
