@@ -27,7 +27,7 @@ function ContentArea() {
       >
         <Outlet />
       </main>
-      <Footer />
+      <Footer className="mt-auto" />
     </div>
   );
 }
