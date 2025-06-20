@@ -323,7 +323,6 @@ export default function EventDetail() {
         );
       }
 
-      alert("저장 완료");
       setIsReadOnly(true);
       navigate("/contents/whatson/event/list?refresh=" + Date.now());
     } catch (err) {
