@@ -99,11 +99,6 @@ const RegistForm = forwardRef(
         const locations = values.locations || [];
         const isValid = await methods.trigger();
 
-        if (!values.mainImage || !values.mainImage.path) {
-          onError?.("대표 이미지를 등록해주세요.");
-          return null;
-        }
-
         if (!isValid) {
           const errors = methods.formState.errors;
 
@@ -151,6 +146,10 @@ const RegistForm = forwardRef(
 
         if (!values.ceoName) {
           setTimeout(() => onError?.("대표명을 입력해주세요."), 0);
+          return null;
+        }
+        if (!values.mainImage || !values.mainImage.path) {
+          onError?.("대표 이미지를 등록해주세요.");
           return null;
         }
         if (!values.phone) {
@@ -224,6 +223,7 @@ const RegistForm = forwardRef(
           <div className="mx-auto max-w-3xl space-y-6 rounded-lg bg-white p-8">
             <Input
               label="입주사명"
+              required
               {...register("companyName", {
                 required: "입주사명을 입력해주세요.",
                 validate: (value) =>
@@ -265,6 +265,7 @@ const RegistForm = forwardRef(
             />
             <Input
               label="대표명"
+              required
               {...register("ceoName", {
                 required: "대표명을 입력해주세요.",
                 validate: (value) =>

@@ -4,6 +4,7 @@ import Button from "@/components/common/Button";
 import Radio from "@/components/common/Radio";
 import { useNavigate } from "react-router-dom";
 import api from "@/lib/apiClient";
+import useModal from "@/hooks/useModal";
 
 export default function AdminRegist() {
   const [form, setForm] = useState({
@@ -18,6 +19,7 @@ export default function AdminRegist() {
     email: "",
   });
   const navigate = useNavigate();
+  const { showModal } = useModal();
 
   // const getRoleValue = (role) => {
   //   switch (role) {
@@ -45,12 +47,20 @@ export default function AdminRegist() {
       !form.phone ||
       !form.email
     ) {
-      alert("모든 필수 항목을 입력해주세요.");
+      showModal({
+        title: "필수 항목 누락",
+        message: "모든 필수 항목을 입력해주세요.",
+        showCancel: false,
+      });
       return;
     }
 
     if (form.password !== form.confirmPassword) {
-      alert("비밀번호가 일치하지 않습니다.");
+      showModal({
+        title: "비밀번호 불일치",
+        message: "비밀번호가 일치하지 않습니다.",
+        showCancel: false,
+      });
       return;
     }
 
@@ -73,21 +83,32 @@ export default function AdminRegist() {
       isReservation: "Y",
     };
 
-    try {
-      await api.post("/api/v1/user/admin/insert", payload);
-      alert("등록이 완료되었습니다.");
-      navigate("/admin/list");
-    } catch (error) {
-      console.error("등록 오류:", error);
-      if (
-        error?.response?.data?.message?.includes("Duplicate entry") &&
-        error?.response?.data?.message?.includes("UQ_username")
-      ) {
-        alert("이미 존재하는 아이디입니다. 다른 아이디를 입력해주세요.");
-      } else {
-        alert("등록에 실패했습니다. 관리자에게 문의하세요.");
-      }
-    }
+    showModal({
+      title: "등록 확인",
+      message: "관리자 계정을 등록하시겠습니까?",
+      showCancel: true,
+      onConfirm: async () => {
+        try {
+          await api.post("/api/v1/user/admin/insert", payload);
+          showModal({
+            title: "등록 완료",
+            message: "계정이 성공적으로 등록되었습니다.",
+            showCancel: false,
+            onConfirm: () => navigate("/admin/list"),
+          });
+        } catch (error) {
+          console.error("등록 오류:", error);
+          if (
+            error?.response?.data?.message?.includes("Duplicate entry") &&
+            error?.response?.data?.message?.includes("UQ_username")
+          ) {
+            alert("이미 존재하는 아이디입니다. 다른 아이디를 입력해주세요.");
+          } else {
+            alert("등록에 실패했습니다. 관리자에게 문의하세요.");
+          }
+        }
+      },
+    });
   };
 
   return (
@@ -228,7 +249,15 @@ export default function AdminRegist() {
         <Button
           type="button"
           className="bg-gray-200"
-          onClick={() => navigate("/admin/list")}
+          onClick={() =>
+            showModal({
+              title: "이동 확인",
+              message:
+                "목록으로 이동하면 작성한 정보가 사라집니다. 이동하시겠습니까?",
+              showCancel: true,
+              onConfirm: () => navigate("/admin/list"),
+            })
+          }
         >
           목록
         </Button>

@@ -5,8 +5,10 @@ import KeyVisualForm from "./components/KeyVisualForm";
 import api from "@/lib/apiClient";
 import Button from "@/components/common/Button";
 import TopContentForm from "./components/TopContentForm";
+import useModal from "@/hooks/useModal";
 
 export default function WhatsonPage() {
+  const { showModal } = useModal();
   const emptyData = {
     keyVisual: [],
     etc: [],
@@ -93,10 +95,24 @@ export default function WhatsonPage() {
     const topRef = currentLang === 0 ? topContentKRRef : topContentENRef;
 
     try {
-      const keyVisualResult = await kvRef.current.submit((err) => alert(err));
-      const topContentResult = await topRef.current.submit((err) => alert(err));
+      const keyVisualResult = await kvRef.current.submit((err) =>
+        showModal({
+          title: "입력 확인",
+          message: err || "필수 항목을 입력해주세요.",
+          showCancel: false,
+        })
+      );
+      const topContentResult = await topRef.current.submit((err) =>
+        showModal({
+          title: "입력 확인",
+          message: err || "필수 항목을 입력해주세요.",
+          showCancel: false,
+        })
+      );
 
       console.log("TopContent submit result:", topContentResult);
+
+      if (!keyVisualResult || !topContentResult) return;
 
       const eventId = ids[lang] ?? null;
 
@@ -127,14 +143,31 @@ export default function WhatsonPage() {
       );
       console.log(payload);
       if (res.data?.success) {
-        alert(lang === "ko" ? "국문 저장 완료" : "영문 저장 완료");
-        window.location.reload();
+        showModal({
+          title: "저장 완료",
+          message:
+            lang === "ko"
+              ? "국문 저장이 완료되었습니다."
+              : "영문 저장이 완료되었습니다.",
+          showCancel: false,
+          onConfirm: () => {
+            window.location.reload();
+          },
+        });
       } else {
-        alert("저장 실패: " + (res.data?.message || "알 수 없는 오류"));
+        showModal({
+          title: "저장 실패",
+          message: res.data?.message || "알 수 없는 오류가 발생했습니다.",
+          showCancel: false,
+        });
       }
     } catch (error) {
       console.error("저장 오류:", error);
-      alert("저장 중 오류가 발생했습니다.");
+      showModal({
+        title: "저장 오류",
+        message: "서버와의 통신 중 문제가 발생했습니다.",
+        showCancel: false,
+      });
     }
   };
 
