@@ -1,4 +1,4 @@
-import { useEffect, forwardRef, useImperativeHandle } from "react";
+import { useEffect, forwardRef, useImperativeHandle, useRef } from "react";
 import {
   useForm,
   FormProvider,
@@ -23,12 +23,15 @@ const KeyVisualForm = forwardRef(
     });
     const { control, register, reset, resetField, getValues } = methods;
 
+    const deletedIdRef = useRef([]);
+
     const { fields, append, remove } = useFieldArray({
       control,
       name: "kv",
     });
 
     useEffect(() => {
+      deletedIdRef.current = [];
       reset({
         kv:
           Array.isArray(data) && data.length > 0
@@ -61,6 +64,7 @@ const KeyVisualForm = forwardRef(
         const previousIds = (data || []).map((d) => d.id).filter(Boolean);
         const currentIds = validList.map((item) => item.id).filter(Boolean);
         const deletedIds = previousIds.filter((id) => !currentIds.includes(id));
+        deletedIdRef.current = [];
 
         return {
           currentUser: 1,
@@ -75,13 +79,15 @@ const KeyVisualForm = forwardRef(
               subTitle: item.subtitle,
               contentType: item.type === "image" ? "I" : "V",
               sort: String(index + 1),
-              delYn: null,
+              delYn: "N",
               pcFile: item.file1,
               moFile: item.file2,
             })),
-            ...deletedIds.map((id) => ({
+            ...deletedIds.map((id, idx) => ({
               currentUser: 1,
               ...(mainId ? { mainId } : {}),
+              sort: 999 + idx, // ✔️ 서버 유효성 검사 통과용
+              contentType: "I",
               id,
               delYn: "Y",
             })),
@@ -182,7 +188,13 @@ const KeyVisualForm = forwardRef(
                     <Button
                       type="button"
                       color="red"
-                      onClick={() => remove(index)}
+                      onClick={() => {
+                        const id = getValues(`kv.${index}.id`);
+                        if (id) {
+                          deletedIdRef.current.push(id); // 삭제된 ID 저장
+                        }
+                        remove(index);
+                      }}
                     >
                       삭제
                     </Button>
