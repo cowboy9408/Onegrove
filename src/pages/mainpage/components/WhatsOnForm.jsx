@@ -89,6 +89,7 @@ const WhatsOnForm = forwardRef(({ data, mainId = null, lang = "KO" }, ref) => {
               label="서브타이틀"
               placeholder="서브타이틀을 입력해주세요"
               maxLength={200}
+              showDefaultInfo
               {...register("whatson.subtitle")}
               error={errors.whatson?.subtitle?.message}
               required
@@ -121,7 +122,7 @@ const WhatsOnForm = forwardRef(({ data, mainId = null, lang = "KO" }, ref) => {
               fieldName={`whatson.url`}
               maxLength={300}
               required
-              placeholder="https://www.onegrove.kr"
+              placeholder="이미지 클릭 시 이동되는 URL 입력해주세요."
               {...register(`whatson.url`)}
               error={errors.whatson?.url?.message}
               onClear={() => resetField(`whatson.url`)}
