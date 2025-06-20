@@ -680,7 +680,7 @@ export const routeMeta = [
             path: "/contents/about",
             element: <></>,
             title: "About",
-            hidden: false,
+            hidden: true,
             permissions: [
               "SUPER_ADMIN",
               "NORMAL_ADMIN",
