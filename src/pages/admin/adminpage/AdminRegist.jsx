@@ -97,14 +97,24 @@ export default function AdminRegist() {
             onConfirm: () => navigate("/admin/list"),
           });
         } catch (error) {
-          console.error("등록 오류:", error);
+          const message = error?.response?.data?.message || "";
+
           if (
-            error?.response?.data?.message?.includes("Duplicate entry") &&
-            error?.response?.data?.message?.includes("UQ_username")
+            message.includes("Duplicate entry") &&
+            message.includes("UQ_username")
           ) {
-            alert("이미 존재하는 아이디입니다. 다른 아이디를 입력해주세요.");
+            showModal({
+              title: "중복 아이디",
+              message:
+                "이미 존재하는 아이디입니다. 다른 아이디를 입력해주세요.",
+              showCancel: false,
+            });
           } else {
-            alert("등록에 실패했습니다. 관리자에게 문의하세요.");
+            showModal({
+              title: "등록 실패",
+              message: "등록에 실패했습니다. 관리자에게 문의하세요.",
+              showCancel: false,
+            });
           }
         }
       },
