@@ -89,6 +89,7 @@ const WhatsOnForm = forwardRef(({ data, mainId = null, lang = "KO" }, ref) => {
               label="서브타이틀"
               placeholder="서브타이틀을 입력해주세요"
               maxLength={200}
+              showDefaultInfo
               {...register("whatson.subtitle")}
               error={errors.whatson?.subtitle?.message}
               required

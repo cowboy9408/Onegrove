@@ -153,6 +153,7 @@ const KeyVisualForm = forwardRef(
                     label="타이틀"
                     fieldName={`kv.${index}.title`}
                     maxLength={50}
+                    showDefaultInfo
                     required
                     placeholder="타이틀 입력"
                     {...register(`kv.${index}.title`)}
@@ -165,6 +166,7 @@ const KeyVisualForm = forwardRef(
                     label="서브타이틀"
                     fieldName={`kv.${index}.subtitle`}
                     maxLength={100}
+                    showDefaultInfo
                     required
                     placeholder="서브타이틀 입력"
                     {...register(`kv.${index}.subtitle`)}
