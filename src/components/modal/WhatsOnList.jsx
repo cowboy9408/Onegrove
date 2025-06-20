@@ -61,7 +61,7 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
       <div className="h-96 overflow-y-scroll">
         <Box>
           <Row>
-            <Col>
+            {/* <Col>
               <Select label="메뉴명" topLabel={false}>
                 <option value="">전체</option>
                 {categories.map((cat) => (
@@ -76,7 +76,7 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
             </Col>
             <Col className="flex self-end gap-2">
               <Button className={"h-12 w-full"}>검색</Button>
-            </Col>
+            </Col> */}
           </Row>
         </Box>
         <DataTable
