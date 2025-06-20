@@ -127,6 +127,7 @@ const WorkForm = forwardRef(function WorkForm({ data, setData }, ref) {
                     label="타이틀"
                     fieldName={`work.${index}.title`}
                     maxLength={50}
+                    showDefaultInfo
                     required
                     placeholder="타이틀을 입력해주세요"
                     {...register(`work.${index}.title`)}
@@ -140,6 +141,7 @@ const WorkForm = forwardRef(function WorkForm({ data, setData }, ref) {
                     label="서브타이틀"
                     fieldName={`work.${index}.subtitle`}
                     maxLength={100}
+                    showDefaultInfo
                     required
                     placeholder="서브타이틀을 입력해주세요."
                     {...register(`work.${index}.subtitle`)}
