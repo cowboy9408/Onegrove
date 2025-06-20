@@ -390,7 +390,7 @@ export default function EventDetail() {
           onClick={() =>
             showModal({
               title: "저장 확인",
-              message: "저장하시겠습니까?",
+              message: "입력한 정보로 수정하시겠습니까",
               showCancel: true,
               onConfirm: async () => {
                 await handleSave();
