@@ -57,7 +57,7 @@ import OccupancyDetail from "@/pages/occupancy/OccupancyDetail";
 import MainBannerPage from "@/pages/banner/MainBannerPage";
 import WhatsonBannerPage from "@/pages/banner/WhatsonBannerPage";
 import LifeStyleBannerPage from "@/pages/banner/LifeStyleBannerPage";
-import WorkBannerPage from "@/pages/banner/WhatsonBannerPage";
+import WorkBannerPage from "@/pages/banner/WorkBannerPage";
 import AboutBannerPage from "@/pages/banner/AboutBannerPage";
 import UserDetailPage from "@/pages/user/UserDetailPage";
 import AffairDetailPage from "@/pages/admin/adminpage/AffairDetailPage";
