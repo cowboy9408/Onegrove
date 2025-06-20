@@ -193,7 +193,7 @@ export default function EventListPage() {
           console.log("원본 데이터 총 개수:", json.data.length);
           const sliced = sorted.slice(start, end).map((row, idx) => ({
             ...row,
-            no: start + idx + 1,
+            no: filtered.length - (start + idx),
             _id: `${row.emId}`,
           }));
 

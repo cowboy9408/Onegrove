@@ -67,11 +67,23 @@ export default function BrandList({ selected = [], onConfirm, closeModal }) {
     fetchBrands();
   }, []);
 
+  const normalize = (str) =>
+    (str || "").toLowerCase().trim().replace(/\s/g, "");
+
   const handleSearch = () => {
-    const kw = keyword.trim().toLowerCase();
-    const result = items.filter((item) =>
-      item.brandName.toLowerCase().includes(kw)
-    );
+    const kw = normalize(keyword);
+    const cat = normalize(selectedCategory);
+
+    const result = items.filter((item) => {
+      const brandName = normalize(item.brandName);
+      const category = normalize(item.category);
+
+      const matchesKeyword = brandName.includes(kw);
+      const matchesCategory = !cat || category === cat;
+
+      return matchesKeyword && matchesCategory;
+    });
+
     setFilteredItems(result);
   };
 
@@ -89,7 +101,7 @@ export default function BrandList({ selected = [], onConfirm, closeModal }) {
               >
                 <option value="">전체</option>
                 {categories.map((cat) => (
-                  <option key={cat.code} value={cat.code}>
+                  <option key={cat.code} value={cat.value}>
                     {cat.value}
                   </option>
                 ))}
@@ -106,6 +118,15 @@ export default function BrandList({ selected = [], onConfirm, closeModal }) {
             <Col className="flex gap-2 self-end">
               <Button className="h-12 w-full" onClick={handleSearch}>
                 검색
+              </Button>
+              <Button
+                className="h-12 w-full bg-gray-200 text-black"
+                onClick={() => {
+                  setKeyword(""); // 검색어 초기화
+                  setFilteredItems(items); // 전체 목록으로 초기화
+                }}
+              >
+                초기화
               </Button>
             </Col>
           </Row>

@@ -115,17 +115,30 @@ export default function AdminRegist() {
           await api.post("/api/v1/user/member/insert", payload);
           showModal({
             title: "등록 완료",
-            message: "등록이 완료되었습니다.",
+            message: "계정이 성공적으로 등록되었습니다.",
             showCancel: false,
             onConfirm: () => navigate("/user"),
           });
         } catch (error) {
-          console.error("등록 오류:", error);
-          showModal({
-            title: "등록 실패",
-            message: "등록에 실패했습니다. 관리자에게 문의하세요.",
-            showCancel: false,
-          });
+          const message = error?.response?.data?.message || "";
+
+          if (
+            message.includes("Duplicate entry") &&
+            message.includes("UQ_username")
+          ) {
+            showModal({
+              title: "중복 아이디",
+              message:
+                "이미 존재하는 아이디입니다. 다른 아이디를 입력해주세요.",
+              showCancel: false,
+            });
+          } else {
+            showModal({
+              title: "등록 실패",
+              message: "등록에 실패했습니다. 관리자에게 문의하세요.",
+              showCancel: false,
+            });
+          }
         }
       },
     });
