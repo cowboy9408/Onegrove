@@ -158,16 +158,7 @@ export default function PressListPage() {
 
           const start = (page - 1) * size;
           const end = start + size;
-          console.log("총 필터링된 데이터:", filtered.length);
-          console.log(
-            "현재 페이지:",
-            page,
-            "시작 인덱스:",
-            start,
-            "끝 인덱스:",
-            end
-          );
-          console.log("원본 데이터 총 개수:", json.data.length);
+
           const sliced = sorted.slice(start, end).map((row, idx) => ({
             ...row,
             no: filtered.length - (start + idx),
@@ -195,7 +186,7 @@ export default function PressListPage() {
   const handleCheck = (id, checked) => {
     setCheckedIds((prev) => {
       const newChecked = checked ? [...prev, id] : prev.filter((v) => v !== id);
-      console.log("현재 체크된 _id 목록:", newChecked);
+
       return newChecked;
     });
   };
@@ -370,8 +361,6 @@ export default function PressListPage() {
               if (!confirm) return;
 
               const idsToDelete = checkedIds.map((id) => Number(id));
-
-              console.log("삭제할 pmId 목록:", idsToDelete);
 
               try {
                 const res = await api.post("/api/v1/press/delete", {

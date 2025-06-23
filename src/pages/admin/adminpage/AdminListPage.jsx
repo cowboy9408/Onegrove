@@ -71,15 +71,6 @@ export default function AdminListPage() {
         if (res.success) {
           let allData = res.data;
 
-          console.log(
-            "item.isUse 실제 값들:",
-            allData.map((item) => item.isUse)
-          );
-          console.log(
-            "전체 isManager 값:",
-            allData.map((item) => item.isManager)
-          );
-          console.log("전체 데이터 샘플:", allData[0]);
           // allData = allData.filter((item) => item.isManager === "N");
 
           let filtered = allData;

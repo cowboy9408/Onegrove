@@ -137,7 +137,7 @@ export default function StoriesListPage() {
 
   return (
     <div>
-      {/* <SearchSection>
+      <SearchSection>
         <Box>
           <Row className="pb-4">
             <Col>
@@ -195,9 +195,9 @@ export default function StoriesListPage() {
               </div>
             </Col>
 
-            <Col className="flex self-end gap-2 justify-center">
+            <Col className="flex justify-center gap-2 self-end">
               <Button
-                className="flex self-end gap-2"
+                className="flex gap-2 self-end"
                 onClick={() => {
                   setPage(1);
                   setSearchParams({ name, category, visibility, page: 1 });
@@ -205,10 +205,21 @@ export default function StoriesListPage() {
               >
                 검색
               </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchFilter(defaultFilter);
+                  setActiveFilter(defaultFilter);
+                  setPage(1);
+                  setSearchParams({ page: 1 });
+                }}
+              >
+                초기화
+              </Button>
             </Col>
           </Row>
         </Box>
-      </SearchSection> */}
+      </SearchSection>
       <div className="mb-4 flex items-center justify-between">
         <ResultSummary total={total} />
 
