@@ -21,21 +21,25 @@ export default function StoriesListPage() {
   const navigate = useNavigate();
   const { showModal } = useModal();
   const [checkedIds, setCheckedIds] = useState([]);
-  const [dateRange, setDateRange] = useState({
-    startDate: null,
-    endDate: null,
-  });
 
-  const [name, setName] = useState(searchParams.get("name") || "");
   const [page, setPage] = useState(searchParams.get("page") || 1);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
 
-  const [category, setCategory] = useState("");
-  const [visibility, setVisibility] = useState(""); // 노출 여부
-
   const nameId = useId();
   const nameCategory = useId();
+
+  const defaultFilter = {
+    name: "",
+    category: "",
+    visibility: "",
+    dateRange: {
+      startDate: null,
+      endDate: null,
+    },
+  };
+  const [searchFilter, setSearchFilter] = useState(defaultFilter);
+  const [activeFilter, setActiveFilter] = useState(defaultFilter);
 
   const size = 10;
 
@@ -96,22 +100,41 @@ export default function StoriesListPage() {
           // 필터 + 정렬
           const filtered = rows.filter((row) => {
             const titleMatch =
-              name === "" ||
-              row.ko_title.includes(name) ||
-              row.en_title.includes(name);
-            const categoryMatch = category === "" || row.name === category;
+              activeFilter.name === "" ||
+              row.ko_title.includes(activeFilter.name) ||
+              row.en_title.includes(activeFilter.name);
+
+            const normalize = (str) =>
+              (str || "").toLowerCase().replace(/\s/g, "").trim();
+
+            const categoryMatch =
+              normalize(activeFilter.category) === "" ||
+              normalize(row.ko_category) === normalize(activeFilter.category) ||
+              normalize(row.en_category) === normalize(activeFilter.category);
+
             const visibilityMatch =
-              visibility === "" || row.showYn === visibility;
+              activeFilter.visibility === "" ||
+              row.showYn_ko ===
+                (activeFilter.visibility === "Y" ? "노출" : "미노출") ||
+              row.showYn_en ===
+                (activeFilter.visibility === "Y" ? "노출" : "미노출");
+
+            const start = activeFilter.dateRange.startDate;
+            const end = activeFilter.dateRange.endDate;
+
+            const isValidDate = (date) =>
+              date instanceof Date && !isNaN(date.getTime());
+
+            const createdDate = new Date(row.created_at);
             const dateMatch =
-              (!dateRange.startDate ||
-                new Date(row.created_at) >= new Date(dateRange.startDate)) &&
-              (!dateRange.endDate ||
-                new Date(row.created_at) <= new Date(dateRange.endDate));
+              (!start ||
+                (isValidDate(createdDate) && createdDate >= new Date(start))) &&
+              (!end ||
+                (isValidDate(createdDate) && createdDate <= new Date(end)));
 
             return titleMatch && categoryMatch && visibilityMatch && dateMatch;
           });
 
-          // const sorted = filtered.sort((a, b) => a.occupancy - b.occupancy);
           const start = (page - 1) * size;
           const end = start + size;
           const sliced = filtered.slice(start, end).map((row, idx) => ({
@@ -128,7 +151,8 @@ export default function StoriesListPage() {
     };
 
     fetchData();
-  }, [page, name, category, visibility, dateRange]);
+  }, [page, activeFilter]);
+
   const handleCheck = (id, checked) => {
     setCheckedIds((prev) =>
       checked ? [...prev, id] : prev.filter((v) => v !== id)
@@ -144,18 +168,25 @@ export default function StoriesListPage() {
               <Input
                 id={nameCategory}
                 label={"카테고리"}
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                onClear={() => setCategory("")}
+                value={searchFilter.category}
+                onChange={(e) =>
+                  setSearchFilter({ ...searchFilter, category: e.target.value })
+                }
+                onClear={() =>
+                  setSearchFilter({ ...searchFilter, category: "" })
+                }
               />
             </Col>
             <Col className="flex flex-col items-start gap-4">
               <p className="text-sm font-medium">게시글 등록일</p>
               <DateRangePicker
-                startDate={dateRange.startDate}
-                endDate={dateRange.endDate}
-                onChange={({ startDate, endDate }) =>
-                  setDateRange({ startDate, endDate })
+                startDate={searchFilter.dateRange.startDate}
+                endDate={searchFilter.dateRange.endDate}
+                onRangeChange={({ startDate, endDate }) =>
+                  setSearchFilter({
+                    ...searchFilter,
+                    dateRange: { startDate, endDate },
+                  })
                 }
               />
             </Col>
@@ -165,9 +196,11 @@ export default function StoriesListPage() {
               <Input
                 id={nameId}
                 label={"타이틀"}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onClear={() => setName("")}
+                value={searchFilter.name}
+                onChange={(e) =>
+                  setSearchFilter({ ...searchFilter, name: e.target.value })
+                }
+                onClear={() => setSearchFilter({ ...searchFilter, name: "" })}
               />
             </Col>
 
@@ -180,16 +213,26 @@ export default function StoriesListPage() {
                   id="visible"
                   name="visibility"
                   value="Y"
-                  checked={visibility === "Y"}
-                  onChange={(e) => setVisibility(e.target.value)}
+                  checked={searchFilter.visibility === "Y"}
+                  onChange={(e) =>
+                    setSearchFilter({
+                      ...searchFilter,
+                      visibility: e.target.value,
+                    })
+                  }
                   label="노출"
                 />
                 <Radio
                   id="hidden"
                   name="visibility"
                   value="N"
-                  checked={visibility === "N"}
-                  onChange={(e) => setVisibility(e.target.value)}
+                  checked={searchFilter.visibility === "N"}
+                  onChange={(e) =>
+                    setSearchFilter({
+                      ...searchFilter,
+                      visibility: e.target.value,
+                    })
+                  }
                   label="미노출"
                 />
               </div>
@@ -197,14 +240,20 @@ export default function StoriesListPage() {
 
             <Col className="flex justify-center gap-2 self-end">
               <Button
-                className="flex gap-2 self-end"
                 onClick={() => {
                   setPage(1);
-                  setSearchParams({ name, category, visibility, page: 1 });
+                  setActiveFilter(searchFilter);
+                  setSearchParams({
+                    name: searchFilter.name,
+                    category: searchFilter.category,
+                    visibility: searchFilter.visibility,
+                    page: 1,
+                  });
                 }}
               >
                 검색
               </Button>
+
               <Button
                 variant="outline"
                 onClick={() => {
