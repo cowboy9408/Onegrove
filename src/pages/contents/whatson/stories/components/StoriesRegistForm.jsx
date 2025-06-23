@@ -39,17 +39,13 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
   const [endTime, setEndTime] = useState("00:00");
   const [isAddContent, setIsAddContent] = useState(true);
 
-
-
-
-
   const onSubmit = async (data) => {
     const content = await editorRef.current.getContent();
     const addContent = await editorRef2.current.getContent();
     console.log({
       ...data,
       content,
-      addContent
+      addContent,
       // ...dateRange,
     });
   };
@@ -59,7 +55,6 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
     if (data?.startDt) {
       const start = new Date(data.startDt);
 
-      
       setStartDate(start);
 
       // 시간 문자열로 변환 (ex: "09:30")
@@ -77,200 +72,197 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
       setEndTime(`${hh}:${mm}`);
     }
 
-    if(data?.addContent !== "" && data?.addContent !== null) {
+    if (data?.addContent !== "" && data?.addContent !== null) {
       setIsAddContent(true);
     }
   }, [data]);
 
-
-
   useImperativeHandle(ref, () => ({
-      submit: async (onError) => {
-        const getCleanedImage = (img) => {
-          if (img?.status === "D") return null;
-          return img;
-        };
+    submit: async (onError) => {
+      const getCleanedImage = (img) => {
+        if (img?.status === "D") return null;
+        return img;
+      };
 
-        const values = {
-          ...getValues(),
-          thumbImg: getCleanedImage(watch("thumbImg")),
-          patternTopPc: getCleanedImage(watch("patternTopPc")),
-          patternTopMo: getCleanedImage(watch("patternTopMo")),
-          patternBottomPc: getCleanedImage(watch("patternBottomPc")),
-          patternBottomMo: getCleanedImage(watch("patternBottomMo")),
-          storiesImgList1: getCleanedImage(watch("storiesImgList1")),
-          storiesImgList2: getCleanedImage(watch("storiesImgList2")),
-          storiesImgList3: getCleanedImage(watch("storiesImgList3"))
-        };
-        const content = await editorRef.current?.getContent?.();
-        const addContent = await editorRef2.current?.getContent?.();
-        const description = watch("description");
-        
-  
-        const [startHour, startMin] = startTime.split(":").map(Number);
-        const [endHour, endMin] = endTime.split(":").map(Number);
-  
-        const start = new Date(startDate);
-        start.setHours(startHour, startMin, 0, 0);
-        const startDateStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-${String(start.getDate()).padStart(2, "0")} ${String(startHour).padStart(2, "0")}:${String(startMin).padStart(2, "0")}`;
-  
-        const end = new Date(endDate);
-        end.setHours(endHour, endMin, 0, 0);
-        const endDateStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")} ${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
-  
-        if (!values.category) {
-          onError?.("카테고리를 입력해주세요.");
-          return null;
-        }
-        if (!values.title) {
-          onError?.("제목을 입력해주세요.");
-          return null;
-        }
-        if (
-          !values.thumbImg ||
-          !values.patternTopPc ||
-          !values.patternTopMo ||
-          !values.patternBottomPc ||
-          !values.patternBottomMo
-        ) {
-          onError?.("이미지를 모두 등록해주세요.");
-          return null;
-        }
-        if (!content || content.replace(/<[^>]+>/g, "").trim() === "") {
-          onError?.("상세 내용을 입력해주세요.");
-          return null;
-        }
-  
-        if (!startDate) {
-          onError?.("이벤트 시작일과 종료일을 선택해주세요.");
-          return null;
-        }
-        if (!endDate) {
-          onError?.("이벤트 종료일과 시간을 선택해주세요.");
-          return null;
-        }
-  
-        if (!description || description.trim() === "") {
-          onError?.("디스크립션을 입력해주세요.");
-          return null;
-        }
-  
-        console.log("검사 대상 값들:", {
-          title: values.title,
-          category: values.category,
-          startDate: startDateStr,
-          endDate: endDateStr,
-          thumbImg: values.thumbImg,
-          patternTopPc: values.patternTopPc,
-          patternTopMo: values.patternTopMo,
-          patternBottomPc: values.patternBottomPc,
-          patternBottomMo: values.patternBottomMo,
-          content,
-          description,
-        });
-  
-        if (
-          !values.title?.trim() ||
-          !values.category ||
-          !startDate ||
-          !endDate ||
-          !values.thumbImg ||
-          !values.patternTopPc ||
-          !values.patternTopMo ||
-          !values.patternBottomPc ||
-          !values.patternBottomMo ||
-          !content?.trim() ||
-          !description?.trim()
-        ) {
-          alert("모든 필수 항목을 입력해주세요.");
-          return null;
-        }
-  
-        const toImageMeta = (file) => {
-          if (!file || !file.name) {
-            console.warn("이미지 name 누락:", file);
-            return null;
-          }
-  
-          return {
-            id: file.id ?? null,
-            originalName: file.originalName || file.name,
-            name: file.name,
-            size: file.size,
-            extension: "." + (file.originalName || file.name).split(".").pop(),
-            mime: file.type || "image/png",
-            classification: "StoriesImg",
-            path:
-              file.path ||
-              `https://assets.onegrove.kr/dev/StoriesImg/${file.originalName || file.name}`,
-            status: file.status || "C",
-          };
-        };
+      const values = {
+        ...getValues(),
+        thumbImg: getCleanedImage(watch("thumbImg")),
+        patternTopPc: getCleanedImage(watch("patternTopPc")),
+        patternTopMo: getCleanedImage(watch("patternTopMo")),
+        patternBottomPc: getCleanedImage(watch("patternBottomPc")),
+        patternBottomMo: getCleanedImage(watch("patternBottomMo")),
+        storiesImgList1: getCleanedImage(watch("storiesImgList1")),
+        storiesImgList2: getCleanedImage(watch("storiesImgList2")),
+        storiesImgList3: getCleanedImage(watch("storiesImgList3")),
+      };
+      const content = await editorRef.current?.getContent?.();
+      const addContent = await editorRef2.current?.getContent?.();
+      const description = watch("description");
 
-        const storiesImgList = [1, 2, 3]
-          .map((i) => {
-            const img = values[`storiesImgList${i}`];
-            if (!img) return null;
-            return {
-              ...toImageMeta(img),
-              caption: values[`storiesImgCaption${i}`] || "",
-            };
-          })
-          .filter((item) => item !== null)
-          .map((item, index) => ({
-            ...item,
-            sort: (index + 1).toString(),
-        }));
-  
+      const [startHour, startMin] = startTime.split(":").map(Number);
+      const [endHour, endMin] = endTime.split(":").map(Number);
+
+      const start = new Date(startDate);
+      start.setHours(startHour, startMin, 0, 0);
+      const startDateStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-${String(start.getDate()).padStart(2, "0")} ${String(startHour).padStart(2, "0")}:${String(startMin).padStart(2, "0")}`;
+
+      const end = new Date(endDate);
+      end.setHours(endHour, endMin, 0, 0);
+      const endDateStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")} ${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
+
+      if (!values.category) {
+        onError?.("카테고리를 입력해주세요.");
+        return null;
+      }
+      if (!values.title) {
+        onError?.("제목을 입력해주세요.");
+        return null;
+      }
+      if (
+        !values.thumbImg ||
+        !values.patternTopPc ||
+        !values.patternTopMo ||
+        !values.patternBottomPc ||
+        !values.patternBottomMo
+      ) {
+        onError?.("이미지를 모두 등록해주세요.");
+        return null;
+      }
+      if (!content || content.replace(/<[^>]+>/g, "").trim() === "") {
+        onError?.("상세 내용을 입력해주세요.");
+        return null;
+      }
+
+      if (!startDate) {
+        onError?.("이벤트 시작일과 종료일을 선택해주세요.");
+        return null;
+      }
+      if (!endDate) {
+        onError?.("이벤트 종료일과 시간을 선택해주세요.");
+        return null;
+      }
+
+      if (!description || description.trim() === "") {
+        onError?.("디스크립션을 입력해주세요.");
+        return null;
+      }
+
+      console.log("검사 대상 값들:", {
+        title: values.title,
+        category: values.category,
+        startDate: startDateStr,
+        endDate: endDateStr,
+        thumbImg: values.thumbImg,
+        patternTopPc: values.patternTopPc,
+        patternTopMo: values.patternTopMo,
+        patternBottomPc: values.patternBottomPc,
+        patternBottomMo: values.patternBottomMo,
+        content,
+        description,
+      });
+
+      if (
+        !values.title?.trim() ||
+        !values.category ||
+        !startDate ||
+        !endDate ||
+        !values.thumbImg ||
+        !values.patternTopPc ||
+        !values.patternTopMo ||
+        !values.patternBottomPc ||
+        !values.patternBottomMo ||
+        !content?.trim() ||
+        !description?.trim()
+      ) {
+        alert("모든 필수 항목을 입력해주세요.");
+        return null;
+      }
+
+      const toImageMeta = (file) => {
+        if (!file || !file.name) {
+          console.warn("이미지 name 누락:", file);
+          return null;
+        }
+
         return {
-          id: data?.id ?? null,
-          lang,
-          showYn: values.status === "active" ? "Y" : "N",
-          sort: values.order.toString() || "",
-          category: values.category,
-          title: values.title || "",
-          thumbImg: toImageMeta(values.thumbImg),
-          patternTopPc: toImageMeta(values.patternTopPc),
-          patternTopMo: toImageMeta(values.patternTopMo),
-          patternBottomPc: toImageMeta(values.patternBottomPc),
-          patternBottomMo: toImageMeta(values.patternBottomMo),
-          storiesImgList,
-          // storiesImgList: [
-          //   {
-          //     ...toImageMeta(values.storiesImgList1),
-          //     caption: values.storiesImgCaption1 || "",
-          //     sort: "1"
-          //   },
-          //   {
-          //     ...toImageMeta(values.storiesImgList2),
-          //     caption: values.storiesImgCaption1 || "",
-          //     sort: "2"
-          //   },
-          //   {
-          //     ...toImageMeta(values.storiesImgList3),
-          //     caption: values.storiesImgCaption1 || "",
-          //     sort: "3"
-          //   },
-          // ],
-          content: content || "",
-          addContent: addContent || "",
-          description: description || "",
-          startDt: startDateStr,
-          endDt: endDateStr,
-          delYn: "N",
+          id: file.id ?? null,
+          originalName: file.originalName || file.name,
+          name: file.name,
+          size: file.size,
+          extension: "." + (file.originalName || file.name).split(".").pop(),
+          mime: file.type || "image/png",
+          classification: "StoriesImg",
+          path:
+            file.path ||
+            `https://assets.onegrove.kr/dev/StoriesImg/${file.originalName || file.name}`,
+          status: file.status || "C",
         };
-      },
-      setValue,
-      setDescription: (desc) => {
-        setValue("description", desc);
-      },
-      setContent: (html) => {
-        editorRef.current?.setContent?.(html);
-      },
-      setContent2: (html) => {
-        editorRef2.current?.setContent?.(html);
-      },
-    }));
+      };
+
+      const storiesImgList = [1, 2, 3]
+        .map((i) => {
+          const img = values[`storiesImgList${i}`];
+          if (!img) return null;
+          return {
+            ...toImageMeta(img),
+            caption: values[`storiesImgCaption${i}`] || "",
+          };
+        })
+        .filter((item) => item !== null)
+        .map((item, index) => ({
+          ...item,
+          sort: (index + 1).toString(),
+        }));
+
+      return {
+        id: data?.id ?? null,
+        lang,
+        showYn: values.status === "active" ? "Y" : "N",
+        sort: values.order.toString() || "",
+        category: values.category,
+        title: values.title || "",
+        thumbImg: toImageMeta(values.thumbImg),
+        patternTopPc: toImageMeta(values.patternTopPc),
+        patternTopMo: toImageMeta(values.patternTopMo),
+        patternBottomPc: toImageMeta(values.patternBottomPc),
+        patternBottomMo: toImageMeta(values.patternBottomMo),
+        storiesImgList,
+        // storiesImgList: [
+        //   {
+        //     ...toImageMeta(values.storiesImgList1),
+        //     caption: values.storiesImgCaption1 || "",
+        //     sort: "1"
+        //   },
+        //   {
+        //     ...toImageMeta(values.storiesImgList2),
+        //     caption: values.storiesImgCaption1 || "",
+        //     sort: "2"
+        //   },
+        //   {
+        //     ...toImageMeta(values.storiesImgList3),
+        //     caption: values.storiesImgCaption1 || "",
+        //     sort: "3"
+        //   },
+        // ],
+        content: content || "",
+        addContent: addContent || "",
+        description: description || "",
+        startDt: startDateStr,
+        endDt: endDateStr,
+        delYn: "N",
+      };
+    },
+    setValue,
+    setDescription: (desc) => {
+      setValue("description", desc);
+    },
+    setContent: (html) => {
+      editorRef.current?.setContent?.(html);
+    },
+    setContent2: (html) => {
+      editorRef2.current?.setContent?.(html);
+    },
+  }));
 
   return (
     <FormProvider {...methods}>
@@ -279,8 +271,13 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         onSubmit={methods.handleSubmit(onSubmit)}
         className="space-y-6 p-6"
       >
-
-        <Input label="제목" {...methods.register("title")} required maxLength={100} showDefaultInfo={true} />
+        <Input
+          label="제목"
+          {...methods.register("title")}
+          required
+          maxLength={100}
+          showDefaultInfo={true}
+        />
 
         {/* 내용 텍스트 공간 */}
         <Textarea
@@ -294,9 +291,15 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
         />
 
         {/* 카테고리 + 상태 */}
-        <div className="flex justify-between items-end gap-4">
+        <div className="flex items-end justify-between gap-4">
           <div className="w-1/2">
-            <Input label="카테고리" {...methods.register("category")} maxLength={50} required showDefaultInfo={true} />
+            <Input
+              label="카테고리"
+              {...methods.register("category")}
+              maxLength={50}
+              required
+              showDefaultInfo={true}
+            />
           </div>
           <div className="w-1/2">
             <Input
@@ -316,11 +319,9 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
               info="노출순서 최대 설정값 : 100"
             />
           </div>
-
-          
         </div>
-        
-        <div className="flex justify-between items-end">
+
+        <div className="flex items-end justify-between">
           <div className="w-1/2">
             <p className="mb-1 block pb-2 pl-1 text-sm font-medium text-gray-800">
               노출 기간<span className="ml-1 text-red-500">*</span>
@@ -349,27 +350,30 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
 
               <div className="flex items-center gap-2">
                 <span className="font-bold">~</span>
-                  <Datepicker
-                    mode="single"
-                    selectedDate={new Date(endDate ? endDate.toISOString() : new Date())}
-                    onSingleChange={(date) => {
-                      setEndDate(date);
-                      setValue("endDate", date?.toISOString());
-                    }}
-                    readOnly={readOnly}
-                  />
-                  <input
-                    type="time"
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                    className="rounded border px-2 py-1"
-                    disabled={readOnly}
-                  />
+                <Datepicker
+                  mode="single"
+                  selectedDate={
+                    new Date(endDate ? endDate.toISOString() : new Date())
+                  }
+                  onSingleChange={(date) => {
+                    setEndDate(date);
+                    setValue("endDate", date?.toISOString());
+                  }}
+                  readOnly={readOnly}
+                  startDate={startDate}
+                />
+                <input
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className="rounded border px-2 py-1"
+                  disabled={readOnly}
+                />
               </div>
             </div>
           </div>
-          <div className="w-1/2 flex items-center gap-4 justify-end">
-            <p className="text-sm font-medium text-gray-800 whitespace-nowrap">
+          <div className="flex w-1/2 items-center justify-end gap-4">
+            <p className="text-sm font-medium whitespace-nowrap text-gray-800">
               노출 여부<span className="ml-1 text-red-500">*</span>
             </p>
             <div className="flex gap-4">
@@ -404,7 +408,6 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
-          
           />
           <Upload
             key={`patternTopPc-upload`}
@@ -449,15 +452,16 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           )}
         />
 
-
         <Button
           className="h-12 w-full"
-          onClick={() => { setIsAddContent(!isAddContent)}}
+          onClick={() => {
+            setIsAddContent(!isAddContent);
+          }}
         >
-          {isAddContent ? '내용 추가 등록 취소' : '내용 추가' }
+          {isAddContent ? "내용 추가 등록 취소" : "내용 추가"}
         </Button>
 
-        <div className={`contetnt2 ${ !isAddContent && 'hidden'}`}>
+        <div className={`contetnt2 ${!isAddContent && "hidden"}`}>
           <p className="mb-1 block pb-2 pl-1 text-sm font-medium text-gray-800">
             내용 추가
           </p>
@@ -475,9 +479,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
           />
         </div>
 
-
-
-        <div className="space-y-2 my-6">
+        <div className="my-6 space-y-2">
           <Upload
             name="storiesImgList1"
             label="스와이프이미지 1"
@@ -489,7 +491,10 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             showDefaultInfo={true}
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
           />
-          <Input {...methods.register("storiesImgCaption1")} info="스와이프이미지 1 캡션 영역" />
+          <Input
+            {...methods.register("storiesImgCaption1")}
+            info="스와이프이미지 1 캡션 영역"
+          />
 
           <Upload
             name="storiesImgList2"
@@ -503,7 +508,10 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
             className="mt-4"
           />
-          <Input {...methods.register("storiesImgCaption2")} info="스와이프이미지 2 캡션 영역" />
+          <Input
+            {...methods.register("storiesImgCaption2")}
+            info="스와이프이미지 2 캡션 영역"
+          />
 
           <Upload
             name="storiesImgList3"
@@ -517,10 +525,11 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
             className="mt-4"
           />
-          <Input {...methods.register("storiesImgCaption3")} info="스와이프이미지 3 캡션 영역" />
+          <Input
+            {...methods.register("storiesImgCaption3")}
+            info="스와이프이미지 3 캡션 영역"
+          />
         </div>
-
-
 
         <div className="space-y-2">
           <Upload
@@ -548,11 +557,7 @@ const EventRegistForm = forwardRef(({ data, lang, readOnly = false }, ref) => {
             info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
           />
         </div>
-
-        
-
       </form>
-
     </FormProvider>
   );
 });

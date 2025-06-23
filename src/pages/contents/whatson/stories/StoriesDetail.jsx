@@ -67,8 +67,6 @@ export default function StoriesDetail() {
     fetchData();
   }, [emId]);
 
-
-
   const parseLocalDateTime = (str) => {
     if (!str) return null;
     const [datePart, timePart] = str.split(" "); // ex: "2025-05-27", "14:00"
@@ -111,14 +109,26 @@ export default function StoriesDetail() {
         formRef.setValue("thumbImg", patchImageMeta(data.thumbImg));
         formRef.setValue("patternTopPc", patchImageMeta(data.patternTopPc));
         formRef.setValue("patternTopMo", patchImageMeta(data.patternTopMo));
-        formRef.setValue("patternBottomPc", patchImageMeta(data.patternBottomPc));
-        formRef.setValue("patternBottomMo", patchImageMeta(data.patternBottomMo));
+        formRef.setValue(
+          "patternBottomPc",
+          patchImageMeta(data.patternBottomPc)
+        );
+        formRef.setValue(
+          "patternBottomMo",
+          patchImageMeta(data.patternBottomMo)
+        );
 
-        if( data?.storiesImgList?.length > 0 ) {
+        if (data?.storiesImgList?.length > 0) {
           data.storiesImgList.forEach((element, index) => {
-            formRef.setValue("storiesImgList" + (index+1), patchImageMeta(element));
-            if( element.caption !== undefined ) {
-              formRef.setValue("storiesImgCaption" + (index+1), element.caption);
+            formRef.setValue(
+              "storiesImgList" + (index + 1),
+              patchImageMeta(element)
+            );
+            if (element.caption !== undefined) {
+              formRef.setValue(
+                "storiesImgCaption" + (index + 1),
+                element.caption
+              );
             }
           });
         }
@@ -138,7 +148,6 @@ export default function StoriesDetail() {
           data.endDt ? parseLocalDateTime(data.endDt) : null
         );
       };
-
 
       patchForm(koFormRef.current, koData);
       patchForm(enFormRef.current, enData);
@@ -196,7 +205,7 @@ export default function StoriesDetail() {
         message: msg,
         showCancel: false,
       });
-    
+
     try {
       const saveOne = async (data, original = {}) => {
         const isInsert = !koData?.id && !enData?.id;
@@ -210,8 +219,14 @@ export default function StoriesDetail() {
           thumbImg: toImageMeta(data.thumbImg, original.thumbImg),
           patternTopPc: toImageMeta(data.patternTopPc, original.patternTopPc),
           patternTopMo: toImageMeta(data.patternTopMo, original.patternTopMo),
-          patternBottomPc: toImageMeta(data.patternBottomPc, original.patternBottomPc),
-          patternBottomMo: toImageMeta(data.patternBottomMo, original.patternBottomMo),
+          patternBottomPc: toImageMeta(
+            data.patternBottomPc,
+            original.patternBottomPc
+          ),
+          patternBottomMo: toImageMeta(
+            data.patternBottomMo,
+            original.patternBottomMo
+          ),
 
           showYn: data.showYn === "Y" ? "Y" : "N",
           sort: data.sort,
@@ -220,18 +235,33 @@ export default function StoriesDetail() {
           description: data.description || "",
           startDt: data.startDt || null,
           endDt: data.endDt || null,
-          delYn: "N"
+          delYn: "N",
         };
 
-        if( currentLang === 0 && koData?.contentId ) {
+        if (currentLang === 0 && koData?.contentId) {
           payload.contentId = koData?.contentId;
-        } else if ( currentLang === 1 && enData?.contentId ) {
+        } else if (currentLang === 1 && enData?.contentId) {
           payload.contentId = enData?.contentId;
         }
 
-        if( data.storiesImgList?.length > 0 ) {
-          payload.storiesImgList = data.storiesImgList;
-        }
+        const deletedImages = (original?.storiesImgList || [])
+          .filter((originalImg) => {
+            const stillExists = (data.storiesImgList || []).some(
+              (newImg) => newImg.siFileId === originalImg.siFileId
+            );
+            return !stillExists;
+          })
+          .map((deletedImg) => ({
+            ...deletedImg,
+            status: "D",
+            delYn: "Y",
+          }));
+
+        // 삭제 항목 포함한 전체 리스트 구성
+        payload.storiesImgList = [
+          ...(data.storiesImgList || []),
+          ...deletedImages,
+        ];
 
         console.log("저장 payload:", payload, data);
 
@@ -247,7 +277,6 @@ export default function StoriesDetail() {
       if (currentLang === 0) {
         const koValues = await koFormRef.current?.submit?.(showError);
         if (!koValues) return;
-
 
         await saveOne(
           {
@@ -405,7 +434,9 @@ export default function StoriesDetail() {
               message: "이전 페이지로 돌아갈 경우 입력한 정보가 사라집니다.",
               showCancel: true,
               onConfirm: () =>
-                navigate("/contents/whatson/stories/list?refresh=" + Date.now()),
+                navigate(
+                  "/contents/whatson/stories/list?refresh=" + Date.now()
+                ),
             })
           }
         >
