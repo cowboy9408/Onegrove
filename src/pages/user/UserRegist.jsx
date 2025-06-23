@@ -22,6 +22,14 @@ export default function AdminRegist() {
   const navigate = useNavigate();
   const { showModal } = useModal();
   const [companyOptions, setCompanyOptions] = useState([]);
+  const [companyError, setCompanyError] = useState(false);
+  const [errors, setErrors] = useState({
+    name: false,
+    username: false,
+    phone: false,
+    email: false,
+    company: false,
+  });
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -62,15 +70,18 @@ export default function AdminRegist() {
   };
 
   const handleSubmit = async () => {
-    if (
-      !form.name ||
-      !form.username ||
-      !form.password ||
-      !form.confirmPassword ||
-      !form.phone ||
-      !form.email ||
-      !form.company // 입주사 추가
-    ) {
+    const newErrors = {
+      name: !form.name,
+      username: !form.username,
+      phone: !form.phone,
+      email: !form.email,
+      company: !form.company,
+    };
+
+    setErrors(newErrors);
+
+    const hasError = Object.values(newErrors).some(Boolean);
+    if (hasError) {
       showModal({
         title: "필수 항목 누락",
         message: "모든 필수 항목을 입력해주세요.",
@@ -152,7 +163,10 @@ export default function AdminRegist() {
           <Select
             label="입주사"
             value={form.company}
-            onChange={(e) => handleChange("company", Number(e.target.value))}
+            onChange={(e) => {
+              handleChange("company", Number(e.target.value));
+              if (e.target.value) setCompanyError(false); // 값 선택 시 에러 해제
+            }}
             className="w-[735px]"
             required
           >
@@ -163,6 +177,9 @@ export default function AdminRegist() {
               </option>
             ))}
           </Select>
+          {companyError && (
+            <p className="mt-1 text-sm text-red-500">입주사를 선택해주세요.</p>
+          )}
         </div>
 
         <div>
@@ -188,12 +205,23 @@ export default function AdminRegist() {
 
       {/* 입력 필드 및 성별 라디오 */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Input
-          label="이름"
-          value={form.name}
-          onChange={(e) => handleChange("name", e.target.value)}
-          required
-        />
+        <div>
+          {" "}
+          <Input
+            label="이름"
+            value={form.name}
+            onChange={(e) => {
+              handleChange("name", e.target.value);
+              if (e.target.value)
+                setErrors((prev) => ({ ...prev, name: false }));
+            }}
+            required
+          />
+          {errors.name && (
+            <p className="mt-1 text-sm text-red-500">이름을 입력해주세요.</p>
+          )}
+        </div>
+
         <div>
           <p className="mb-2 text-sm font-medium text-gray-800">성별</p>
           <div className="flex gap-4">
@@ -219,9 +247,16 @@ export default function AdminRegist() {
         <Input
           label="아이디"
           value={form.username}
-          onChange={(e) => handleChange("username", e.target.value)}
+          onChange={(e) => {
+            handleChange("username", e.target.value);
+            if (e.target.value)
+              setErrors((prev) => ({ ...prev, username: false }));
+          }}
           required
         />
+        {errors.username && (
+          <p className="mt-1 text-sm text-red-500">아이디를 입력해주세요.</p>
+        )}
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <Input
@@ -251,19 +286,37 @@ export default function AdminRegist() {
             <div className="w-[670px]">
               <Input
                 value={form.phone}
-                onChange={(e) => handleChange("phone", e.target.value)}
+                onChange={(e) => {
+                  handleChange("phone", e.target.value);
+                  if (e.target.value)
+                    setErrors((prev) => ({ ...prev, phone: false }));
+                }}
                 className="rounded-l-none"
                 placeholder="1234-5678"
               />
+              {errors.phone && (
+                <p className="mt-1 text-sm text-red-500">
+                  전화번호를 입력해주세요.
+                </p>
+              )}
             </div>
           </div>
         </div>
-        <Input
-          label="이메일"
-          value={form.email}
-          onChange={(e) => handleChange("email", e.target.value)}
-          required
-        />
+        <div>
+          <Input
+            label="이메일"
+            value={form.email}
+            onChange={(e) => {
+              handleChange("email", e.target.value);
+              if (e.target.value)
+                setErrors((prev) => ({ ...prev, email: false }));
+            }}
+            required
+          />
+          {errors.email && (
+            <p className="mt-1 text-sm text-red-500">이메일을 입력해주세요.</p>
+          )}
+        </div>
       </div>
       <div>
         <p className="mb-2 text-sm font-medium text-gray-800">
