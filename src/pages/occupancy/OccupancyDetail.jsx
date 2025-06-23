@@ -286,7 +286,7 @@ export default function OccupancyDetail() {
                 locations={enLocations}
                 setLocations={setEnLocations}
                 currentLang={currentLang}
-                readOnlyOffice={true}
+                readOnlyOffice={false}
               />
             </>
           )}
