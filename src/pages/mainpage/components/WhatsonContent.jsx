@@ -142,6 +142,8 @@ const WhatContentForm = forwardRef(
                         label="대표 이미지 업로드"
                         classification="content"
                         required
+                        showDefaultInfo={true}
+                        info="976x376px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
                       />
                     )}
                   />

@@ -248,12 +248,12 @@ export default function AdminListPage() {
             className="bg-black text-white hover:bg-gray-800"
             onClick={async () => {
               if (checkedIds.length === 0) {
-                alert("삭제할 항목을 선택해주세요.");
+                alert("선택된 항목이 없습니다.");
                 return;
               }
 
               const confirmed =
-                window.confirm("선택한 관리자를 삭제하시겠습니까?");
+                window.confirm("선택된 항목을 삭제하시겠습니까?");
               if (!confirmed) return;
 
               try {
