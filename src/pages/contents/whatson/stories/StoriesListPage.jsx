@@ -50,14 +50,15 @@ export default function StoriesListPage() {
 
         if (Array.isArray(json)) {
           const rows = json.map((item, index) => {
-            const koItem = item.contentList.find((i) => i.lang.toUpperCase() === "KO") || {};
-            const enItem = item.contentList.find((i) => i.lang.toUpperCase() === "EN") || {};
+            const koItem =
+              item.contentList.find((i) => i.lang.toUpperCase() === "KO") || {};
+            const enItem =
+              item.contentList.find((i) => i.lang.toUpperCase() === "EN") || {};
 
             // console.log("koItem:", koItem);
             // console.log("enItem:", enItem);
 
             // console.log("item:", item, koItem, enItem);
-
 
             return {
               originalIndex: item.id,
@@ -75,7 +76,6 @@ export default function StoriesListPage() {
               status: koItem.status || "진행중",
               showYn: koItem.showYn || "미노출",
 
-
               status_ko: koItem.status || "진행중",
               status_en: enItem.status || "진행중",
               showYn_ko: koItem.showYn || "미노출",
@@ -87,7 +87,6 @@ export default function StoriesListPage() {
               created_at_ko: koItem.createDt || "-",
               created_at_en: enItem.createDt || "-",
               created_at: koItem.createDt || enItem.createDt || "-",
-
 
               created_user: koItem.created_user || "-",
               // created_at: koItem.createDcreateUsert || "-",
@@ -138,7 +137,7 @@ export default function StoriesListPage() {
 
   return (
     <div>
-      <SearchSection>
+      {/* <SearchSection>
         <Box>
           <Row className="pb-4">
             <Col>
@@ -209,7 +208,7 @@ export default function StoriesListPage() {
             </Col>
           </Row>
         </Box>
-      </SearchSection>
+      </SearchSection> */}
       <div className="mb-4 flex items-center justify-between">
         <ResultSummary total={total} />
 
@@ -233,8 +232,9 @@ export default function StoriesListPage() {
                 confirmButton: "삭제",
                 onConfirm: async () => {
                   try {
-                    await api.post("/api/v1/stories/delete", 
-                      checkedIds.map((id) => Number(id)),
+                    await api.post(
+                      "/api/v1/stories/delete",
+                      checkedIds.map((id) => Number(id))
                     );
                     console.log("삭제 성공");
                     setCheckedIds([]);
@@ -255,7 +255,9 @@ export default function StoriesListPage() {
         <DataTable
           columns={[
             { key: "no", label: "번호" },
-            { key: "occupancy", label: "노출순서",
+            {
+              key: "occupancy",
+              label: "노출순서",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
                   <div className="p-2 font-medium">{row.ko_occupancy}</div>
@@ -263,7 +265,9 @@ export default function StoriesListPage() {
                 </div>
               ),
             },
-            { key: "category", label: "카테고리",
+            {
+              key: "category",
+              label: "카테고리",
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
                   <div className="p-2 font-medium">{row.ko_category}</div>
@@ -287,17 +291,21 @@ export default function StoriesListPage() {
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
                   <button
-                    className={`text-black-600 truncate p-2 text-left cursor-pointer ${row.ko_title !== "-" && row.ko_title !== null && "underline"}`}
+                    className={`text-black-600 cursor-pointer truncate p-2 text-left ${row.ko_title !== "-" && row.ko_title !== null && "underline"}`}
                     onClick={() =>
-                      navigate(`/contents/whatson/stories/${row.originalIndex}?lang=ko`)
+                      navigate(
+                        `/contents/whatson/stories/${row.originalIndex}?lang=ko`
+                      )
                     }
                   >
                     {row.ko_title}
                   </button>
                   <button
-                    className={`text-black-600 truncate p-2 text-left cursor-pointer ${row.en_title !== "-" && row.en_title !== null && "underline"}`}
+                    className={`text-black-600 cursor-pointer truncate p-2 text-left ${row.en_title !== "-" && row.en_title !== null && "underline"}`}
                     onClick={() =>
-                      navigate(`/contents/whatson/stories/${row.originalIndex}?lang=en`)
+                      navigate(
+                        `/contents/whatson/stories/${row.originalIndex}?lang=en`
+                      )
                     }
                   >
                     {row.en_title}

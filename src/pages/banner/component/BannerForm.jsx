@@ -145,6 +145,8 @@ const BannerForm = forwardRef(({ data, lang, menu }, ref) => {
               value={banner?.image1}
               onChange={(file) => setValue("image1", file)}
               required
+              showDefaultInfo={true}
+              info="1920x140px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
             />
           </Row>
 
@@ -156,6 +158,8 @@ const BannerForm = forwardRef(({ data, lang, menu }, ref) => {
               value={banner?.image2}
               onChange={(file) => setValue("image2", file)}
               required
+              showDefaultInfo={true}
+              info="720x264px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
             />
           </Row>
 

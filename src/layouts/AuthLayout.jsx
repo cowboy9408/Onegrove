@@ -19,7 +19,7 @@ function ContentArea() {
     >
       <Header />
       <main
-        className={`mb-0 max-w-screen rounded-xl transition-all duration-300 ${
+        className={`mt-auto mb-0 max-w-screen rounded-xl transition-all duration-300 ${
           isExpanded
             ? "md:max-w-[calc(100vw-22rem)]"
             : "md:max-w-[calc(100vw-7rem)]"
@@ -27,7 +27,7 @@ function ContentArea() {
       >
         <Outlet />
       </main>
-      <Footer />
+      <Footer className="mt-auto" />
     </div>
   );
 }

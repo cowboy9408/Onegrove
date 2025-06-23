@@ -328,8 +328,8 @@ const RegistForm = forwardRef(
               }}
               classification="Company"
               required
-              showDefaultInfo={true}
-              info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
+              // showDefaultInfo={true}
+              // info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
             />
             <Input
               label="회의실 무료 예약시간"

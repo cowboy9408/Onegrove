@@ -243,7 +243,7 @@ export default function Upload({
             onClick={handleDelete}
             className="mt-1 text-xs text-red-500 underline"
           >
-            이미지 제거
+            파일 제거
           </button>
         </div>
       )}

@@ -84,6 +84,12 @@ export default function AdminListPage() {
 
           let filtered = allData;
 
+          filtered.sort((a, b) => {
+            const dateA = new Date(a.createDatetime);
+            const dateB = new Date(b.createDatetime);
+            return dateB - dateA;
+          });
+
           if (activeFilter.type) {
             filtered = filtered.filter(
               (item) => item.role === activeFilter.type
@@ -111,11 +117,12 @@ export default function AdminListPage() {
           // 페이지네이션 처리
           const startIndex = (page - 1) * size;
           const paginated = filtered.slice(startIndex, startIndex + size);
+          const totalFiltered = filtered.length;
 
           // 데이터 형식을 맞춰서 상태에 저장
           setData(
-            paginated.map((item) => ({
-              no: item.rownum,
+            paginated.map((item, index) => ({
+              no: totalFiltered - (startIndex + index),
               _id: item.id,
               type: mapRoleToLabel(item.role),
               occupancy: "", // 입주사 없음
@@ -200,7 +207,7 @@ export default function AdminListPage() {
                 }
               />
             </Col>
-            <Col className="flex self-end gap-2">
+            <Col className="flex gap-2 self-end">
               <Button
                 onClick={() => {
                   setPage(1);
@@ -241,12 +248,12 @@ export default function AdminListPage() {
             className="bg-black text-white hover:bg-gray-800"
             onClick={async () => {
               if (checkedIds.length === 0) {
-                alert("삭제할 항목을 선택해주세요.");
+                alert("선택된 항목이 없습니다.");
                 return;
               }
 
               const confirmed =
-                window.confirm("선택한 관리자를 삭제하시겠습니까?");
+                window.confirm("선택된 항목을 삭제하시겠습니까?");
               if (!confirmed) return;
 
               try {

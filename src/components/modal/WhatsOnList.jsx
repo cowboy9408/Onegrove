@@ -12,6 +12,9 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
   const [items, setItems] = useState([]);
   const [checked, setChecked] = useState(() => selected.map((s) => String(s)));
   const [categories, setCategories] = useState([]);
+  const [keyword, setKeyword] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [filteredItems, setFilteredItems] = useState([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -45,6 +48,7 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
             useYn: "사용", // 혹시 사용 여부 필드가 필요 없다면 삭제 가능
           }));
           setItems(mapped);
+          setFilteredItems(mapped);
         }
       } catch (error) {
         console.error("데이터 불러오기 실패:", error);
@@ -56,13 +60,44 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
 
   console.log("✔ checkedIds:", checked);
 
+  const normalize = (str) =>
+    (str || "").toLowerCase().trim().replace(/\s/g, "");
+
+  const handleSearch = () => {
+    const kw = normalize(keyword);
+    const cat = normalize(selectedCategory);
+
+    const result = items.filter((item) => {
+      const title = normalize(item.title);
+      const category = normalize(item.categoryCode);
+
+      const matchesKeyword = title.includes(kw);
+      const matchesCategory = !cat || category === cat;
+
+      return matchesKeyword && matchesCategory;
+    });
+
+    setFilteredItems(result);
+  };
+
+  const handleReset = () => {
+    setKeyword("");
+    setSelectedCategory("");
+    setFilteredItems(items);
+  };
+
   return (
     <>
       <div className="h-96 overflow-y-scroll">
         <Box>
           <Row>
             <Col>
-              <Select label="메뉴명" topLabel={false}>
+              <Select
+                label="메뉴명"
+                topLabel={false}
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              >
                 <option value="">전체</option>
                 {categories.map((cat) => (
                   <option key={cat.code} value={cat.code}>
@@ -72,10 +107,23 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
               </Select>
             </Col>
             <Col>
-              <Input label="타이틀" topLabel={false} />
+              <Input
+                label="타이틀"
+                topLabel={false}
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+              />
             </Col>
-            <Col className="flex self-end gap-2">
-              <Button className={"h-12 w-full"}>검색</Button>
+            <Col className="flex gap-2 self-end">
+              <Button className="h-12 w-full" onClick={handleSearch}>
+                검색
+              </Button>
+              <Button
+                className="h-12 w-full bg-gray-200 text-black"
+                onClick={handleReset}
+              >
+                초기화
+              </Button>
             </Col>
           </Row>
         </Box>
@@ -87,7 +135,7 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
             { key: "end_at", label: "종료일" },
             { key: "useYn", label: "사용여부" },
           ]}
-          data={items}
+          data={filteredItems}
           checkable
           checkedIds={checked.map(String)}
           onCheck={(id, checked) => {
