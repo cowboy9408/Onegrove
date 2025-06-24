@@ -10,7 +10,6 @@ export default function AdminDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { showModal } = useModal();
-  console.log("현재 상세 페이지 ID:", id);
 
   const [form, setForm] = useState({
     role: "admin",
@@ -101,8 +100,6 @@ export default function AdminDetailPage() {
       });
       return;
     }
-
-    console.log("폼 데이터:", form);
 
     try {
       const payload = {

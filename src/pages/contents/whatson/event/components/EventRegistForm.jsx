@@ -167,8 +167,6 @@ const EventRegistForm = forwardRef(
         setValue("imgMo", data.imgMo || null);
         editorRef1.current?.setContent?.(data.content || "");
         editorRef2.current?.setContent?.(data.description || "");
-
-        console.log("값 세팅 완료:", categoryCode);
       }
     }, [data, categoryOptions]);
 
@@ -274,7 +272,7 @@ const EventRegistForm = forwardRef(
           onError?.("디스크립션을 입력해주세요.");
           return null;
         }
-        console.log("최종 제출값:", values.progressStatus);
+
         console.log("검사 대상 값들:", {
           title: values.title,
           category: values.category,
@@ -364,7 +362,6 @@ const EventRegistForm = forwardRef(
       },
     }));
 
-    console.log("brands", brands);
     return (
       <FormProvider {...methods}>
         <form className="space-y-6 p-6">

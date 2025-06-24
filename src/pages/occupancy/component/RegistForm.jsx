@@ -39,13 +39,21 @@ const RegistForm = forwardRef(
 
       if (!isCurrentTab) return;
 
-      // 이미 설정한 값이면 더 이상 반영하지 않음
       const current = getValues("locations") || [];
       const next = locations || [];
 
+      const normalize = (list) =>
+        list.map((item) => ({
+          office: item.office?.trim() || "",
+          floor: item.floor?.trim() || "",
+        }));
+
       const isSame =
         current.length === next.length &&
-        current.every((cur, i) => cur.id === next[i].id);
+        normalize(current).every((cur, i) => {
+          const normNext = normalize(next)[i];
+          return cur.office === normNext.office && cur.floor === normNext.floor;
+        });
 
       if (!isSame) {
         console.log(`[${lang}] setValue로 locations 반영`);
