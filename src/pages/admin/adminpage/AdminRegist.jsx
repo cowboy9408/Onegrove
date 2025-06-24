@@ -20,6 +20,10 @@ export default function AdminRegist() {
   });
   const navigate = useNavigate();
   const { showModal } = useModal();
+  const [errors, setErrors] = useState({
+    name: "",
+    username: "",
+  });
 
   // const getRoleValue = (role) => {
   //   switch (role) {
@@ -35,21 +39,78 @@ export default function AdminRegist() {
   // };
 
   const handleChange = (key, value) => {
+    if (key === "name") {
+      if (value.length > 10) {
+        setErrors((prev) => ({
+          ...prev,
+          name: "이름은 최대 10자까지 입력 가능합니다.",
+        }));
+        return; // 입력 제한
+      } else {
+        setErrors((prev) => ({ ...prev, name: "" }));
+      }
+    }
+
+    // 아이디 유효성 처리
+    if (key === "username") {
+      const usernameRegex = /^[a-z0-9]{0,16}$/;
+      if (!usernameRegex.test(value)) {
+        setErrors((prev) => ({
+          ...prev,
+          username: "영소문자와 숫자만 입력할 수 있습니다 (4~16자).",
+        }));
+      } else {
+        setErrors((prev) => ({ ...prev, username: "" }));
+      }
+    }
+
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSubmit = async () => {
-    if (
-      !form.name ||
-      !form.username ||
-      !form.password ||
-      !form.confirmPassword ||
-      !form.phone ||
-      !form.email
-    ) {
+    if (!form.username) {
+      showModal({
+        title: "필수 입력",
+        message: "아이디를 입력해주세요.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    const usernameRegex = /^[a-z0-9]{4,16}$/;
+    if (!usernameRegex.test(form.username)) {
+      showModal({
+        title: "아이디 오류",
+        message: "아이디는 4~16자의 영소문자와 숫자만 사용 가능합니다.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    if (!form.email) {
+      showModal({
+        title: "필수 입력",
+        message: "이메일을 입력해주세요.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    if (!form.name || !form.password || !form.confirmPassword || !form.phone) {
       showModal({
         title: "필수 항목 누락",
         message: "모든 필수 항목을 입력해주세요.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(form.email)) {
+      showModal({
+        title: "이메일 오류",
+        message: "올바른 이메일 형식이 아닙니다.",
         showCancel: false,
       });
       return;
@@ -180,6 +241,7 @@ export default function AdminRegist() {
           value={form.name}
           onChange={(e) => handleChange("name", e.target.value)}
           required
+          error={errors.name}
         />
         <div>
           <p className="mb-2 text-sm font-medium text-gray-800">성별</p>
@@ -208,6 +270,7 @@ export default function AdminRegist() {
           value={form.username}
           onChange={(e) => handleChange("username", e.target.value)}
           required
+          error={errors.username}
         />
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">

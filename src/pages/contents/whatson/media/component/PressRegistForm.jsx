@@ -40,7 +40,6 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
   }, []);
 
   useEffect(() => {
-    console.log("받은 data:", data);
     if (data && Object.keys(data).length > 0) {
       setValue("category", data.categoryCode || "");
       setValue("title", data.title || "");
@@ -57,8 +56,6 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
         setValue("publishDate", iso);
         setSingleDate(today);
       }
-
-      console.log("값 세팅 완료");
     }
   }, [data]);
 
@@ -74,8 +71,6 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
         imgPc: getCleanedImage(watch("imgPc")),
         imgMo: getCleanedImage(watch("imgMo")),
       };
-      console.log("최종 imgPc:", values.imgPc);
-      console.log("최종 imgMo:", values.imgMo);
 
       const content = await editorRef.current?.getContent?.();
 
@@ -122,7 +117,6 @@ const PressRegistForm = forwardRef(({ data, lang, readOnly }, ref) => {
           status: file.status ?? "C",
         };
       };
-      console.log("submit() values.imgPc:", values.imgPc);
 
       if (!values.imgPc || !values.imgMo) {
         alert("PC, 모바일 썸네일 이미지를 모두 등록해주세요.");

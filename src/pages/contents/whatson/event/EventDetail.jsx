@@ -45,9 +45,6 @@ export default function EventDetail() {
         const ko = list.find((item) => item.lang === "ko") || null;
         const en = list.find((item) => item.lang === "en") || null;
 
-        console.log("koData:", ko);
-        console.log("enData:", en);
-
         const patchedKo = ko
           ? {
               ...ko,
@@ -116,8 +113,6 @@ export default function EventDetail() {
     if (!loading && categoryOptions.length > 0) {
       const patchForm = (formRef, data, fallbackCategory = "") => {
         if (!formRef) return;
-
-        // console.log(">>> patchForm 호출 시점:", formRef.current);
 
         const patchImageMeta = (img) => {
           if (!img) return null;
@@ -278,8 +273,6 @@ export default function EventDetail() {
           brandId: data.brandId ?? null,
           delYn: "N",
         };
-
-        console.log("저장 payload:", payload);
 
         const apiUrl =
           data?.id != null
