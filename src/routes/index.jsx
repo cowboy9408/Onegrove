@@ -727,11 +727,7 @@ export const routeMeta = [
         element: <OfficeLayout />,
         title: "오피스 관리",
         icon: <CalendarDaysIcon size={18} />,
-<<<<<<< HEAD
-        // hidden: true,
-=======
         hidden: false,
->>>>>>> byeongjun
         permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN", "MEMBER"],
         children: [
           {
