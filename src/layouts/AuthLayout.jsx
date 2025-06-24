@@ -19,11 +19,12 @@ function ContentArea() {
     >
       <Header />
       <main
-        className={`mt-auto mb-0 max-w-screen rounded-xl transition-all duration-300 ${
+        className={`max-w-screen rounded-xl transition-all duration-300 ${
           isExpanded
             ? "md:max-w-[calc(100vw-22rem)]"
             : "md:max-w-[calc(100vw-7rem)]"
         }`}
+        // mt-auto mb-0
       >
         <Outlet />
       </main>
