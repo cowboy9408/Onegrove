@@ -1,148 +1,106 @@
-import { useState } from "react";
-import Input from "@/components/common/Input";
-import Radio from "@/components/common/Radio";
-import Select from "@/components/common/Select";
-import Datepicker from "@/components/common/Datepicker";
-import Upload from "@/components/common/Upload";
+import Section from "@/components/layout/Section";
+import Tabs, { TabPanel } from "@/components/layout/Tabs";
+import { useState, useRef } from "react";
 import Button from "@/components/common/Button";
-import { useForm, FormProvider } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import api from "@/lib/apiClient";
+import useModal from "@/hooks/useModal";
+import PopupRegistForm from "./component/PopupRegistForm";
 
 export default function PopupRegist() {
-  const methods = useForm();
+  const [currentLang, setCurrentLang] = useState(0); // 0 = 국문, 1 = 영문
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    title: "",
-    isVisible: "Y",
-    menu: "",
-    language: "ko",
-    period: { startDate: null, endDate: null },
-    image: null,
-    url: "",
-    buttonLabel: "",
-    buttonTextColor: "",
-    buttonBgColor: "",
-  });
+  const koFormRef = useRef();
+  const enFormRef = useRef();
+  const { showModal } = useModal();
+  const formRef = useRef();
 
-  const handleChange = (key, value) => {
-    setForm((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+  // 국문 상태
+  const [koData, setKoData] = useState({});
+  // 영문 상태
+  const [enData, setEnData] = useState({});
+
+  const handleClickSave = async () => {
+    const ref = currentLang === 0 ? koFormRef : enFormRef;
+
+    // 폼 유효성 검사 (필수 항목 누락 시 모달)
+    const form = await ref.current?.submit?.((message) => {
+      showModal({
+        title: "필수 항목을 입력해 주세요.",
+        message,
+        showCancel: false,
+      });
+    });
+
+    if (!form) return;
+
+    // 유효성 통과 → 저장 확인 모달
+    showModal({
+      title: "저장 확인",
+      message: "저장하시겠습니까?",
+      showCancel: true,
+      onConfirm: () => handleSave(form),
+    });
   };
 
-  const handleSubmit = () => {
-    console.log("저장 데이터:", form);
-    alert("팝업이 등록되었습니다!");
+  const handleSave = async (form) => {
+    try {
+      await api.post("/api/v1/press/insert", form);
+      navigate("/contents/whatson/media");
+    } catch (err) {
+      console.error("저장 실패:", err);
+    }
   };
 
   return (
-    <FormProvider {...methods}>
-      <div className="mx-auto max-w-4xl space-y-6 rounded-lg bg-white p-6 shadow-md">
-        <div className="mx-auto max-w-3xl space-y-6 p-6">
-          <div className="flex items-start gap-6">
-            {/* 타이틀 */}
-            <div className="flex-1">
-              <Input
-                label="타이틀"
-                value={form.title}
-                onChange={(e) => handleChange("title", e.target.value)}
-                required
-              />
-            </div>
-
-            {/* 노출 여부 */}
-            <div className="flex-1">
-              <p className="mb-2 text-sm font-medium">노출 여부</p>
-              <div className="flex gap-4">
-                <Radio
-                  name="isVisible"
-                  value="Y"
-                  checked={form.isVisible === "Y"}
-                  onChange={(e) => handleChange("isVisible", e.target.value)}
-                  label="노출"
-                />
-                <Radio
-                  name="isVisible"
-                  value="N"
-                  checked={form.isVisible === "N"}
-                  onChange={(e) => handleChange("isVisible", e.target.value)}
-                  label="미노출"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 메뉴 선택 */}
-          <div className="flex items-start gap-6">
-            {/* 메뉴 */}
-            <div className="flex-1">
-              <Select
-                label="메뉴 선택"
-                value={form.menu}
-                onChange={(e) => handleChange("menu", e.target.value)}
-                required
-              >
-                <option value="">선택</option>
-                <option value="home">홈</option>
-                <option value="event">이벤트</option>
-                <option value="notice">공지사항</option>
-              </Select>
-            </div>
-
-            {/* 언어 */}
-          </div>
-
-          {/* 노출 기간 */}
-          <div>
-            <p className="mb-2 text-sm font-medium">
-              노출 기간<span className="ml-1 text-red-500">*</span>
-            </p>
-            <Datepicker
-              startDate={form.period.startDate}
-              endDate={form.period.endDate}
-              onChange={(val) => handleChange("period", val)}
-            />
-          </div>
-
-          {/* 팝업 이미지 업로드 */}
-          <Upload
-            name="ImgPc"
-            label="팝업 이미지 업로드"
-            required
-            defaultValue={form.image}
-            onChange={(val) => handleChange("image", val)}
+    <Section>
+      <Tabs
+        tabs={[
+          { key: "kr", label: "국문" },
+          { key: "en", label: "영문" },
+        ]}
+        defaultIndex={0}
+        onTabChange={(index) => setCurrentLang(index)}
+      >
+        <TabPanel>
+          <PopupRegistForm
+            ref={koFormRef}
+            data={koData}
+            setData={setKoData}
+            lang="ko"
           />
-          <Upload
-            name="ImgMo"
-            label="팝업 이미지 업로드"
-            required
-            defaultValue={form.image}
-            onChange={(val) => handleChange("image", val)}
-          />
+        </TabPanel>
 
-          {/* URL, 버튼 텍스트, 색상 */}
-          <Input
-            label="랜딩 URL"
-            value={form.url}
-            onChange={(e) => handleChange("url", e.target.value)}
-            placeholder="https://example.com"
-            required
+        <TabPanel>
+          <PopupRegistForm
+            ref={enFormRef}
+            data={enData}
+            setData={setEnData}
+            lang="ko"
           />
-
-          {/* 하단 버튼 */}
-          <div className="flex justify-end gap-4 px-6 pb-6">
-            <Button onClick={handleSubmit}>등록</Button>
-            <Button
-              type="button"
-              className="bg-gray-200"
-              onClick={() => navigate("/popup")}
-            >
-              목록
-            </Button>
-          </div>
-        </div>
+        </TabPanel>
+      </Tabs>
+      <div className="flex justify-end gap-4 px-6 pb-6">
+        <Button
+          onClick={handleClickSave} // 기존 showModal → 새 함수로 교체
+        >
+          저장
+        </Button>
+        <Button
+          type="button"
+          className="bg-gray-200"
+          onClick={() =>
+            showModal({
+              title: "이동 확인",
+              message: "이전 페이지로 돌아갈 경우 입력한 정보가 사라집니다.",
+              showCancel: true,
+              onConfirm: () => navigate("/contents/whatson/media"),
+            })
+          }
+        >
+          목록
+        </Button>
       </div>
-    </FormProvider>
+    </Section>
   );
 }

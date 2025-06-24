@@ -21,7 +21,7 @@ export default function UserDetailPage() {
     username: "",
     phone: "",
     email: "",
-    isReservation: "N",
+    isReservation: "Y",
   });
   const [companyOptions, setCompanyOptions] = useState([]);
 
