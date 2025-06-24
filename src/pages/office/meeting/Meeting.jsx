@@ -1,10 +1,10 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import CommonCalendar from "@/components/common/Calendar"; // 공통 캘린더 컴포넌트
 import Select from "@/components/common/Select";
 import Button from "@/components/common/Button";
 import { ModalContext } from "@/context/ModalContext";
 import ReservationForm from "@/components/modal/ReservationForm";
-
+import api from "@/lib/apiClient";
 
 export default function Meeting({
   scheduleListByRoom = {},
@@ -33,6 +33,23 @@ export default function Meeting({
     onConfirm?.({ ...event, room: selectedRoom });
     closeModal?.();
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await api.get(`/api/v1/meeting/setting`);
+        
+        if (res.data.success && res.data.data) {
+          const data = res.data.data;
+          console.log("조회 응답:", data);
+        }
+      } catch (err) {
+        console.error("상세 정보 조회 실패:", err);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div>
