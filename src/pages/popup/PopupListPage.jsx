@@ -133,7 +133,7 @@ export default function PopupListPage() {
               label="미노출"
             />
 
-            <Col className="flex self-end gap-2">
+            <Col className="flex gap-2 self-end">
               <Button
                 className={"h-12 w-full"}
                 onClick={() => {

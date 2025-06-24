@@ -313,7 +313,7 @@ export const routeMeta = [
         element: <PopupListPage />,
         title: "팝업 관리",
         icon: <BellIcon size={18} />,
-        hidden: true,
+        hidden: false,
         permissions: [
           "SUPER_ADMIN",
           "NORMAL_ADMIN",
@@ -727,7 +727,11 @@ export const routeMeta = [
         element: <OfficeLayout />,
         title: "오피스 관리",
         icon: <CalendarDaysIcon size={18} />,
+<<<<<<< HEAD
         // hidden: true,
+=======
+        hidden: false,
+>>>>>>> byeongjun
         permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN", "MEMBER"],
         children: [
           {
@@ -782,7 +786,7 @@ export const routeMeta = [
         element: <InquiryListPage />,
         title: "고객 문의 관리",
         icon: <BellIcon size={18} />,
-        hidden: true,
+        hidden: false,
         permissions: [
           "SUPER_ADMIN",
           "NORMAL_ADMIN",
@@ -797,7 +801,7 @@ export const routeMeta = [
         element: <SystemLayout />,
         title: "시스템 관리",
         icon: <SettingsGearIcon size={18} />,
-        hidden: true,
+        hidden: false,
         permissions: [
           "SUPER_ADMIN",
           "NORMAL_ADMIN",
