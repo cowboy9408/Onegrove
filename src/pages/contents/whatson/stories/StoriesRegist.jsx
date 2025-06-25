@@ -66,7 +66,7 @@ export default function StoriesRegist() {
             ref={enFormRef}
             data={enData}
             setData={setEnData}
-            lang="ko"
+            lang="en"
           />
         </TabPanel>
       </Tabs>
