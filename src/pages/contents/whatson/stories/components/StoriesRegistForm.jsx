@@ -205,24 +205,46 @@ const StoriesRegistForm = forwardRef(
         const storiesImgList = [1, 2, 3]
           .map((i) => {
             const img = values[`storiesImgList${i}`];
-            if (!img) return null;
+            if (!img) {
+              setValue(`storiesImgCaption${i}`, "");
+              return null;
+            }
 
+            const caption = values[`storiesImgCaption${i}`] || "";
             const originalImg = (data?.storiesImgList || []).find(
               (o) =>
                 o?.name === img?.name || o?.originalName === img?.originalName
             );
 
-            const baseSort =
-              originalImg?.sort || (originalImg?.swipeImg?.sort ?? null); // 혹시 swipeImg에 sort가 있을 경우
+            const fileMeta = toImageMeta(img, originalImg);
+            const isDeleted = fileMeta.status === "D";
+
+            // 캡션 변경 시 status를 E로 덮기
+            if (!isDeleted && originalImg) {
+              const isCaptionChanged = originalImg?.caption !== caption;
+              const isSortChanged = originalImg?.sort !== fileMeta.sort;
+
+              if (
+                isCaptionChanged ||
+                isSortChanged ||
+                fileMeta.status === "R" ||
+                !fileMeta.status
+              ) {
+                fileMeta.status = "E";
+              }
+            }
 
             return {
-              ...toImageMeta(img, originalImg),
-              caption: values[`storiesImgCaption${i}`] || "",
-              sort: baseSort || i.toString(), // ← 기존 sort 유지, fallback으로 i 사용
+              ...fileMeta,
+              caption: isDeleted ? "" : caption,
+              sort: originalImg?.sort || String(i),
             };
           })
           .filter(Boolean)
-          .sort((a, b) => Number(a.sort) - Number(b.sort)); // 이건 보내기 전에 명확하게 오름차순 정렬
+          .map((item, idx) => ({
+            ...item,
+            sort: String(idx + 1),
+          }));
 
         return {
           id: data?.id ?? null,
