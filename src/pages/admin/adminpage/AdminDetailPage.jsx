@@ -104,7 +104,7 @@ export default function AdminDetailPage() {
     try {
       const payload = {
         id: Number(id),
-        companyId: 4,
+        // companyId: 4,
         role: form.role,
         name: form.name,
         phoneNumber: formatPhoneNumber(form.phone),

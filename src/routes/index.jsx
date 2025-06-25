@@ -115,7 +115,7 @@ export const routeMeta = [
             path: "/admin/affair",
             element: <AffairListPage />,
             title: "입주사 총무팀",
-            hidden: true,
+            hidden: false,
             permissions: [
               "SUPER_ADMIN",
               "NORMAL_ADMIN",

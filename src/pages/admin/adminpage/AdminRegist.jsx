@@ -137,7 +137,7 @@ export default function AdminRegist() {
         form.gender === "male" ? "M" : form.gender === "female" ? "W" : null,
 
       role: form.role,
-      companyId: 4,
+      // companyId: 4,
       isAdmin: "Y",
       isUse: form.status === "active" ? "Y" : "N",
       isManager: "N",
@@ -173,7 +173,7 @@ export default function AdminRegist() {
           } else {
             showModal({
               title: "등록 실패",
-              message: "등록에 실패했습니다. 관리자에게 문의하세요.",
+              message: "이미 존재하는 이메일입니다. 확인해주세요.",
               showCancel: false,
             });
           }
@@ -271,6 +271,7 @@ export default function AdminRegist() {
           onChange={(e) => handleChange("username", e.target.value)}
           required
           error={errors.username}
+          placeholder="4~16자 내의 영소문자,숫자로 구성"
         />
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
