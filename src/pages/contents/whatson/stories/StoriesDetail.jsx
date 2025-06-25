@@ -124,12 +124,17 @@ export default function StoriesDetail() {
         );
 
         if (data?.storiesImgList?.length > 0) {
-          const sortedList = [...data.storiesImgList].sort(
-            (a, b) => Number(a.sort || 0) - Number(b.sort || 0)
-          );
+          const sortedList = [...data.storiesImgList]
+            .filter((img) => img && img.status !== "D")
+            .sort((a, b) => {
+              if (a.status === "D" && b.status !== "D") return 1;
+              if (a.status !== "D" && b.status === "D") return -1;
+
+              return Number(a.sort || 0) - Number(b.sort || 0);
+            });
 
           sortedList.forEach((element, index) => {
-            const imgMeta = patchImageMeta(element.swipeImg || element); // swipeImg가 있다면 사용
+            const imgMeta = patchImageMeta(element.swipeImg || element);
             formRef.setValue(`storiesImgList${index + 1}`, imgMeta);
             formRef.setValue(
               `storiesImgCaption${index + 1}`,
