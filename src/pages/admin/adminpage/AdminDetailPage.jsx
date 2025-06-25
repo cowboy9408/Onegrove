@@ -12,7 +12,7 @@ export default function AdminDetailPage() {
   const { showModal } = useModal();
 
   const [form, setForm] = useState({
-    role: "admin",
+    role: "NORMAL_ADMIN",
     status: "active",
     name: "",
     gender: "",

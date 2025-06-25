@@ -4,14 +4,15 @@ import Radio from "@/components/common/Radio";
 import Button from "@/components/common/Button";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "@/lib/apiClient";
+import useModal from "@/hooks/useModal";
 
-export default function AffairDetailPage() {
+export default function AdminDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  console.log("현재 상세 페이지 ID:", id);
+  const { showModal } = useModal();
 
   const [form, setForm] = useState({
-    role: "admin",
+    role: "OFFICE_SECRETARY_ADMIN",
     status: "active",
     name: "",
     gender: "",
@@ -92,19 +93,21 @@ export default function AffairDetailPage() {
 
   const handleUpdate = async () => {
     if (!form.name || !form.username || !form.phone || !form.email) {
-      alert("모든 필수 항목을 입력해주세요.");
+      showModal({
+        title: "필수 항목 누락",
+        message: "모든 필수 항목을 입력해주세요.",
+        showCancel: false,
+      });
       return;
     }
 
-    console.log("폼 데이터:", form);
     try {
       const payload = {
         id: Number(id),
-        companyId: 4,
+        // companyId: 4,
         role: form.role,
         name: form.name,
         phoneNumber: formatPhoneNumber(form.phone),
-
         email: form.email,
         gender:
           form.gender === "male" ? "M" : form.gender === "female" ? "W" : "",
@@ -113,16 +116,40 @@ export default function AffairDetailPage() {
         isReservation: "Y",
       };
 
-      const res = await api.post("/api/v1/user/admin/update", payload);
-      if (res.data.success) {
-        alert("수정이 완료되었습니다.");
-        navigate("/admin/list");
-      } else {
-        alert("수정 실패: " + res.data.message);
-      }
+      showModal({
+        title: "수정 확인",
+        message: "입력하신 정보로 수정을 진행하시겠습니까?",
+        showCancel: true,
+        onConfirm: async () => {
+          try {
+            const res = await api.post("/api/v1/user/admin/update", payload);
+            if (res.data.success) {
+              showModal({
+                title: "수정 완료",
+                message: "수정이 완료되었습니다.",
+                showCancel: false,
+                onConfirm: () => navigate("/admin/list"),
+              });
+            } else {
+              showModal({
+                title: "수정 실패",
+                message: res.data.message || "수정에 실패했습니다.",
+                showCancel: false,
+              });
+            }
+          } catch (error) {
+            console.error("수정 요청 실패:", error);
+            showModal({
+              title: "서버 오류",
+              message: "서버 오류로 수정에 실패했습니다.",
+              showCancel: false,
+            });
+          }
+        },
+      });
     } catch (error) {
-      console.error("수정 요청 실패:", error);
-      alert("서버 오류로 수정에 실패했습니다.");
+      // 이 catch는 필요 없어졌지만 남겨도 무방
+      console.error("수정 로직 실패:", error);
     }
   };
 
@@ -285,7 +312,15 @@ export default function AffairDetailPage() {
 
         <Button
           className="bg-black-200"
-          onClick={() => navigate("/admin/list")}
+          onClick={() =>
+            showModal({
+              title: "이동 확인",
+              message:
+                "목록으로 돌아가면 수정 사항이 저장되지 않습니다. 이동하시겠습니까?",
+              showCancel: true,
+              onConfirm: () => navigate("/admin/list"),
+            })
+          }
         >
           목록
         </Button>

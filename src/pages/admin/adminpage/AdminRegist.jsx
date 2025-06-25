@@ -173,7 +173,7 @@ export default function AdminRegist() {
           } else {
             showModal({
               title: "등록 실패",
-              message: "이미 존재하는 이메일입니다. 확인해주세요.",
+              message: "등록 실패하였습니다. 관리자에게 문의해주세요.",
               showCancel: false,
             });
           }
