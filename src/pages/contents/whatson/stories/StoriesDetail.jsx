@@ -77,6 +77,10 @@ export default function StoriesDetail() {
   };
 
   useEffect(() => {
+    console.log("koFormRef.current:", koFormRef.current);
+  }, [loading]);
+
+  useEffect(() => {
     if (!loading) {
       const patchForm = (formRef, data, fallbackCategory = "") => {
         if (!formRef) return;
@@ -95,6 +99,7 @@ export default function StoriesDetail() {
             ...img,
             path: img.path || fallbackPath,
             name: img.name || fileName,
+            siFileId: img.siFileId ?? img.id ?? null,
             status: img.status ?? "R",
           };
         };
@@ -119,17 +124,22 @@ export default function StoriesDetail() {
         );
 
         if (data?.storiesImgList?.length > 0) {
-          data.storiesImgList.forEach((element, index) => {
+          const sortedList = [...data.storiesImgList]
+            .filter((img) => img && img.status !== "D")
+            .sort((a, b) => {
+              if (a.status === "D" && b.status !== "D") return 1;
+              if (a.status !== "D" && b.status === "D") return -1;
+
+              return Number(a.sort || 0) - Number(b.sort || 0);
+            });
+
+          sortedList.forEach((element, index) => {
+            const imgMeta = patchImageMeta(element.swipeImg || element);
+            formRef.setValue(`storiesImgList${index + 1}`, imgMeta);
             formRef.setValue(
-              "storiesImgList" + (index + 1),
-              patchImageMeta(element)
+              `storiesImgCaption${index + 1}`,
+              element.caption || ""
             );
-            if (element.caption !== undefined) {
-              formRef.setValue(
-                "storiesImgCaption" + (index + 1),
-                element.caption
-              );
-            }
           });
         }
 
@@ -246,9 +256,11 @@ export default function StoriesDetail() {
 
         const deletedImages = (original?.storiesImgList || [])
           .filter((originalImg) => {
-            const stillExists = (data.storiesImgList || []).some(
-              (newImg) => newImg.siFileId === originalImg.siFileId
-            );
+            const originalKey = originalImg?.originalName || originalImg?.path;
+            const stillExists = (data.storiesImgList || []).some((newImg) => {
+              const newKey = newImg?.originalName || newImg?.path;
+              return newKey === originalKey;
+            });
             return !stillExists;
           })
           .map((deletedImg) => ({
@@ -262,6 +274,9 @@ export default function StoriesDetail() {
           ...(data.storiesImgList || []),
           ...deletedImages,
         ];
+        console.log("기존 리스트:", original?.storiesImgList);
+        console.log("제출 리스트:", data?.storiesImgList);
+        console.log("삭제 처리된:", deletedImages);
 
         console.log("저장 payload:", payload, data);
 
