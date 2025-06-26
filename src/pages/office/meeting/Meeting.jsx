@@ -1,31 +1,54 @@
 import React, { useState, useContext, useEffect } from "react";
-import CommonCalendar from "@/components/common/Calendar"; // 공통 캘린더 컴포넌트
+import CommonCalendar from "@/components/common/Calendar";
 import Select from "@/components/common/Select";
 import Button from "@/components/common/Button";
 import { ModalContext } from "@/context/ModalContext";
 import ReservationForm from "@/components/modal/ReservationForm";
 import api from "@/lib/apiClient";
 
-export default function Meeting({
-  scheduleListByRoom = {},
-  onConfirm,
-  closeModal,
-}) {
-  const defaultRooms = ["A", "B", "C"];
-  const roomOptions = Object.keys(scheduleListByRoom).length
-    ? Object.keys(scheduleListByRoom)
-    : defaultRooms;
-
-  const [selectedRoom, setSelectedRoom] = useState(roomOptions[0]);
-  const scheduleList = scheduleListByRoom[selectedRoom] || [];
+export default function Meeting({ scheduleListByRoom = {}, onConfirm, closeModal }) {
+  const [selectedRoom, setSelectedRoom] = useState(1);
   const { showModal } = useContext(ModalContext);
+  const [officeOptions, setOfficeOptions] = useState([]);
+  const [scheduleList, setScheduleList] = useState([]);
+
+  useEffect(() => {
+    const fetchOfficeList = async () => {
+      try {
+        const res = await api.get(`/api/v1/meeting?roomId=${selectedRoom}&isVip=N&lang=ko`);
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          const mappedEvents = res.data.data.map((item) => ({
+            id: item.id,
+            title: `${item.paymentType}예약 ${item.resveStartTime} ~ ${item.resveEndTime} ${item.reserver} (${item.companyName})`,
+            start: new Date(`${item.resveDate}T${item.resveStartTime}`),
+            end: new Date(`${item.resveDate}T${item.resveEndTime}`),
+            resource: item,
+          }));
+          setScheduleList(mappedEvents);
+        }
+      } catch (err) {
+        console.error("회의실예약 리스트 호출 실패:", err);
+      }
+    };
+    fetchOfficeList();
+  }, [selectedRoom]);
+
+  useEffect(() => {
+    const fetchSetting = async () => {
+      try {
+        const res = await api.get(`/api/v1/meeting/setting`);
+        if (res.data.success && res.data.data) {
+          setOfficeOptions(res.data.data);
+        }
+      } catch (err) {
+        console.error("상세 정보 조회 실패:", err);
+      }
+    };
+    fetchSetting();
+  }, []);
 
   const handleDateClick = ({ start }) => {
-    onConfirm?.({
-      type: "date",
-      date: start,
-      room: selectedRoom,
-    });
+    onConfirm?.({ type: "date", date: start, room: selectedRoom });
     closeModal?.();
   };
 
@@ -34,42 +57,25 @@ export default function Meeting({
     closeModal?.();
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await api.get(`/api/v1/meeting/setting`);
-        
-        if (res.data.success && res.data.data) {
-          const data = res.data.data;
-          console.log("조회 응답:", data);
-        }
-      } catch (err) {
-        console.error("상세 정보 조회 실패:", err);
-      }
-    };
-
-    fetchData();
-  }, []);
-
   return (
     <div>
       <div className="flex items-end justify-between gap-4 mb-4">
         <Select
           label="회의실 선택"
           value={selectedRoom}
-          onChange={(e) => setSelectedRoom(e.target.value)}
+          onChange={(e) => setSelectedRoom(Number(e.target.value))}
           className="w-40"
         >
-          {roomOptions.map((room) => (
-            <option key={room} value={room}>
-              회의실 {room}
+          {officeOptions.map((room) => (
+            <option key={room.id} value={room.id}>
+              {room.name} {room.location}
             </option>
           ))}
         </Select>
         <Button
           onClick={() => {
             showModal({
-              title: "회의실 에약하기",
+              title: "회의실 예약하기",
               size: "lg",
               confirmButton: "저장",
               customButton: true,
@@ -78,7 +84,7 @@ export default function Meeting({
                 <ReservationForm
                   room={selectedRoom}
                   onSubmit={(newEvent) => {
-                    onConfirm?.(newEvent); // 외부 처리기 전달
+                    onConfirm?.(newEvent);
                     closeModal();
                   }}
                 />

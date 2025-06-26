@@ -1,0 +1,23 @@
+.rbc-month-view .rbc-event {
+  white-space: normal !important;
+  height: auto !important;
+  line-height: 1.2;
+  font-size: 12px;
+}
+
+.rbc-show-more {
+  font-size: 12px;
+}
+
+.rbc-row-segment .rbc-event-content {
+  text-overflow: clip;
+  white-space: normal;
+}
+
+
+.rbc-month-row {
+  overflow: initial;
+  height: auto;
+  padding-bottom: 10px;
+  min-height: 120px;
+}
