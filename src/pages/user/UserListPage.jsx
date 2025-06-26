@@ -23,6 +23,7 @@ export default function UserListPage() {
   const [total, setTotal] = useState(0);
   const [checkedIds, setCheckedIds] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [companyOptions, setCompanyOptions] = useState([]);
   const defaultFilter = {
     name: "",
     email: "",
@@ -56,6 +57,27 @@ export default function UserListPage() {
   //   }
   // };
 
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const res = await api.get("/api/v1/user/company");
+        if (res.data.success) {
+          // 중복 제거: companyId 기준
+          const uniqueCompanies = Array.from(
+            new Map(
+              res.data.data.map((item) => [item.companyId, item])
+            ).values()
+          );
+          setCompanyOptions(uniqueCompanies);
+        }
+      } catch (err) {
+        console.error("입주사 목록 가져오기 실패:", err);
+      }
+    };
+
+    fetchCompanies();
+  }, []);
+
   const handleCheck = (id, checked) => {
     setCheckedIds((prev) =>
       checked ? [...prev, id] : prev.filter((v) => v !== id)
@@ -86,7 +108,7 @@ export default function UserListPage() {
 
           if (activeFilter.type) {
             filtered = filtered.filter(
-              (item) => item.role === activeFilter.type
+              (item) => String(item.companyId) === String(activeFilter.type)
             );
           }
 
@@ -154,9 +176,11 @@ export default function UserListPage() {
                 }
               >
                 <option value="">전체</option>
-                <option value="NORMAL_ADMIN">일반 관리자</option>
-                <option value="RETAIL_ADMIN">리테일 관리자</option>
-                <option value="OFFICE_ADMIN">오피스 관리자</option>
+                {companyOptions.map((company) => (
+                  <option key={company.companyId} value={company.companyId}>
+                    {company.companyName}
+                  </option>
+                ))}
               </Select>
             </Col>
             <Col>
