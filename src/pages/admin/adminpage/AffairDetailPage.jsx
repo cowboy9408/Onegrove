@@ -10,6 +10,7 @@ export default function AdminDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { showModal } = useModal();
+  const [companies, setCompanies] = useState([]);
 
   const [form, setForm] = useState({
     role: "OFFICE_SECRETARY_ADMIN",
@@ -47,6 +48,32 @@ export default function AdminDetailPage() {
 
     fetchData();
   }, [id]);
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const response = await api.get("/api/v1/user/company");
+        const rawData = response?.data?.data || [];
+
+        // 중복 companyId 제거
+        const uniqueCompanies = [];
+        const seen = new Set();
+
+        for (const c of rawData) {
+          if (!seen.has(c.companyId)) {
+            uniqueCompanies.push(c);
+            seen.add(c.companyId);
+          }
+        }
+
+        setCompanies(uniqueCompanies);
+      } catch (error) {
+        console.error("입주사 목록 조회 실패:", error);
+      }
+    };
+
+    fetchCompanies();
+  }, []);
 
   const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -104,7 +131,7 @@ export default function AdminDetailPage() {
     try {
       const payload = {
         id: Number(id),
-        // companyId: 4,
+        companyId: form.companyId,
         role: form.role,
         name: form.name,
         phoneNumber: formatPhoneNumber(form.phone),
@@ -160,27 +187,19 @@ export default function AdminDetailPage() {
           <div>
             <p className="mb-2 text-sm font-medium text-gray-800">계정 유형</p>
             <div className="flex gap-4">
-              <Radio
-                name="role"
-                label="일반"
-                value="NORMAL_ADMIN"
-                checked={form.role === "NORMAL_ADMIN"}
-                onChange={() => handleChange("role", "NORMAL_ADMIN")}
-              />
-              <Radio
-                name="role"
-                label="리테일"
-                value="RETAIL_ADMIN"
-                checked={form.role === "RETAIL_ADMIN"}
-                onChange={() => handleChange("role", "RETAIL_ADMIN")}
-              />
-              <Radio
-                name="role"
-                label="오피스"
-                value="OFFICE_ADMIN"
-                checked={form.role === "OFFICE_ADMIN"}
-                onChange={() => handleChange("role", "OFFICE_ADMIN")}
-              />
+              <Select
+                label="입주사 선택"
+                value={form.companyId || ""}
+                onChange={(e) => handleChange("companyId", e.target.value)}
+                required
+              >
+                <option value="">입주사를 선택하세요</option>
+                {companies.map((company) => (
+                  <option key={company.companyId} value={company.companyId}>
+                    {company.companyName}
+                  </option>
+                ))}
+              </Select>
             </div>
           </div>
 

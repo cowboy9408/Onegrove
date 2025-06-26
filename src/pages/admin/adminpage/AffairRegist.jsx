@@ -168,7 +168,7 @@ export default function AffairRegist() {
 
       role: "OFFICE_SECRETARY_ADMIN",
       companyId: form.companyId,
-      isAdmin: "N",
+      isAdmin: "Y",
       isUse: form.status === "active" ? "Y" : "N",
       isManager: "Y",
       isReservation: "Y",
