@@ -31,6 +31,7 @@ export default function AffairListPage() {
   };
   const [searchFilter, setSearchFilter] = useState(defaultFilter);
   const [activeFilter, setActiveFilter] = useState(defaultFilter);
+  const [companies, setCompanies] = useState([]);
 
   const nameId = useId();
   const emailId = useId();
@@ -63,6 +64,32 @@ export default function AffairListPage() {
   };
 
   useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const res = await api.get("/api/v1/user/company");
+        if (res.data.success) {
+          // companyId 기준으로 대표 companyName 하나만 매핑
+          const uniqueMap = new Map();
+          res.data.data.forEach((item) => {
+            if (!uniqueMap.has(item.companyId)) {
+              uniqueMap.set(item.companyId, item.companyName);
+            }
+          });
+          const companyList = Array.from(uniqueMap, ([id, name]) => ({
+            id,
+            name,
+          }));
+          setCompanies(companyList);
+        }
+      } catch (error) {
+        console.error("입주사 목록 불러오기 실패:", error);
+      }
+    };
+
+    fetchCompanies();
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await api.get("/api/v1/user/admin", {
@@ -79,6 +106,10 @@ export default function AffairListPage() {
 
           let filtered = allData;
 
+          // let filtered = allData.filter(
+          //   (item) => item.role === "OFFICE_SECRETARY_ADMIN"
+          // );
+
           filtered.sort((a, b) => {
             const dateA = new Date(a.createDatetime);
             const dateB = new Date(b.createDatetime);
@@ -87,7 +118,7 @@ export default function AffairListPage() {
 
           if (activeFilter.type) {
             filtered = filtered.filter(
-              (item) => item.role === activeFilter.type
+              (item) => item.companyId === Number(activeFilter.type)
             );
           }
 
@@ -114,11 +145,17 @@ export default function AffairListPage() {
           const paginated = filtered.slice(startIndex, startIndex + size);
           const totalFiltered = filtered.length;
 
+          const getCompanyName = (id) => {
+            const company = companies.find((c) => c.id === id);
+            return company ? company.name : "-";
+          };
+
           // 데이터 형식을 맞춰서 상태에 저장
           setData(
             paginated.map((item, index) => ({
               no: totalFiltered - (startIndex + index),
               _id: item.id,
+              companyName: getCompanyName(item.companyId),
               type: mapRoleToLabel(item.role),
               occupancy: "", // 입주사 없음
               name: item.name,
@@ -126,7 +163,16 @@ export default function AffairListPage() {
               email: item.email,
               status: item.status,
               valuable: item.isUse,
-              created_at: item.createDatetime?.split("T")[0],
+              created_at: item.createDatetime
+                ? new Date(item.createDatetime).toLocaleString("ko-KR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })
+                : "",
             }))
           );
 
@@ -154,9 +200,11 @@ export default function AffairListPage() {
                 }
               >
                 <option value="">전체</option>
-                <option value="NORMAL_ADMIN">일반 관리자</option>
-                <option value="RETAIL_ADMIN">리테일 관리자</option>
-                <option value="OFFICE_ADMIN">오피스 관리자</option>
+                {companies.map((company) => (
+                  <option key={company.id} value={company.id}>
+                    {company.name}
+                  </option>
+                ))}
               </Select>
             </Col>
             <Col>
@@ -278,7 +326,7 @@ export default function AffairListPage() {
         <DataTable
           columns={[
             { key: "no", label: "번호" },
-            { key: "type", label: "입주사" },
+            { key: "companyName", label: "입주사" },
             { key: "name", label: "이름" },
             {
               key: "username",

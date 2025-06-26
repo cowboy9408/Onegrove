@@ -186,7 +186,7 @@ export default function AffairRegist() {
             title: "등록 완료",
             message: "계정이 성공적으로 등록되었습니다.",
             showCancel: false,
-            onConfirm: () => navigate("/admin/list"),
+            onConfirm: () => navigate("/admin/affair"),
           });
         } catch (error) {
           const message = error?.response?.data?.message || "";
@@ -371,7 +371,7 @@ export default function AffairRegist() {
               message:
                 "목록으로 이동하면 작성한 정보가 사라집니다. 이동하시겠습니까?",
               showCancel: true,
-              onConfirm: () => navigate("/admin/list"),
+              onConfirm: () => navigate("/admin/affair"),
             })
           }
         >

@@ -344,7 +344,7 @@ export default function AdminDetailPage() {
               message:
                 "목록으로 돌아가면 수정 사항이 저장되지 않습니다. 이동하시겠습니까?",
               showCancel: true,
-              onConfirm: () => navigate("/admin/list"),
+              onConfirm: () => navigate("/admin/affair"),
             })
           }
         >

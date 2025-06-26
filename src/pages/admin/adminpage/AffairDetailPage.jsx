@@ -72,7 +72,7 @@ export default function AdminDetailPage() {
     switch (gender) {
       case "M":
         return "male";
-      case "F":
+      case "W":
         return "female";
       default:
         return "";

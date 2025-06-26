@@ -148,7 +148,16 @@ export default function UserListPage() {
               status: item.status,
               valuable: item.isUse,
               createUser: item.createUser,
-              created_at: item.createDatetime?.split("T")[0],
+              created_at: item.createDatetime
+                ? new Date(item.createDatetime).toLocaleString("ko-KR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })
+                : "",
             }))
           );
 
