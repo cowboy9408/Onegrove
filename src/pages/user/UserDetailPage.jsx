@@ -21,9 +21,10 @@ export default function UserDetailPage() {
     username: "",
     phone: "",
     email: "",
-    isReservation: "Y",
+    isReservation: "",
   });
   const [companyOptions, setCompanyOptions] = useState([]);
+  const [isLocked, setIsLocked] = useState(false);
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -60,6 +61,7 @@ export default function UserDetailPage() {
             email: data.email || "",
             isReservation: data.isReservation === "Y" ? "Y" : "N",
           });
+          setIsLocked(data.isLock === "Y");
         }
       } catch (err) {
         console.error("상세 정보 조회 실패:", err);
@@ -218,6 +220,12 @@ export default function UserDetailPage() {
                 onChange={() => handleChange("status", "inactive")}
               />
             </div>
+          </div>
+          <div className="mt-6 text-sm font-semibold text-gray-700">
+            계정 상태:{" "}
+            <span className={isLocked ? "text-red-600" : "text-black-600"}>
+              {isLocked ? "잠금" : "활성화"}
+            </span>
           </div>
         </div>
 

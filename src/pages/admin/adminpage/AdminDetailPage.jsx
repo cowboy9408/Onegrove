@@ -10,6 +10,7 @@ export default function AdminDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { showModal } = useModal();
+  const [isLocked, setIsLocked] = useState(false);
 
   const [form, setForm] = useState({
     role: "NORMAL_ADMIN",
@@ -39,6 +40,8 @@ export default function AdminDetailPage() {
               : data.phoneNumber || "",
             email: data.email || "",
           });
+
+          setIsLocked(data.isLock === "Y");
         }
       } catch (err) {
         console.error("상세 정보 조회 실패:", err);
@@ -72,7 +75,7 @@ export default function AdminDetailPage() {
     switch (gender) {
       case "M":
         return "male";
-      case "F":
+      case "W":
         return "female";
       default:
         return "";
@@ -203,6 +206,12 @@ export default function AdminDetailPage() {
               />
             </div>
           </div>
+          <div className="mt-6 text-sm font-semibold text-gray-700">
+            계정 상태:{" "}
+            <span className={isLocked ? "text-red-600" : "text-black-600"}>
+              {isLocked ? "잠금" : "활성화"}
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -266,33 +275,50 @@ export default function AdminDetailPage() {
         </div>
       </div>
       <div className="flex justify-end gap-3 px-6 pt-5 pb-6">
-        <Button
-          className="bg-black-100"
-          onClick={async () => {
-            try {
-              const payload = {
-                id: Number(id),
-                username: form.username,
-                email: form.email,
-              };
+        {isLocked && (
+          <Button
+            className="bg-black-100"
+            onClick={async () => {
+              try {
+                const payload = {
+                  id: Number(id),
+                  username: form.username,
+                  email: form.email,
+                };
 
-              const res = await api.post("/api/v1/user/unlock", payload);
+                const res = await api.post("/api/v1/user/unlock", payload);
 
-              if (res.data.success) {
-                alert(
-                  "계정 잠금이 해제되었고, 이메일로 아이디 및 임시 비밀번호가 전송되었습니다."
-                );
-              } else {
-                alert("잠금 해제 실패: " + res.data.message);
+                if (res.data.success) {
+                  showModal({
+                    title: "계정 잠금 해제 완료",
+                    message:
+                      "계정이 해제되었으며, 이메일로 임시 비밀번호가 발송되었습니다.",
+                    showCancel: false,
+                    onConfirm: () => {
+                      // 해제 후 UI에서도 버튼 안보이게 처리
+                      setIsLocked(false);
+                    },
+                  });
+                } else {
+                  showModal({
+                    title: "잠금 해제 실패",
+                    message: res.data.message || "잠금 해제에 실패했습니다.",
+                    showCancel: false,
+                  });
+                }
+              } catch (error) {
+                console.error("잠금 해제 실패:", error);
+                showModal({
+                  title: "서버 오류",
+                  message: "서버 오류로 잠금 해제에 실패했습니다.",
+                  showCancel: false,
+                });
               }
-            } catch (error) {
-              console.error("계정 잠금 해제 오류:", error);
-              alert("서버 오류로 계정 잠금 해제에 실패했습니다.");
-            }
-          }}
-        >
-          계정 잠금(휴면) 해제
-        </Button>
+            }}
+          >
+            계정 잠금(휴면) 해제
+          </Button>
+        )}
 
         <Button
           className="bg-black-100"

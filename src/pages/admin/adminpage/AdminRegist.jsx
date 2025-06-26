@@ -150,20 +150,25 @@ export default function AdminRegist() {
       showCancel: true,
       onConfirm: async () => {
         try {
-          await api.post("/api/v1/user/admin/insert", payload);
-          showModal({
-            title: "등록 완료",
-            message: "계정이 성공적으로 등록되었습니다.",
-            showCancel: false,
-            onConfirm: () => navigate("/admin/list"),
-          });
+          const res = await api.post("/api/v1/user/admin/update", payload);
+          if (res.data.success) {
+            showModal({
+              title: "수정 완료",
+              message: "수정이 완료되었습니다.",
+              showCancel: false,
+              onConfirm: () => navigate("/admin/list"),
+            });
+          } else {
+            showModal({
+              title: "수정 실패",
+              message: res.data.message || "수정에 실패했습니다.",
+              showCancel: false,
+            });
+          }
         } catch (error) {
           const message = error?.response?.data?.message || "";
 
-          if (
-            message.includes("Duplicate entry") &&
-            message.includes("UQ_username")
-          ) {
+          if (message.includes("중복된 아이디가 존재합니다")) {
             showModal({
               title: "중복 아이디",
               message:
@@ -172,8 +177,8 @@ export default function AdminRegist() {
             });
           } else {
             showModal({
-              title: "등록 실패",
-              message: "등록 실패하였습니다. 관리자에게 문의해주세요.",
+              title: "수정 실패",
+              message: "서버 오류로 수정을 완료하지 못했습니다.",
               showCancel: false,
             });
           }

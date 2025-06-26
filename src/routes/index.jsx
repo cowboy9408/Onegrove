@@ -84,7 +84,7 @@ export const routeMeta = [
         title: "관리자 관리",
         icon: <UsersIcon size={18} />,
         hidden: false,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN", "User"],
+        permissions: ["SUPER_ADMIN", "OFFICE_ADMIN"],
         children: [
           {
             uuid: "12b3ef89-1b74-450d-9f51-2888b953c1fd",
@@ -92,7 +92,7 @@ export const routeMeta = [
             element: <AdminListPage />,
             title: "관리자 관리",
             hidden: false,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN"],
+            permissions: ["SUPER_ADMIN"],
           },
           {
             uuid: "1e83ea43-0b00-4261-8c5a-a76102d971a0",
@@ -100,7 +100,7 @@ export const routeMeta = [
             element: <AdminDetailPage />,
             title: "관리자 상세",
             hidden: true,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN"],
+            permissions: ["SUPER_ADMIN"],
           },
           {
             uuid: "403ed52e-f0a2-4bdb-b1d5-e1c7cf542e1f",
@@ -108,7 +108,7 @@ export const routeMeta = [
             element: <AdminRegist />,
             title: "관리자 등록",
             hidden: true,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN"],
+            permissions: ["SUPER_ADMIN"],
           },
           {
             uuid: "0a74902d-894e-421a-9471-2920c692e73a",
@@ -116,12 +116,7 @@ export const routeMeta = [
             element: <AffairListPage />,
             title: "입주사 총무팀",
             hidden: false,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "OFFICE_ADMIN",
-              "RETAIL_ADMIN",
-            ],
+            permissions: ["SUPER_ADMIN", "OFFICE_ADMIN"],
           },
           {
             uuid: "87046c63-2981-4c56-9e57-8c908ed82160",
@@ -129,12 +124,7 @@ export const routeMeta = [
             element: <AffairRegist />,
             title: "입주사 총무팀 등록",
             hidden: true,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "OFFICE_ADMIN",
-              "RETAIL_ADMIN",
-            ],
+            permissions: ["SUPER_ADMIN", "OFFICE_ADMIN"],
           },
           {
             uuid: "d3487af9-b3eb-430c-887b-c599041597e7",
@@ -142,12 +132,7 @@ export const routeMeta = [
             element: <AffairDetailPage />,
             title: "입주사 총무팀 상세",
             hidden: true,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "OFFICE_ADMIN",
-              "RETAIL_ADMIN",
-            ],
+            permissions: ["SUPER_ADMIN", "OFFICE_ADMIN"],
           },
         ],
       },
