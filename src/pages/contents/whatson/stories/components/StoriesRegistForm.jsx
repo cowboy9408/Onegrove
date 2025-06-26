@@ -186,8 +186,11 @@ const StoriesRegistForm = forwardRef(
           const matchedSiFileId =
             file.siFileId || originalFile?.siFileId || originalFile?.id || null;
 
+          const matchedSiId = file.siId || originalFile?.siId || null;
+
           return {
             id: file.id ?? null,
+            siId: matchedSiId,
             siFileId: matchedSiFileId,
             originalName: file.originalName || file.name,
             name: file.name,
@@ -199,6 +202,7 @@ const StoriesRegistForm = forwardRef(
               file.path ||
               `https://assets.onegrove.kr/dev/StoriesImg/${file.originalName || file.name}`,
             status: file.status || "C",
+            delYn: file.delYn || "N",
           };
         };
 
@@ -219,32 +223,24 @@ const StoriesRegistForm = forwardRef(
             const fileMeta = toImageMeta(img, originalImg);
             const isDeleted = fileMeta.status === "D";
 
-            // 캡션 변경 시 status를 E로 덮기
-            if (!isDeleted && originalImg) {
-              const isCaptionChanged = originalImg?.caption !== caption;
-              const isSortChanged = originalImg?.sort !== fileMeta.sort;
-
-              if (
-                isCaptionChanged ||
-                isSortChanged ||
-                fileMeta.status === "R" ||
-                !fileMeta.status
-              ) {
-                fileMeta.status = "E";
-              }
+            // 캡션만 변경 시에도 status = "E"
+            if (
+              !isDeleted &&
+              originalImg &&
+              (originalImg.caption !== caption ||
+                originalImg.sort !== fileMeta.sort) &&
+              (fileMeta.status === "R" || !fileMeta.status)
+            ) {
+              fileMeta.status = "E";
             }
 
             return {
               ...fileMeta,
               caption: isDeleted ? "" : caption,
-              sort: originalImg?.sort || String(i),
+              sort: originalImg?.sort || fileMeta.sort || String(i),
             };
           })
-          .filter(Boolean)
-          .map((item, idx) => ({
-            ...item,
-            sort: String(idx + 1),
-          }));
+          .filter(Boolean);
 
         return {
           id: data?.id ?? null,

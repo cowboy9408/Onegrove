@@ -65,7 +65,11 @@ export default function AdminListPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await api.get("/api/v1/user/admin");
+        const response = await api.get("/api/v1/user/admin", {
+          params: {
+            isManager: "N",
+          },
+        });
         const res = response.data;
 
         if (res.success) {
