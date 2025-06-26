@@ -1,54 +1,78 @@
-import React from "react";
+import React, { useState } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import CustomToolbar from "./CustomToolbar";
+import "./calendar.css";
 
-
-
-
-// Moment 로컬라이저 설정
 const localizer = momentLocalizer(moment);
 
-/**
- * 공통 캘린더 컴포넌트 (React Big Calendar 기반)
- *
- * @param {Array} events - 일정 목록
- * @param {Function} onSelectEvent - 이벤트 클릭 시 처리
- * @param {Function} onSelectSlot - 날짜 클릭/범위 선택 시 처리
- */
 export default function CommonCalendar({
   events = [],
   onSelectEvent,
   onSelectSlot,
 }) {
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const minDate = moment().subtract(1, "month").startOf("month").toDate();
+  const maxDate = moment().add(1, "month").endOf("month").toDate();
+
+  const CustomToolbar = ({ date, onNavigate }) => {
+    const currentMonth = moment(date).format("YYYY.MM");
+
+    const handleNavigate = (action) => {
+      const newDate = moment(date);
+      if (action === "PREV") newDate.subtract(1, "month");
+      else if (action === "NEXT") newDate.add(1, "month");
+      const newDateObj = newDate.toDate();
+      if (newDateObj >= minDate && newDateObj <= maxDate) {
+        setCurrentDate(newDateObj);
+        onNavigate(action);
+      }
+    };
+
+    return (
+      <div className="rbc-toolbar flex justify-between items-center px-4 py-2">
+        <button className="!border-0" onClick={() => handleNavigate("PREV")}>&lt;</button>
+        <span className="text-lg font-bold text-themeBlack">{currentMonth}</span>
+        <button className="!border-0" onClick={() => handleNavigate("NEXT")}>&gt;</button>
+      </div>
+    );
+  };
+
   return (
-    <div className="p-4 rounded-xl shadow-md bg-white dark:bg-gray-900">
-    <Calendar
-  localizer={localizer}
-  events={events}
-  startAccessor="start"
-  endAccessor="end"
-  selectable
-  style={{ height: 600 }}
-  onSelectEvent={onSelectEvent}
-  onSelectSlot={onSelectSlot}
-  popup
-  views={["month", "week", "day"]}
-  messages={{
-    next: "다음",
-    previous: "이전",
-    today: "오늘",
-    month: "월",
-    week: "주",
-    day: "일",
-  }}
-  components={{
-    toolbar: CustomToolbar,
-  }}
-  timeslots={2}
-  step={30}
-/>
+    <div className="bg-white">
+      <Calendar
+        localizer={localizer}
+        events={events}
+        startAccessor="start"
+        endAccessor="end"
+        selectable
+        date={currentDate}
+        defaultView="month"
+        views={["month"]}
+        popup
+        dayLayoutAlgorithm="no-overlap"
+        eventPropGetter={(event) => ({
+          style: {
+            whiteSpace: "normal",
+            overflow: "visible",
+            textOverflow: "clip",
+            fontSize: "12px",
+            padding: "2px 4px",
+            backgroundColor: event.resource?.status === "예약 확정" ? "##00AAFF" : "#4CAF50",
+            color: "white",
+          },
+        })}
+        messages={{
+          next: "다음",
+          previous: "이전",
+          today: "오늘",
+          month: "월",
+        }}
+        components={{ toolbar: CustomToolbar }}
+        onSelectEvent={onSelectEvent}
+        onSelectSlot={onSelectSlot}
+      />
     </div>
   );
 }
