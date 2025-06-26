@@ -7,7 +7,7 @@ import Upload from "@/components/common/Upload";
 import Button from "@/components/common/Button";
 import { useForm, FormProvider } from "react-hook-form";
 
-export default function PopupRegist() {
+const PopupRegistForm = forwardRef(({ data, lang }, ref) => {
   const methods = useForm();
 
   const [form, setForm] = useState({
@@ -30,10 +30,47 @@ export default function PopupRegist() {
     }));
   };
 
-  const handleSubmit = () => {
-    console.log("저장 데이터:", form);
-    alert("팝업이 등록되었습니다!");
-  };
+  useImperativeHandle(ref, () => ({
+    submit: (onError) => {
+      if (!form.title) {
+        onError?.("타이틀을 입력해주세요.");
+        return null;
+      }
+
+      if (!form.period.startDate || !form.period.endDate) {
+        onError?.("노출 기간을 선택해주세요.");
+        return null;
+      }
+
+      if (!form.image) {
+        onError?.("이미지를 등록해주세요.");
+        return null;
+      }
+
+      const toImageMeta = (file) => ({
+        id: file.id ?? null,
+        originalName: file.originalName || file.name,
+        name: file.name,
+        size: file.size,
+        extension: "." + (file.originalName || file.name).split(".").pop(),
+        mime: file.type || "image/png",
+        classification: file.classification ?? null,
+        path: file.path,
+        status: file.status ?? "C",
+      });
+
+      return {
+        lang: lang?.toUpperCase() || "KO",
+        title: form.title,
+        startDt: form.period.startDate.toISOString().split("T")[0],
+        endDt: form.period.endDate.toISOString().split("T")[0],
+        landingUrl: form.url,
+        useYn: form.isVisible,
+        pcImg: toImageMeta(form.image),
+        moImg: toImageMeta(form.image),
+      };
+    },
+  }));
 
   return (
     <FormProvider {...methods}>
@@ -98,9 +135,10 @@ export default function PopupRegist() {
               노출 기간<span className="ml-1 text-red-500">*</span>
             </p>
             <Datepicker
+              mode="range"
               startDate={form.period.startDate}
               endDate={form.period.endDate}
-              onChange={(val) => handleChange("period", val)}
+              onRangeChange={(range) => handleChange("period", range)}
             />
           </div>
 
@@ -134,4 +172,6 @@ export default function PopupRegist() {
       </div>
     </FormProvider>
   );
-}
+});
+
+export default PopupRegistForm;
