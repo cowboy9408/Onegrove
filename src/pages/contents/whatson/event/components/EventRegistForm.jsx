@@ -70,8 +70,9 @@ const EventRegistForm = forwardRef(
 
         try {
           const res = await api.get(
-            "/api/v1/event-promotion/item/brand?lang=ko"
+            `/api/v1/event-promotion/item/brand?lang=${lang}`
           );
+
           const brandList = res.data?.data ?? [];
 
           const found = brandList.find((b) => String(b.id) === String(brandId));
@@ -658,6 +659,7 @@ const EventRegistForm = forwardRef(
                           Array.isArray(brands) ? brands.map((e) => e._id) : []
                         }
                         closeModal={closeModal}
+                        lang={lang}
                         onConfirm={(result) => {
                           setBrands(result);
                           setValue(

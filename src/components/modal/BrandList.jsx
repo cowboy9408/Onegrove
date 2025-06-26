@@ -9,7 +9,12 @@ import Row from "../layout/Row";
 import useModal from "@/hooks/useModal";
 import api from "@/lib/apiClient";
 
-export default function BrandList({ selected = [], onConfirm, closeModal }) {
+export default function BrandList({
+  selected = [],
+  onConfirm,
+  closeModal,
+  lang = "ko",
+}) {
   const [items, setItems] = useState([]); // 전체 목록
   const [filteredItems, setFilteredItems] = useState([]); // 검색 결과
   const [checked, setChecked] = useState(selected.map(String)); // 체크된 ID (문자열로 변환)
@@ -36,7 +41,9 @@ export default function BrandList({ selected = [], onConfirm, closeModal }) {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const res = await api.get("/api/v1/event-promotion/item/brand?lang=ko");
+        const res = await api.get(
+          `/api/v1/event-promotion/item/brand?lang=${lang}`
+        );
         if (res.data?.success && Array.isArray(res.data.data)) {
           const parsed = res.data.data.map((item) => ({
             _id: String(item.id),
