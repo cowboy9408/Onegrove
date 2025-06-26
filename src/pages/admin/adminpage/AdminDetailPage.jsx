@@ -323,7 +323,7 @@ export default function AdminDetailPage() {
         <Button
           className="bg-black-100"
           onClick={() => {
-            alert("임시 비밀번호 발급 요청");
+            alert("임시 비밀번호가 발급되었습니다.");
           }}
         >
           임시 비밀번호 발급
