@@ -76,28 +76,23 @@ export default function MeetingListPage() {
   }, [page]);
 
   return (
-    
     <div>
-      <div className="absolute top-28 -mt-3 w-full text-xl ">
-        회의실 리스트
-      </div>
-<div className="flex items-center justify-between mb-4 mt-6">
-  <ResultSummary total={total} />
+      <div className="absolute top-28 -mt-3 w-full text-xl">회의실 리스트</div>
+      <div className="mt-6 mb-4 flex items-center justify-between">
+        <ResultSummary total={total} />
 
-  <div className="flex gap-2">
-    <Button
-      className="bg-black text-white hover:bg-gray-800"
-      onClick={() => {
-        // 등록 버튼 클릭 시 로직
-      }}
-    >
-      등록
-    </Button>
-   
-  </div>
-</div>
+        <div className="flex gap-2">
+          <Button
+            className="bg-black text-white hover:bg-gray-800"
+            onClick={() => {
+              // 등록 버튼 클릭 시 로직
+            }}
+          >
+            등록
+          </Button>
+        </div>
+      </div>
       <ResultSection>
-        
         <DataTable
           columns={[
             { key: "no", label: "번호" },
