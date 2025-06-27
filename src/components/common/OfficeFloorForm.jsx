@@ -6,7 +6,7 @@ import api from "@/lib/apiClient";
 export default function OfficeFloorForm({ value = [], readOnly = false }) {
   const { setValue, trigger } = useFormContext();
   const [items, setItems] = useState(
-    value.length ? value : [{ office: "", floor: "" }]
+    value.length ? value : [{ office: "cp0101", floor: "" }]
   );
   const [officeOptions, setOfficeOptions] = useState([]);
 
@@ -28,7 +28,7 @@ export default function OfficeFloorForm({ value = [], readOnly = false }) {
   }, []);
 
   useEffect(() => {
-    setItems(value.length ? [...value] : [{ office: "", floor: "" }]);
+    setItems(value.length ? [...value] : [{ office: "cp0101", floor: "" }]);
   }, [JSON.stringify(value)]);
 
   const updateItems = (newItems) => {
@@ -94,7 +94,6 @@ export default function OfficeFloorForm({ value = [], readOnly = false }) {
                 className="w-full rounded border p-2"
                 disabled={readOnly}
               >
-                <option value="">선택</option>
                 {officeOptions.map((opt) => (
                   <option key={opt.code} value={opt.code}>
                     {opt.value}
@@ -108,7 +107,7 @@ export default function OfficeFloorForm({ value = [], readOnly = false }) {
                 type="text"
                 value={item.floor}
                 onChange={(e) => handleChange(index, "floor", e.target.value)}
-                placeholder="예: 3F"
+                placeholder="예: 3F, 3~5F"
                 className="w-full rounded border p-2"
                 disabled={readOnly}
               />

@@ -798,7 +798,7 @@ export const routeMeta = [
             path: "/system/meeting",
             element: <MeetingListPage />,
             title: "회의실 설정",
-            hidden: true,
+            hidden: false,
             permissions: [
               "SUPER_ADMIN",
               "NORMAL_ADMIN",
