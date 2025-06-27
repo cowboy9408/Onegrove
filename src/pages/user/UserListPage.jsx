@@ -36,7 +36,7 @@ export default function UserListPage() {
   const nameId = useId();
   const emailId = useId();
 
-  const size = 10;
+  const size = 30;
 
   // const mapRoleToLabel = (role) => {
   //   switch (role) {

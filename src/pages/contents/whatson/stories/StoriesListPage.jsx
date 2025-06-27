@@ -41,7 +41,7 @@ export default function StoriesListPage() {
   const [searchFilter, setSearchFilter] = useState(defaultFilter);
   const [activeFilter, setActiveFilter] = useState(defaultFilter);
 
-  const size = 10;
+  const size = 30;
 
   useEffect(() => {
     const fetchData = async () => {

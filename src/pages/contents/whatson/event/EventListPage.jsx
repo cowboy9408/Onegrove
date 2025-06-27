@@ -35,7 +35,7 @@ export default function EventListPage() {
 
   const nameId = useId();
 
-  const size = 10;
+  const size = 30;
 
   const defaultFilter = {
     name: "",

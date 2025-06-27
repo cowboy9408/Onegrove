@@ -218,7 +218,6 @@ export default function AffairRegist() {
       {/* 라디오 그룹: 계정 유형 & 사용 여부 */}
       <div className="flex flex-wrap gap-8">
         <div>
-          <p className="mb-2 text-sm font-medium text-gray-800">입주사</p>
           <div className="flex gap-4">
             <Select
               label="입주사 선택"
