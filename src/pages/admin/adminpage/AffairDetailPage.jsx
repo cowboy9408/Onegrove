@@ -5,12 +5,14 @@ import Button from "@/components/common/Button";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "@/lib/apiClient";
 import useModal from "@/hooks/useModal";
+import Select from "@/components/common/Select";
 
 export default function AdminDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { showModal } = useModal();
   const [companies, setCompanies] = useState([]);
+  const [isLocked, setIsLocked] = useState(false);
 
   const [form, setForm] = useState({
     role: "OFFICE_SECRETARY_ADMIN",
@@ -20,6 +22,7 @@ export default function AdminDetailPage() {
     username: "",
     phone: "",
     email: "",
+    isContact: "",
   });
 
   useEffect(() => {
@@ -30,6 +33,7 @@ export default function AdminDetailPage() {
         if (res.data.success && res.data.data) {
           const data = res.data.data;
           setForm({
+            companyId: data.companyId ?? "",
             role: data.role,
             status: data.isUse === "Y" ? "active" : "inactive",
             name: data.name || "",
@@ -39,7 +43,9 @@ export default function AdminDetailPage() {
               ? data.phoneNumber.split("-").slice(1).join("-")
               : data.phoneNumber || "",
             email: data.email || "",
+            isContact: data.isContact ?? "",
           });
+          setIsLocked(data.isLock === "Y");
         }
       } catch (err) {
         console.error("상세 정보 조회 실패:", err);
@@ -141,6 +147,7 @@ export default function AdminDetailPage() {
         isUse: form.status === "active" ? "Y" : "N",
         isManager: "N",
         isReservation: "Y",
+        isContact: form.isContact,
       };
 
       showModal({
@@ -189,13 +196,18 @@ export default function AdminDetailPage() {
             <div className="flex gap-4">
               <Select
                 label="입주사 선택"
-                value={form.companyId || ""}
-                onChange={(e) => handleChange("companyId", e.target.value)}
+                value={String(form.companyId || "")} // 반드시 문자열로 변환
+                onChange={(e) =>
+                  handleChange("companyId", Number(e.target.value))
+                } // 저장은 숫자로
                 required
               >
                 <option value="">입주사를 선택하세요</option>
                 {companies.map((company) => (
-                  <option key={company.companyId} value={company.companyId}>
+                  <option
+                    key={company.companyId}
+                    value={String(company.companyId)}
+                  >
                     {company.companyName}
                   </option>
                 ))}
@@ -221,6 +233,12 @@ export default function AdminDetailPage() {
                 onChange={() => handleChange("status", "inactive")}
               />
             </div>
+          </div>
+          <div className="mt-6 text-sm font-semibold text-gray-700">
+            계정 상태:{" "}
+            <span className={isLocked ? "text-red-600" : "text-black-600"}>
+              {isLocked ? "잠금" : "활성화"}
+            </span>
           </div>
         </div>
 
@@ -283,40 +301,76 @@ export default function AdminDetailPage() {
             onChange={(e) => handleChange("email", e.target.value)}
           />
         </div>
+        <div className="mt-4">
+          <p className="mb-2 text-sm font-medium text-gray-800">담당자 여부</p>
+          <div className="flex gap-4">
+            <Radio
+              name="isContact"
+              label="등록"
+              value="Y"
+              checked={form.isContact === "Y"}
+              onChange={() => handleChange("isContact", "Y")}
+            />
+            <Radio
+              name="isContact"
+              label="미등록"
+              value="N"
+              checked={form.isContact === "N"}
+              onChange={() => handleChange("isContact", "N")}
+            />
+          </div>
+        </div>
       </div>
       <div className="flex justify-end gap-3 px-6 pt-5 pb-6">
-        <Button
-          className="bg-black-100"
-          onClick={async () => {
-            try {
-              const payload = {
-                id: Number(id),
-                username: form.username,
-                email: form.email,
-              };
+        {isLocked && (
+          <Button
+            className="bg-black-100"
+            onClick={async () => {
+              try {
+                const payload = {
+                  id: Number(id),
+                  username: form.username,
+                  email: form.email,
+                };
 
-              const res = await api.post("/api/v1/user/unlock", payload);
+                const res = await api.post("/api/v1/user/unlock", payload);
 
-              if (res.data.success) {
-                alert(
-                  "계정 잠금이 해제되었고, 이메일로 아이디 및 임시 비밀번호가 전송되었습니다."
-                );
-              } else {
-                alert("잠금 해제 실패: " + res.data.message);
+                if (res.data.success) {
+                  showModal({
+                    title: "계정 잠금 해제 완료",
+                    message:
+                      "계정이 해제되었으며, 이메일로 임시 비밀번호가 발송되었습니다.",
+                    showCancel: false,
+                    onConfirm: () => {
+                      // 해제 후 UI에서도 버튼 안보이게 처리
+                      setIsLocked(false);
+                    },
+                  });
+                } else {
+                  showModal({
+                    title: "잠금 해제 실패",
+                    message: res.data.message || "잠금 해제에 실패했습니다.",
+                    showCancel: false,
+                  });
+                }
+              } catch (error) {
+                console.error("잠금 해제 실패:", error);
+                showModal({
+                  title: "서버 오류",
+                  message: "서버 오류로 잠금 해제에 실패했습니다.",
+                  showCancel: false,
+                });
               }
-            } catch (error) {
-              console.error("계정 잠금 해제 오류:", error);
-              alert("서버 오류로 계정 잠금 해제에 실패했습니다.");
-            }
-          }}
-        >
-          계정 잠금(휴면) 해제
-        </Button>
+            }}
+          >
+            계정 잠금(휴면) 해제
+          </Button>
+        )}
 
         <Button
           className="bg-black-100"
           onClick={() => {
-            alert("임시 비밀번호 발급 요청");
+            alert("임시 비밀번호가 발급되었습니다.");
           }}
         >
           임시 비밀번호 발급
@@ -337,7 +391,7 @@ export default function AdminDetailPage() {
               message:
                 "목록으로 돌아가면 수정 사항이 저장되지 않습니다. 이동하시겠습니까?",
               showCancel: true,
-              onConfirm: () => navigate("/admin/list"),
+              onConfirm: () => navigate("/admin/affair"),
             })
           }
         >

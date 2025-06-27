@@ -334,7 +334,7 @@ export default function AffairListPage() {
               render: (row) => (
                 <button
                   className="text-black-600 underline"
-                  onClick={() => navigate(`/admin/detail/${row._id}`)}
+                  onClick={() => navigate(`/admin/affair/detail/${row._id}`)}
                 >
                   {row.username}
                 </button>
