@@ -23,6 +23,7 @@ export default function AffairDetailPage() {
     phone: "",
     email: "",
     isContact: "",
+    isReservation: "",
   });
 
   useEffect(() => {
@@ -44,6 +45,7 @@ export default function AffairDetailPage() {
               : data.phoneNumber || "",
             email: data.email || "",
             isContact: data.isContact ?? "",
+            isReservation: data.isReservation === "Y" ? "Y" : "N",
           });
           setIsLocked(data.isLock === "Y");
         }
@@ -146,8 +148,8 @@ export default function AffairDetailPage() {
           form.gender === "male" ? "M" : form.gender === "female" ? "W" : "",
         isUse: form.status === "active" ? "Y" : "N",
         isManager: "N",
-        isReservation: "Y",
         isContact: form.isContact,
+        isReservation: form.isReservation,
       };
 
       showModal({
@@ -320,6 +322,27 @@ export default function AffairDetailPage() {
               value="N"
               checked={form.isContact === "N"}
               onChange={() => handleChange("isContact", "N")}
+            />
+          </div>
+        </div>
+        <div>
+          <p className="mb-2 text-sm font-medium text-gray-800">
+            회의실 예약 기능
+          </p>
+          <div className="flex gap-4">
+            <Radio
+              name="isReservation"
+              label="가능"
+              value="Y"
+              checked={form.isReservation === "Y"}
+              onChange={() => handleChange("isReservation", "Y")}
+            />
+            <Radio
+              name="isReservation"
+              label="불가"
+              value="N"
+              checked={form.isReservation === "N"}
+              onChange={() => handleChange("isReservation", "N")}
             />
           </div>
         </div>
