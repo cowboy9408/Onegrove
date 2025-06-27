@@ -61,6 +61,9 @@ import WorkBannerPage from "@/pages/banner/WorkBannerPage";
 import AboutBannerPage from "@/pages/banner/AboutBannerPage";
 import UserDetailPage from "@/pages/user/UserDetailPage";
 import AffairDetailPage from "@/pages/admin/adminpage/AffairDetailPage";
+import SleepListPage from "@/pages/system/sleep/SleepListPage";
+import SleepSetting from "@/pages/system/sleep/SleepSetting";
+import SleepDetail from "@/pages/system/sleep/SleepDetail";
 
 export const routeMeta = [
   {
@@ -767,7 +770,7 @@ export const routeMeta = [
         element: <InquiryListPage />,
         title: "고객 문의 관리",
         icon: <BellIcon size={18} />,
-        hidden: false,
+        hidden: true,
         permissions: [
           "SUPER_ADMIN",
           "NORMAL_ADMIN",
@@ -795,7 +798,7 @@ export const routeMeta = [
             path: "/system/meeting",
             element: <MeetingListPage />,
             title: "회의실 설정",
-            hidden: false,
+            hidden: true,
             permissions: [
               "SUPER_ADMIN",
               "NORMAL_ADMIN",
@@ -806,7 +809,7 @@ export const routeMeta = [
           {
             uuid: "4bd3ba77-798a-4466-bc3e-48fec787592a",
             path: "/system/sleep",
-            element: <></>,
+            element: <SleepListPage />,
             title: "수면실 설정",
             hidden: false,
             permissions: [
@@ -817,11 +820,38 @@ export const routeMeta = [
             ],
           },
           {
+            uuid: "cfd0a71c-188d-4cbc-bcc8-aa196bbdce2b",
+            path: "/system/sleep/regist",
+            element: <SleepSetting />,
+            title: "수면실 추가",
+            hidden: true,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "RETAIL_ADMIN",
+              "OFFICE_ADMIN",
+            ],
+          },
+          {
+            uuid: "cdfad14f-7e62-44eb-accd-68696dbbd0b0",
+            path: "/system/sleep/detail/:id",
+            element: <SleepDetail />,
+            title: "수면실 상세",
+            hidden: true,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "RETAIL_ADMIN",
+              "OFFICE_ADMIN",
+            ],
+          },
+
+          {
             uuid: "bc71031e-1a66-410a-84ea-5db89fa8822f",
             path: "/system/client",
             element: <></>,
             title: "고객 문의 설정",
-            hidden: false,
+            hidden: true,
             permissions: [
               "SUPER_ADMIN",
               "NORMAL_ADMIN",

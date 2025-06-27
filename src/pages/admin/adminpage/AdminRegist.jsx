@@ -154,14 +154,14 @@ export default function AdminRegist() {
           if (res.data.success) {
             showModal({
               title: "저장 완료",
-              message: "저장이 완료되었습니다.",
+              message: "등록이 완료되었습니다.",
               showCancel: false,
               onConfirm: () => navigate("/admin/list"),
             });
           } else {
             showModal({
-              title: "수정 실패",
-              message: res.data.message || "수정에 실패했습니다.",
+              title: "등록 실패",
+              message: res.data.message || "등록에 실패했습니다.",
               showCancel: false,
             });
           }

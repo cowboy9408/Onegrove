@@ -7,7 +7,7 @@ import api from "@/lib/apiClient";
 import useModal from "@/hooks/useModal";
 import Select from "@/components/common/Select";
 
-export default function AdminDetailPage() {
+export default function AffairDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { showModal } = useModal();
@@ -189,6 +189,9 @@ export default function AdminDetailPage() {
 
   return (
     <>
+      <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
+        입주사 총무팀 상세
+      </div>
       <div className="max-w mx-auto space-y-6 rounded-lg bg-white p-6 shadow-md">
         <div className="flex flex-wrap gap-8">
           <div>
