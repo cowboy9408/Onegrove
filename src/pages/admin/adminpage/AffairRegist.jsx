@@ -20,6 +20,7 @@ export default function AffairRegist() {
     phone: "",
     email: "",
     isContact: "N",
+    isReservation: "N",
   });
   const navigate = useNavigate();
   const { showModal } = useModal();
@@ -171,8 +172,8 @@ export default function AffairRegist() {
       isAdmin: "Y",
       isUse: form.status === "active" ? "Y" : "N",
       isManager: "Y",
-      isReservation: "Y",
       isContact: form.isContact,
+      isReservation: form.isReservation,
     };
 
     showModal({
@@ -354,6 +355,27 @@ export default function AffairRegist() {
             value="N"
             checked={form.isContact === "N"}
             onChange={() => handleChange("isContact", "N")}
+          />
+        </div>
+      </div>
+      <div>
+        <p className="mb-2 text-sm font-medium text-gray-800">
+          회의실 예약 기능
+        </p>
+        <div className="flex gap-4">
+          <Radio
+            name="isReservation"
+            label="가능"
+            value="Y"
+            checked={form.isReservation === "Y"}
+            onChange={() => handleChange("isReservation", "Y")}
+          />
+          <Radio
+            name="isReservation"
+            label="불가"
+            value="N"
+            checked={form.isReservation === "N"}
+            onChange={() => handleChange("isReservation", "N")}
           />
         </div>
       </div>

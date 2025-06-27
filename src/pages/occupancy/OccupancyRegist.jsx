@@ -97,7 +97,7 @@ export default function OccupancyRegist() {
             })
           }
         >
-          목록
+          취소
         </Button>
       </div>
     </Section>
