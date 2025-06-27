@@ -26,7 +26,7 @@ export default function OccupancyListPage() {
   const [officeOptions, setOfficeOptions] = useState([]);
   const [officeMap, setOfficeMap] = useState({}); // code → label 매핑
 
-  const size = 10;
+  const size = 30;
 
   const defaultFilter = {
     name: "",

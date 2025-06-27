@@ -76,7 +76,7 @@ export default function PopupRegist() {
             ref={enFormRef}
             data={enData}
             setData={setEnData}
-            lang="ko"
+            lang="en"
           />
         </TabPanel>
       </Tabs>
