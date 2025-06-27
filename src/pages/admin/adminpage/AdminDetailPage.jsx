@@ -158,6 +158,9 @@ export default function AdminDetailPage() {
 
   return (
     <>
+      <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
+        관리자 상세
+      </div>
       <div className="max-w mx-auto space-y-6 rounded-lg bg-white p-6 shadow-md">
         <div className="flex flex-wrap gap-8">
           <div>
@@ -323,7 +326,7 @@ export default function AdminDetailPage() {
         <Button
           className="bg-black-100"
           onClick={() => {
-            alert("임시 비밀번호 발급 요청");
+            alert("임시 비밀번호가 발급되었습니다.");
           }}
         >
           임시 비밀번호 발급

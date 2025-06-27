@@ -41,7 +41,7 @@ export default function BrandListPage() {
   const [searchFilter, setSearchFilter] = useState(defaultFilter);
   const [activeFilter, setActiveFilter] = useState(defaultFilter);
 
-  const size = 10;
+  const size = 30;
   const nameId = useId();
 
   useEffect(() => {

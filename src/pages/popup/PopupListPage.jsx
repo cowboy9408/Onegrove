@@ -32,7 +32,7 @@ export default function PopupListPage() {
 
   const nameId = useId();
 
-  const size = 10;
+  const size = 30;
 
   useEffect(() => {
     const fetchData = async () => {

@@ -5,6 +5,7 @@ import { FaCalendarAlt } from "react-icons/fa";
 
 export default function Datepicker({
   mode = "range", // "single" or "range"
+  timeOnly = false,
   selectedDate,
   onSingleChange,
   startDate,
@@ -12,6 +13,14 @@ export default function Datepicker({
   onRangeChange,
   disabled = false,
 }) {
+  const commonProps = {
+    showTimeSelect: true,
+    showTimeSelectOnly: timeOnly,
+    timeIntervals: 30,
+    timeCaption: "시간",
+    dateFormat: timeOnly ? "HH:mm" : "yyyy-MM-dd HH:mm",
+  };
+
   if (mode === "single") {
     // 단일 날짜 선택기
     return (
@@ -23,6 +32,7 @@ export default function Datepicker({
           dateFormat="yyyy-MM-dd"
           placeholderText="날짜 선택"
           disabled={disabled}
+          {...commonProps}
           className={`w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none ${
             disabled ? "cursor-not-allowed bg-gray-100 text-gray-500" : ""
           }`}
@@ -49,8 +59,9 @@ export default function Datepicker({
           startDate={startDate}
           endDate={endDate}
           dateFormat="yyyy-MM-dd"
-          placeholderText="시작일"
+          placeholderText={timeOnly ? "시작 시간" : "시작일"}
           disabled={disabled}
+          {...commonProps}
           className="w-32 rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none"
         />
         <FaCalendarAlt className="pointer-events-none absolute top-3 right-2 text-gray-400" />
@@ -72,8 +83,9 @@ export default function Datepicker({
           endDate={endDate}
           minDate={startDate} // 종료일은 시작일보다 뒤여야 함
           dateFormat="yyyy-MM-dd"
-          placeholderText="종료일"
+          placeholderText={timeOnly ? "종료 시간" : "종료일"}
           disabled={disabled}
+          {...commonProps}
           className="w-32 rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none"
         />
         <FaCalendarAlt className="pointer-events-none absolute top-3 right-2 text-gray-400" />

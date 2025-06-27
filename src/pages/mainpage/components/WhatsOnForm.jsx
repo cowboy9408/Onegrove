@@ -94,7 +94,7 @@ const WhatsOnForm = forwardRef(({ data, mainId = null, lang = "KO" }, ref) => {
       if (
         !value.subtitle ||
         ((isImage || isVideoEmbed) && !value.url) ||
-        ((isImage || isVideoFile) && !hasFileNow && !isDeleted)
+        ((isImage || isVideoFile) && !hasFileNow)
       ) {
         return onError?.("필수 항목을 확인해주세요.");
       }

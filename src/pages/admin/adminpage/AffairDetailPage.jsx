@@ -5,11 +5,14 @@ import Button from "@/components/common/Button";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "@/lib/apiClient";
 import useModal from "@/hooks/useModal";
+import Select from "@/components/common/Select";
 
-export default function AdminDetailPage() {
+export default function AffairDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { showModal } = useModal();
+  const [companies, setCompanies] = useState([]);
+  const [isLocked, setIsLocked] = useState(false);
 
   const [form, setForm] = useState({
     role: "OFFICE_SECRETARY_ADMIN",
@@ -19,6 +22,7 @@ export default function AdminDetailPage() {
     username: "",
     phone: "",
     email: "",
+    isContact: "",
   });
 
   useEffect(() => {
@@ -29,6 +33,7 @@ export default function AdminDetailPage() {
         if (res.data.success && res.data.data) {
           const data = res.data.data;
           setForm({
+            companyId: data.companyId ?? "",
             role: data.role,
             status: data.isUse === "Y" ? "active" : "inactive",
             name: data.name || "",
@@ -38,7 +43,9 @@ export default function AdminDetailPage() {
               ? data.phoneNumber.split("-").slice(1).join("-")
               : data.phoneNumber || "",
             email: data.email || "",
+            isContact: data.isContact ?? "",
           });
+          setIsLocked(data.isLock === "Y");
         }
       } catch (err) {
         console.error("상세 정보 조회 실패:", err);
@@ -47,6 +54,32 @@ export default function AdminDetailPage() {
 
     fetchData();
   }, [id]);
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const response = await api.get("/api/v1/user/company");
+        const rawData = response?.data?.data || [];
+
+        // 중복 companyId 제거
+        const uniqueCompanies = [];
+        const seen = new Set();
+
+        for (const c of rawData) {
+          if (!seen.has(c.companyId)) {
+            uniqueCompanies.push(c);
+            seen.add(c.companyId);
+          }
+        }
+
+        setCompanies(uniqueCompanies);
+      } catch (error) {
+        console.error("입주사 목록 조회 실패:", error);
+      }
+    };
+
+    fetchCompanies();
+  }, []);
 
   const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -72,7 +105,7 @@ export default function AdminDetailPage() {
     switch (gender) {
       case "M":
         return "male";
-      case "F":
+      case "W":
         return "female";
       default:
         return "";
@@ -104,7 +137,7 @@ export default function AdminDetailPage() {
     try {
       const payload = {
         id: Number(id),
-        // companyId: 4,
+        companyId: form.companyId,
         role: form.role,
         name: form.name,
         phoneNumber: formatPhoneNumber(form.phone),
@@ -114,6 +147,7 @@ export default function AdminDetailPage() {
         isUse: form.status === "active" ? "Y" : "N",
         isManager: "N",
         isReservation: "Y",
+        isContact: form.isContact,
       };
 
       showModal({
@@ -155,32 +189,32 @@ export default function AdminDetailPage() {
 
   return (
     <>
+      <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
+        입주사 총무팀 상세
+      </div>
       <div className="max-w mx-auto space-y-6 rounded-lg bg-white p-6 shadow-md">
         <div className="flex flex-wrap gap-8">
           <div>
             <p className="mb-2 text-sm font-medium text-gray-800">계정 유형</p>
             <div className="flex gap-4">
-              <Radio
-                name="role"
-                label="일반"
-                value="NORMAL_ADMIN"
-                checked={form.role === "NORMAL_ADMIN"}
-                onChange={() => handleChange("role", "NORMAL_ADMIN")}
-              />
-              <Radio
-                name="role"
-                label="리테일"
-                value="RETAIL_ADMIN"
-                checked={form.role === "RETAIL_ADMIN"}
-                onChange={() => handleChange("role", "RETAIL_ADMIN")}
-              />
-              <Radio
-                name="role"
-                label="오피스"
-                value="OFFICE_ADMIN"
-                checked={form.role === "OFFICE_ADMIN"}
-                onChange={() => handleChange("role", "OFFICE_ADMIN")}
-              />
+              <Select
+                label="입주사 선택"
+                value={String(form.companyId || "")} // 반드시 문자열로 변환
+                onChange={(e) =>
+                  handleChange("companyId", Number(e.target.value))
+                } // 저장은 숫자로
+                required
+              >
+                <option value="">입주사를 선택하세요</option>
+                {companies.map((company) => (
+                  <option
+                    key={company.companyId}
+                    value={String(company.companyId)}
+                  >
+                    {company.companyName}
+                  </option>
+                ))}
+              </Select>
             </div>
           </div>
 
@@ -202,6 +236,12 @@ export default function AdminDetailPage() {
                 onChange={() => handleChange("status", "inactive")}
               />
             </div>
+          </div>
+          <div className="mt-6 text-sm font-semibold text-gray-700">
+            계정 상태:{" "}
+            <span className={isLocked ? "text-red-600" : "text-black-600"}>
+              {isLocked ? "잠금" : "활성화"}
+            </span>
           </div>
         </div>
 
@@ -264,40 +304,76 @@ export default function AdminDetailPage() {
             onChange={(e) => handleChange("email", e.target.value)}
           />
         </div>
+        <div className="mt-4">
+          <p className="mb-2 text-sm font-medium text-gray-800">담당자 여부</p>
+          <div className="flex gap-4">
+            <Radio
+              name="isContact"
+              label="등록"
+              value="Y"
+              checked={form.isContact === "Y"}
+              onChange={() => handleChange("isContact", "Y")}
+            />
+            <Radio
+              name="isContact"
+              label="미등록"
+              value="N"
+              checked={form.isContact === "N"}
+              onChange={() => handleChange("isContact", "N")}
+            />
+          </div>
+        </div>
       </div>
       <div className="flex justify-end gap-3 px-6 pt-5 pb-6">
-        <Button
-          className="bg-black-100"
-          onClick={async () => {
-            try {
-              const payload = {
-                id: Number(id),
-                username: form.username,
-                email: form.email,
-              };
+        {isLocked && (
+          <Button
+            className="bg-black-100"
+            onClick={async () => {
+              try {
+                const payload = {
+                  id: Number(id),
+                  username: form.username,
+                  email: form.email,
+                };
 
-              const res = await api.post("/api/v1/user/unlock", payload);
+                const res = await api.post("/api/v1/user/unlock", payload);
 
-              if (res.data.success) {
-                alert(
-                  "계정 잠금이 해제되었고, 이메일로 아이디 및 임시 비밀번호가 전송되었습니다."
-                );
-              } else {
-                alert("잠금 해제 실패: " + res.data.message);
+                if (res.data.success) {
+                  showModal({
+                    title: "계정 잠금 해제 완료",
+                    message:
+                      "계정이 해제되었으며, 이메일로 임시 비밀번호가 발송되었습니다.",
+                    showCancel: false,
+                    onConfirm: () => {
+                      // 해제 후 UI에서도 버튼 안보이게 처리
+                      setIsLocked(false);
+                    },
+                  });
+                } else {
+                  showModal({
+                    title: "잠금 해제 실패",
+                    message: res.data.message || "잠금 해제에 실패했습니다.",
+                    showCancel: false,
+                  });
+                }
+              } catch (error) {
+                console.error("잠금 해제 실패:", error);
+                showModal({
+                  title: "서버 오류",
+                  message: "서버 오류로 잠금 해제에 실패했습니다.",
+                  showCancel: false,
+                });
               }
-            } catch (error) {
-              console.error("계정 잠금 해제 오류:", error);
-              alert("서버 오류로 계정 잠금 해제에 실패했습니다.");
-            }
-          }}
-        >
-          계정 잠금(휴면) 해제
-        </Button>
+            }}
+          >
+            계정 잠금(휴면) 해제
+          </Button>
+        )}
 
         <Button
           className="bg-black-100"
           onClick={() => {
-            alert("임시 비밀번호 발급 요청");
+            alert("임시 비밀번호가 발급되었습니다.");
           }}
         >
           임시 비밀번호 발급
@@ -318,7 +394,7 @@ export default function AdminDetailPage() {
               message:
                 "목록으로 돌아가면 수정 사항이 저장되지 않습니다. 이동하시겠습니까?",
               showCancel: true,
-              onConfirm: () => navigate("/admin/list"),
+              onConfirm: () => navigate("/admin/affair"),
             })
           }
         >

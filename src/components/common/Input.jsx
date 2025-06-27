@@ -40,7 +40,7 @@ const Input = forwardRef(function Input(
           {required && <span className="text-red-500">*</span>}
         </p>
       )}
-      <div className={`relative w-full ${className}`}>
+      <div className={`relative ${className}`}>
         <input
           id={id}
           ref={ref}

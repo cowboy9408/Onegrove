@@ -150,18 +150,18 @@ export default function AdminRegist() {
       showCancel: true,
       onConfirm: async () => {
         try {
-          const res = await api.post("/api/v1/user/admin/update", payload);
+          const res = await api.post("/api/v1/user/admin/insert", payload);
           if (res.data.success) {
             showModal({
-              title: "수정 완료",
-              message: "수정이 완료되었습니다.",
+              title: "저장 완료",
+              message: "등록이 완료되었습니다.",
               showCancel: false,
               onConfirm: () => navigate("/admin/list"),
             });
           } else {
             showModal({
-              title: "수정 실패",
-              message: res.data.message || "수정에 실패했습니다.",
+              title: "등록 실패",
+              message: res.data.message || "등록에 실패했습니다.",
               showCancel: false,
             });
           }
