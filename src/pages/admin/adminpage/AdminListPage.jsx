@@ -35,7 +35,7 @@ export default function AdminListPage() {
   const nameId = useId();
   const emailId = useId();
 
-  const size = 10;
+  const size = 30;
 
   const mapRoleToLabel = (role) => {
     switch (role) {
@@ -65,7 +65,11 @@ export default function AdminListPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await api.get("/api/v1/user/admin");
+        const response = await api.get("/api/v1/user/admin", {
+          params: {
+            isManager: "N",
+          },
+        });
         const res = response.data;
 
         if (res.success) {
@@ -122,7 +126,16 @@ export default function AdminListPage() {
               email: item.email,
               status: item.status,
               valuable: item.isUse,
-              created_at: item.createDatetime?.split("T")[0],
+              created_at: item.createDatetime
+                ? new Date(item.createDatetime).toLocaleString("ko-KR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })
+                : "",
             }))
           );
 

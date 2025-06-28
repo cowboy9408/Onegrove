@@ -1,14 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import Radio from "@/components/common/Radio";
 import { useNavigate } from "react-router-dom";
+import api from "@/lib/apiClient";
+import useModal from "@/hooks/useModal";
 import Select from "@/components/common/Select";
 
 export default function AffairRegist() {
   const [form, setForm] = useState({
-    role: "admin",
+    role: "OFFICE_SECRETARY_ADMIN",
     status: "active",
+    companyId: "",
     name: "",
     gender: "",
     username: "",
@@ -16,34 +19,222 @@ export default function AffairRegist() {
     confirmPassword: "",
     phone: "",
     email: "",
-    agent: "yes",
+    isContact: "N",
+    isReservation: "N",
   });
   const navigate = useNavigate();
+  const { showModal } = useModal();
+  const [errors, setErrors] = useState({
+    name: "",
+    username: "",
+  });
+  const [companies, setCompanies] = useState([]);
+
+  // const getRoleValue = (role) => {
+  //   switch (role) {
+  //     case "admin":
+  //       return "NORMAL_ADMIN";
+  //     case "retail":
+  //       return "RETAIL_ADMIN";
+  //     case "manager":
+  //       return "OFFICE_ADMIN";
+  //     default:
+  //       return "NORMAL_ADMIN";
+  //   }
+  // };
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const response = await api.get("/api/v1/user/company");
+        const rawData = response?.data?.data || [];
+
+        // 중복 companyId 제거
+        const uniqueCompanies = [];
+        const seen = new Set();
+
+        for (const c of rawData) {
+          if (!seen.has(c.companyId)) {
+            uniqueCompanies.push(c);
+            seen.add(c.companyId);
+          }
+        }
+
+        setCompanies(uniqueCompanies);
+      } catch (error) {
+        console.error("입주사 목록 조회 실패:", error);
+      }
+    };
+
+    fetchCompanies();
+  }, []);
 
   const handleChange = (key, value) => {
+    if (key === "name") {
+      if (value.length > 10) {
+        setErrors((prev) => ({
+          ...prev,
+          name: "이름은 최대 10자까지 입력 가능합니다.",
+        }));
+        return; // 입력 제한
+      } else {
+        setErrors((prev) => ({ ...prev, name: "" }));
+      }
+    }
+
+    // 아이디 유효성 처리
+    if (key === "username") {
+      const usernameRegex = /^[a-z0-9]{0,16}$/;
+      if (!usernameRegex.test(value)) {
+        setErrors((prev) => ({
+          ...prev,
+          username: "영소문자와 숫자만 입력할 수 있습니다 (4~16자).",
+        }));
+      } else {
+        setErrors((prev) => ({ ...prev, username: "" }));
+      }
+    }
+
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = () => {
-    console.log("등록 요청:", form);
-    // 실제 등록 API 호출 로직 추가
+  const handleSubmit = async () => {
+    if (!form.username) {
+      showModal({
+        title: "필수 입력",
+        message: "아이디를 입력해주세요.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    const usernameRegex = /^[a-z0-9]{4,16}$/;
+    if (!usernameRegex.test(form.username)) {
+      showModal({
+        title: "아이디 오류",
+        message: "아이디는 4~16자의 영소문자와 숫자만 사용 가능합니다.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    if (!form.email) {
+      showModal({
+        title: "필수 입력",
+        message: "이메일을 입력해주세요.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    if (!form.name || !form.password || !form.confirmPassword || !form.phone) {
+      showModal({
+        title: "필수 항목 누락",
+        message: "모든 필수 항목을 입력해주세요.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(form.email)) {
+      showModal({
+        title: "이메일 오류",
+        message: "올바른 이메일 형식이 아닙니다.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      showModal({
+        title: "비밀번호 불일치",
+        message: "비밀번호가 일치하지 않습니다.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    const payload = {
+      username: form.username,
+      password: form.password,
+      passwordConfirm: form.confirmPassword,
+      name: form.name,
+      phoneNumber: `010-${form.phone?.replace(/[^0-9]/g, "").replace(/(\d{4})(\d{4})/, "$1-$2")}`,
+
+      email: form.email,
+      gender:
+        form.gender === "male" ? "M" : form.gender === "female" ? "W" : null,
+
+      role: "OFFICE_SECRETARY_ADMIN",
+      companyId: form.companyId,
+      isAdmin: "Y",
+      isUse: form.status === "active" ? "Y" : "N",
+      isManager: "Y",
+      isContact: form.isContact,
+      isReservation: form.isReservation,
+    };
+
+    showModal({
+      title: "등록 확인",
+      message: "관리자 계정을 등록하시겠습니까?",
+      showCancel: true,
+      onConfirm: async () => {
+        try {
+          await api.post("/api/v1/user/admin/insert", payload);
+          showModal({
+            title: "등록 완료",
+            message: "계정이 성공적으로 등록되었습니다.",
+            showCancel: false,
+            onConfirm: () => navigate("/admin/affair"),
+          });
+        } catch (error) {
+          const message = error?.response?.data?.message || "";
+
+          if (
+            message.includes("Duplicate entry") &&
+            message.includes("UQ_username")
+          ) {
+            showModal({
+              title: "중복 아이디",
+              message:
+                "이미 존재하는 아이디입니다. 다른 아이디를 입력해주세요.",
+              showCancel: false,
+            });
+          } else {
+            showModal({
+              title: "등록 실패",
+              message: "이미 존재하는 이메일입니다. 확인해주세요.",
+              showCancel: false,
+            });
+          }
+        }
+      },
+    });
   };
 
   return (
     <div className="max-w mx-auto space-y-6 rounded-lg bg-white p-6 shadow-md">
       {/* 라디오 그룹: 계정 유형 & 사용 여부 */}
       <div className="flex flex-wrap gap-8">
-        <Select
-          label="입주사"
-          value={form.company}
-          onChange={(e) => handleChange("company", e.target.value)}
-          className="w-[735px]"
-        >
-          <option value="">선택하세요</option>
-          <option value="LG">입주사1</option>
-          <option value="삼성">입주사2</option>
-          <option value="카카오">입주사3</option>
-        </Select>
+        <div>
+          <div className="flex gap-4">
+            <Select
+              label="입주사 선택"
+              value={form.companyId || ""}
+              onChange={(e) => handleChange("companyId", e.target.value)}
+              required
+            >
+              <option value="">입주사를 선택하세요</option>
+              {companies.map((company) => (
+                <option key={company.companyId} value={company.companyId}>
+                  {company.companyName}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </div>
 
         <div>
           <p className="mb-2 text-sm font-medium text-gray-800">사용 여부</p>
@@ -73,6 +264,7 @@ export default function AffairRegist() {
           value={form.name}
           onChange={(e) => handleChange("name", e.target.value)}
           required
+          error={errors.name}
         />
         <div>
           <p className="mb-2 text-sm font-medium text-gray-800">성별</p>
@@ -101,6 +293,8 @@ export default function AffairRegist() {
           value={form.username}
           onChange={(e) => handleChange("username", e.target.value)}
           required
+          error={errors.username}
+          placeholder="4~16자 내의 영소문자,숫자로 구성"
         />
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -123,6 +317,7 @@ export default function AffairRegist() {
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-800">
             전화번호
+            <span className="text-red-500">*</span>
           </label>
           <div className="flex items-center">
             <span className="rounded-l-md px-3 py-2 text-base">010 -</span>
@@ -141,25 +336,47 @@ export default function AffairRegist() {
           label="이메일"
           value={form.email}
           onChange={(e) => handleChange("email", e.target.value)}
+          required
         />
-        <div>
-          <p className="mb-2 text-sm font-medium text-gray-800">담당자 여부</p>
-          <div className="flex gap-4">
-            <Radio
-              name="agent"
-              label="등록"
-              value="yes"
-              checked={form.status === "active"}
-              onChange={() => handleChange("status", "active")}
-            />
-            <Radio
-              name="agent"
-              label="미등록"
-              value="no"
-              checked={form.status === "inactive"}
-              onChange={() => handleChange("status", "inactive")}
-            />
-          </div>
+      </div>
+      <div className="mt-4">
+        <p className="mb-2 text-sm font-medium text-gray-800">담당자 여부</p>
+        <div className="flex gap-4">
+          <Radio
+            name="isContact"
+            label="등록"
+            value="Y"
+            checked={form.isContact === "Y"}
+            onChange={() => handleChange("isContact", "Y")}
+          />
+          <Radio
+            name="isContact"
+            label="미등록"
+            value="N"
+            checked={form.isContact === "N"}
+            onChange={() => handleChange("isContact", "N")}
+          />
+        </div>
+      </div>
+      <div>
+        <p className="mb-2 text-sm font-medium text-gray-800">
+          회의실 예약 기능
+        </p>
+        <div className="flex gap-4">
+          <Radio
+            name="isReservation"
+            label="가능"
+            value="Y"
+            checked={form.isReservation === "Y"}
+            onChange={() => handleChange("isReservation", "Y")}
+          />
+          <Radio
+            name="isReservation"
+            label="불가"
+            value="N"
+            checked={form.isReservation === "N"}
+            onChange={() => handleChange("isReservation", "N")}
+          />
         </div>
       </div>
 
@@ -169,7 +386,15 @@ export default function AffairRegist() {
         <Button
           type="button"
           className="bg-gray-200"
-          onClick={() => navigate("/admin/affair")}
+          onClick={() =>
+            showModal({
+              title: "이동 확인",
+              message:
+                "목록으로 이동하면 작성한 정보가 사라집니다. 이동하시겠습니까?",
+              showCancel: true,
+              onConfirm: () => navigate("/admin/affair"),
+            })
+          }
         >
           목록
         </Button>

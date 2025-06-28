@@ -34,7 +34,7 @@ export default function PressListPage() {
 
   const nameId = useId();
 
-  const size = 10;
+  const size = 30;
 
   const defaultFilter = {
     name: "",

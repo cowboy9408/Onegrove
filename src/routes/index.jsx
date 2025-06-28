@@ -61,6 +61,9 @@ import WorkBannerPage from "@/pages/banner/WorkBannerPage";
 import AboutBannerPage from "@/pages/banner/AboutBannerPage";
 import UserDetailPage from "@/pages/user/UserDetailPage";
 import AffairDetailPage from "@/pages/admin/adminpage/AffairDetailPage";
+import SleepListPage from "@/pages/system/sleep/SleepListPage";
+import SleepSetting from "@/pages/system/sleep/SleepSetting";
+import SleepDetail from "@/pages/system/sleep/SleepDetail";
 
 export const routeMeta = [
   {
@@ -84,7 +87,7 @@ export const routeMeta = [
         title: "관리자 관리",
         icon: <UsersIcon size={18} />,
         hidden: false,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN", "User"],
+        permissions: ["SUPER_ADMIN", "OFFICE_ADMIN"],
         children: [
           {
             uuid: "12b3ef89-1b74-450d-9f51-2888b953c1fd",
@@ -92,7 +95,7 @@ export const routeMeta = [
             element: <AdminListPage />,
             title: "관리자 관리",
             hidden: false,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN"],
+            permissions: ["SUPER_ADMIN"],
           },
           {
             uuid: "1e83ea43-0b00-4261-8c5a-a76102d971a0",
@@ -100,7 +103,7 @@ export const routeMeta = [
             element: <AdminDetailPage />,
             title: "관리자 상세",
             hidden: true,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN"],
+            permissions: ["SUPER_ADMIN"],
           },
           {
             uuid: "403ed52e-f0a2-4bdb-b1d5-e1c7cf542e1f",
@@ -108,20 +111,15 @@ export const routeMeta = [
             element: <AdminRegist />,
             title: "관리자 등록",
             hidden: true,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN"],
+            permissions: ["SUPER_ADMIN"],
           },
           {
             uuid: "0a74902d-894e-421a-9471-2920c692e73a",
             path: "/admin/affair",
             element: <AffairListPage />,
             title: "입주사 총무팀",
-            hidden: true,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "OFFICE_ADMIN",
-              "RETAIL_ADMIN",
-            ],
+            hidden: false,
+            permissions: ["SUPER_ADMIN", "OFFICE_ADMIN"],
           },
           {
             uuid: "87046c63-2981-4c56-9e57-8c908ed82160",
@@ -129,12 +127,7 @@ export const routeMeta = [
             element: <AffairRegist />,
             title: "입주사 총무팀 등록",
             hidden: true,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "OFFICE_ADMIN",
-              "RETAIL_ADMIN",
-            ],
+            permissions: ["SUPER_ADMIN", "OFFICE_ADMIN"],
           },
           {
             uuid: "d3487af9-b3eb-430c-887b-c599041597e7",
@@ -142,12 +135,7 @@ export const routeMeta = [
             element: <AffairDetailPage />,
             title: "입주사 총무팀 상세",
             hidden: true,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "OFFICE_ADMIN",
-              "RETAIL_ADMIN",
-            ],
+            permissions: ["SUPER_ADMIN", "OFFICE_ADMIN"],
           },
         ],
       },
@@ -782,7 +770,7 @@ export const routeMeta = [
         element: <InquiryListPage />,
         title: "고객 문의 관리",
         icon: <BellIcon size={18} />,
-        hidden: false,
+        hidden: true,
         permissions: [
           "SUPER_ADMIN",
           "NORMAL_ADMIN",
@@ -821,7 +809,7 @@ export const routeMeta = [
           {
             uuid: "4bd3ba77-798a-4466-bc3e-48fec787592a",
             path: "/system/sleep",
-            element: <></>,
+            element: <SleepListPage />,
             title: "수면실 설정",
             hidden: false,
             permissions: [
@@ -832,11 +820,38 @@ export const routeMeta = [
             ],
           },
           {
+            uuid: "cfd0a71c-188d-4cbc-bcc8-aa196bbdce2b",
+            path: "/system/sleep/regist",
+            element: <SleepSetting />,
+            title: "수면실 추가",
+            hidden: true,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "RETAIL_ADMIN",
+              "OFFICE_ADMIN",
+            ],
+          },
+          {
+            uuid: "cdfad14f-7e62-44eb-accd-68696dbbd0b0",
+            path: "/system/sleep/detail/:id",
+            element: <SleepDetail />,
+            title: "수면실 상세",
+            hidden: true,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "RETAIL_ADMIN",
+              "OFFICE_ADMIN",
+            ],
+          },
+
+          {
             uuid: "bc71031e-1a66-410a-84ea-5db89fa8822f",
             path: "/system/client",
             element: <></>,
             title: "고객 문의 설정",
-            hidden: false,
+            hidden: true,
             permissions: [
               "SUPER_ADMIN",
               "NORMAL_ADMIN",

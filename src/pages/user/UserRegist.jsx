@@ -17,7 +17,6 @@ export default function AdminRegist() {
     confirmPassword: "",
     phone: "",
     email: "",
-    isReservation: "N",
   });
   const navigate = useNavigate();
   const { showModal } = useModal();
@@ -114,7 +113,6 @@ export default function AdminRegist() {
       isAdmin: "N", // 고정
       isUse: form.status === "active" ? "Y" : "N",
       isManager: "N", // 고정
-      isReservation: form.isReservation,
     };
 
     showModal({
@@ -316,27 +314,6 @@ export default function AdminRegist() {
           {errors.email && (
             <p className="mt-1 text-sm text-red-500">이메일을 입력해주세요.</p>
           )}
-        </div>
-      </div>
-      <div>
-        <p className="mb-2 text-sm font-medium text-gray-800">
-          회의실 예약 기능
-        </p>
-        <div className="flex gap-4">
-          <Radio
-            name="isReservation"
-            label="가능"
-            value="Y"
-            checked={form.isReservation === "Y"}
-            onChange={() => handleChange("isReservation", "Y")}
-          />
-          <Radio
-            name="isReservation"
-            label="불가"
-            value="N"
-            checked={form.isReservation === "N"}
-            onChange={() => handleChange("isReservation", "N")}
-          />
         </div>
       </div>
 

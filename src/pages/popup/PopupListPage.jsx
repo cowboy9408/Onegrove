@@ -9,11 +9,11 @@ import Col from "@/components/layout/Col";
 import ResultSection from "@/components/layout/ResultSection";
 import Row from "@/components/layout/Row";
 import SearchSection from "@/components/layout/SearchSection";
-import { faker } from "@faker-js/faker";
 import { useEffect, useId, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import DateRangePicker from "@/components/common/Datepicker";
 import Radio from "@/components/common/Radio";
+import api from "@/lib/apiClient";
 
 export default function PopupListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -27,58 +27,71 @@ export default function PopupListPage() {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [visibility, setVisibility] = useState(""); // 노출 여부
+  const [checkedIds, setCheckedIds] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const nameId = useId();
 
-  const size = 10;
+  const size = 30;
 
   useEffect(() => {
     const fetchData = async () => {
-      // TODO: faker 삭제
-      const generateFakePagedUsers = ({ page = 1, size = 10 }) => {
-        const totalElements = 23;
-        const totalPages = Math.ceil(totalElements / size);
-        const start = (page - 1) * size;
+      try {
+        const res = await api.get("/api/v1/popup", {
+          params: {
+            page,
+            size,
+          },
+        });
 
-        const data = Array.from({ length: size }, (_, i) => {
-          const index = start + i + 1;
+        const list = res.data?.data || [];
+
+        const parsedData = list.map((item) => {
+          const contentKo = item.contentList.find((c) => c.lang === "KO") || {};
+          const contentEn = item.contentList.find((c) => c.lang === "EN") || {};
+
+          const formatDate = (str) =>
+            str && str !== "-" ? str.split(" ")[0] : "-";
+
           return {
-            no: index,
-            type: faker.helpers.arrayElement(["관리자", "일반", "외부"]),
-            occupancy: faker.company.name(),
-            name: faker.person.lastName() + faker.person.firstName(),
-            username: faker.internet.userName(),
-            email: faker.internet.email(),
-            status: faker.helpers.arrayElement(["활성", "비활성"]),
-            created_user: faker.person.fullName(),
-            created_at: faker.date
-              .recent({ days: 30 })
-              .toISOString()
-              .split("T")[0],
+            pmId: item.id, // 상세 링크 등에 사용
+            no: item.rownum,
+
+            ko_title: contentKo.title ?? "-",
+            en_title: contentEn.title ?? "-",
+
+            status_ko: contentKo.useYn ?? "-",
+            status_en: contentEn.useYn ?? "-",
+
+            start_ko: formatDate(contentKo.startDt),
+            start_en: formatDate(contentEn.startDt),
+            end_ko: formatDate(contentKo.endDt),
+            end_en: formatDate(contentEn.endDt),
+
+            created_user_ko: contentKo.createUser ?? "-",
+            created_user_en: contentEn.createUser ?? "-",
+
+            created_at_ko: contentKo.createDt?.split(" ")[0] ?? "-",
+            created_at_en: contentEn.createDt?.split(" ")[0] ?? "-",
+            _id: String(item.id),
           };
         });
 
-        return {
-          pageable: {
-            totalPages,
-            totalElements,
-            currentPage: page,
-            pageSize: size,
-          },
-          data: data.slice(0, totalElements - start), // 마지막 페이지 size 조정
-        };
-      };
-      // END TODO faker 삭제
-
-      // TODO: FETCH DATA
-      const res = generateFakePagedUsers(page);
-
-      setData(res.data);
-      setTotal(res.pageable.totalElements);
+        setData(parsedData);
+        setTotal(res.data?.pageable?.totalElements || 0);
+      } catch (err) {
+        console.error("팝업 리스트 로딩 실패:", err);
+      }
     };
 
     fetchData();
-  }, [page]);
+  }, [page, refreshKey]);
+
+  const handleCheck = (id, checked) => {
+    setCheckedIds((prev) =>
+      checked ? [...prev, id] : prev.filter((v) => v !== id)
+    );
+  };
 
   return (
     <div>
@@ -160,8 +173,34 @@ export default function PopupListPage() {
           </Button>
           <Button
             className="bg-black text-white hover:bg-gray-800"
-            onClick={() => {
-              // 삭제 버튼 클릭 시 로직
+            onClick={async () => {
+              if (checkedIds.length === 0) {
+                alert("삭제할 항목을 선택해주세요.");
+                return;
+              }
+
+              const confirmDelete =
+                window.confirm("선택한 팝업을 삭제하시겠습니까?");
+              if (!confirmDelete) return;
+
+              try {
+                const res = await api.post(
+                  "/api/v1/popup/delete",
+                  checkedIds.map(Number)
+                );
+
+                if (res.status === 200) {
+                  alert("삭제가 완료되었습니다.");
+                  setCheckedIds([]);
+                  setPage(1);
+                  setRefreshKey((prev) => prev + 1);
+                } else {
+                  alert("삭제 실패: 서버 오류");
+                }
+              } catch (err) {
+                console.error("팝업 삭제 요청 실패:", err);
+                alert("삭제 중 오류가 발생했습니다.");
+              }
             }}
           >
             삭제
@@ -172,18 +211,101 @@ export default function PopupListPage() {
         <DataTable
           columns={[
             { key: "no", label: "번호" },
-            { key: "occupancy", label: "입주사" },
-            { key: "name", label: "이름" },
-            { key: "username", label: "아이디" },
-            { key: "email", label: "이메일" },
-            { key: "status", label: "계정 상태" },
-            { key: "", label: "사용 여부" },
-            { key: "created_user", label: "등록자" },
-            { key: "created_at", label: "등록일시" },
+            {
+              key: "language",
+              label: "언어",
+              render: () => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="p-2 font-medium">KO</div>
+                  <div className="p-2 font-medium">EN</div>
+                </div>
+              ),
+            },
+
+            {
+              key: "title",
+              label: "타이틀",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <button
+                    className={`text-black-600 truncate p-2 text-left ${row.ko_title !== "-" ? "underline" : ""}`}
+                    onClick={() =>
+                      navigate(`/popup/regist/${row.pmId}?lang=ko`)
+                    }
+                  >
+                    {row.ko_title}
+                  </button>
+                  <button
+                    className={`text-black-600 truncate p-2 text-left ${row.en_title !== "-" ? "underline" : ""}`}
+                    onClick={() =>
+                      navigate(`/popup/regist/${row.pmId}?lang=en`)
+                    }
+                  >
+                    {row.en_title}
+                  </button>
+                </div>
+              ),
+            },
+
+            {
+              key: "status",
+              label: "노출 여부",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="p-2">{row.status_ko}</div>
+                  <div className="p-2">{row.status_en}</div>
+                </div>
+              ),
+            },
+            {
+              key: "startDt",
+              label: "시작일",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="p-2">{row.start_ko}</div>
+                  <div className="p-2">{row.start_en}</div>
+                </div>
+              ),
+            },
+            {
+              key: "endDt",
+              label: "종료일",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="p-2">{row.end_ko}</div>
+                  <div className="p-2">{row.end_en}</div>
+                </div>
+              ),
+            },
+            {
+              key: "created_at",
+              label: "등록일시",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="p-2">{row.created_at_ko}</div>
+                  <div className="p-2">{row.created_at_en}</div>
+                </div>
+              ),
+            },
+
+            {
+              key: "created_user",
+              label: "등록자",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="p-2">{row.created_user_ko}</div>
+                  <div className="p-2">{row.created_user_en}</div>
+                </div>
+              ),
+            },
           ]}
           data={data}
-          link={{ base: "/admin", path: "no" }}
+          link={{ base: "/popup/regist", path: "pmId" }}
+          checkable={true}
+          checkedIds={checkedIds}
+          onCheck={handleCheck}
         />
+
         <Pagination
           current={page}
           totalPages={Math.ceil(total / size)}

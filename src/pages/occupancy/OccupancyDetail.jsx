@@ -184,7 +184,11 @@ export default function OccupancyDetail() {
       const originalData = isKorean ? koData : enData;
 
       const formValues = await formRef.current?.submit?.(showError);
-      if (!formValues) return;
+      if (!formValues) {
+        // 유효성 검사 실패 시, 상태 초기화
+        await fetchDetail(); // 상태 초기화 (koData, enData, koLocations, enLocations)
+        return;
+      }
 
       const commonId = koData?.id || enData?.id || formValues?.id || null;
 

@@ -23,6 +23,7 @@ export default function UserListPage() {
   const [total, setTotal] = useState(0);
   const [checkedIds, setCheckedIds] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [companyOptions, setCompanyOptions] = useState([]);
   const defaultFilter = {
     name: "",
     email: "",
@@ -35,7 +36,7 @@ export default function UserListPage() {
   const nameId = useId();
   const emailId = useId();
 
-  const size = 10;
+  const size = 30;
 
   // const mapRoleToLabel = (role) => {
   //   switch (role) {
@@ -55,6 +56,27 @@ export default function UserListPage() {
   //       return "알 수 없음";
   //   }
   // };
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const res = await api.get("/api/v1/user/company");
+        if (res.data.success) {
+          // 중복 제거: companyId 기준
+          const uniqueCompanies = Array.from(
+            new Map(
+              res.data.data.map((item) => [item.companyId, item])
+            ).values()
+          );
+          setCompanyOptions(uniqueCompanies);
+        }
+      } catch (err) {
+        console.error("입주사 목록 가져오기 실패:", err);
+      }
+    };
+
+    fetchCompanies();
+  }, []);
 
   const handleCheck = (id, checked) => {
     setCheckedIds((prev) =>
@@ -86,7 +108,7 @@ export default function UserListPage() {
 
           if (activeFilter.type) {
             filtered = filtered.filter(
-              (item) => item.role === activeFilter.type
+              (item) => String(item.companyId) === String(activeFilter.type)
             );
           }
 
@@ -126,7 +148,16 @@ export default function UserListPage() {
               status: item.status,
               valuable: item.isUse,
               createUser: item.createUser,
-              created_at: item.createDatetime?.split("T")[0],
+              created_at: item.createDatetime
+                ? new Date(item.createDatetime).toLocaleString("ko-KR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })
+                : "",
             }))
           );
 
@@ -154,9 +185,11 @@ export default function UserListPage() {
                 }
               >
                 <option value="">전체</option>
-                <option value="NORMAL_ADMIN">일반 관리자</option>
-                <option value="RETAIL_ADMIN">리테일 관리자</option>
-                <option value="OFFICE_ADMIN">오피스 관리자</option>
+                {companyOptions.map((company) => (
+                  <option key={company.companyId} value={company.companyId}>
+                    {company.companyName}
+                  </option>
+                ))}
               </Select>
             </Col>
             <Col>

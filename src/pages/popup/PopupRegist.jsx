@@ -45,8 +45,8 @@ export default function PopupRegist() {
 
   const handleSave = async (form) => {
     try {
-      await api.post("/api/v1/press/insert", form);
-      navigate("/contents/whatson/media");
+      await api.post("/api/v1/popup/insert", form);
+      navigate("/popup");
     } catch (err) {
       console.error("저장 실패:", err);
     }
@@ -76,7 +76,7 @@ export default function PopupRegist() {
             ref={enFormRef}
             data={enData}
             setData={setEnData}
-            lang="ko"
+            lang="en"
           />
         </TabPanel>
       </Tabs>
@@ -94,7 +94,7 @@ export default function PopupRegist() {
               title: "이동 확인",
               message: "이전 페이지로 돌아갈 경우 입력한 정보가 사라집니다.",
               showCancel: true,
-              onConfirm: () => navigate("/contents/whatson/media"),
+              onConfirm: () => navigate("/popup"),
             })
           }
         >
