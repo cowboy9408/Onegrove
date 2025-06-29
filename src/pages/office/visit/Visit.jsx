@@ -13,6 +13,7 @@ import { faker } from "@faker-js/faker";
 import { useEffect, useId, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import DateRangePicker from "@/components/common/Datepicker";
+import api from "@/lib/apiClient";
 
 export default function Visit() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -23,12 +24,29 @@ export default function Visit() {
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [startDate, setStartDate] = useState(null);
-const [endDate, setEndDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [visitList, setVisitList] = useState([]);
 
   const nameId = useId();
   
 
   const size = 10;
+
+  useEffect(() => {
+    const fetchList = async () => {
+      try {
+        const res = await api.get("/api/v1/visit");
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          console.log(res.data.data);
+          setVisitList(res.data.data);
+        }
+      } catch (err) {
+        console.error("목록 불러오기 실패:", err);
+      }
+    };
+
+    fetchList();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -153,16 +171,18 @@ const [endDate, setEndDate] = useState(null);
         <DataTable
           columns={[
             { key: "no", label: "번호" },
-            { key: "occupancy", label: "입주사" },
-            { key: "name", label: "이름" },
-            { key: "username", label: "아이디" },
-            { key: "email", label: "이메일" },
-            { key: "status", label: "계정 상태" },
-            { key: "", label: "사용 여부" },
-            { key: "created_user", label: "등록자" },
-            { key: "created_at", label: "등록일시" },
+            { key: "companyName", label: "입주사" },
+            { key: "name", label: "방문객" },
+            { key: "visitPurpose", label: "방문 목적" },
+            { key: "visitDate", label: "방문 신청일" },
+            { key: "visitTime", label: "방문 시간" },
+            { key: "visitNumber", label: "방문 인원" },
+            { key: "visitBuilding", label: "방문동" },
+            { key: "", label: "카드번호" },
+            { key: "createDatetime", label: "등록일시" },
+            { key: "status", label: "상태" },
           ]}
-          data={data}
+          data={visitList}
           link={{ base: "/admin", path: "no" }}
         />
         <Pagination
