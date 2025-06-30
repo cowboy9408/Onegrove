@@ -19,10 +19,16 @@ export default function CommonCalendar({
   const CustomToolbar = ({ date, onNavigate }) => {
     const currentMonth = moment(date).format("YYYY.MM");
 
+    const prevDate = moment(date).subtract(1, "month").toDate();
+    const nextDate = moment(date).add(1, "month").toDate();
+
+    const canNavigatePrev = prevDate >= minDate;
+    const canNavigateNext = nextDate <= maxDate;
+
     const handleNavigate = (action) => {
       const newDate = moment(date);
-      if (action === "PREV") newDate.subtract(1, "month");
-      else if (action === "NEXT") newDate.add(1, "month");
+      if (action === "PREV" && canNavigatePrev) newDate.subtract(1, "month");
+      else if (action === "NEXT" && canNavigateNext) newDate.add(1, "month");
       const newDateObj = newDate.toDate();
       if (newDateObj >= minDate && newDateObj <= maxDate) {
         setCurrentDate(newDateObj);
@@ -32,9 +38,21 @@ export default function CommonCalendar({
 
     return (
       <div className="rbc-toolbar flex justify-between items-center px-4 py-2">
-        <button className="!border-0" onClick={() => handleNavigate("PREV")}>&lt;</button>
+        <button
+          onClick={() => handleNavigate("PREV")}
+          className={`!border-0 px-2 py-1 ${!canNavigatePrev ? "opacity-30 cursor-not-allowed" : ""}`}
+          disabled={!canNavigatePrev}
+        >
+          &lt;
+        </button>
         <span className="text-lg font-bold text-themeBlack">{currentMonth}</span>
-        <button className="!border-0" onClick={() => handleNavigate("NEXT")}>&gt;</button>
+        <button
+          onClick={() => handleNavigate("NEXT")}
+          className={`!border-0 px-2 py-1 ${!canNavigateNext ? "opacity-30 cursor-not-allowed" : ""}`}
+          disabled={!canNavigateNext}
+        >
+          &gt;
+        </button>
       </div>
     );
   };
@@ -59,7 +77,7 @@ export default function CommonCalendar({
             textOverflow: "clip",
             fontSize: "12px",
             padding: "2px 4px",
-            backgroundColor: event.resource?.status === "예약 확정" ? "##00AAFF" : "#4CAF50",
+            backgroundColor: event.resource?.status === "예약 확정" ? "#00AAFF" : "#4CAF50",
             color: "white",
           },
         })}

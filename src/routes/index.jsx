@@ -30,6 +30,7 @@ import EventListPage from "@/pages/contents/whatson/event/EventListPage";
 import StoriesListPage from "@/pages/contents/whatson/stories/StoriesListPage";
 import PressListPage from "@/pages/contents/whatson/media/PressListPage";
 import Meeting from "@/pages/office/meeting/Meeting";
+import Viproom from "@/pages/office/viproom/Viproom";
 import Visit from "@/pages/office/visit/Visit";
 import Sleep from "@/pages/office/sleep/Sleep";
 import InquiryListPage from "@/pages/inquiry/client/InquiryListPage";
@@ -724,7 +725,22 @@ export const routeMeta = [
             uuid: "b3c13f6a-0715-4199-b0bd-dcc163d4c89d",
             path: "/office/meeting",
             element: <Meeting />,
-            title: "회의실 예약",
+            title: "Meeting Room 예약",
+            hidden: false,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "RETAIL_ADMIN",
+              "OFFICE_ADMIN",
+              "OFFICE_SECRETARY_ADMIN",
+              "MEMBER",
+            ],
+          },
+          {
+            uuid: "fc07f96b-d19c-4677-a7f1-5d39d36e2666",
+            path: "/office/viproom",
+            element: <Viproom />,
+            title: "Executive Room 예약",
             hidden: false,
             permissions: [
               "SUPER_ADMIN",
