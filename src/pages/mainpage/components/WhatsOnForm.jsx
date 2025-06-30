@@ -191,7 +191,7 @@ const WhatsOnForm = forwardRef(({ data, mainId = null, lang = "KO" }, ref) => {
                   name={`whatson.videoType`}
                   label="영상 형식"
                   options={[
-                    { label: "영상 업로드", value: "file" },
+                    // { label: "영상 업로드", value: "file" },
                     { label: "YouTube 임베드", value: "embed" },
                   ]}
                   error={errors.whatson?.videoType?.message}
