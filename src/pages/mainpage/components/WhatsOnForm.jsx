@@ -154,7 +154,7 @@ const WhatsOnForm = forwardRef(({ data, mainId = null, lang = "KO" }, ref) => {
               label="강조 콘텐츠 요소"
               options={[
                 { label: "이미지", value: "image" },
-                { label: "영상", value: "video" },
+                // { label: "영상", value: "video" },
               ]}
               error={errors.whatson?.type?.message}
             />
