@@ -719,7 +719,7 @@ export const routeMeta = [
         title: "오피스 관리",
         icon: <CalendarDaysIcon size={18} />,
         hidden: false,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN", "MEMBER"],
+        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN", "OFFICE_SECRETARY_ADMIN"],
         children: [
           {
             uuid: "b3c13f6a-0715-4199-b0bd-dcc163d4c89d",
@@ -730,10 +730,8 @@ export const routeMeta = [
             permissions: [
               "SUPER_ADMIN",
               "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
               "OFFICE_ADMIN",
               "OFFICE_SECRETARY_ADMIN",
-              "MEMBER",
             ],
           },
           {
@@ -745,10 +743,8 @@ export const routeMeta = [
             permissions: [
               "SUPER_ADMIN",
               "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
               "OFFICE_ADMIN",
               "OFFICE_SECRETARY_ADMIN",
-              "MEMBER",
             ],
           },
           {
@@ -760,10 +756,8 @@ export const routeMeta = [
             permissions: [
               "SUPER_ADMIN",
               "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
               "OFFICE_ADMIN",
-              "OFFICE_SECRETARY_ADMIN",
-              "MEMBER",
+              "OFFICE_SECRETARY_ADMIN"
             ],
           },
           {
@@ -775,9 +769,7 @@ export const routeMeta = [
             permissions: [
               "SUPER_ADMIN",
               "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
               "OFFICE_ADMIN",
-              "MEMBER",
             ],
           },
         ],
