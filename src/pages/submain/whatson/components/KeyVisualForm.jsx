@@ -145,7 +145,7 @@ const KeyVisualForm = forwardRef(
                     label="콘텐츠 형식"
                     options={[
                       { label: "이미지", value: "image" },
-                      { label: "영상", value: "video" },
+                      // { label: "영상", value: "video" },
                     ]}
                   />
                 </Row>
