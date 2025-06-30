@@ -198,7 +198,7 @@ const WhatsOnForm = forwardRef(({ data, mainId = null, lang = "KO" }, ref) => {
                 />
               </Row>
 
-              {videoType === "file" && (
+              {/* {videoType === "file" && (
                 <Row className="pb-4">
                   <Upload
                     name={`whatson.image`}
@@ -207,7 +207,7 @@ const WhatsOnForm = forwardRef(({ data, mainId = null, lang = "KO" }, ref) => {
                     required
                   />
                 </Row>
-              )}
+              )} */}
 
               {videoType === "embed" && (
                 <Row className="pb-4">

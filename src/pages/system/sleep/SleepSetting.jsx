@@ -172,7 +172,9 @@ export default function SleepListPage() {
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium">운영 시간</p>
+            <p className="text-sm font-medium">
+              운영 시간<span className="text-red-500">*</span>
+            </p>
             <Datepicker
               mode="range"
               timeOnly={true}
