@@ -6,7 +6,7 @@ import Datepicker from "@/components/common/Datepicker";
 import Upload from "@/components/common/Upload";
 import Button from "@/components/common/Button";
 import api from "@/lib/apiClient";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import useModal from "@/hooks/useModal";
 import { useForm, FormProvider } from "react-hook-form";
 
@@ -16,12 +16,69 @@ export default function MeetingDetail() {
   const [locationOptions, setLocationOptions] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const { id } = useParams();
+  const [originImage, setOriginImage] = useState(null);
+
+  const toImageMeta = (file, original) => {
+    if (!file && original) {
+      return {
+        id: original.id ?? null,
+        originalName: original.originalName ?? "",
+        name: original.name ?? original.originalName ?? "",
+        size: original.size ?? 0,
+        extension:
+          original.extension ||
+          "." + (original.originalName || "").split(".").pop(),
+        mime: original.mime || "image/jpeg",
+        classification: original.classification || "meeting",
+        path: original.path || null,
+        status: "R", // 기존 이미지 유지
+      };
+    }
+
+    if (!file || file.status === "D" || !file.path) {
+      return {
+        id: null,
+        name: null,
+        originalName: file?.originalName || "",
+        size: null,
+        extension: null,
+        mime: null,
+        classification: "meeting",
+        path: null,
+        status: "D",
+      };
+    }
+
+    const base = file || original;
+    const originalName = base.originalName || base.name || "";
+    const extension = base.extension || "." + originalName.split(".").pop();
+    const isNew = !base.id && !original?.id;
+
+    return {
+      id: base.id ?? null,
+      originalName: originalName,
+      name: base.name ?? originalName,
+      size: base.size ?? 0,
+      extension: extension,
+      mime: base.mime || "image/jpeg",
+      classification: base.classification || "meeting",
+      path: base.path || null,
+      status: isNew
+        ? "C"
+        : file?.changed
+          ? "E"
+          : original?.path !== file?.path
+            ? "E"
+            : file?.status || "R",
+    };
+  };
 
   const methods = useForm({
     defaultValues: {
       name: "",
-      useYn: "사용",
-      isVip: "일반",
+      useYn: "",
+      isVip: "",
       roomNumber: "",
       location: "",
       capacity: "",
@@ -35,42 +92,84 @@ export default function MeetingDetail() {
   const { watch, setValue, handleSubmit } = methods;
 
   useEffect(() => {
-    const fetchLocations = async () => {
+    const fetchData = async () => {
       try {
-        const res = await api.get("/api/v1/meeting/setting/location");
-        if (res.data.success) {
-          setLocationOptions(res.data.data);
-          // 기본값 설정 (예: 첫 번째 옵션)
-          if (res.data.data.length > 0) {
-            setValue("location", res.data.data[0].value);
+        const locRes = await api.get("/api/v1/meeting/setting/location");
+        if (!locRes.data.success) throw new Error("위치 옵션 조회 실패");
+
+        const options = locRes.data.data;
+        setLocationOptions(options);
+
+        // 기본 location 설정
+        if (options.length > 0) {
+          setValue("location", options[0].value);
+        }
+
+        // 수정 모드라면 상세 조회
+        if (id) {
+          const res = await api.get(`/api/v1/meeting/setting/detail/${id}`);
+          if (res.data.success) {
+            const d = res.data.data;
+            console.log("백엔드 응답 fileId:", d.fileId);
+            const s = new Date(`1970-01-01T${d.startTime}`);
+            const e = new Date(`1970-01-01T${d.endTime}`);
+            setStartDate(s);
+            setEndDate(e);
+
+            setValue("name", d.name);
+            setValue("useYn", d.useYn === "Y" ? "사용" : "미사용");
+            setValue("isVip", d.isVip === "Y" ? "VIP" : "일반");
+            setValue("roomNumber", d.roomNumber);
+            setValue("capacity", d.capacity);
+            setValue("timeRange", { startDate: s, endDate: e });
+            setValue("file", {
+              name: d.originalName,
+              path: d.imgPath,
+              originalName: d.originalName,
+              id: d.fileId,
+              size: null,
+            });
+            setOriginImage({
+              name: d.originalName,
+              path: d.imgPath,
+              originalName: d.originalName,
+              id: d.fileId,
+            });
+            setValue("freeTime", d.freeHour);
+            setValue("pricePerHour", d.hourlyCost);
+            s;
+            // 코드 → value로 매핑
+            const selectedLoc = options.find((loc) => loc.code === d.location);
+            if (selectedLoc) setValue("location", selectedLoc.value);
           }
-        } else {
-          console.error("위치 조회 실패:", res.data.message);
         }
       } catch (err) {
-        console.error("위치 API 오류:", err);
+        console.error("데이터 조회 중 오류:", err);
       }
     };
 
-    fetchLocations();
-  }, [setValue]);
+    fetchData();
+  }, [id, setValue]);
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const onSubmit = async (form) => {
+    console.log("roomNumber:", form.roomNumber);
+    console.log("location:", form.location);
     try {
       const selectedLocation = locationOptions.find(
         (loc) => loc.value === form.location
       );
 
       const payload = {
+        id: Number(id), // 반드시 포함
         name: form.name,
         useYn: form.useYn === "사용" ? "Y" : "N",
         isVip: form.isVip === "VIP" ? "Y" : "N",
         roomNumber: form.roomNumber,
-        location: selectedLocation?.code ?? "", // code 전송
+        location: selectedLocation?.code ?? "",
         capacity: Number(form.capacity),
         startTime: form.timeRange?.startDate
           ? new Date(form.timeRange.startDate).toTimeString().slice(0, 8)
@@ -78,25 +177,29 @@ export default function MeetingDetail() {
         endTime: form.timeRange?.endDate
           ? new Date(form.timeRange.endDate).toTimeString().slice(0, 8)
           : null,
-        img: form.file,
+        img: toImageMeta(form.file, originImage),
+
         freeHour: Number(form.freeTime),
         hourlyCost: Number(form.pricePerHour),
       };
-
-      const res = await api.post("/api/v1/meeting/setting/insert", payload);
+      console.log("전송되는 데이터:", payload);
+      const res = await api.post("/api/v1/meeting/setting/update", payload);
 
       if (res.data.success) {
         showModal({
-          title: "추가 완료",
-          message: "회의실이 성공적으로 추가되었습니다.",
+          title: "수정 완료",
+          message: "회의실 정보가 성공적으로 수정되었습니다.",
           onConfirm: () => navigate("/system/meeting"),
         });
       } else {
-        showModal({ title: "등록 실패", message: res.data.message });
+        showModal({ title: "수정 실패", message: res.data.message });
       }
     } catch (error) {
-      showModal({ title: "오류", message: "API 요청 중 문제가 발생했습니다." });
-      console.error("Insert API Error:", error);
+      showModal({
+        title: "오류",
+        message: "API 요청 중 문제가 발생했습니다.",
+      });
+      console.error("Update API Error:", error);
     }
   };
 
@@ -167,7 +270,7 @@ export default function MeetingDetail() {
             <Input label="호실" {...methods.register("roomNumber")} required />
             <Select label="위치" {...methods.register("location")} required>
               {locationOptions.map((loc) => (
-                <option key={loc.code} value={loc.value}>
+                <option key={loc.code} value={loc.code}>
                   {loc.value}
                 </option>
               ))}
@@ -223,8 +326,7 @@ export default function MeetingDetail() {
           </div>
 
           <div className="flex justify-end gap-4 px-6 pb-6">
-            <Button onClick={handleSubmit(onSubmit)}>수정</Button>
-
+            <Button type="submit">수정</Button>
             <Button
               type="button"
               className="bg-gray-200"
@@ -234,7 +336,7 @@ export default function MeetingDetail() {
                   message:
                     "목록으로 이동하면 작성한 정보가 사라집니다. 이동하시겠습니까?",
                   showCancel: true,
-                  onConfirm: () => navigate("/system/Meeting"),
+                  onConfirm: () => navigate("/system/meeting"),
                 })
               }
             >
