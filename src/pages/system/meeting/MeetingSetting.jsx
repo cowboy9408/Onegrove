@@ -234,7 +234,7 @@ export default function MeetingSetting() {
                   message:
                     "목록으로 이동하면 작성한 정보가 사라집니다. 이동하시겠습니까?",
                   showCancel: true,
-                  onConfirm: () => navigate("/system/Meeting"),
+                  onConfirm: () => navigate("/system/meeting"),
                 })
               }
             >
