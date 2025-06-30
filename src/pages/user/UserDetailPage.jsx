@@ -365,8 +365,38 @@ export default function UserDetailPage() {
 
         <Button
           className="bg-black-100"
-          onClick={() => {
-            alert("임시 비밀번호 발급 요청");
+          onClick={async () => {
+            try {
+              const payload = {
+                id: Number(id),
+                username: form.username,
+                email: form.email,
+              };
+
+              const res = await api.post("/api/v1/user/temp-password", payload);
+
+              if (res.data.success) {
+                showModal({
+                  title: "발급 완료",
+                  message: "임시 비밀번호가 이메일로 전송되었습니다.",
+                  showCancel: false,
+                });
+              } else {
+                showModal({
+                  title: "발급 실패",
+                  message:
+                    res.data.message || "임시 비밀번호 발급에 실패했습니다.",
+                  showCancel: false,
+                });
+              }
+            } catch (error) {
+              console.error("임시 비밀번호 발급 실패:", error);
+              showModal({
+                title: "서버 오류",
+                message: "서버 오류로 인해 발급에 실패했습니다.",
+                showCancel: false,
+              });
+            }
           }}
         >
           임시 비밀번호 발급

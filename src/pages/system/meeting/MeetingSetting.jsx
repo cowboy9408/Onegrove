@@ -8,7 +8,7 @@ import Button from "@/components/common/Button";
 import api from "@/lib/apiClient";
 import { useNavigate } from "react-router-dom";
 import useModal from "@/hooks/useModal";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, Controller } from "react-hook-form";
 
 export default function MeetingSetting() {
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ export default function MeetingSetting() {
       pricePerHour: "",
     },
   });
-  const { watch, setValue, handleSubmit } = methods;
+  const { control, watch, setValue, handleSubmit } = methods;
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -42,7 +42,7 @@ export default function MeetingSetting() {
           setLocationOptions(res.data.data);
           // 기본값 설정 (예: 첫 번째 옵션)
           if (res.data.data.length > 0) {
-            setValue("location", res.data.data[0].value);
+            setValue("location", res.data.data[0].code); // value → code
           }
         } else {
           console.error("위치 조회 실패:", res.data.message);
@@ -61,16 +61,12 @@ export default function MeetingSetting() {
 
   const onSubmit = async (form) => {
     try {
-      const selectedLocation = locationOptions.find(
-        (loc) => loc.value === form.location
-      );
-
       const payload = {
         name: form.name,
         useYn: form.useYn === "사용" ? "Y" : "N",
         isVip: form.isVip === "VIP" ? "Y" : "N",
         roomNumber: form.roomNumber,
-        location: selectedLocation?.code ?? "", // code 전송
+        location: form.location, // code 전송
         capacity: Number(form.capacity),
         startTime: form.timeRange?.startDate
           ? new Date(form.timeRange.startDate).toTimeString().slice(0, 8)
@@ -165,13 +161,20 @@ export default function MeetingSetting() {
 
           <div className="grid grid-cols-2 gap-4">
             <Input label="호실" {...methods.register("roomNumber")} required />
-            <Select label="위치" {...methods.register("location")} required>
-              {locationOptions.map((loc) => (
-                <option key={loc.code} value={loc.value}>
-                  {loc.value}
-                </option>
-              ))}
-            </Select>
+            <Controller
+              control={control}
+              name="location"
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Select label="위치" {...field} required>
+                  {locationOptions.map((loc) => (
+                    <option key={loc.code} value={loc.code}>
+                      {loc.value}
+                    </option>
+                  ))}
+                </Select>
+              )}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
