@@ -89,7 +89,7 @@ export default function MeetingDetail() {
       pricePerHour: "",
     },
   });
-  const { watch, setValue, handleSubmit } = methods;
+  const { register, watch, setValue, handleSubmit } = methods;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -100,12 +100,6 @@ export default function MeetingDetail() {
         const options = locRes.data.data;
         setLocationOptions(options);
 
-        // 기본 location 설정
-        if (options.length > 0) {
-          setValue("location", options[0].value);
-        }
-
-        // 수정 모드라면 상세 조회
         if (id) {
           const res = await api.get(`/api/v1/meeting/setting/detail/${id}`);
           if (res.data.success) {
@@ -140,7 +134,11 @@ export default function MeetingDetail() {
             s;
             // 코드 → value로 매핑
             const selectedLoc = options.find((loc) => loc.code === d.location);
-            if (selectedLoc) setValue("location", selectedLoc.value);
+            if (selectedLoc) {
+              // 기존: setValue("location", selectedLoc.code);
+              // 변경: 사용자에게 보여줄 value로 설정
+              setValue("location", d.location);
+            }
           }
         }
       } catch (err) {
@@ -159,17 +157,13 @@ export default function MeetingDetail() {
     console.log("roomNumber:", form.roomNumber);
     console.log("location:", form.location);
     try {
-      const selectedLocation = locationOptions.find(
-        (loc) => loc.value === form.location
-      );
-
       const payload = {
         id: Number(id), // 반드시 포함
         name: form.name,
         useYn: form.useYn === "사용" ? "Y" : "N",
         isVip: form.isVip === "VIP" ? "Y" : "N",
         roomNumber: form.roomNumber,
-        location: selectedLocation?.code ?? "",
+        location: form.location,
         capacity: Number(form.capacity),
         startTime: form.timeRange?.startDate
           ? new Date(form.timeRange.startDate).toTimeString().slice(0, 8)
@@ -184,7 +178,8 @@ export default function MeetingDetail() {
       };
       console.log("전송되는 데이터:", payload);
       const res = await api.post("/api/v1/meeting/setting/update", payload);
-
+      console.log("전송된 payload:", payload);
+      console.log("응답:", res.data);
       if (res.data.success) {
         showModal({
           title: "수정 완료",
@@ -268,13 +263,13 @@ export default function MeetingDetail() {
 
           <div className="grid grid-cols-2 gap-4">
             <Input label="호실" {...methods.register("roomNumber")} required />
-            <Select label="위치" {...methods.register("location")} required>
+            <select {...register("location")} required>
               {locationOptions.map((loc) => (
                 <option key={loc.code} value={loc.code}>
                   {loc.value}
                 </option>
               ))}
-            </Select>
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
