@@ -6,7 +6,7 @@ import { ModalContext } from "@/context/ModalContext";
 import ReservationForm from "@/components/modal/ReservationForm";
 import api from "@/lib/apiClient";
 
-export default function Meeting() {
+export default function Viproom() {
   const [selectedRoom, setSelectedRoom] = useState(1);
   const { showModal } = useContext(ModalContext);
   const [meetingOptions, setMeetingOptions] = useState({});
@@ -15,7 +15,7 @@ export default function Meeting() {
 
   const fetchSchedules = async () => {
     try {
-      const res = await api.get(`/api/v1/meeting?roomId=${selectedRoom}&isVip=N&lang=ko`);
+      const res = await api.get(`/api/v1/meeting?roomId=${selectedRoom}&isVip=Y&lang=ko`);
       if (res.data?.success && Array.isArray(res.data.data)) {
         const mapped = res.data.data.map((item) => ({
           id: item.id,
