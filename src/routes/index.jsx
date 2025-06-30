@@ -65,6 +65,8 @@ import AffairDetailPage from "@/pages/admin/adminpage/AffairDetailPage";
 import SleepListPage from "@/pages/system/sleep/SleepListPage";
 import SleepSetting from "@/pages/system/sleep/SleepSetting";
 import SleepDetail from "@/pages/system/sleep/SleepDetail";
+import MeetingSetting from "@/pages/system/meeting/MeetingSetting";
+import MeetingDetail from "@/pages/system/meeting/MeetinDetail";
 
 export const routeMeta = [
   {
@@ -717,7 +719,7 @@ export const routeMeta = [
         title: "오피스 관리",
         icon: <CalendarDaysIcon size={18} />,
         hidden: false,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN", "MEMBER"],
+        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN", "OFFICE_SECRETARY_ADMIN"],
         children: [
           {
             uuid: "b3c13f6a-0715-4199-b0bd-dcc163d4c89d",
@@ -728,10 +730,8 @@ export const routeMeta = [
             permissions: [
               "SUPER_ADMIN",
               "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
               "OFFICE_ADMIN",
               "OFFICE_SECRETARY_ADMIN",
-              "MEMBER",
             ],
           },
           {
@@ -743,10 +743,8 @@ export const routeMeta = [
             permissions: [
               "SUPER_ADMIN",
               "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
               "OFFICE_ADMIN",
               "OFFICE_SECRETARY_ADMIN",
-              "MEMBER",
             ],
           },
           {
@@ -758,10 +756,8 @@ export const routeMeta = [
             permissions: [
               "SUPER_ADMIN",
               "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
               "OFFICE_ADMIN",
-              "OFFICE_SECRETARY_ADMIN",
-              "MEMBER",
+              "OFFICE_SECRETARY_ADMIN"
             ],
           },
           {
@@ -773,9 +769,7 @@ export const routeMeta = [
             permissions: [
               "SUPER_ADMIN",
               "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
               "OFFICE_ADMIN",
-              "MEMBER",
             ],
           },
         ],
@@ -822,6 +816,33 @@ export const routeMeta = [
               "OFFICE_ADMIN",
             ],
           },
+          {
+            uuid: "f6d4536d-e76b-4621-9873-bf5b6465e50e",
+            path: "/system/meeting/regist",
+            element: <MeetingSetting />,
+            title: "회의실 추가",
+            hidden: true,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "RETAIL_ADMIN",
+              "OFFICE_ADMIN",
+            ],
+          },
+          {
+            uuid: "c4b5101a-61b4-44e7-8efe-4ab822624927",
+            path: "/system/meeting/detail/:id",
+            element: <MeetingDetail />,
+            title: "회의실 상세",
+            hidden: true,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "RETAIL_ADMIN",
+              "OFFICE_ADMIN",
+            ],
+          },
+
           {
             uuid: "4bd3ba77-798a-4466-bc3e-48fec787592a",
             path: "/system/sleep",
