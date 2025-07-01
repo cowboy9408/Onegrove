@@ -178,6 +178,7 @@ export default function Meeting() {
                 <ReservationForm
                   room={selectedRoom}
                   meetingOptions={meetingOptions}
+                  existingReservations={scheduleList}
                   roomList={officeOptions}
                   closeModal={closeModal}
                   onSubmit={() => {

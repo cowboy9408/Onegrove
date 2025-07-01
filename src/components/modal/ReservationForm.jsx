@@ -5,6 +5,7 @@ export default function ReservationForm({
   room,
   roomList,
   meetingOptions,
+  existingReservations = [],
   initialData = {},
   isEdit = false,
   onSubmit,
@@ -28,31 +29,6 @@ export default function ReservationForm({
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
-  };
-
-  const startOptions = Array.from({ length: 19 }, (_, i) => {
-    const hour = 9 + Math.floor(i / 2);
-    const min = i % 2 === 0 ? "00" : "30";
-    return `${String(hour).padStart(2, '0')}:${min}:00`;
-  });
-
-  const endOptions = () => {
-    const [hour, min] = resveStartTime.split(":");
-    const baseHour = parseInt(hour, 10);
-    const baseMin = parseInt(min, 10);
-
-    const oneHourLater = new Date();
-    oneHourLater.setHours(baseHour + 1);
-    oneHourLater.setMinutes(baseMin);
-
-    const twoHourLater = new Date();
-    twoHourLater.setHours(baseHour + 2);
-    twoHourLater.setMinutes(baseMin);
-
-    const formatTime = (date) =>
-      `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:00`;
-
-    return [formatTime(oneHourLater), formatTime(twoHourLater)];
   };
 
   const handleSubmit = async () => {
@@ -86,6 +62,58 @@ export default function ReservationForm({
       alert("필수 입력 내용을 확인해 주세요.")
     }
   };
+
+  const generateTimeOptions = (startHour, endHour) => {
+    return Array.from({ length: endHour - startHour + 1 }, (_, i) => {
+      const hour = startHour + i;
+      return `${String(hour).padStart(2, '0')}:00:00`;
+    });
+  };
+
+  const getReservedTimes = () => {
+    return existingReservations
+      .filter((r) => r.resource.resveDate === resveDate)
+      .map((r) => ({
+        start: new Date(`${r.resource.resveDate}T${r.resource.resveStartTime}`),
+        end: new Date(`${r.resource.resveDate}T${r.resource.resveEndTime}`),
+      }));
+  };
+
+  const isTimeAvailable = (timeStr) => {
+    const timeDate = new Date(`${resveDate}T${timeStr}`);
+    const reserved = getReservedTimes();
+
+    return reserved.every(({ start, end }) => {
+      const beforeStart = new Date(start);
+      beforeStart.setHours(beforeStart.getHours() - 1);
+
+      const afterEnd = new Date(end);
+      afterEnd.setHours(afterEnd.getHours() + 1);
+
+      return timeDate < beforeStart || timeDate > afterEnd;
+    });
+  };
+
+  const getEndOptions = () => {
+    if (!resveDate || !resveStartTime) return [];
+
+    const base = new Date(`${resveDate}T${resveStartTime}`);
+    if (isNaN(base)) return [];
+
+    const options = [];
+
+    // 시작시간 +1 ~ 18:00 까지
+    for (let hour = base.getHours() + 1; hour <= 18; hour++) {
+      const timeStr = `${String(hour).padStart(2, '0')}:00:00`;
+      options.push({
+        value: timeStr,
+        disabled: !isTimeAvailable(timeStr),
+      });
+    }
+
+    return options;
+  };
+
 
   return (
     <div className="space-y-5 text-left">
@@ -129,15 +157,27 @@ export default function ReservationForm({
         <div className="flex gap-2">
           <input type="date" value={resveDate} min={getToday()} onChange={(e) => setResveDate(e.target.value)} className="border px-2 py-1 rounded" />
           <select value={resveStartTime} onChange={(e) => setResveStartTime(e.target.value)} className="border px-2 py-1 rounded">
-            {startOptions.map((time) => (
-              <option key={time} value={time}>{time.slice(0,5)}</option>
+            {generateTimeOptions(9, 17).map((time) => (
+              <option key={time} value={time} disabled={!isTimeAvailable(time)}>
+                {time.slice(0, 5)} {isTimeAvailable(time) ? "" : "(불가)"}
+              </option>
             ))}
           </select>
           <span>~</span>
-          <select value={resveEndTime} onChange={(e) => setResveEndTime(e.target.value)} className="border px-2 py-1 rounded">
-            {endOptions().map((time) => (
-              <option key={time} value={time}>{time.slice(0,5)}</option>
-            ))}
+          <select
+            value={resveEndTime}
+            onChange={(e) => setResveEndTime(e.target.value)}
+            className="border px-2 py-1 rounded"
+          >
+            {getEndOptions().length === 0 ? (
+              <option disabled>예약 시작 시간을 먼저 선택해주세요</option>
+            ) : (
+              getEndOptions().map((opt) => (
+                <option key={opt.value} value={opt.value} disabled={opt.disabled}>
+                  {opt.value.slice(0, 5)} {opt.disabled ? "(불가)" : ""}
+                </option>
+              ))
+            )}
           </select>
         </div>
       </div>
