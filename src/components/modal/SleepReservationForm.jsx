@@ -114,7 +114,22 @@ export default function SleepReservationForm({
         </select>
       </div>
 
-      <div></div>
+      <div>
+        <label className="mb-1 block">
+          Relax Room 호실 선택 <span className="text-red-500">*</span>
+        </label>
+        <select
+          value={roomId}
+          onChange={(e) => setRoomId(e.target.value)}
+          className="w-full rounded border px-2 py-1"
+        >
+          {roomList.map((room) => (
+            <option key={room.id} value={room.id}>
+              {room.name} ({room.location})
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div>
         <label className="mb-1 block">
@@ -153,6 +168,7 @@ export default function SleepReservationForm({
           </select>
         </div>
       </div>
+      <div></div>
 
       <div>
         <label className="mb-1 block">
@@ -168,6 +184,25 @@ export default function SleepReservationForm({
               {c.companyName}
             </option>
           ))}
+        </select>
+      </div>
+      <div>
+        <label className="mb-1 block">
+          아이디 <span className="text-red-500">*</span>
+        </label>
+        <select
+          value={realUser}
+          onChange={(e) => setRealUser(e.target.value)}
+          className="w-full rounded border px-2 py-1"
+        >
+          <option value="">아이디를 선택하세요</option>
+          {meetingOptions?.visitCompanyListRes
+            ?.find((c) => String(c.companyId) === String(companyId))
+            ?.users?.map((user) => (
+              <option key={user.userId} value={user.userId}>
+                {user.userName} ({user.userId})
+              </option>
+            ))}
         </select>
       </div>
 
