@@ -33,7 +33,8 @@ const StoriesRegistForm = forwardRef(
     const editorRef = useRef();
     const editorRef2 = useRef();
     const { showModal } = useModal();
-
+    const [imageFields, setImageFields] = useState([1, 2, 3]); // 최소 3개 유지
+    const [deletedImages, setDeletedImages] = useState([]);
     const [startDate, setStartDate] = useState(new Date());
     const [startTime, setStartTime] = useState("00:00");
     const [endDate, setEndDate] = useState(null);
@@ -75,6 +76,13 @@ const StoriesRegistForm = forwardRef(
 
       if (data?.addContent !== "" && data?.addContent !== null) {
         setIsAddContent(true);
+      }
+    }, [data]);
+
+    useEffect(() => {
+      if (data?.storiesImgList?.length > 3) {
+        const count = data.storiesImgList.length;
+        setImageFields(Array.from({ length: count }, (_, i) => i + 1));
       }
     }, [data]);
 
@@ -188,6 +196,8 @@ const StoriesRegistForm = forwardRef(
 
           const matchedSiId = file.siId || originalFile?.siId || null;
 
+          const isNew = !originalFile || !matchedSiFileId;
+
           return {
             id: file.id ?? null,
             siId: matchedSiId,
@@ -201,46 +211,76 @@ const StoriesRegistForm = forwardRef(
             path:
               file.path ||
               `https://assets.onegrove.kr/dev/StoriesImg/${file.originalName || file.name}`,
-            status: file.status || "C",
+            status: file.status || (isNew ? "C" : "R"), // 수정 포인트
             delYn: file.delYn || "N",
           };
         };
 
-        const storiesImgList = [1, 2, 3]
+        // 새로 구성된 이미지 리스트
+        const storiesImgList = imageFields
           .map((i, idx) => {
             const img = values[`storiesImgList${i}`];
-            if (!img) {
-              setValue(`storiesImgCaption${i}`, "");
-              return null;
-            }
+            if (!img) return null;
 
             const caption = values[`storiesImgCaption${i}`] || "";
+
             const originalImg = (data?.storiesImgList || []).find(
               (o) =>
-                o?.name === img?.name || o?.originalName === img?.originalName
+                o?.siFileId === img?.siFileId ||
+                o?.originalName === img?.originalName
             );
 
             const fileMeta = toImageMeta(img, originalImg);
-            const isDeleted = fileMeta.status === "D";
+            fileMeta.sort = String(idx + 1);
 
-            fileMeta.sort = String(idx + 1); // idx는 0부터 시작
-
-            // 캡션 변경 감지
+            // 기존 이미지인데 캡션이 변경됨 => E
             if (
-              !isDeleted &&
               originalImg &&
-              originalImg.caption !== caption &&
-              (fileMeta.status === "R" || !fileMeta.status)
+              (originalImg.caption || "") !== caption &&
+              fileMeta.status === "R"
             ) {
               fileMeta.status = "E";
             }
 
             return {
               ...fileMeta,
-              caption: isDeleted ? "" : caption,
+              caption,
             };
           })
           .filter(Boolean);
+
+        // 삭제된 이미지 반영
+        const replacedImages = (data?.storiesImgList || [])
+          .filter((originalImg) => {
+            const index = Number(originalImg.sort) || 0;
+            const currentImg = values[`storiesImgList${index}`];
+
+            // 같은 위치의 이미지가 존재하지 않거나, siFileId 또는 originalName이 다른 경우 삭제 처리
+            const isModified =
+              !currentImg ||
+              (currentImg?.siFileId &&
+                currentImg?.siFileId !== originalImg?.siFileId) ||
+              (currentImg?.originalName &&
+                currentImg?.originalName !== originalImg?.originalName);
+
+            return isModified;
+          })
+          .map((img) => ({
+            ...toImageMeta(img),
+            status: "D",
+            delYn: "Y",
+          }));
+
+        // 최종 이미지 리스트 구성
+        const finalStoriesImgList = [
+          ...storiesImgList, // 입력한 이미지 (R, E, C)
+          ...replacedImages, // 덮어쓴 기존 이미지 → D
+          ...deletedImages.map((img) => ({
+            ...toImageMeta(img),
+            status: "D",
+            delYn: "Y",
+          })), // 명시적으로 삭제한 이미지
+        ];
 
         return {
           id: data?.id ?? null,
@@ -254,7 +294,8 @@ const StoriesRegistForm = forwardRef(
           patternTopMo: toImageMeta(values.patternTopMo),
           patternBottomPc: toImageMeta(values.patternBottomPc),
           patternBottomMo: toImageMeta(values.patternBottomMo),
-          storiesImgList,
+          storiesImgList: finalStoriesImgList,
+
           // storiesImgList: [
           //   {
           //     ...toImageMeta(values.storiesImgList1),
@@ -511,56 +552,76 @@ const StoriesRegistForm = forwardRef(
             />
           </div>
 
-          <div className="my-6 space-y-2">
-            <Upload
-              name="storiesImgList1"
-              label="스와이프이미지 1"
-              classification="StoriesImg"
-              readOnly={readOnly}
-              value={watch("storiesImgList1")}
-              onChange={(file) => setValue("storiesImgList1", file)}
-              accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
-              showDefaultInfo={true}
-              info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
-            />
-            <Input
-              {...methods.register("storiesImgCaption1")}
-              info="스와이프이미지 1 캡션 영역"
-            />
+          <div className="my-6 space-y-4">
+            {imageFields.map((index) => (
+              <div
+                key={index}
+                className="relative space-y-2 rounded-md border p-4"
+              >
+                <Upload
+                  name={`storiesImgList${index}`}
+                  label={`스와이프이미지 ${index}`}
+                  classification="StoriesImg"
+                  readOnly={readOnly}
+                  value={watch(`storiesImgList${index}`)}
+                  onChange={(file) => setValue(`storiesImgList${index}`, file)}
+                  accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
+                  showDefaultInfo={true}
+                  info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
+                />
+                <Input
+                  {...methods.register(`storiesImgCaption${index}`)}
+                  info={`스와이프이미지 ${index} 캡션 영역`}
+                />
 
-            <Upload
-              name="storiesImgList2"
-              label="스와이프이미지 2"
-              classification="StoriesImg"
-              readOnly={readOnly}
-              value={watch("storiesImgList2")}
-              onChange={(file) => setValue("storiesImgList2", file)}
-              accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
-              showDefaultInfo={true}
-              info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
-              className="mt-4"
-            />
-            <Input
-              {...methods.register("storiesImgCaption2")}
-              info="스와이프이미지 2 캡션 영역"
-            />
+                {index >= 4 && (
+                  <Button
+                    type="button"
+                    className="absolute bottom-2 left-1/2 -translate-x-1/2 transform text-red-800"
+                    onClick={() => {
+                      const deletedImg = watch(`storiesImgList${index}`);
+                      if (deletedImg) {
+                        setDeletedImages((prev) => [...prev, deletedImg]);
+                      }
 
-            <Upload
-              name="storiesImgList3"
-              label="스와이프이미지 3"
-              classification="StoriesImg"
-              readOnly={readOnly}
-              value={watch("storiesImgList3")}
-              onChange={(file) => setValue("storiesImgList3", file)}
-              accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
-              showDefaultInfo={true}
-              info="20MB 이하의 JPG, JPEG, PNG 파일 1개"
-              className="mt-4"
-            />
-            <Input
-              {...methods.register("storiesImgCaption3")}
-              info="스와이프이미지 3 캡션 영역"
-            />
+                      const newFields = imageFields
+                        .filter((i) => i !== index)
+                        .sort((a, b) => a - b);
+
+                      const reordered = newFields.map((_, idx) => idx + 1);
+                      setImageFields(reordered);
+
+                      reordered.forEach((newIdx, i) => {
+                        const oldIdx = newFields[i];
+                        const oldImage = watch(`storiesImgList${oldIdx}`);
+                        const oldCaption = watch(`storiesImgCaption${oldIdx}`);
+                        setValue(`storiesImgList${newIdx}`, oldImage);
+                        setValue(`storiesImgCaption${newIdx}`, oldCaption);
+                      });
+
+                      const max = Math.max(...imageFields);
+                      setValue(`storiesImgList${max}`, null);
+                      setValue(`storiesImgCaption${max}`, "");
+                    }}
+                  >
+                    삭제
+                  </Button>
+                )}
+              </div>
+            ))}
+
+            {imageFields.length < 10 && (
+              <Button
+                type="button"
+                className="bg-black-100 mt-2"
+                onClick={() => {
+                  const nextIndex = Math.max(...imageFields) + 1;
+                  setImageFields([...imageFields, nextIndex]);
+                }}
+              >
+                추가
+              </Button>
+            )}
           </div>
 
           <div className="space-y-2">
