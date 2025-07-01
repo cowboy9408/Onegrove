@@ -5,6 +5,7 @@ import Button from "@/components/common/Button";
 import { ModalContext } from "@/context/ModalContext";
 import SleepReservationForm from "@/components/modal/SleepReservationForm";
 import api from "@/lib/apiClient";
+import { ArrowDownIcon } from "@/components/ui/arrow-down";
 
 export default function SleepReserve() {
   const [selectedRoom, setSelectedRoom] = useState(1);
@@ -262,37 +263,61 @@ export default function SleepReserve() {
           events={scheduleList}
           onSelectEvent={handleEventClick}
         />
-        <div className="mt-6 grid grid-cols-2 gap-4">
-          {/* 오전 시간대 */}
-          <div className="space-y-4">
-            {["09:00", "10:00", "11:00", "12:00", "13:00"].map((time) => (
-              <div key={time}>
-                <p className="mb-1 text-sm font-semibold">
-                  {time} ~ {add50Min(time)}
-                </p>
-                <Select value="" onChange={() => {}}>
-                  <option value="">잔여 Relax Room 수 : - </option>
-                  <option value="1">옵션 1</option>
-                  <option value="2">옵션 2</option>
-                </Select>
-              </div>
-            ))}
-          </div>
+        <div className="mt-6 flex justify-center">
+          <div className="grid max-w-fit grid-cols-2 gap-30">
+            {/* 오전 시간대 */}
+            <div className="space-y-4">
+              {["09:00", "10:00", "11:00", "12:00", "13:00"].map((time) => (
+                <div key={time}>
+                  <p className="mb-1 text-sm font-semibold">
+                    {time} ~ {add50Min(time)}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium whitespace-nowrap">
+                      잔여 Relax Room 수 : "-"
+                    </label>
+                    <div className="relative inline-block">
+                      <select
+                        value=""
+                        onChange={() => {}}
+                        className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                      >
+                        <option value="1">옵션 1</option>
+                        <option value="2">옵션 2</option>
+                      </select>
+                      <ArrowDownIcon className="h-8 w-8 bg-white" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-          {/* 오후 시간대 */}
-          <div className="space-y-4">
-            {["14:00", "15:00", "16:00", "17:00"].map((time) => (
-              <div key={time}>
-                <p className="mb-1 text-sm font-semibold">
-                  {time} ~ {add50Min(time)}
-                </p>
-                <Select value="" onChange={() => {}}>
-                  <option value="">잔여 Relax Room 수 : - </option>
-                  <option value="1">옵션 1</option>
-                  <option value="2">옵션 2</option>
-                </Select>
-              </div>
-            ))}
+            {/* 오후 시간대 */}
+            <div className="space-y-4">
+              {["14:00", "15:00", "16:00", "17:00"].map((time) => (
+                <div key={time}>
+                  <p className="mb-1 text-sm font-semibold">
+                    {time} ~ {add50Min(time)}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium whitespace-nowrap">
+                      잔여 Relax Room 수 : "-"
+                    </label>
+                    <div className="relative inline-block">
+                      <select
+                        value=""
+                        onChange={() => {}}
+                        className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                      >
+                        <option value="1">옵션 1</option>
+                        <option value="2">옵션 2</option>
+                      </select>
+                      <ArrowDownIcon className="h-8 w-8 bg-white" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
