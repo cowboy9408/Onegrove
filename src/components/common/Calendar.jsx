@@ -37,18 +37,20 @@ export default function CommonCalendar({
     };
 
     return (
-      <div className="rbc-toolbar flex justify-between items-center px-4 py-2">
+      <div className="rbc-toolbar flex items-center justify-between px-4 py-2">
         <button
           onClick={() => handleNavigate("PREV")}
-          className={`!border-0 px-2 py-1 ${!canNavigatePrev ? "opacity-30 cursor-not-allowed" : ""}`}
+          className={`!border-0 px-2 py-1 ${!canNavigatePrev ? "cursor-not-allowed opacity-30" : ""}`}
           disabled={!canNavigatePrev}
         >
           &lt;
         </button>
-        <span className="text-lg font-bold text-themeBlack">{currentMonth}</span>
+        <span className="text-themeBlack text-lg font-bold">
+          {currentMonth}
+        </span>
         <button
           onClick={() => handleNavigate("NEXT")}
-          className={`!border-0 px-2 py-1 ${!canNavigateNext ? "opacity-30 cursor-not-allowed" : ""}`}
+          className={`!border-0 px-2 py-1 ${!canNavigateNext ? "cursor-not-allowed opacity-30" : ""}`}
           disabled={!canNavigateNext}
         >
           &gt;
@@ -77,7 +79,8 @@ export default function CommonCalendar({
             textOverflow: "clip",
             fontSize: "12px",
             padding: "2px 4px",
-            backgroundColor: event.resource?.status === "예약 확정" ? "#00AAFF" : "#4CAF50",
+            backgroundColor:
+              event.resource?.status === "예약 확정" ? "#00AAFF" : "#4CAF50",
             color: "white",
           },
         })}
