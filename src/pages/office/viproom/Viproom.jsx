@@ -38,7 +38,7 @@ export default function Viproom() {
   useEffect(() => {
     const fetchMeta = async () => {
       try {
-        const settingRes = await api.get(`/api/v1/meeting/setting`);
+        const settingRes = await api.get(`/api/v1/meeting/room-list?isVip=Y`);
         if (settingRes.data.success) setOfficeOptions(settingRes.data.data);
 
         const categoryRes = await api.get(`/api/v1/visit/category`);
@@ -82,23 +82,26 @@ export default function Viproom() {
 
             <div className="flex justify-between gap-3">
               <div className="flex gap-3">
-                <Button
-                  theme="danger"
-                  onClick={async () => {
-                    if (confirm("예약을 확정하겠습니까?")) {
-                      try {
-                        const res = await api.post("/api/v1/meeting/confirm", { id: detail.id });
-                        if (res.data?.success) {
-                          alert("예약 확정 완료");
-                          fetchSchedules();
-                          closeModal();
-                        } else alert("예약 확정 실패");
-                      } catch (err) {
-                        console.error("예약 확정 오류:", err);
+                {detail?.status !== '예약 확정' && (
+                  <Button
+                    theme="danger"
+                    onClick={async () => {
+                      if (confirm("예약을 확정하겠습니까?")) {
+                        try {
+                          const res = await api.post("/api/v1/meeting/confirm", { id: detail.id });
+                          if (res.data?.success) {
+                            alert("예약 확정 완료");
+                            fetchSchedules();
+                            closeModal();
+                          } else alert("예약 확정 실패");
+                        } catch (err) {
+                          console.error("예약 확정 오류:", err);
+                        }
                       }
-                    }
-                  }}
-                >예약 확정</Button>
+                    }}
+                  >예약 확정</Button>
+                )}
+                
                 <Button
                   theme="danger"
                   onClick={async () => {
@@ -159,10 +162,11 @@ export default function Viproom() {
           label="회의실 선택"
           value={selectedRoom}
           onChange={(e) => setSelectedRoom(Number(e.target.value))}
+          className="w-sm"
         >
           {officeOptions.map((room) => (
             <option key={room.id} value={room.id}>
-              {room.name} ({room.location})
+              {room.roomName} ({room.location})
             </option>
           ))}
         </Select>
@@ -178,6 +182,7 @@ export default function Viproom() {
                 <ReservationForm
                   room={selectedRoom}
                   meetingOptions={meetingOptions}
+                  existingReservations={scheduleList}
                   roomList={officeOptions}
                   closeModal={closeModal}
                   onSubmit={() => {
@@ -201,6 +206,31 @@ export default function Viproom() {
         <CommonCalendar
           events={scheduleList}
           onSelectEvent={handleEventClick}
+          onSelectSlot={(slotInfo) => {
+            const clickedDate = new Date(slotInfo.start);
+            const resveDate = clickedDate.toISOString().split("T")[0];
+
+            showModal({
+              title: "회의실 예약",
+              size: "lg",
+              customButton: true,
+              showCancel: true,
+              children: ({ closeModal }) => (
+                <ReservationForm
+                  room={selectedRoom}
+                  roomList={officeOptions}
+                  meetingOptions={meetingOptions}
+                  existingReservations={scheduleList}
+                  initialData={{ resveDate }}
+                  closeModal={closeModal}
+                  onSubmit={() => {
+                    fetchSchedules();
+                    closeModal();
+                  }}
+                />
+              ),
+            });
+          }}
         />
       </div>
     </div>
