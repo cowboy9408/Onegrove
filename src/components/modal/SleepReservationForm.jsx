@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
 
 export default function SleepReservationForm({
@@ -11,6 +11,7 @@ export default function SleepReservationForm({
   closeModal,
 }) {
   const [roomId, setRoomId] = useState(initialData.roomId || room || 1);
+  const [roomDetailId, setRoomDetailId] = useState(initialData.roomId || room || 1);
   const [companyId, setCompanyId] = useState(initialData.companyId || "");
   const [paymentType, setPaymentType] = useState(
     initialData.paymentType || "free"
@@ -29,6 +30,7 @@ export default function SleepReservationForm({
   );
   const [note, setNote] = useState(initialData.note || "");
   const [status, setStatus] = useState(initialData.status || "gs0101");
+  const [meetingList, setMeetingList] = useState([]);
 
   const getToday = () => {
     const today = new Date();
@@ -38,12 +40,11 @@ export default function SleepReservationForm({
     return `${yyyy}-${mm}-${dd}`;
   };
 
-  const startOptions = Array.from({ length: 19 }, (_, i) => {
-    const hour = 9 + Math.floor(i / 2);
-    const min = i % 2 === 0 ? "00" : "30";
-    return `${String(hour).padStart(2, "0")}:${min}:00`;
+  const startOptions = Array.from({ length: 9 }, (_, i) => {
+    const hour = 9 + i; // 9시부터 17시까지
+    return `${String(hour).padStart(2, "0")}:00:00`;
   });
-
+  
   const endOptions = () => {
     const [hour, min] = resveStartTime.split(":");
     const baseHour = parseInt(hour, 10);
@@ -60,8 +61,24 @@ export default function SleepReservationForm({
     const formatTime = (date) =>
       `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}:00`;
 
-    return [formatTime(oneHourLater), formatTime(twoHourLater)];
+    return [formatTime(oneHourLater)];
   };
+
+  useEffect(() => {
+    if (!roomId) return;
+    const fetchRoomDetail = async () => {
+      try {
+        const res = await api.get(`/api/v1/sleep/room/detail/${roomId}`);
+        if (res.data.success) {
+          // console.log('abdsdfdfdf', res.data.data);
+          setMeetingList(res.data.data);
+        }
+      } catch (err) {
+        console.error("방 상세 조회 실패:", err);
+      }
+    };
+    fetchRoomDetail();
+  }, [roomId]);
 
   const handleSubmit = async () => {
     const payload = {
@@ -106,6 +123,7 @@ export default function SleepReservationForm({
           onChange={(e) => setRoomId(e.target.value)}
           className="w-full rounded border px-2 py-1"
         >
+          <option value="">수면실을 선택해 주세요</option>
           {roomList.map((r) => (
             <option key={r.id} value={r.id}>
               {r.name} ({r.location})
@@ -120,13 +138,19 @@ export default function SleepReservationForm({
         </label>
         <select
           value={roomId}
-          onChange={(e) => setRoomId(e.target.value)}
+          onChange={(e) => setRoomDetailId(e.target.value)}
           className="w-full rounded border px-2 py-1"
         >
-          {roomList.map((room) => (
-            <option key={room.id} value={room.id}>
-              {room.name} ({room.location})
-            </option>
+          <option value="">호실을 선택해 주세요</option>
+          {meetingList?.infoList?.map((room, index) => (
+            <>
+              {room?.useYn === "Y" && !(meetingList?.gender !== "M" && index === 7) && (
+                <option key={room.id} value={room.id}>
+                  {room.roomNumId}호실
+                </option>
+              )}
+            </>
+            
           ))}
         </select>
       </div>

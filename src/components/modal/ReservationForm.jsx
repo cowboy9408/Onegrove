@@ -150,7 +150,7 @@ export default function ReservationForm({
         >
           {roomList.map((r) => (
             <option key={r.id} value={r.id}>
-              {r.name} ({r.location})
+              {r.roomName} ({r.location})
             </option>
           ))}
         </select>

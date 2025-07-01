@@ -38,7 +38,7 @@ export default function Meeting() {
   useEffect(() => {
     const fetchMeta = async () => {
       try {
-        const settingRes = await api.get(`/api/v1/meeting/setting`);
+        const settingRes = await api.get(`/api/v1/meeting/room-list?isVip=N`);
         if (settingRes.data.success) setOfficeOptions(settingRes.data.data);
 
         const categoryRes = await api.get(`/api/v1/visit/category`);
@@ -82,7 +82,7 @@ export default function Meeting() {
 
             <div className="flex justify-between gap-3">
               <div className="flex gap-3">
-                {!detail?.status && (
+                {detail?.status !== '예약 확정' && (
                   <Button
                     theme="danger"
                     onClick={async () => {
@@ -166,7 +166,7 @@ export default function Meeting() {
         >
           {officeOptions.map((room) => (
             <option key={room.id} value={room.id}>
-              {room.name} ({room.location})
+              {room.roomName} ({room.location})
             </option>
           ))}
         </Select>
