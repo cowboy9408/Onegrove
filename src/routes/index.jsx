@@ -32,7 +32,7 @@ import PressListPage from "@/pages/contents/whatson/media/PressListPage";
 import Meeting from "@/pages/office/meeting/Meeting";
 import Viproom from "@/pages/office/viproom/Viproom";
 import Visit from "@/pages/office/visit/Visit";
-import Sleep from "@/pages/office/sleep/Sleep";
+import SleepReserve from "@/pages/office/sleep/SleepReserve";
 import InquiryListPage from "@/pages/inquiry/client/InquiryListPage";
 import MeetingListPage from "@/pages/system/meeting/MeetingListPage";
 import EventRegist from "@/pages/contents/whatson/event/EventRegist";
@@ -333,7 +333,7 @@ export const routeMeta = [
         title: "하단 배너 관리",
         icon: <LayoutPanelTopIcon size={18} />,
         hidden: false,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN"],
+        permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
         children: [
           {
             uuid: "3183d249-9f8e-42f9-9745-ab251a784135",
@@ -579,7 +579,7 @@ export const routeMeta = [
           {
             uuid: "95b2aae3-4ce2-4782-95ca-62c4111dcc17",
             path: "/office/sleep",
-            element: <Sleep />,
+            element: <SleepReserve />,
             title: "수면실 예약",
             hidden: false,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
