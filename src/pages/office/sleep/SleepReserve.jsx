@@ -256,11 +256,6 @@ export default function SleepReserve() {
           events={scheduleList}
           onSelectEvent={handleEventClick}
         />
-        <Datepicker
-          mode="single"
-          selectedDate={selectedDate}
-          onSingleChange={setSelectedDate}
-        />
       </div>
     </div>
   );

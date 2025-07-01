@@ -1,5 +1,7 @@
 import React from "react";
 import moment from "moment";
+import Datepicker from "./Datepicker";
+import { FaCalendarAlt } from "react-icons/fa";
 
 export default function CalendarToolbar({
   currentDate,
@@ -46,6 +48,21 @@ export default function CalendarToolbar({
       >
         &gt;
       </button>
+      <div className="relative">
+        <Datepicker
+          selected={selectedDate}
+          onChange={(date) => onChangeMonth(date)}
+          minDate={minDate}
+          maxDate={maxDate}
+          customInput={
+            <button className="p-2">
+              <FaCalendarAlt className="text-gray-600" />
+            </button>
+          }
+          dateFormat="yyyy-MM-dd"
+          withPortal
+        />
+      </div>
     </div>
   );
 }
