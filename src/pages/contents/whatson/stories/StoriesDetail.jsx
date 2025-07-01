@@ -144,11 +144,14 @@ export default function StoriesDetail() {
         }
 
         formRef.setValue("content", data.content || "");
-        formRef.setValue("addContent", data.addContent || "");
+        const addContent = data.addContent?.trim?.() || "";
+        formRef.setValue("addContent", addContent);
+        formRef.setContent2?.(addContent);
         formRef.setValue("description", data.description || "");
         formRef.setDescription?.(data.description || "");
         formRef.setContent?.(data.content || "");
         formRef.setContent2?.(data.addContent || "");
+
         formRef.setValue(
           "startDate",
           data.startDt ? parseLocalDateTime(data.startDt) : null

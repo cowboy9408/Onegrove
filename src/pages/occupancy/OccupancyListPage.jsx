@@ -78,7 +78,9 @@ export default function OccupancyListPage() {
             .map((o) => officeMap[o.office] || o.office)
             .join(", ");
 
-          const floorNames = item.officeList.map((o) => o.floor).join(", ");
+          // const floorNames = item.officeList.map((o) => o.floor).join(", ");
+          const inputFloor = activeFilter.floor.replace(/[^0-9]/g, "");
+          const inputNumber = parseInt(inputFloor, 10);
 
           const nameMatch =
             !activeFilter.name ||
@@ -88,7 +90,25 @@ export default function OccupancyListPage() {
             !activeFilter.office || officeNames.includes(activeFilter.office);
 
           const floorMatch =
-            !activeFilter.floor || floorNames.includes(activeFilter.floor);
+            !activeFilter.floor ||
+            item.officeList.some((o) => {
+              const raw = o.floor || "";
+
+              // 숫자만 추출
+              const rangeMatch = raw.match(/^(\d+)\s*-\s*(\d+)/);
+              const singleMatch = raw.match(/^(\d+)/);
+
+              if (rangeMatch) {
+                const start = parseInt(rangeMatch[1], 10);
+                const end = parseInt(rangeMatch[2], 10);
+                return inputNumber >= start && inputNumber <= end;
+              } else if (singleMatch) {
+                const value = parseInt(singleMatch[1], 10);
+                return inputNumber === value;
+              } else {
+                return false;
+              }
+            });
 
           const statusMatch =
             !activeFilter.status || item.useYn === activeFilter.status;

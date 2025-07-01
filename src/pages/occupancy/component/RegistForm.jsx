@@ -15,6 +15,9 @@ const RegistForm = forwardRef(
       setLocations,
       currentLang,
       readOnlyOffice = false,
+      chargerList = [],
+      freeUsedTimeThisMonth = null,
+      paidUsedTimeThisMonth = null,
     },
     ref
   ) => {
@@ -339,6 +342,20 @@ const RegistForm = forwardRef(
               // showDefaultInfo={true}
               // info="416x280px 사이즈, 20MB 이하의 JPG,JPEG,PNG 파일 1개"
             />
+
+            {chargerList.length > 0 && (
+              <div>
+                <p className="mb-2 text-sm font-medium text-gray-800">
+                  총무 담당자 목록
+                </p>
+                <ul className="list-inside list-disc text-sm text-gray-700">
+                  {chargerList.slice(0, 10).map((charger, idx) => (
+                    <li key={idx}>{charger}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <Input
               label="회의실 무료 예약시간"
               type="text"
@@ -366,6 +383,22 @@ const RegistForm = forwardRef(
               })}
               info="예약시간은 127시간까지만 입력 가능"
             />
+            {(freeUsedTimeThisMonth !== null ||
+              paidUsedTimeThisMonth !== null) && (
+              <div className="mt-6 border-t pt-6">
+                <label className="mb-2 block text-sm font-medium text-gray-800">
+                  이번달 어메니티 예약 사용 시간
+                </label>
+                <div className="flex gap-8 text-sm text-gray-700">
+                  {freeUsedTimeThisMonth !== null && (
+                    <div>무료 사용 시간: {freeUsedTimeThisMonth}시간</div>
+                  )}
+                  {paidUsedTimeThisMonth !== null && (
+                    <div>유료 사용 시간: {paidUsedTimeThisMonth}시간</div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </form>
       </FormProvider>

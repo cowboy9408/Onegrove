@@ -38,7 +38,7 @@ const StoriesRegistForm = forwardRef(
     const [startTime, setStartTime] = useState("00:00");
     const [endDate, setEndDate] = useState(null);
     const [endTime, setEndTime] = useState("00:00");
-    const [isAddContent, setIsAddContent] = useState(true);
+    const [isAddContent, setIsAddContent] = useState(false);
 
     const onSubmit = async (data) => {
       const content = await editorRef.current.getContent();
@@ -273,7 +273,7 @@ const StoriesRegistForm = forwardRef(
           //   },
           // ],
           content: content || "",
-          addContent: addContent || "",
+          addContent: isAddContent ? addContent || "" : "",
           description: description || "",
           startDt: startDateStr,
           endDt: endDateStr,
@@ -481,9 +481,13 @@ const StoriesRegistForm = forwardRef(
           />
 
           <Button
-            className="h-12 w-full"
             onClick={() => {
-              setIsAddContent(!isAddContent);
+              const next = !isAddContent;
+              setIsAddContent(next);
+              if (!next) {
+                editorRef2.current?.setContent?.("");
+                setValue("addContent", "");
+              }
             }}
           >
             {isAddContent ? "내용 추가 등록 취소" : "내용 추가"}

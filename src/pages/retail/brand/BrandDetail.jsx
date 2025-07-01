@@ -318,7 +318,7 @@ export default function BrandDetail() {
             <BrandRegistForm ref={koFormRef} lang="ko" readOnly={isReadOnly} />
           </TabPanel>
           <TabPanel>
-            <BrandRegistForm ref={enFormRef} lang="ko" readOnly={isReadOnly} />
+            <BrandRegistForm ref={enFormRef} lang="en" readOnly={isReadOnly} />
           </TabPanel>
         </Tabs>
 
