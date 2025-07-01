@@ -32,7 +32,7 @@ import PressListPage from "@/pages/contents/whatson/media/PressListPage";
 import Meeting from "@/pages/office/meeting/Meeting";
 import Viproom from "@/pages/office/viproom/Viproom";
 import Visit from "@/pages/office/visit/Visit";
-import Sleep from "@/pages/office/sleep/Sleep";
+import SleepReserve from "@/pages/office/sleep/SleepReserve";
 import InquiryListPage from "@/pages/inquiry/client/InquiryListPage";
 import MeetingListPage from "@/pages/system/meeting/MeetingListPage";
 import EventRegist from "@/pages/contents/whatson/event/EventRegist";
@@ -65,6 +65,8 @@ import AffairDetailPage from "@/pages/admin/adminpage/AffairDetailPage";
 import SleepListPage from "@/pages/system/sleep/SleepListPage";
 import SleepSetting from "@/pages/system/sleep/SleepSetting";
 import SleepDetail from "@/pages/system/sleep/SleepDetail";
+import MeetingSetting from "@/pages/system/meeting/MeetingSetting";
+import MeetingDetail from "@/pages/system/meeting/MeetinDetail";
 
 export const routeMeta = [
   {
@@ -88,7 +90,7 @@ export const routeMeta = [
         title: "관리자 관리",
         icon: <UsersIcon size={18} />,
         hidden: false,
-        permissions: ["SUPER_ADMIN", "OFFICE_ADMIN"],
+        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
         children: [
           {
             uuid: "12b3ef89-1b74-450d-9f51-2888b953c1fd",
@@ -120,7 +122,7 @@ export const routeMeta = [
             element: <AffairListPage />,
             title: "입주사 총무팀",
             hidden: false,
-            permissions: ["SUPER_ADMIN", "OFFICE_ADMIN"],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
           {
             uuid: "87046c63-2981-4c56-9e57-8c908ed82160",
@@ -128,7 +130,7 @@ export const routeMeta = [
             element: <AffairRegist />,
             title: "입주사 총무팀 등록",
             hidden: true,
-            permissions: ["SUPER_ADMIN", "OFFICE_ADMIN"],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
           {
             uuid: "d3487af9-b3eb-430c-887b-c599041597e7",
@@ -136,7 +138,7 @@ export const routeMeta = [
             element: <AffairDetailPage />,
             title: "입주사 총무팀 상세",
             hidden: true,
-            permissions: ["SUPER_ADMIN", "OFFICE_ADMIN"],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
         ],
       },
@@ -152,10 +154,8 @@ export const routeMeta = [
         permissions: [
           "SUPER_ADMIN",
           "NORMAL_ADMIN",
-          "RETAIL_ADMIN",
           "OFFICE_ADMIN",
           "OFFICE_SECRETARY_ADMIN",
-          "MEMBER",
         ],
       },
       {
@@ -169,10 +169,8 @@ export const routeMeta = [
         permissions: [
           "SUPER_ADMIN",
           "NORMAL_ADMIN",
-          "RETAIL_ADMIN",
           "OFFICE_ADMIN",
           "OFFICE_SECRETARY_ADMIN",
-          "MEMBER",
         ],
       },
       {
@@ -186,10 +184,8 @@ export const routeMeta = [
         permissions: [
           "SUPER_ADMIN",
           "NORMAL_ADMIN",
-          "RETAIL_ADMIN",
           "OFFICE_ADMIN",
           "OFFICE_SECRETARY_ADMIN",
-          "User",
         ],
       },
 
@@ -205,7 +201,6 @@ export const routeMeta = [
           "NORMAL_ADMIN",
           "RETAIL_ADMIN",
           "OFFICE_ADMIN",
-          "User",
         ],
       },
       {
@@ -219,7 +214,6 @@ export const routeMeta = [
           "NORMAL_ADMIN",
           "RETAIL_ADMIN",
           "OFFICE_ADMIN",
-          "User",
         ],
       },
       {
@@ -233,7 +227,6 @@ export const routeMeta = [
           "NORMAL_ADMIN",
           "RETAIL_ADMIN",
           "OFFICE_ADMIN",
-          "User",
         ],
       },
 
@@ -244,13 +237,7 @@ export const routeMeta = [
         title: "리테일 관리",
         icon: <CartIcon size={18} />,
         hidden: false,
-        permissions: [
-          "SUPER_ADMIN",
-          "NORMAL_ADMIN",
-          "RETAIL_ADMIN",
-          "OFFICE_ADMIN",
-          "User",
-        ],
+        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN"],
         children: [
           {
             uuid: "07dcc050-f903-402f-948f-2e38f7fb79cb",
@@ -258,13 +245,7 @@ export const routeMeta = [
             element: <BrandListPage />,
             title: "입점 브랜드 관리",
             hidden: false,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-              "User",
-            ],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN"],
           },
           {
             uuid: "e002650c-3989-4441-81a8-32f69d76ecdb",
@@ -272,13 +253,7 @@ export const routeMeta = [
             element: <BrandRegist />,
             title: "입점 브랜드 관리",
             hidden: true,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-              "User",
-            ],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN"],
           },
           {
             uuid: "88722265-4bd6-4702-9dfd-07a9af8ac137",
@@ -286,13 +261,7 @@ export const routeMeta = [
             element: <BrandDetail />,
             title: "입점 브랜드 상세",
             hidden: true,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-              "User",
-            ],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN"],
           },
         ],
       },
@@ -303,13 +272,7 @@ export const routeMeta = [
         title: "팝업 관리",
         icon: <BellIcon size={18} />,
         hidden: false,
-        permissions: [
-          "SUPER_ADMIN",
-          "NORMAL_ADMIN",
-          "RETAIL_ADMIN",
-          "OFFICE_ADMIN",
-          "User",
-        ],
+        permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
       },
       {
         uuid: "05df59fa-6318-4b05-b325-590bfa1829d6",
@@ -317,13 +280,7 @@ export const routeMeta = [
         element: <PopupRegist />,
         title: "팝업 등록",
         hidden: true,
-        permissions: [
-          "SUPER_ADMIN",
-          "NORMAL_ADMIN",
-          "RETAIL_ADMIN",
-          "OFFICE_ADMIN",
-          "User",
-        ],
+        permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
       },
       {
         uuid: "89708e74-e523-469d-a60d-67ce51f94959",
@@ -332,13 +289,7 @@ export const routeMeta = [
         title: "메인화면 관리",
         icon: <FileTextIcon size={18} />,
         hidden: false,
-        permissions: [
-          "SUPER_ADMIN",
-          "NORMAL_ADMIN",
-          "RETAIL_ADMIN",
-          "OFFICE_ADMIN",
-          "User",
-        ],
+        permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
       },
       {
         uuid: "79d324e5-4e32-47e5-a372-fa5d58340aca",
@@ -347,13 +298,7 @@ export const routeMeta = [
         title: "서브메인 관리",
         icon: <FileTextIcon size={18} />,
         hidden: false,
-        permissions: [
-          "SUPER_ADMIN",
-          "NORMAL_ADMIN",
-          "RETAIL_ADMIN",
-          "OFFICE_ADMIN",
-          "User",
-        ],
+        permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
         children: [
           {
             uuid: "217c8074-622d-4ae1-a101-ad664b6c8615",
@@ -361,13 +306,7 @@ export const routeMeta = [
             element: <WhatsonPage />,
             title: "What's On 관리",
             hidden: false,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-              "User",
-            ],
+            permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
           },
           {
             uuid: "9eb49204-b00e-4ac9-af35-0b4267c01f8f",
@@ -375,13 +314,7 @@ export const routeMeta = [
             element: <LifeStylePage />,
             title: "LifeStyle 관리",
             hidden: false,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-              "User",
-            ],
+            permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
           },
           {
             uuid: "cfd16abc-83b1-4998-a32a-f77b2ac59ec3",
@@ -389,13 +322,7 @@ export const routeMeta = [
             element: <WorkPage />,
             title: "Work 관리",
             hidden: false,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-              "User",
-            ],
+            permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
           },
         ],
       },
@@ -406,7 +333,7 @@ export const routeMeta = [
         title: "하단 배너 관리",
         icon: <LayoutPanelTopIcon size={18} />,
         hidden: false,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN", "User"],
+        permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
         children: [
           {
             uuid: "3183d249-9f8e-42f9-9745-ab251a784135",
@@ -414,13 +341,7 @@ export const routeMeta = [
             element: <MainBannerPage />,
             title: "Main 메뉴",
             hidden: false,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-              "User",
-            ],
+            permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
           },
           {
             uuid: "9d93fcbe-641f-42a6-98fd-b7ba93201834",
@@ -428,13 +349,7 @@ export const routeMeta = [
             element: <WhatsonBannerPage />,
             title: "What's On 메뉴",
             hidden: false,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-              "User",
-            ],
+            permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
           },
           {
             uuid: "d4228ac7-87dd-48e1-9b5b-bacae5b367b9",
@@ -442,13 +357,7 @@ export const routeMeta = [
             element: <LifeStyleBannerPage />,
             title: "LifeStyle 메뉴",
             hidden: false,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-              "User",
-            ],
+            permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
           },
           {
             uuid: "0c33961e-71d2-4cc0-a678-aaa9c5c11ecc",
@@ -456,13 +365,7 @@ export const routeMeta = [
             element: <WorkBannerPage />,
             title: "Work 메뉴",
             hidden: false,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-              "User",
-            ],
+            permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
           },
           {
             uuid: "17020178-0250-4457-9d87-1bafe7375e05",
@@ -470,13 +373,7 @@ export const routeMeta = [
             element: <AboutBannerPage />,
             title: "About 메뉴",
             hidden: false,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-              "User",
-            ],
+            permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
           },
         ],
       },
@@ -488,13 +385,7 @@ export const routeMeta = [
         title: "콘텐츠 관리",
         icon: <FileTextIcon size={18} />,
         hidden: false,
-        permissions: [
-          "SUPER_ADMIN",
-          "NORMAL_ADMIN",
-          "RETAIL_ADMIN",
-          "OFFICE_ADMIN",
-          "User",
-        ],
+        permissions: ["SUPER_ADMIN", "RETAIL_ADMIN", "OFFICE_ADMIN"],
         children: [
           {
             uuid: "952664cb-fbe1-4ecd-bb18-ca6aecead4d1",
@@ -502,13 +393,7 @@ export const routeMeta = [
             element: <WhatsonLayout />,
             title: "What's On",
             hidden: false,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-              "User",
-            ],
+            permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
             children: [
               {
                 uuid: "d37ccd54-b4bb-4980-b259-2905f47dcc3f",
@@ -516,13 +401,7 @@ export const routeMeta = [
                 element: <EventListPage />,
                 title: "Event & Promotion",
                 hidden: false,
-                permissions: [
-                  "SUPER_ADMIN",
-                  "NORMAL_ADMIN",
-                  "RETAIL_ADMIN",
-                  "OFFICE_ADMIN",
-                  "User",
-                ],
+                permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
               },
               {
                 uuid: "335b31b2-0f7a-46f9-b4dd-1b2b92034be6",
@@ -531,13 +410,7 @@ export const routeMeta = [
                 element: <EventRegist />,
                 title: "Event & Promotion 등록",
                 hidden: true,
-                permissions: [
-                  "SUPER_ADMIN",
-                  "NORMAL_ADMIN",
-                  "RETAIL_ADMIN",
-                  "OFFICE_ADMIN",
-                  "User",
-                ],
+                permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
               },
               {
                 uuid: "a3126b50-bd32-4d31-9241-b9a8a5ec6eb8",
@@ -546,13 +419,7 @@ export const routeMeta = [
                 element: <EventDetail />,
                 title: "Event & Promotion 상세",
                 hidden: true,
-                permissions: [
-                  "SUPER_ADMIN",
-                  "NORMAL_ADMIN",
-                  "RETAIL_ADMIN",
-                  "OFFICE_ADMIN",
-                  "User",
-                ],
+                permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
               },
 
               {
@@ -562,13 +429,7 @@ export const routeMeta = [
                 element: <StoriesListPage />,
                 title: "Stories of One Grove",
                 hidden: false,
-                permissions: [
-                  "SUPER_ADMIN",
-                  "NORMAL_ADMIN",
-                  "RETAIL_ADMIN",
-                  "OFFICE_ADMIN",
-                  "User",
-                ],
+                permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
               },
               {
                 uuid: "565c400a-1c08-46a9-ab0b-c28c05d543f4",
@@ -577,13 +438,7 @@ export const routeMeta = [
                 element: <StoriesRegist />,
                 title: "Stories of One Grove 등록",
                 hidden: true,
-                permissions: [
-                  "SUPER_ADMIN",
-                  "NORMAL_ADMIN",
-                  "RETAIL_ADMIN",
-                  "OFFICE_ADMIN",
-                  "User",
-                ],
+                permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
               },
 
               {
@@ -593,13 +448,7 @@ export const routeMeta = [
                 element: <StoriesDetail />,
                 title: "Stories of One Grove 상세",
                 hidden: true,
-                permissions: [
-                  "SUPER_ADMIN",
-                  "NORMAL_ADMIN",
-                  "RETAIL_ADMIN",
-                  "OFFICE_ADMIN",
-                  "User",
-                ],
+                permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
               },
 
               {
@@ -608,13 +457,7 @@ export const routeMeta = [
                 element: <PressListPage />,
                 title: "Press & Media",
                 hidden: false,
-                permissions: [
-                  "SUPER_ADMIN",
-                  "NORMAL_ADMIN",
-                  "RETAIL_ADMIN",
-                  "OFFICE_ADMIN",
-                  "User",
-                ],
+                permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
               },
               {
                 uuid: "a87e5edb-3c21-4b02-8700-b7b31f31f1b8",
@@ -622,13 +465,7 @@ export const routeMeta = [
                 element: <PressRegist />,
                 title: "Press & Media 등록",
                 hidden: true,
-                permissions: [
-                  "SUPER_ADMIN",
-                  "NORMAL_ADMIN",
-                  "RETAIL_ADMIN",
-                  "OFFICE_ADMIN",
-                  "User",
-                ],
+                permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
               },
               {
                 uuid: "e026f9a6-7337-45c3-8140-71f673cca0f9",
@@ -636,13 +473,7 @@ export const routeMeta = [
                 element: <PressDetail />,
                 title: "Press & Media 상세",
                 hidden: true,
-                permissions: [
-                  "SUPER_ADMIN",
-                  "NORMAL_ADMIN",
-                  "RETAIL_ADMIN",
-                  "OFFICE_ADMIN",
-                  "User",
-                ],
+                permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
               },
             ],
           },
@@ -670,13 +501,7 @@ export const routeMeta = [
             element: <></>,
             title: "About",
             hidden: true,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-              "User",
-            ],
+            permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
             children: [
               {
                 uuid: "bf4a99a5-8e19-440e-823d-eb6f14cde19b",
@@ -684,13 +509,7 @@ export const routeMeta = [
                 element: <></>,
                 title: "FAQ",
                 hidden: false,
-                permissions: [
-                  "SUPER_ADMIN",
-                  "NORMAL_ADMIN",
-                  "RETAIL_ADMIN",
-                  "OFFICE_ADMIN",
-                  "User",
-                ],
+                permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
               },
               {
                 uuid: "848a9396-d84a-444f-825d-d1ec317096c8",
@@ -698,13 +517,7 @@ export const routeMeta = [
                 element: <></>,
                 title: "Getting Here",
                 hidden: false,
-                permissions: [
-                  "SUPER_ADMIN",
-                  "NORMAL_ADMIN",
-                  "RETAIL_ADMIN",
-                  "OFFICE_ADMIN",
-                  "User",
-                ],
+                permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
               },
             ],
           },
@@ -717,7 +530,12 @@ export const routeMeta = [
         title: "오피스 관리",
         icon: <CalendarDaysIcon size={18} />,
         hidden: false,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN", "OFFICE_SECRETARY_ADMIN"],
+        permissions: [
+          "SUPER_ADMIN",
+          "NORMAL_ADMIN",
+          "OFFICE_ADMIN",
+          "OFFICE_SECRETARY_ADMIN",
+        ],
         children: [
           {
             uuid: "b3c13f6a-0715-4199-b0bd-dcc163d4c89d",
@@ -755,20 +573,16 @@ export const routeMeta = [
               "SUPER_ADMIN",
               "NORMAL_ADMIN",
               "OFFICE_ADMIN",
-              "OFFICE_SECRETARY_ADMIN"
+              "OFFICE_SECRETARY_ADMIN",
             ],
           },
           {
             uuid: "95b2aae3-4ce2-4782-95ca-62c4111dcc17",
             path: "/office/sleep",
-            element: <Sleep />,
+            element: <SleepReserve />,
             title: "수면실 예약",
             hidden: false,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "OFFICE_ADMIN",
-            ],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
         ],
       },
@@ -779,13 +593,7 @@ export const routeMeta = [
         title: "고객 문의 관리",
         icon: <BellIcon size={18} />,
         hidden: true,
-        permissions: [
-          "SUPER_ADMIN",
-          "NORMAL_ADMIN",
-          "RETAIL_ADMIN",
-          "OFFICE_ADMIN",
-          "User",
-        ],
+        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
       },
       {
         uuid: "c9c84ed1-a896-4d9b-b659-cd6a43dc8cd2",
@@ -794,12 +602,7 @@ export const routeMeta = [
         title: "시스템 관리",
         icon: <SettingsGearIcon size={18} />,
         hidden: false,
-        permissions: [
-          "SUPER_ADMIN",
-          "NORMAL_ADMIN",
-          "RETAIL_ADMIN",
-          "OFFICE_ADMIN",
-        ],
+        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
         children: [
           {
             uuid: "e59c7075-0b1c-4607-b548-c38fa7566532",
@@ -807,25 +610,32 @@ export const routeMeta = [
             element: <MeetingListPage />,
             title: "회의실 설정",
             hidden: false,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-            ],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
           },
+          {
+            uuid: "f6d4536d-e76b-4621-9873-bf5b6465e50e",
+            path: "/system/meeting/regist",
+            element: <MeetingSetting />,
+            title: "회의실 추가",
+            hidden: true,
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
+          },
+          {
+            uuid: "c4b5101a-61b4-44e7-8efe-4ab822624927",
+            path: "/system/meeting/detail/:id",
+            element: <MeetingDetail />,
+            title: "회의실 상세",
+            hidden: true,
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
+          },
+
           {
             uuid: "4bd3ba77-798a-4466-bc3e-48fec787592a",
             path: "/system/sleep",
             element: <SleepListPage />,
             title: "수면실 설정",
             hidden: false,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-            ],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
           },
           {
             uuid: "cfd0a71c-188d-4cbc-bcc8-aa196bbdce2b",
@@ -833,12 +643,7 @@ export const routeMeta = [
             element: <SleepSetting />,
             title: "수면실 추가",
             hidden: true,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-            ],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
           },
           {
             uuid: "cdfad14f-7e62-44eb-accd-68696dbbd0b0",
@@ -846,12 +651,7 @@ export const routeMeta = [
             element: <SleepDetail />,
             title: "수면실 상세",
             hidden: true,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-            ],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
           },
 
           {
@@ -860,12 +660,7 @@ export const routeMeta = [
             element: <></>,
             title: "고객 문의 설정",
             hidden: true,
-            permissions: [
-              "SUPER_ADMIN",
-              "NORMAL_ADMIN",
-              "RETAIL_ADMIN",
-              "OFFICE_ADMIN",
-            ],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
           },
         ],
       },

@@ -2,6 +2,7 @@ import React from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaCalendarAlt } from "react-icons/fa";
+import { useRef } from "react";
 
 export default function Datepicker({
   mode = "range", // "single" or "range"
@@ -13,13 +14,39 @@ export default function Datepicker({
   onRangeChange,
   disabled = false,
 }) {
+  const datepickerRef = useRef(null);
+
   const commonProps = {
-    showTimeSelect: true,
+    showTimeSelect: timeOnly,
     showTimeSelectOnly: timeOnly,
     timeIntervals: 30,
     timeCaption: "시간",
     dateFormat: timeOnly ? "HH:mm" : "yyyy-MM-dd HH:mm",
   };
+
+  if (mode === "icon-only") {
+    return (
+      <div className="relative">
+        {/* 숨겨진 DatePicker */}
+        <DatePicker
+          ref={datepickerRef}
+          selected={selectedDate}
+          onChange={onSingleChange}
+          minDate={startDate}
+          maxDate={endDate}
+          {...commonProps}
+          customInput={<div />} // 시각적으로 보이지 않게 함
+        />
+        <button
+          type="button"
+          onClick={() => datepickerRef.current.setOpen(true)}
+          className="p-2"
+        >
+          <FaCalendarAlt className="text-xl text-gray-600" />
+        </button>
+      </div>
+    );
+  }
 
   if (mode === "single") {
     // 단일 날짜 선택기

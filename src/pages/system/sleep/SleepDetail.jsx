@@ -171,6 +171,9 @@ export default function SleepDetail() {
 
   return (
     <div className="max-w mx-auto space-y-6 rounded-lg bg-white p-6 shadow-md">
+      <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
+        수면실 설정 상세
+      </div>
       <div className="space-y-6 p-6">
         {/* Relax Room 이름 + 사용 여부 */}
         <div className="flex gap-6">
@@ -226,7 +229,9 @@ export default function SleepDetail() {
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium">운영 시간</p>
+            <p className="text-sm font-medium">
+              운영 시간<span className="text-red-500">*</span>
+            </p>
             <Datepicker
               mode="range"
               timeOnly={true}

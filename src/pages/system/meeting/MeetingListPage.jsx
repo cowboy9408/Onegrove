@@ -1,45 +1,44 @@
 import Button from "@/components/common/Button";
 import DataTable from "@/components/common/DataTable";
-
 import Pagination from "@/components/common/Pagination";
 import ResultSummary from "@/components/common/ResultSummary";
-
 import ResultSection from "@/components/layout/ResultSection";
-
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import api from "@/lib/apiClient";
 
-export default function SleepListPage() {
+export default function MeetingListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [page, setPage] = useState(searchParams.get("page") || 1);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
 
-  const size = 10;
+  const size = 30;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await api.get("/api/v1/sleep/room");
+        const res = await api.get("/api/v1/meeting/setting");
 
         if (res.data.success) {
           const allData = res.data.data;
 
-          const formattedData = allData.map((item, index) => ({
-            no: index + 1,
+          const formattedData = allData.map((item) => ({
+            no: item.rownum,
             name: (
               <Link
-                to={`/system/sleep/detail/${item.id}`}
+                to={`/system/meeting/detail/${item.id}`}
                 className="text-black-600 hover:underline"
               >
                 {item.name}
               </Link>
             ),
+            roomNumber: item.roomNumber,
             username: item.location,
-            status: `${item.startTime} ~ ${item.endTime}`,
-            createdDt: item.createDt,
+            capacity: item.capacity,
+            isVip: item.isVip,
+            createdDt: "-", // createdDt 없음 → 대체 문자
             useYn: item.useYn,
             id: item.id,
           }));
@@ -70,7 +69,7 @@ export default function SleepListPage() {
           <Button
             className="bg-black text-white hover:bg-gray-800"
             onClick={() => {
-              navigate("/system/sleep/regist");
+              navigate("/system/meeting/regist");
             }}
           >
             추가
@@ -81,14 +80,16 @@ export default function SleepListPage() {
         <DataTable
           columns={[
             { key: "no", label: "번호" },
-            { key: "name", label: "Relax Room 이름", link: true },
+            { key: "name", label: "회의실 이름", link: true },
+            { key: "roomNumber", label: "호실" },
             { key: "username", label: "위치" },
-            { key: "status", label: "운영 시간" },
-            { key: "createdDt", label: "등록일시" },
+            { key: "capacity", label: "수용 가능 인원" },
+            { key: "isVip", label: "회의실 유형" },
+            { key: "createdDt", label: "등록일시" }, // 생략 가능
             { key: "useYn", label: "사용여부" },
           ]}
           data={data}
-          link={{ base: "/admin/sleep", path: "id", key: "name" }}
+          link={{ base: "/system/meeting", path: "id", key: "name" }}
         />
         <Pagination
           current={page}
