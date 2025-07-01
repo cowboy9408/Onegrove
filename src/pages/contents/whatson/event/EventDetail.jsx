@@ -26,7 +26,8 @@ export default function EventDetail() {
     );
     return matched?.code || "";
   };
-  const [sharedBrands, setSharedBrands] = useState([]);
+  const [koBrands, setKoBrands] = useState([]);
+  const [enBrands, setEnBrands] = useState([]);
 
   // 국문 상태
   const [koData, setKoData] = useState({});
@@ -333,9 +334,7 @@ export default function EventDetail() {
 
   return (
     <>
-      <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
-        Event & Promotion 상세
-      </div>
+      <div className="mb-6 text-2xl font-bold">Event & Promotion 상세</div>
       <Section>
         <Tabs
           tabs={[
@@ -356,8 +355,8 @@ export default function EventDetail() {
                   data={koData}
                   setData={setKoData}
                   lang="ko"
-                  brands={sharedBrands}
-                  setBrands={setSharedBrands}
+                  brands={koBrands}
+                  setBrands={setKoBrands}
                   category={sharedCategory}
                   setCategory={setSharedCategory}
                 />
@@ -373,8 +372,8 @@ export default function EventDetail() {
                   data={enData}
                   setData={setEnData}
                   lang="en"
-                  brands={sharedBrands}
-                  setBrands={setSharedBrands}
+                  brands={enBrands}
+                  setBrands={setEnBrands}
                   category={sharedCategory}
                   setCategory={setSharedCategory}
                 />

@@ -104,7 +104,7 @@ export default function MeetingDetail() {
           const res = await api.get(`/api/v1/meeting/setting/detail/${id}`);
           if (res.data.success) {
             const d = res.data.data;
-            console.log("백엔드 응답 fileId:", d.fileId);
+
             const s = new Date(`1970-01-01T${d.startTime}`);
             const e = new Date(`1970-01-01T${d.endTime}`);
             setStartDate(s);
@@ -176,10 +176,9 @@ export default function MeetingDetail() {
         freeHour: Number(form.freeTime),
         hourlyCost: Number(form.pricePerHour),
       };
-      console.log("전송되는 데이터:", payload);
+
       const res = await api.post("/api/v1/meeting/setting/update", payload);
-      console.log("전송된 payload:", payload);
-      console.log("응답:", res.data);
+
       if (res.data.success) {
         showModal({
           title: "수정 완료",
@@ -265,14 +264,26 @@ export default function MeetingDetail() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
+            {/* 호실 입력란 */}
             <Input label="호실" {...methods.register("roomNumber")} required />
-            <select {...register("location")} required>
-              {locationOptions.map((loc) => (
-                <option key={loc.code} value={loc.code}>
-                  {loc.value}
-                </option>
-              ))}
-            </select>
+
+            {/* 위치 선택란 */}
+            <div>
+              <p className="mb-1 text-sm font-medium text-gray-800 dark:text-gray-100">
+                위치
+              </p>
+              <select
+                {...register("location")}
+                className="peer h-12 w-full appearance-none rounded-md border border-gray-300 bg-white px-4 text-sm text-gray-800 focus:ring-2 focus:ring-gray-800 focus:outline-none disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:ring-gray-600 dark:disabled:bg-gray-800"
+                required
+              >
+                {locationOptions.map((loc) => (
+                  <option key={loc.code} value={loc.code}>
+                    {loc.value}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
