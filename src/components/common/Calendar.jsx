@@ -92,7 +92,14 @@ export default function CommonCalendar({
         }}
         components={{ toolbar: CustomToolbar }}
         onSelectEvent={onSelectEvent}
-        onSelectSlot={onSelectSlot}
+        onSelectSlot={(slotInfo) => {
+          const selectedDate = new Date(slotInfo.start);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          if (selectedDate >= today) {
+            onSelectSlot?.(slotInfo);
+          }
+        }}
       />
     </div>
   );
