@@ -3,9 +3,8 @@ import CalendarToolbar from "@/components/common/CalendarToolbar";
 import Select from "@/components/common/Select";
 import Button from "@/components/common/Button";
 import { ModalContext } from "@/context/ModalContext";
-import ReservationForm from "@/components/modal/ReservationForm";
+import SleepReservationForm from "@/components/modal/SleepReservationForm";
 import api from "@/lib/apiClient";
-import Datepicker from "@/components/common/Datepicker";
 
 export default function SleepReserve() {
   const [selectedRoom, setSelectedRoom] = useState(1);
@@ -13,7 +12,14 @@ export default function SleepReserve() {
   const [meetingOptions, setMeetingOptions] = useState({});
   const [officeOptions, setOfficeOptions] = useState([]);
   const [scheduleList, setScheduleList] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  const add50Min = (timeStr) => {
+    const [hour, minute] = timeStr.split(":").map(Number);
+    const date = new Date(0, 0, 0, hour, minute + 50);
+    const newHour = date.getHours().toString().padStart(2, "0");
+    const newMinute = date.getMinutes().toString().padStart(2, "0");
+    return `${newHour}:${newMinute}`;
+  };
 
   const fetchSchedules = async () => {
     try {
@@ -230,7 +236,7 @@ export default function SleepReserve() {
               customButton: true,
               showCancel: true,
               children: ({ closeModal }) => (
-                <ReservationForm
+                <SleepReservationForm
                   room={selectedRoom}
                   meetingOptions={meetingOptions}
                   roomList={officeOptions}
@@ -256,6 +262,39 @@ export default function SleepReserve() {
           events={scheduleList}
           onSelectEvent={handleEventClick}
         />
+        <div className="mt-6 grid grid-cols-2 gap-4">
+          {/* 오전 시간대 */}
+          <div className="space-y-4">
+            {["09:00", "10:00", "11:00", "12:00", "13:00"].map((time) => (
+              <div key={time}>
+                <p className="mb-1 text-sm font-semibold">
+                  {time} ~ {add50Min(time)}
+                </p>
+                <Select value="" onChange={() => {}}>
+                  <option value="">잔여 Relax Room 수 : - </option>
+                  <option value="1">옵션 1</option>
+                  <option value="2">옵션 2</option>
+                </Select>
+              </div>
+            ))}
+          </div>
+
+          {/* 오후 시간대 */}
+          <div className="space-y-4">
+            {["14:00", "15:00", "16:00", "17:00"].map((time) => (
+              <div key={time}>
+                <p className="mb-1 text-sm font-semibold">
+                  {time} ~ {add50Min(time)}
+                </p>
+                <Select value="" onChange={() => {}}>
+                  <option value="">잔여 Relax Room 수 : - </option>
+                  <option value="1">옵션 1</option>
+                  <option value="2">옵션 2</option>
+                </Select>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -333,7 +333,7 @@ export const routeMeta = [
         title: "하단 배너 관리",
         icon: <LayoutPanelTopIcon size={18} />,
         hidden: false,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN"],
+        permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
         children: [
           {
             uuid: "3183d249-9f8e-42f9-9745-ab251a784135",
