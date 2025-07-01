@@ -133,11 +133,9 @@ export default function MeetingDetail() {
             setValue("pricePerHour", d.hourlyCost);
             s;
             // 코드 → value로 매핑
-            const selectedLoc = options.find((loc) => loc.code === d.location);
+            const selectedLoc = options.find((loc) => loc.value === d.location);
             if (selectedLoc) {
-              // 기존: setValue("location", selectedLoc.code);
-              // 변경: 사용자에게 보여줄 value로 설정
-              setValue("location", d.location);
+              setValue("location", selectedLoc.code); // 코드값 설정
             }
           }
         }
