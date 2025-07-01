@@ -82,7 +82,7 @@ export default function Meeting() {
 
             <div className="flex justify-between gap-3">
               <div className="flex gap-3">
-                {detail?.status !== '예약 확정' && (
+                {detail?.status === '가계약' && (
                   <Button
                     theme="danger"
                     onClick={async () => {
