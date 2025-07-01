@@ -12,14 +12,14 @@ export default function ReservationForm({
   closeModal,
 }) {
   const [roomId, setRoomId] = useState(initialData.roomId || room || 1);
-  const [companyId, setCompanyId] = useState(initialData.companyId || "");
-  const [paymentType, setPaymentType] = useState(initialData.paymentType || "free");
+  const [companyId, setCompanyId] = useState(isEdit ? initialData.companyId || "" : "");
+  const [numberVisitors, setNumberVisitors] = useState(isEdit ? initialData.numberVisitors || "" : "");
+  const [paymentType, setPaymentType] = useState(isEdit ? initialData.paymentType || "" : "free");
   const [resveDate, setResveDate] = useState(initialData.resveDate || "");
   const [resveStartTime, setResveStartTime] = useState(initialData.resveStartTime || "09:00:00");
   const [resveEndTime, setResveEndTime] = useState(initialData.resveEndTime || "10:00:00");
   const [content, setContent] = useState(initialData.content || "");
   const [realUser, setRealUser] = useState(initialData.realUser || "");
-  const [numberVisitors, setNumberVisitors] = useState(initialData.numberVisitors || 1);
   const [note, setNote] = useState(initialData.note || "");
   const [status, setStatus] = useState(initialData.status || "gs0101");
 
@@ -32,6 +32,19 @@ export default function ReservationForm({
   };
 
   const handleSubmit = async () => {
+    if (
+      !resveDate ||
+      !resveStartTime ||
+      !resveEndTime ||
+      !content ||
+      !realUser ||
+      !numberVisitors ||
+      !companyId
+    ) {
+      alert("모든 필수 입력 항목을 작성해 주세요.");
+      return;
+    }
+
     const payload = {
       roomId: Number(roomId),
       companyId: Number(companyId),
@@ -59,9 +72,10 @@ export default function ReservationForm({
       } else alert("처리 실패");
     } catch (err) {
       console.error("예약 처리 실패:", err);
-      alert("필수 입력 내용을 확인해 주세요.")
+      alert("필수 입력 내용을 확인해 주세요.");
     }
   };
+
 
   const generateTimeOptions = (startHour, endHour) => {
     return Array.from({ length: endHour - startHour + 1 }, (_, i) => {
@@ -113,6 +127,18 @@ export default function ReservationForm({
 
     return options;
   };
+
+  const isFormValid =
+    roomId &&
+    companyId &&
+    paymentType &&
+    resveDate &&
+    resveStartTime &&
+    resveEndTime &&
+    content.trim() !== "" &&
+    realUser.trim() !== "" &&
+    Number(numberVisitors) > 0 &&
+    Number(numberVisitors) <= 99;
 
 
   return (
@@ -170,7 +196,7 @@ export default function ReservationForm({
             className="border px-2 py-1 rounded"
           >
             {getEndOptions().length === 0 ? (
-              <option disabled>예약 시작 시간을 먼저 선택해주세요</option>
+              <option disabled>날짜와 시작시간 선택</option>
             ) : (
               getEndOptions().map((opt) => (
                 <option key={opt.value} value={opt.value} disabled={opt.disabled}>
@@ -189,7 +215,17 @@ export default function ReservationForm({
 
       <div>
         <label className="block mb-1">참석인원 <span className="text-red-500">*</span></label>
-        <input type="number" value={numberVisitors} onChange={(e) => setNumberVisitors(e.target.value)} className="w-full border px-2 py-1 rounded" />
+        <input
+          type="number"
+          min={1}
+          max={99}
+          value={numberVisitors}
+          onChange={(e) => {
+            const val = Number(e.target.value);
+            if (val <= 99) setNumberVisitors(val);
+          }}
+          className="w-full border px-2 py-1 rounded"
+        />
       </div>
 
       <div>
@@ -202,6 +238,7 @@ export default function ReservationForm({
         <select value={companyId} onChange={(e) => setCompanyId(e.target.value)}
           className="w-full border px-2 py-1 rounded"  
         >
+          <option value="">입주사를 선택하세요</option>
           {meetingOptions?.visitCompanyListRes?.map((c) => (
             <option key={c.companyId} value={c.companyId}>
               {c.companyName}
@@ -218,7 +255,10 @@ export default function ReservationForm({
       <div className="flex justify-between gap-3">
         <button
           onClick={handleSubmit}
-          className="rounded bg-black text-white px-4 py-2 hover:bg-gray-800 cursor-pointer"
+          disabled={!isFormValid}
+          className={`rounded px-4 py-2 cursor-pointer text-white ${
+            isFormValid ? "bg-black hover:bg-gray-800" : "bg-gray-400 cursor-not-allowed"
+          }`}
         >
           저장
         </button>
