@@ -179,7 +179,7 @@ export default function BrandDetail() {
 
   const handleSave = async () => {
     if (isSaving) return;
-    setIsSaving(true); 
+    setIsSaving(true);
 
     try {
       const koValues = await koFormRef.current?.submit?.();
@@ -297,43 +297,44 @@ export default function BrandDetail() {
   };
 
   return (
-    <Section>
-      <Tabs
-        tabs={[
-          { key: "kr", label: "국문" },
-          { key: "en", label: "영문" },
-        ]}
-        defaultIndex={currentLang}
-        onTabChange={(index) => {
-          // 탭 비활성화: 클릭 무시
-          if (!loading) setCurrentLang(index);
-        }}
-        // disabled={isReadOnly}
-      >
-        <TabPanel>
-          <BrandRegistForm ref={koFormRef} lang="ko" readOnly={isReadOnly} />
-        </TabPanel>
-        <TabPanel>
-          <BrandRegistForm ref={enFormRef} lang="ko" readOnly={isReadOnly} />
-        </TabPanel>
-      </Tabs>
-
-      <div className="flex justify-end gap-4 px-6 pb-6">
-        {isReadOnly ? (
-          <Button onClick={() => setIsReadOnly(false)} theme="primary">
-            수정
-          </Button>
-        ) : (
-          <Button
-            disabled={isSaving}
-            onClick={handleSave}
-            theme="primary"
-          >
-            {isSaving ? "수정 중..." : "수정"}
-          </Button>
-        )}
-        <Button onClick={() => navigate("/retail/brand")}>목록</Button>
+    <>
+      <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
+        브랜드 관리 상세
       </div>
-    </Section>
+      <Section>
+        <Tabs
+          tabs={[
+            { key: "kr", label: "국문" },
+            { key: "en", label: "영문" },
+          ]}
+          defaultIndex={currentLang}
+          onTabChange={(index) => {
+            // 탭 비활성화: 클릭 무시
+            if (!loading) setCurrentLang(index);
+          }}
+          // disabled={isReadOnly}
+        >
+          <TabPanel>
+            <BrandRegistForm ref={koFormRef} lang="ko" readOnly={isReadOnly} />
+          </TabPanel>
+          <TabPanel>
+            <BrandRegistForm ref={enFormRef} lang="en" readOnly={isReadOnly} />
+          </TabPanel>
+        </Tabs>
+
+        <div className="flex justify-end gap-4 px-6 pb-6">
+          {isReadOnly ? (
+            <Button onClick={() => setIsReadOnly(false)} theme="primary">
+              수정
+            </Button>
+          ) : (
+            <Button disabled={isSaving} onClick={handleSave} theme="primary">
+              {isSaving ? "수정 중..." : "수정"}
+            </Button>
+          )}
+          <Button onClick={() => navigate("/retail/brand")}>목록</Button>
+        </div>
+      </Section>
+    </>
   );
 }

@@ -24,6 +24,10 @@ export default function OccupancyDetail() {
   const hasPatchedRef = useRef(false);
   const [koLocations, setKoLocations] = useState([]);
   const [enLocations, setEnLocations] = useState([]);
+  const [koChargers, setKoChargers] = useState([]);
+  const [enChargers, setEnChargers] = useState([]);
+  const [freeTime, setFreeTime] = useState(null);
+  const [paidTime, setPaidTime] = useState(null);
 
   const fetchDetail = async () => {
     try {
@@ -32,6 +36,8 @@ export default function OccupancyDetail() {
 
       const ko = resKo.data?.data || {};
       const en = resEn.data?.data || {};
+      setKoChargers(ko.chargerList || []);
+      setEnChargers(en.chargerList || []);
 
       setKoData(ko);
       setEnData(en);
@@ -39,8 +45,29 @@ export default function OccupancyDetail() {
       setEnLocations(en.officeList ?? cloneDeep(ko.officeList || []));
 
       setLoading(false);
+
+      const commonId = ko.id || en.id;
+      if (commonId) {
+        fetchMonthlyTime(commonId);
+      }
     } catch (err) {
       console.error("상세 조회 실패:", err);
+    }
+  };
+
+  const fetchMonthlyTime = async (companyId) => {
+    try {
+      const [resFree, resPaid] = await Promise.all([
+        api.get(`/api/v1/company/detail/time?companyId=${companyId}&type=free`),
+        api.get(`/api/v1/company/detail/time?companyId=${companyId}&type=paid`),
+      ]);
+
+      setFreeTime(resFree.data?.data ?? 0);
+      setPaidTime(resPaid.data?.data ?? 0);
+    } catch (err) {
+      console.error("월별 시간 조회 실패:", err);
+      setFreeTime(0);
+      setPaidTime(0);
     }
   };
 
@@ -252,69 +279,80 @@ export default function OccupancyDetail() {
   };
 
   return (
-    <Section>
-      <Tabs
-        tabs={[
-          { key: "ko", label: "국문" },
-          { key: "en", label: "영문" },
-        ]}
-        defaultIndex={currentLang}
-        onTabChange={(index) => {
-          if (!loading) setCurrentLang(index);
-        }}
-        // disabled={isReadOnly}
-      >
-        <TabPanel>
-          {!loading && (
-            <>
-              <RegistForm
-                ref={koFormRef}
-                data={koData}
-                lang="ko"
-                locations={koLocations}
-                setLocations={setKoLocations}
-                currentLang={currentLang}
-                readOnlyOffice={false}
-              />
-            </>
-          )}
-        </TabPanel>
-
-        <TabPanel>
-          {!loading && (
-            <>
-              <RegistForm
-                ref={enFormRef}
-                data={enData}
-                lang="en"
-                locations={enLocations}
-                setLocations={setEnLocations}
-                currentLang={currentLang}
-                readOnlyOffice={false}
-              />
-            </>
-          )}
-        </TabPanel>
-      </Tabs>
-
-      <div className="flex justify-end gap-4 px-6 pb-6">
-        <Button onClick={handleSave}>저장</Button>
-
-        <Button
-          type="button"
-          className="bg-gray-200"
-          onClick={() =>
-            showModal({
-              title: "이동 확인",
-              message: "입력된 내용이 사라집니다. 목록으로 돌아가시겠습니까?",
-              showCancel: true,
-              onConfirm: () => navigate("/occupancy"),
-            })
-          }
-        >
-          목록
-        </Button>
+    <>
+      <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
+        입주사 관리 상세
       </div>
-    </Section>
+      <Section>
+        <Tabs
+          tabs={[
+            { key: "ko", label: "국문" },
+            { key: "en", label: "영문" },
+          ]}
+          defaultIndex={currentLang}
+          onTabChange={(index) => {
+            if (!loading) setCurrentLang(index);
+          }}
+          // disabled={isReadOnly}
+        >
+          <TabPanel>
+            {!loading && (
+              <>
+                <RegistForm
+                  ref={koFormRef}
+                  data={koData}
+                  lang="ko"
+                  locations={koLocations}
+                  setLocations={setKoLocations}
+                  currentLang={currentLang}
+                  readOnlyOffice={false}
+                  chargerList={koChargers}
+                  freeUsedTimeThisMonth={freeTime}
+                  paidUsedTimeThisMonth={paidTime}
+                />
+              </>
+            )}
+          </TabPanel>
+
+          <TabPanel>
+            {!loading && (
+              <>
+                <RegistForm
+                  ref={enFormRef}
+                  data={enData}
+                  lang="en"
+                  locations={enLocations}
+                  setLocations={setEnLocations}
+                  currentLang={currentLang}
+                  readOnlyOffice={false}
+                  chargerList={enChargers}
+                  freeUsedTimeThisMonth={freeTime}
+                  paidUsedTimeThisMonth={paidTime}
+                />
+              </>
+            )}
+          </TabPanel>
+        </Tabs>
+
+        <div className="flex justify-end gap-4 px-6 pb-6">
+          <Button onClick={handleSave}>수정</Button>
+
+          <Button
+            type="button"
+            className="bg-gray-200"
+            onClick={() =>
+              showModal({
+                title: "이동 확인",
+                message: "입력된 내용이 사라집니다. 목록으로 돌아가시겠습니까?",
+                showCancel: true,
+                onConfirm: () => navigate("/occupancy"),
+              })
+            }
+          >
+            목록
+          </Button>
+        </div>
+      </Section>
+    </>
   );
 }
