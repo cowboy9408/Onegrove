@@ -128,9 +128,7 @@ export default function Sidebar() {
   return (
     <aside
       ref={sidebarRef}
-      className={`
-        fixed z-50 m-6 mr-2 flex h-241 max-h-[calc(100vh-6rem)] !flex-none flex-col justify-between overflow-auto rounded-xl border-2 border-gray-200 bg-white px-2 pt-0 pb-2 transition-all duration-300
-        md:max-h-[calc(100vh-3rem)] md:px-3 md:pb-4 dark:border-gray-700 dark:bg-gray-800 ${isExpanded ? "w-70 min-w-70" : "w-17 min-w-17 md:w-25 md:min-w-25"} ${
+      className={`fixed z-50 m-6 mr-2 flex h-241 max-h-[calc(100vh-6rem)] !flex-none flex-col justify-between overflow-auto rounded-xl border-2 border-gray-200 bg-white px-2 pt-0 pb-2 transition-all duration-300 md:max-h-[calc(100vh-3rem)] md:px-3 md:pb-4 dark:border-gray-700 dark:bg-gray-800 ${isExpanded ? "w-70 min-w-70" : "w-17 min-w-17 md:w-25 md:min-w-25"} ${
         isMobile
           ? `top-6 transition-[left] duration-300 ${isExpanded ? "left-0" : "-left-72"}`
           : ""
