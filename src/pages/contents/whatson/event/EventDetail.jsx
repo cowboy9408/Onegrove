@@ -332,85 +332,92 @@ export default function EventDetail() {
   }, [emId]);
 
   return (
-    <Section>
-      <Tabs
-        tabs={[
-          { key: "kr", label: "국문" },
-          { key: "en", label: "영문" },
-        ]}
-        defaultIndex={currentLang}
-        onTabChange={(index) => {
-          // 탭 비활성화: 클릭 무시
-          if (!loading) setCurrentLang(index);
-        }}
-      >
-        <TabPanel>
-          {!loading && (
-            <>
-              <EventRegistForm
-                ref={koFormRef}
-                data={koData}
-                setData={setKoData}
-                lang="ko"
-                brands={sharedBrands}
-                setBrands={setSharedBrands}
-                category={sharedCategory}
-                setCategory={setSharedCategory}
-              />
-            </>
-          )}
-        </TabPanel>
-
-        <TabPanel>
-          {!loading && (
-            <>
-              <EventRegistForm
-                ref={enFormRef}
-                data={enData}
-                setData={setEnData}
-                lang="en"
-                brands={sharedBrands}
-                setBrands={setSharedBrands}
-                category={sharedCategory}
-                setCategory={setSharedCategory}
-              />
-            </>
-          )}
-        </TabPanel>
-      </Tabs>
-      <div className="flex justify-end gap-4 px-6 pb-6">
-        <Button
-          onClick={() =>
-            showModal({
-              title: "저장 확인",
-              message: "입력한 정보로 수정하시겠습니까",
-              showCancel: true,
-              onConfirm: async () => {
-                await handleSave();
-                setIsReadOnly(true); // 저장 후 다시 읽기 전용
-              },
-            })
-          }
-        >
-          저장
-        </Button>
-
-        <Button
-          type="button"
-          className="bg-gray-200"
-          onClick={() =>
-            showModal({
-              title: "이동 확인",
-              message: "이전 페이지로 돌아갈 경우 입력한 정보가 사라집니다.",
-              showCancel: true,
-              onConfirm: () =>
-                navigate("/contents/whatson/event/list?refresh=" + Date.now()),
-            })
-          }
-        >
-          목록
-        </Button>
+    <>
+      <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
+        Event & Promotion 상세
       </div>
-    </Section>
+      <Section>
+        <Tabs
+          tabs={[
+            { key: "kr", label: "국문" },
+            { key: "en", label: "영문" },
+          ]}
+          defaultIndex={currentLang}
+          onTabChange={(index) => {
+            // 탭 비활성화: 클릭 무시
+            if (!loading) setCurrentLang(index);
+          }}
+        >
+          <TabPanel>
+            {!loading && (
+              <>
+                <EventRegistForm
+                  ref={koFormRef}
+                  data={koData}
+                  setData={setKoData}
+                  lang="ko"
+                  brands={sharedBrands}
+                  setBrands={setSharedBrands}
+                  category={sharedCategory}
+                  setCategory={setSharedCategory}
+                />
+              </>
+            )}
+          </TabPanel>
+
+          <TabPanel>
+            {!loading && (
+              <>
+                <EventRegistForm
+                  ref={enFormRef}
+                  data={enData}
+                  setData={setEnData}
+                  lang="en"
+                  brands={sharedBrands}
+                  setBrands={setSharedBrands}
+                  category={sharedCategory}
+                  setCategory={setSharedCategory}
+                />
+              </>
+            )}
+          </TabPanel>
+        </Tabs>
+        <div className="flex justify-end gap-4 px-6 pb-6">
+          <Button
+            onClick={() =>
+              showModal({
+                title: "저장 확인",
+                message: "입력한 정보로 수정하시겠습니까",
+                showCancel: true,
+                onConfirm: async () => {
+                  await handleSave();
+                  setIsReadOnly(true); // 저장 후 다시 읽기 전용
+                },
+              })
+            }
+          >
+            저장
+          </Button>
+
+          <Button
+            type="button"
+            className="bg-gray-200"
+            onClick={() =>
+              showModal({
+                title: "이동 확인",
+                message: "이전 페이지로 돌아갈 경우 입력한 정보가 사라집니다.",
+                showCancel: true,
+                onConfirm: () =>
+                  navigate(
+                    "/contents/whatson/event/list?refresh=" + Date.now()
+                  ),
+              })
+            }
+          >
+            목록
+          </Button>
+        </div>
+      </Section>
+    </>
   );
 }

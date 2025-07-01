@@ -325,139 +325,144 @@ export default function StoriesDetail() {
   };
 
   return (
-    <Section>
-      <Tabs
-        tabs={[
-          { key: "kr", label: "국문" },
-          { key: "en", label: "영문" },
-        ]}
-        defaultIndex={currentLang}
-        onTabChange={(index) => {
-          // 탭 비활성화: 클릭 무시
-          if (!loading) setCurrentLang(index);
-        }}
-      >
-        <TabPanel>
-          {!loading && (
-            <>
-              <StoriesRegistForm
-                ref={koFormRef}
-                data={koData}
-                setData={setKoData}
-                lang="ko"
-              />
-              <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
-                <tbody>
-                  <tr>
-                    <th className="w-32 border bg-gray-100 px-4 py-2">
-                      등록일시
-                    </th>
-                    <td className="border px-4 py-2">
-                      {koData?.createDt || "-"}
-                    </td>
-                    <th className="w-32 border bg-gray-100 px-4 py-2">
-                      등록자
-                    </th>
-                    <td className="border px-4 py-2">
-                      {koData?.createUser || "-"}
-                    </td>
-                  </tr>
-                  <tr>
-                    <th className="border bg-gray-100 px-4 py-2">수정일시</th>
-                    <td className="border px-4 py-2">
-                      {koData?.updateDt || "-"}
-                    </td>
-                    <th className="border bg-gray-100 px-4 py-2">
-                      최근 수정자
-                    </th>
-                    <td className="border px-4 py-2">
-                      {koData?.updateUser || "-"}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </>
-          )}
-        </TabPanel>
-
-        <TabPanel>
-          {!loading && (
-            <>
-              <StoriesRegistForm
-                ref={enFormRef}
-                data={enData}
-                setData={setEnData}
-                lang="en"
-              />
-              <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
-                <tbody>
-                  <tr>
-                    <th className="w-32 border bg-gray-100 px-4 py-2">
-                      등록일시
-                    </th>
-                    <td className="border px-4 py-2">
-                      {enData?.createDt || "-"}
-                    </td>
-                    <th className="w-32 border bg-gray-100 px-4 py-2">
-                      등록자
-                    </th>
-                    <td className="border px-4 py-2">
-                      {enData?.createUser || "-"}
-                    </td>
-                  </tr>
-                  <tr>
-                    <th className="border bg-gray-100 px-4 py-2">수정일시</th>
-                    <td className="border px-4 py-2">
-                      {enData?.updateDt || "-"}
-                    </td>
-                    <th className="border bg-gray-100 px-4 py-2">
-                      최근 수정자
-                    </th>
-                    <td className="border px-4 py-2">
-                      {enData?.updateUser || "-"}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </>
-          )}
-        </TabPanel>
-      </Tabs>
-      <div className="flex justify-end gap-4 px-6 pb-6">
-        <Button
-          onClick={() =>
-            showModal({
-              title: "저장 확인",
-              message: "저장하시겠습니까?",
-              showCancel: true,
-              onConfirm: async () => {
-                await handleSave();
-                setIsReadOnly(true); // 저장 후 다시 읽기 전용
-              },
-            })
-          }
-        >
-          저장
-        </Button>
-
-        <Button
-          type="button"
-          className="bg-gray-200"
-          onClick={() =>
-            showModal({
-              title: "이동 확인",
-              message: "이전 페이지로 돌아갈 경우 입력한 정보가 사라집니다.",
-              showCancel: true,
-              onConfirm: () =>
-                navigate(
-                  "/contents/whatson/stories/list?refresh=" + Date.now()
-                ),
-            })
-          }
-        >
-          목록
-        </Button>
+    <>
+      <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
+        Stories of OneGrove 상세
       </div>
-    </Section>
+      <Section>
+        <Tabs
+          tabs={[
+            { key: "kr", label: "국문" },
+            { key: "en", label: "영문" },
+          ]}
+          defaultIndex={currentLang}
+          onTabChange={(index) => {
+            // 탭 비활성화: 클릭 무시
+            if (!loading) setCurrentLang(index);
+          }}
+        >
+          <TabPanel>
+            {!loading && (
+              <>
+                <StoriesRegistForm
+                  ref={koFormRef}
+                  data={koData}
+                  setData={setKoData}
+                  lang="ko"
+                />
+                <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
+                  <tbody>
+                    <tr>
+                      <th className="w-32 border bg-gray-100 px-4 py-2">
+                        등록일시
+                      </th>
+                      <td className="border px-4 py-2">
+                        {koData?.createDt || "-"}
+                      </td>
+                      <th className="w-32 border bg-gray-100 px-4 py-2">
+                        등록자
+                      </th>
+                      <td className="border px-4 py-2">
+                        {koData?.createUser || "-"}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th className="border bg-gray-100 px-4 py-2">수정일시</th>
+                      <td className="border px-4 py-2">
+                        {koData?.updateDt || "-"}
+                      </td>
+                      <th className="border bg-gray-100 px-4 py-2">
+                        최근 수정자
+                      </th>
+                      <td className="border px-4 py-2">
+                        {koData?.updateUser || "-"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </>
+            )}
+          </TabPanel>
+
+          <TabPanel>
+            {!loading && (
+              <>
+                <StoriesRegistForm
+                  ref={enFormRef}
+                  data={enData}
+                  setData={setEnData}
+                  lang="en"
+                />
+                <table className="mb-4 w-full border border-gray-300 text-left text-sm text-gray-800">
+                  <tbody>
+                    <tr>
+                      <th className="w-32 border bg-gray-100 px-4 py-2">
+                        등록일시
+                      </th>
+                      <td className="border px-4 py-2">
+                        {enData?.createDt || "-"}
+                      </td>
+                      <th className="w-32 border bg-gray-100 px-4 py-2">
+                        등록자
+                      </th>
+                      <td className="border px-4 py-2">
+                        {enData?.createUser || "-"}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th className="border bg-gray-100 px-4 py-2">수정일시</th>
+                      <td className="border px-4 py-2">
+                        {enData?.updateDt || "-"}
+                      </td>
+                      <th className="border bg-gray-100 px-4 py-2">
+                        최근 수정자
+                      </th>
+                      <td className="border px-4 py-2">
+                        {enData?.updateUser || "-"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </>
+            )}
+          </TabPanel>
+        </Tabs>
+        <div className="flex justify-end gap-4 px-6 pb-6">
+          <Button
+            onClick={() =>
+              showModal({
+                title: "저장 확인",
+                message: "저장하시겠습니까?",
+                showCancel: true,
+                onConfirm: async () => {
+                  await handleSave();
+                  setIsReadOnly(true); // 저장 후 다시 읽기 전용
+                },
+              })
+            }
+          >
+            저장
+          </Button>
+
+          <Button
+            type="button"
+            className="bg-gray-200"
+            onClick={() =>
+              showModal({
+                title: "이동 확인",
+                message: "이전 페이지로 돌아갈 경우 입력한 정보가 사라집니다.",
+                showCancel: true,
+                onConfirm: () =>
+                  navigate(
+                    "/contents/whatson/stories/list?refresh=" + Date.now()
+                  ),
+              })
+            }
+          >
+            목록
+          </Button>
+        </div>
+      </Section>
+    </>
   );
 }

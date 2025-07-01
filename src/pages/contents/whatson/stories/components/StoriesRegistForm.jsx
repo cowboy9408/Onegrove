@@ -207,7 +207,7 @@ const StoriesRegistForm = forwardRef(
         };
 
         const storiesImgList = [1, 2, 3]
-          .map((i) => {
+          .map((i, idx) => {
             const img = values[`storiesImgList${i}`];
             if (!img) {
               setValue(`storiesImgCaption${i}`, "");
@@ -223,12 +223,13 @@ const StoriesRegistForm = forwardRef(
             const fileMeta = toImageMeta(img, originalImg);
             const isDeleted = fileMeta.status === "D";
 
-            // 캡션만 변경 시에도 status = "E"
+            fileMeta.sort = String(idx + 1); // idx는 0부터 시작
+
+            // 캡션 변경 감지
             if (
               !isDeleted &&
               originalImg &&
-              (originalImg.caption !== caption ||
-                originalImg.sort !== fileMeta.sort) &&
+              originalImg.caption !== caption &&
               (fileMeta.status === "R" || !fileMeta.status)
             ) {
               fileMeta.status = "E";
@@ -237,7 +238,6 @@ const StoriesRegistForm = forwardRef(
             return {
               ...fileMeta,
               caption: isDeleted ? "" : caption,
-              sort: originalImg?.sort || fileMeta.sort || String(i),
             };
           })
           .filter(Boolean);
