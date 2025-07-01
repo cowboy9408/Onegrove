@@ -16,10 +16,9 @@ export default function StoriesDetail() {
   const enFormRef = useRef();
   const { showModal } = useModal();
   const { emId } = useParams();
-  const [sharedCategory, setSharedCategory] = useState("");
+
   const [isReadOnly, setIsReadOnly] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [sharedBrands, setSharedBrands] = useState([]);
 
   // 국문 상태
   const [koData, setKoData] = useState({});

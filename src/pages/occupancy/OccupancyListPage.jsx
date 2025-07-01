@@ -95,8 +95,9 @@ export default function OccupancyListPage() {
               const raw = o.floor || "";
 
               // 숫자만 추출
-              const rangeMatch = raw.match(/^(\d+)\s*-\s*(\d+)/);
-              const singleMatch = raw.match(/^(\d+)/);
+              const rangeMatch = raw.match(/^(\d+)\s*[-~]\s*(\d+)(F)?$/);
+
+              const singleMatch = raw.match(/^(\d+)(F)?$/);
 
               if (rangeMatch) {
                 const start = parseInt(rangeMatch[1], 10);
