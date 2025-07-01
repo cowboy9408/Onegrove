@@ -17,7 +17,7 @@ export default function SleepListPage() {
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
 
-  const size = 10;
+  const size = 30;
 
   useEffect(() => {
     const fetchData = async () => {

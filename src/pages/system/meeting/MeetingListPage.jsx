@@ -14,7 +14,7 @@ export default function MeetingListPage() {
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
 
-  const size = 10;
+  const size = 30;
 
   useEffect(() => {
     const fetchData = async () => {

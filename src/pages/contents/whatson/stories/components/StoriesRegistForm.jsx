@@ -38,7 +38,7 @@ const StoriesRegistForm = forwardRef(
     const [startTime, setStartTime] = useState("00:00");
     const [endDate, setEndDate] = useState(null);
     const [endTime, setEndTime] = useState("00:00");
-    const [isAddContent, setIsAddContent] = useState(true);
+    const [isAddContent, setIsAddContent] = useState(false);
 
     const onSubmit = async (data) => {
       const content = await editorRef.current.getContent();
@@ -207,7 +207,7 @@ const StoriesRegistForm = forwardRef(
         };
 
         const storiesImgList = [1, 2, 3]
-          .map((i) => {
+          .map((i, idx) => {
             const img = values[`storiesImgList${i}`];
             if (!img) {
               setValue(`storiesImgCaption${i}`, "");
@@ -223,12 +223,13 @@ const StoriesRegistForm = forwardRef(
             const fileMeta = toImageMeta(img, originalImg);
             const isDeleted = fileMeta.status === "D";
 
-            // 캡션만 변경 시에도 status = "E"
+            fileMeta.sort = String(idx + 1); // idx는 0부터 시작
+
+            // 캡션 변경 감지
             if (
               !isDeleted &&
               originalImg &&
-              (originalImg.caption !== caption ||
-                originalImg.sort !== fileMeta.sort) &&
+              originalImg.caption !== caption &&
               (fileMeta.status === "R" || !fileMeta.status)
             ) {
               fileMeta.status = "E";
@@ -237,7 +238,6 @@ const StoriesRegistForm = forwardRef(
             return {
               ...fileMeta,
               caption: isDeleted ? "" : caption,
-              sort: originalImg?.sort || fileMeta.sort || String(i),
             };
           })
           .filter(Boolean);
@@ -273,7 +273,7 @@ const StoriesRegistForm = forwardRef(
           //   },
           // ],
           content: content || "",
-          addContent: addContent || "",
+          addContent: isAddContent ? addContent || "" : "",
           description: description || "",
           startDt: startDateStr,
           endDt: endDateStr,
@@ -481,9 +481,13 @@ const StoriesRegistForm = forwardRef(
           />
 
           <Button
-            className="h-12 w-full"
             onClick={() => {
-              setIsAddContent(!isAddContent);
+              const next = !isAddContent;
+              setIsAddContent(next);
+              if (!next) {
+                editorRef2.current?.setContent?.("");
+                setValue("addContent", "");
+              }
             }}
           >
             {isAddContent ? "내용 추가 등록 취소" : "내용 추가"}
