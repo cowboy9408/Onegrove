@@ -173,13 +173,12 @@ const StoriesRegistForm = forwardRef(
         }
 
         const toImageMeta = (file, originalFile = null) => {
-          if (!file || !file.name) return null;
+          if (!file || !(file.name || file.originalName)) return null;
 
+          const fileName = file.originalName || file.name;
           const matchedSiFileId =
-            file.siFileId || originalFile?.siFileId || originalFile?.id || null;
-
+            file.siFileId || originalFile?.siFileId || file.id || null;
           const matchedSiId = file.siId || originalFile?.siId || null;
-
           const isNew = !originalFile || !matchedSiFileId;
 
           return {
@@ -187,15 +186,15 @@ const StoriesRegistForm = forwardRef(
             siId: matchedSiId,
             siFileId: matchedSiFileId,
             originalName: file.originalName || file.name,
-            name: file.name,
-            size: file.size,
-            extension: "." + (file.originalName || file.name).split(".").pop(),
+            name: file.name || file.originalName,
+            size: file.size ?? 0,
+            extension: "." + (fileName.split(".").pop() || "png"),
             mime: file.type || "image/png",
             classification: "StoriesImg",
             path:
               file.path ||
-              `https://assets.onegrove.kr/dev/StoriesImg/${file.originalName || file.name}`,
-            status: file.status || (isNew ? "C" : "R"), // 수정 포인트
+              `https://assets.onegrove.kr/dev/StoriesImg/${fileName}`,
+            status: file.status || (isNew ? "C" : "R"),
             delYn: file.delYn || "N",
           };
         };
@@ -251,12 +250,21 @@ const StoriesRegistForm = forwardRef(
         // 최종 이미지 리스트 구성
         const finalStoriesImgList = [
           ...storiesImgList, // 입력한 이미지 (R, E, C)
-          ...replacedImages, // 덮어쓴 기존 이미지 → D
-          ...deletedImages.map((img) => ({
-            ...toImageMeta(img),
-            status: "D",
-            delYn: "Y",
-          })), // 명시적으로 삭제한 이미지
+          ...replacedImages, // 누락된 기존 이미지 → D
+          ...deletedImages
+            .map((img) => {
+              const meta = toImageMeta(img);
+              if (!meta) return null;
+
+              return {
+                ...meta,
+                status: "D",
+                delYn: "Y",
+                caption: img.caption || "",
+                sort: img.sort || "",
+              };
+            })
+            .filter(Boolean), // null 제거
         ];
 
         return {
