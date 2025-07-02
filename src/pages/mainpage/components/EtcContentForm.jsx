@@ -75,9 +75,6 @@ const EtcContentForm = forwardRef(
       });
     }, [data]);
 
-    console.log("✔ selectedContents on load:", selectedContents);
-    console.log("✔ form contents:", methods.getValues("etc.contents"));
-
     useImperativeHandle(ref, () => ({
       submit: async (onError) => {
         const values = methods.getValues("etc");
@@ -94,11 +91,6 @@ const EtcContentForm = forwardRef(
         }
 
         const first = content.contents[0];
-
-        console.log("✔ payload:", {
-          contentId: first._id,
-          categoryCode: first?.categoryCode,
-        });
 
         return {
           lang: lang.toUpperCase(),

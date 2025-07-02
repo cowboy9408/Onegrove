@@ -129,7 +129,7 @@ export default function AffairRegist() {
 
     if (!form.name || !form.password || !form.confirmPassword || !form.phone) {
       showModal({
-        title: "필수 항목 누락",
+        title: "필수 항목 확인",
         message: "모든 필수 항목을 입력해주세요.",
         showCancel: false,
       });
