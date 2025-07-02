@@ -23,7 +23,7 @@ export default function AdminRegist() {
   const [companyOptions, setCompanyOptions] = useState([]);
   const [companyError, setCompanyError] = useState(false);
   const [errors, setErrors] = useState({
-    name: false,
+    name: "",
     username: "",
     phone: false,
     email: "",
@@ -71,13 +71,12 @@ export default function AdminRegist() {
           ...prev,
           name: "이름은 최대 10자까지 입력 가능합니다.",
         }));
-        return; // 입력 제한
+        return;
       } else {
         setErrors((prev) => ({ ...prev, name: "" }));
       }
     }
 
-    // 아이디 유효성 처리
     if (key === "username") {
       const usernameRegex = /^[a-z0-9]{0,16}$/;
       if (!usernameRegex.test(value)) {
@@ -102,7 +101,6 @@ export default function AdminRegist() {
       company: !form.company,
     };
 
-    const usernameRegex = /^[a-zA-Z0-9]+$/; // 한글/특수문자 금지
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 이메일 형식 검사
 
     setErrors(newErrors);
@@ -116,6 +114,7 @@ export default function AdminRegist() {
       });
       return;
     }
+    const usernameRegex = /^[a-z0-9]{4,16}$/;
     if (!usernameRegex.test(form.username)) {
       showModal({
         title: "아이디 오류",
@@ -259,19 +258,14 @@ export default function AdminRegist() {
       {/* 입력 필드 및 성별 라디오 */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
-          {" "}
           <Input
             label="이름"
             value={form.name}
-            onChange={(e) => {
-              handleChange("name", e.target.value);
-              if (e.target.value)
-                setErrors((prev) => ({ ...prev, name: false }));
-            }}
+            onChange={(e) => handleChange("name", e.target.value)}
             required
           />
           {errors.name && (
-            <p className="mt-1 text-sm text-red-500">이름을 입력해주세요.</p>
+            <p className="mt-1 text-sm text-red-500">{errors.name}</p>
           )}
         </div>
 
@@ -300,17 +294,12 @@ export default function AdminRegist() {
         <Input
           label="아이디"
           value={form.username}
-          onChange={(e) => {
-            handleChange("username", e.target.value);
-          }}
+          onChange={(e) => handleChange("username", e.target.value)}
           required
-          error={errors.name}
-          placeholder="4~16자 내의 영소문자,숫자로 구성"
         />
+
         {errors.username && (
-          <p className="mt-1 text-sm text-red-500">
-            영소문자와 숫자만 입력할 수 있습니다 (4~16자).
-          </p>
+          <p className="mt-1 text-sm text-red-500">{errors.username}</p>
         )}
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -349,11 +338,11 @@ export default function AdminRegist() {
                 className="rounded-l-none"
                 placeholder="1234-5678"
               />
-              {errors.phone && (
+              {/* {errors.phone && (
                 <p className="mt-1 text-sm text-red-500">
                   전화번호를 입력해주세요.
                 </p>
-              )}
+              )} */}
             </div>
           </div>
         </div>
