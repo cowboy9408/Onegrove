@@ -200,7 +200,6 @@ const StoriesRegistForm = forwardRef(
           };
         };
 
-        // 새로 구성된 이미지 리스트
         const storiesImgList = imageFields
           .map((i, idx) => {
             const img = values[`storiesImgList${i}`];
