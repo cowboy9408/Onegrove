@@ -269,10 +269,15 @@ export default function StoriesDetail() {
           }));
 
         // 삭제 항목 포함한 전체 리스트 구성
-        payload.storiesImgList = [
-          ...(data.storiesImgList || []),
-          ...deletedImages,
-        ];
+        const sortedImages = (data.storiesImgList || [])
+          .filter((img) => img?.status !== "D")
+          .map((img, idx) => ({
+            ...img,
+            sort: String(idx + 1),
+          }));
+
+        // 최종 리스트에 삭제된 이미지 포함
+        payload.storiesImgList = [...sortedImages, ...deletedImages];
 
         const apiUrl =
           data?.id != null
