@@ -113,11 +113,13 @@ export default function OfficeFloorForm({ value = [], readOnly = false }) {
               />
             </div>
             <div className="flex items-end">
-              {!readOnly && items.filter((i) => i.delYn !== "Y").length > 1 && (
-                <Button variant="outline" onClick={() => handleRemove(index)}>
-                  삭제
-                </Button>
-              )}
+              {!readOnly &&
+                items.filter((i) => i.delYn !== "Y").length > 1 &&
+                index !== 0 && (
+                  <Button variant="outline" onClick={() => handleRemove(index)}>
+                    삭제
+                  </Button>
+                )}
             </div>
           </div>
         ))}

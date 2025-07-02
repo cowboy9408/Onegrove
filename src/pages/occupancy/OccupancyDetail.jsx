@@ -190,7 +190,12 @@ export default function OccupancyDetail() {
           freeHour: data.freeHour,
           useYn: data.useYn,
           mainImg: toImageMeta(data.mainImg, original.mainImg),
-          officeList: data.officeList,
+          officeList: (data.officeList || []).filter(
+            (item) =>
+              item.delYn !== "Y" &&
+              item.office?.trim() !== "" &&
+              item.floor?.trim() !== ""
+          ),
         };
 
         const isNew = !original?.id || original?.lang !== payload.lang;
