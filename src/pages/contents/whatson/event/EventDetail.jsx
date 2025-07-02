@@ -39,7 +39,6 @@ export default function EventDetail() {
     const fetchData = async () => {
       try {
         const res = await api.get(`/api/v1/event-promotion/item/${emId}`);
-        console.log("API 응답 결과:", res.data);
 
         const list = Array.isArray(res.data?.data) ? res.data.data : [];
 

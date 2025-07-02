@@ -25,7 +25,6 @@ export default function PressDetail() {
     const fetchData = async () => {
       try {
         const res = await api.get(`/api/v1/press/${pmId}`);
-        console.log("API 응답 결과:", res.data);
 
         const list = Array.isArray(res.data?.data) ? res.data.data : [];
 

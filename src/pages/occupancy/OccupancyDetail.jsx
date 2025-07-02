@@ -192,9 +192,6 @@ export default function OccupancyDetail() {
           mainImg: toImageMeta(data.mainImg, original.mainImg),
           officeList: data.officeList,
         };
-        console.log("payload.email:", payload.email);
-        console.log("저장 payload:", payload);
-        console.log("payload.thumbImgPc:", payload.thumbImgPc);
 
         const isNew = !original?.id || original?.lang !== payload.lang;
 
@@ -228,10 +225,7 @@ export default function OccupancyDetail() {
         });
         return;
       }
-      console.log(
-        "formValues.officeList (before override):",
-        formValues.officeList
-      );
+
       showModal({
         title: "수정 확인",
         message: "수정하시겠습니까?",

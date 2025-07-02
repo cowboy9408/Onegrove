@@ -31,7 +31,6 @@ export default function StoriesDetail() {
       try {
         const resKO = await api.get(`/api/v1/stories/detail/${emId}/KO`);
         const resEN = await api.get(`/api/v1/stories/detail/${emId}/EN`);
-        console.log("API 응답 결과:", resKO.data, resEN.data);
 
         // const list = Array.isArray(resKO.data?.data) ? resKO.data.data : [];
 
@@ -71,7 +70,7 @@ export default function StoriesDetail() {
     const [datePart, timePart] = str.split(" "); // ex: "2025-05-27", "14:00"
     const [year, month, day] = datePart.split("-").map(Number);
     const [hour, minute] = timePart.split(":").map(Number);
-    // console.log(str, year, month, day, hour, minute);
+
     return new Date(year, month - 1, day, hour, minute);
   };
 
@@ -83,8 +82,6 @@ export default function StoriesDetail() {
     if (!loading) {
       const patchForm = (formRef, data, fallbackCategory = "") => {
         if (!formRef) return;
-
-        // console.log(">>> patchForm 호출 시점:", formRef.current);
 
         const patchImageMeta = (img) => {
           if (!img) return null;
@@ -276,11 +273,6 @@ export default function StoriesDetail() {
           ...(data.storiesImgList || []),
           ...deletedImages,
         ];
-        console.log("기존 리스트:", original?.storiesImgList);
-        console.log("제출 리스트:", data?.storiesImgList);
-        console.log("삭제 처리된:", deletedImages);
-
-        console.log("저장 payload:", payload, data);
 
         const apiUrl =
           data?.id != null
