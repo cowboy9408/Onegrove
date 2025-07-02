@@ -1,47 +1,68 @@
+// SleepReserve.jsx
 import React, { useState, useContext, useEffect } from "react";
-import CalendarToolbar from "@/components/common/CalendarToolbar";
+import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import Select from "@/components/common/Select";
 import Button from "@/components/common/Button";
 import { ModalContext } from "@/context/ModalContext";
 import SleepReservationForm from "@/components/modal/SleepReservationForm";
 import api from "@/lib/apiClient";
-import { ArrowDownIcon } from "@/components/ui/arrow-down";
+
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
 
 export default function SleepReserve() {
-  const [selectedRoom, setSelectedRoom] = useState(null); // ✅ 초기값 null
   const { showModal } = useContext(ModalContext);
-  const [meetingOptions, setMeetingOptions] = useState({});
+  const [selectedRoom, setSelectedRoom] = useState(null);
   const [officeOptions, setOfficeOptions] = useState([]);
-  const [scheduleList, setScheduleList] = useState([]);
+  const [meetingOptions, setMeetingOptions] = useState({});
+  const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
+  const [timeSlots, setTimeSlots] = useState([]);
+  const [expandedSlot, setExpandedSlot] = useState(null);
+  const [reservationDetails, setReservationDetails] = useState({});
 
-  const fetchSchedules = async () => {
-    try {
-      const res = await api.get(`/api/v1/sleep/room/detail/${selectedRoom}`);
-      if (res.data?.success) {
-        setMeetingOptions(res.data.data);
-      }
-    } catch (err) {
-      console.error("수면실 roomlist 예약 조회 실패:", err);
+  const fetchMeta = async () => {
+    const res = await api.get(`/api/v1/sleep/reserve/list/room`);
+    if (res.data.success) setOfficeOptions(res.data.data);
+  };
+
+  const fetchRoomDetail = async (roomId) => {
+    const res = await api.get(`/api/v1/sleep/room/detail/${roomId}`);
+    if (res.data.success) setMeetingOptions(res.data.data);
+  };
+
+  const fetchReservations = async (roomId, time) => {
+    const res = await api.get(`/api/v1/sleep/reserve/list/detail`, {
+      params: {
+        roomId,
+        reserveDt: selectedDate,
+        reserveTime: time,
+      },
+    });
+    if (res.data.success) {
+      setReservationDetails((prev) => ({
+        ...prev,
+        [time]: res.data.data,
+      }));
     }
   };
 
-  useEffect(() => {
-    if (selectedRoom !== null) {
-      fetchSchedules();
+  const generateTimeSlots = (start, end) => {
+    const slots = [];
+    let current = dayjs(`2020-01-01T${start}`);
+    const endTime = dayjs(`2020-01-01T${end}`);
+    while (current.add(50, "minute").isSameOrBefore(endTime)) {
+      slots.push({
+        start: current.format("HH:mm"),
+        end: current.add(50, "minute").format("HH:mm"),
+      });
+      current = current.add(50, "minute");
     }
-  }, [selectedRoom]);
+    return slots;
+  };
 
   useEffect(() => {
-    const fetchMeta = async () => {
-      try {
-        const settingRes = await api.get(`/api/v1/sleep/room`);
-        if (settingRes.data.success) {
-          setOfficeOptions(settingRes.data.data);
-        }
-      } catch (err) {
-        console.error("수면실 roomlist 예약 조회 실패:", err);
-      }
-    };
     fetchMeta();
   }, []);
 
@@ -49,166 +70,39 @@ export default function SleepReserve() {
     if (officeOptions.length > 0 && selectedRoom === null) {
       setSelectedRoom(officeOptions[0].id);
     }
-  }, [officeOptions, selectedRoom]);
+  }, [officeOptions]);
 
-  const add50Min = (timeStr) => {
-    const [hour, minute] = timeStr.split(":").map(Number);
-    const date = new Date(0, 0, 0, hour, minute + 50);
-    const newHour = date.getHours().toString().padStart(2, "0");
-    const newMinute = date.getMinutes().toString().padStart(2, "0");
-    return `${newHour}:${newMinute}`;
+  useEffect(() => {
+    if (selectedRoom) {
+      fetchRoomDetail(selectedRoom);
+    }
+  }, [selectedRoom]);
+
+  useEffect(() => {
+    if (meetingOptions.startTime && meetingOptions.endTime) {
+      const slots = generateTimeSlots(meetingOptions.startTime, meetingOptions.endTime);
+      setTimeSlots(slots);
+    }
+  }, [meetingOptions, selectedDate]);
+
+  const handleSlotToggle = (time) => {
+    if (expandedSlot === time) {
+      setExpandedSlot(null);
+    } else {
+      setExpandedSlot(time);
+      fetchReservations(selectedRoom, time);
+    }
   };
 
-  const handleEventClick = async (event) => {
-    try {
-      const res = await api.get(`/api/v1/meeting/${event.id}`);
-      if (!res.data.success) return;
-      const detail = res.data.data;
+  const handleDateChange = (direction) => {
+    const today = dayjs();
+    const tenDaysAgo = today.subtract(10, "day");
+    const newDate = direction === "prev"
+      ? dayjs(selectedDate).subtract(1, "day")
+      : dayjs(selectedDate).add(1, "day");
 
-      showModal({
-        title: "Meeting Room 상세",
-        size: "lg",
-        customButton: true,
-        showCancel: true,
-        children: ({ closeModal }) => (
-          <div className="space-y-5 text-sm text-gray-700">
-            <table className="w-full border text-left">
-              <tbody>
-                <tr>
-                  <th className="border p-2">회의실</th>
-                  <td className="border p-2">
-                    {detail.roomName} ({detail.location})
-                  </td>
-                </tr>
-                <tr>
-                  <th className="border p-2">예약 종류</th>
-                  <td className="border p-2">{detail.paymentType}</td>
-                </tr>
-                <tr>
-                  <th className="border p-2">일정</th>
-                  <td className="border p-2">
-                    {detail.resveDate} {detail.resveStartTime} ~{" "}
-                    {detail.resveEndTime}
-                  </td>
-                </tr>
-                <tr>
-                  <th className="border p-2">상태</th>
-                  <td className="border p-2">{detail.status}</td>
-                </tr>
-                <tr>
-                  <th className="border p-2">내용</th>
-                  <td className="border p-2">{detail.content}</td>
-                </tr>
-                <tr>
-                  <th className="border p-2">사용자</th>
-                  <td className="border p-2">{detail.realUser}</td>
-                </tr>
-                <tr>
-                  <th className="border p-2">참석인원</th>
-                  <td className="border p-2">{detail.numberVisitors}</td>
-                </tr>
-                <tr>
-                  <th className="border p-2">입주사</th>
-                  <td className="border p-2">{detail.companyName}</td>
-                </tr>
-                <tr>
-                  <th className="border p-2">예약자</th>
-                  <td className="border p-2">{detail.reserver}</td>
-                </tr>
-                <tr>
-                  <th className="border p-2">전화번호</th>
-                  <td className="border p-2">{detail.reserverTel}</td>
-                </tr>
-                <tr>
-                  <th className="border p-2">이메일</th>
-                  <td className="border p-2">{detail.reserverEmail}</td>
-                </tr>
-                <tr>
-                  <th className="border p-2">비고</th>
-                  <td className="border p-2">{detail.note}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div className="flex justify-between gap-3">
-              <div className="flex gap-3">
-                <Button
-                  theme="danger"
-                  onClick={async () => {
-                    if (confirm("예약을 확정하겠습니까?")) {
-                      try {
-                        const res = await api.post("/api/v1/meeting/confirm", {
-                          id: detail.id,
-                        });
-                        if (res.data?.success) {
-                          alert("예약 확정 완료");
-                          fetchSchedules();
-                          closeModal();
-                        } else alert("예약 확정 실패");
-                      } catch (err) {
-                        console.error("예약 확정 오류:", err);
-                      }
-                    }
-                  }}
-                >
-                  예약 확정
-                </Button>
-                <Button
-                  theme="danger"
-                  onClick={async () => {
-                    if (confirm("예약을 취소하겠습니까?")) {
-                      try {
-                        const res = await api.post("/api/v1/meeting/cancel", {
-                          id: detail.id,
-                        });
-                        if (res.data?.success) {
-                          alert("취소 완료");
-                          fetchSchedules();
-                          closeModal();
-                        } else alert("취소 실패");
-                      } catch (err) {
-                        console.error("취소 오류:", err);
-                      }
-                    }
-                  }}
-                >
-                  예약 취소
-                </Button>
-              </div>
-              <div>
-                <Button
-                  onClick={() => {
-                    closeModal();
-                    showModal({
-                      title: "Meeting Room 수정",
-                      size: "lg",
-                      customButton: true,
-                      showCancel: true,
-                      children: ({ closeModal }) => (
-                        <ReservationForm
-                          isEdit
-                          initialData={detail}
-                          meetingOptions={meetingOptions}
-                          roomList={officeOptions}
-                          closeModal={closeModal}
-                          onSubmit={() => {
-                            fetchSchedules();
-                            closeModal();
-                          }}
-                        />
-                      ),
-                    });
-                  }}
-                >
-                  수정
-                </Button>
-              </div>
-            </div>
-          </div>
-        ),
-      });
-    } catch (err) {
-      console.error("상세 조회 실패:", err);
+    if (newDate.isSameOrAfter(tenDaysAgo) && newDate.isSameOrBefore(today)) {
+      setSelectedDate(newDate.format("YYYY-MM-DD"));
     }
   };
 
@@ -217,7 +111,7 @@ export default function SleepReserve() {
       <div className="mb-4 flex items-center justify-between">
         <Select
           label="수면실 선택"
-          value={selectedRoom ?? ""} // ✅ null이면 ""으로 처리
+          value={selectedRoom ?? ""}
           className="w-sm"
           onChange={(e) => setSelectedRoom(Number(e.target.value))}
         >
@@ -231,7 +125,7 @@ export default function SleepReserve() {
         <Button
           onClick={() => {
             showModal({
-              title: "회의실 예약",
+              title: "수면실 예약",
               size: "lg",
               customButton: true,
               showCancel: true,
@@ -242,7 +136,7 @@ export default function SleepReserve() {
                   roomList={officeOptions}
                   closeModal={closeModal}
                   onSubmit={() => {
-                    fetchSchedules();
+                    fetchRoomDetail(selectedRoom);
                     closeModal();
                   }}
                 />
@@ -254,71 +148,55 @@ export default function SleepReserve() {
         </Button>
       </div>
 
-      <div className="relative space-y-4 overflow-hidden rounded-xl bg-white p-4 shadow-md">
-        <div className="absolute top-6 right-6">
-          <ul className="flex gap-2"></ul>
-        </div>
-        <CalendarToolbar
-          events={scheduleList}
-          onSelectEvent={handleEventClick}
-        />
-        <div className="mt-6 flex justify-center">
-          <div className="grid max-w-fit grid-cols-2 gap-30">
-            {/* 오전 시간대 */}
-            <div className="space-y-4">
-              {["09:00", "10:00", "11:00", "12:00", "13:00"].map((time) => (
-                <div key={time}>
-                  <p className="mb-1 text-sm font-semibold">
-                    {time} ~ {add50Min(time)}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm font-medium whitespace-nowrap">
-                      잔여 Relax Room 수 : 
-                    </label>
-                    <div className="relative inline-block">
-                      <select
-                        value="-"
-                        onChange={() => {}}
-                        className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
-                      >
-                        <option value="1">옵션 1</option>
-                        <option value="2">옵션 2</option>
-                      </select>
-                      <ArrowDownIcon className="h-8 w-8 bg-white" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+      {/* 수동 날짜 이동 */}
+      <div className="mb-4 flex justify-center gap-4 items-center text-sm">
+        <Button size="sm" variant="ghost" onClick={() => handleDateChange("prev")}>&lt;</Button>
+        <div className="text-[20px] font-bold">{selectedDate}</div>
+        <Button size="sm" variant="ghost" onClick={() => handleDateChange("next")}>&gt;</Button>
+      </div>
 
-            {/* 오후 시간대 */}
-            <div className="space-y-4">
-              {["14:00", "15:00", "16:00", "17:00"].map((time) => (
-                <div key={time}>
-                  <p className="mb-1 text-sm font-semibold">
-                    {time} ~ {add50Min(time)}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm font-medium whitespace-nowrap">
-                      잔여 Relax Room 수 :
-                    </label>
-                    <div className="relative inline-block">
-                      <select
-                        value="-"
-                        onChange={() => {}}
-                        className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
-                      >
-                        <option value="1">옵션 1</option>
-                        <option value="2">옵션 2</option>
-                      </select>
-                      <ArrowDownIcon className="h-8 w-8 bg-white" />
-                    </div>
-                  </div>
+      {/* 타임 슬롯 */}
+      <div className="mt-6 space-y-3 mx-auto w-[50%]">
+        {timeSlots.map((slot) => {
+          const time = slot.start;
+          const reserveList = reservationDetails[time] || [];
+          const reserveCount = reserveList.length;
+          const totalCount = (meetingOptions.infoList || []).filter(info => info.useYn === "Y").length;
+
+          return (
+            <div key={time} className="border rounded shadow-sm">
+              <button
+                onClick={() => handleSlotToggle(time)}
+                className="w-full flex justify-between items-center px-4 py-2 text-sm font-medium bg-gray-50 hover:bg-gray-100"
+              >
+                <span>
+                  <span className="font-bold mr-2">{slot.start} ~ {slot.end}</span> - 예약된 수: {reserveCount} / {totalCount}
+                </span>
+                <span>{expandedSlot === time ? "▲" : "▼"}</span>
+              </button>
+
+              {expandedSlot === time && (
+                <div className="p-3 space-y-2 bg-gray-200">
+                  {(meetingOptions.infoList || [])
+                    .filter((info) => info.useYn === "Y")
+                    .map((info) => {
+                      const reservation = reserveList.find(
+                        (r) => r.roomNumberId === info.roomNumId
+                      );
+                      return (
+                        <div key={info.id} className="text-sm border-b pb-2">
+                          <strong>
+                            {meetingOptions.name} {info.roomNumId}호
+                          </strong>{" "}
+                          | {reservation ? `${reservation.userName} (${reservation.companyName})` : "예약자 없음"}
+                        </div>
+                      );
+                    })}
                 </div>
-              ))}
+              )}
             </div>
-          </div>
-        </div>
+          );
+        })}
       </div>
     </div>
   );

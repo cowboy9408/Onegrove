@@ -172,13 +172,7 @@ export default function EventListPage() {
             const dateB = parseValidDate(b.created_at_ko || b.created_at_en);
             return dateB - dateA; // 최신순 (최근 날짜가 먼저)
           });
-          console.log(
-            "데이터 createDatetime들",
-            json.data.map((entry) => ({
-              ko: entry.items?.find((i) => i.lang === "ko")?.createDatetime,
-              en: entry.items?.find((i) => i.lang === "en")?.createDatetime,
-            }))
-          );
+
           const start = (page - 1) * size;
           const end = start + size;
 

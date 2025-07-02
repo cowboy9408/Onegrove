@@ -49,20 +49,12 @@ export default function StoriesListPage() {
         const res = await api.get("/api/v1/stories");
         const json = res.data?.data || [];
 
-        // console.log("Fetched Stories Data:", json.sort((a, b) => a.id - b.id));
-        // console.log("Fetched Stories Data:", json.sort((a, b) => b.id - a.id));
-
         if (Array.isArray(json)) {
           const rows = json.map((item, index) => {
             const koItem =
               item.contentList.find((i) => i.lang.toUpperCase() === "KO") || {};
             const enItem =
               item.contentList.find((i) => i.lang.toUpperCase() === "EN") || {};
-
-            // console.log("koItem:", koItem);
-            // console.log("enItem:", enItem);
-
-            // console.log("item:", item, koItem, enItem);
 
             return {
               originalIndex: item.id,
