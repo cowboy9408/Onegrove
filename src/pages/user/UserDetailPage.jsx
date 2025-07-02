@@ -275,7 +275,6 @@ export default function UserDetailPage() {
           <Input
             label="이름"
             value={form.name}
-            maxLength={10}
             onChange={(e) => handleChange("name", e.target.value)}
             required
             error={errors.name}
