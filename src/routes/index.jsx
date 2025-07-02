@@ -631,7 +631,7 @@ export const routeMeta = [
             uuid: "f6d4536d-e76b-4621-9873-bf5b6465e50e",
             path: "/system/meeting/regist",
             element: <MeetingSetting />,
-            title: "어메니티 설정 추가",
+            title: "Meeting Room 추가",
             hidden: true,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
           },
