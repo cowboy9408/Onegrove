@@ -13,7 +13,7 @@ export default function AffairRegist() {
     status: "active",
     companyId: "",
     name: "",
-    gender: "",
+    gender: "male",
     username: "",
     password: "",
     confirmPassword: "",
@@ -102,7 +102,7 @@ export default function AffairRegist() {
     if (!form.username) {
       showModal({
         title: "필수 입력",
-        message: "아이디를 입력해주세요.",
+        message: "모든 필수 항목을 입력해주세요.",
         showCancel: false,
       });
       return;
@@ -121,7 +121,7 @@ export default function AffairRegist() {
     if (!form.email) {
       showModal({
         title: "필수 입력",
-        message: "이메일을 입력해주세요.",
+        message: "모든 필수 항목을 입력해주세요.",
         showCancel: false,
       });
       return;
@@ -131,6 +131,16 @@ export default function AffairRegist() {
       showModal({
         title: "필수 항목 확인",
         message: "모든 필수 항목을 입력해주세요.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    const phoneDigitsOnly = form.phone.replace(/\D/g, "");
+    if (phoneDigitsOnly.length !== 8) {
+      showModal({
+        title: "전화번호 오류",
+        message: "전화번호는 숫자만 입력하며, 8자리여야 합니다.",
         showCancel: false,
       });
       return;

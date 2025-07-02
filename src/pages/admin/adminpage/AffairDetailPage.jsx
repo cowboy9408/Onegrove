@@ -128,10 +128,39 @@ export default function AffairDetailPage() {
   };
 
   const handleUpdate = async () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneDigitsOnly = form.phone.replace(/\D/g, "");
     if (!form.name || !form.username || !form.phone || !form.email) {
       showModal({
         title: "필수 항목 확인",
         message: "모든 필수 항목을 입력해주세요.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    if (form.name.length > 10) {
+      showModal({
+        title: "이름 오류",
+        message: "이름은 최대 10자까지 입력 가능합니다.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    if (phoneDigitsOnly.length !== 8) {
+      showModal({
+        title: "전화번호 오류",
+        message: "전화번호는 숫자만 입력하며, 8자리여야 합니다.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    if (!emailRegex.test(form.email)) {
+      showModal({
+        title: "이메일 오류",
+        message: "올바른 이메일 형식이 아닙니다.",
         showCancel: false,
       });
       return;
