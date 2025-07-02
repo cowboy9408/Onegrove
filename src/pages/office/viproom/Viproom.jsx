@@ -5,9 +5,10 @@ import Button from "@/components/common/Button";
 import { ModalContext } from "@/context/ModalContext";
 import ReservationForm from "@/components/modal/ReservationForm";
 import api from "@/lib/apiClient";
+import dayjs from "dayjs";
 
 export default function Viproom() {
-  const [selectedRoom, setSelectedRoom] = useState(1);
+  const [selectedRoom, setSelectedRoom] = useState(null);
   const { showModal } = useContext(ModalContext);
   const [meetingOptions, setMeetingOptions] = useState({});
   const [officeOptions, setOfficeOptions] = useState([]);
@@ -34,6 +35,12 @@ export default function Viproom() {
   useEffect(() => {
     fetchSchedules();
   }, [selectedRoom]);
+
+  useEffect(() => {
+    if (officeOptions.length > 0 && !selectedRoom) {
+      setSelectedRoom(officeOptions[0].id);
+    }
+  }, [officeOptions]);
 
   useEffect(() => {
     const fetchMeta = async () => {
@@ -82,7 +89,7 @@ export default function Viproom() {
 
             <div className="flex justify-between gap-3">
               <div className="flex gap-3">
-                {detail?.status !== '예약 확정' && (
+                {detail?.status === '가예약' && (
                   <Button
                     theme="danger"
                     onClick={async () => {
@@ -207,8 +214,7 @@ export default function Viproom() {
           events={scheduleList}
           onSelectEvent={handleEventClick}
           onSelectSlot={(slotInfo) => {
-            const clickedDate = new Date(slotInfo.start);
-            const resveDate = clickedDate.toISOString().split("T")[0];
+            const resveDate = dayjs(slotInfo.start).format("YYYY-MM-DD");
 
             showModal({
               title: "회의실 예약",

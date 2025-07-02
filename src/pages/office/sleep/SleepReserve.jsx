@@ -279,11 +279,11 @@ export default function SleepReserve() {
                   </p>
                   <div className="flex items-center gap-2">
                     <label className="text-sm font-medium whitespace-nowrap">
-                      잔여 Relax Room 수 : "-"
+                      잔여 Relax Room 수 : 
                     </label>
                     <div className="relative inline-block">
                       <select
-                        value=""
+                        value="-"
                         onChange={() => {}}
                         className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
                       >
@@ -306,11 +306,11 @@ export default function SleepReserve() {
                   </p>
                   <div className="flex items-center gap-2">
                     <label className="text-sm font-medium whitespace-nowrap">
-                      잔여 Relax Room 수 : "-"
+                      잔여 Relax Room 수 :
                     </label>
                     <div className="relative inline-block">
                       <select
-                        value=""
+                        value="-"
                         onChange={() => {}}
                         className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
                       >
