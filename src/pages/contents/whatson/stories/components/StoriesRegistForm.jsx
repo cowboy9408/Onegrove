@@ -556,7 +556,7 @@ const StoriesRegistForm = forwardRef(
             {imageFields.map((index) => (
               <div
                 key={index}
-                className="relative space-y-2 rounded-md border p-4"
+                className="relative space-y-2 rounded-md border p-4 pb-12"
               >
                 <Upload
                   name={`storiesImgList${index}`}
