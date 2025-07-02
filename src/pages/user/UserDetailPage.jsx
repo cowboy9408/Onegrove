@@ -129,6 +129,16 @@ export default function UserDetailPage() {
       return;
     }
 
+    const phoneDigitsOnly = form.phone.replace(/\D/g, "");
+    if (phoneDigitsOnly.length !== 8) {
+      showModal({
+        title: "전화번호 오류",
+        message: "전화번호는 숫자만 입력하며, 8자리여야 합니다.",
+        showCancel: false,
+      });
+      return;
+    }
+
     console.log("폼 데이터:", form);
 
     const payload = {
