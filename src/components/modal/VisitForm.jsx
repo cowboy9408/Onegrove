@@ -11,14 +11,27 @@ export default function VisitForm({
   const [companyId, setCompanyId] = useState(isEdit ? initialData.companyId || "" : "");
   const [visitNumber, setVisitNumber] = useState(isEdit ? initialData.visitNumber || "" : "");
   const [visitPurpose, setVisitPurpose] = useState(isEdit ? initialData.visitPurpose || "" : "");
-  const [resveDate, setResveDate] = useState(initialData.visitDate || "");
-  const [resveTime, setResveTime] = useState(initialData.resveTime || "09:00:00");
+  const normalizeTime = (time) => {
+    if (!time) return "09:00:00";
+    return time.length === 5 ? `${time}:00` : time;
+  };
+
+  const [resveTime, setResveTime] = useState(normalizeTime(initialData.visitTime));
   const [name, setName] = useState(initialData.name || "");
   
   const [tel, setTel] = useState(initialData.tel || "");
   const [card, setCard] = useState( initialData.accessCard || "");
   const [email, setEmail] = useState(initialData.email || "");
   const [building, setBuilding] = useState(initialData.visitBuilding || "");
+
+  const formatDateToInput = (value) => {
+  if (!value) return "";
+  return value.replace(/\./g, "-").replace(/-$/, "").trim();
+};
+
+  const [resveDate, setResveDate] = useState(
+    initialData.visitDate ? formatDateToInput(initialData.visitDate) : ""
+  );
 
 
   
@@ -99,18 +112,6 @@ export default function VisitForm({
       ...(isEdit && { id: initialData.id }),
     };
 
-// {
-//     "companyId": 3,
-//     "visitDate": "2025-06-25",
-//     "visitTime": "12:00:00",
-//     "visitBuilding": "cp0101",
-//     "visitPurpose": "방문 목적",
-//     "name": "방문자명",
-//     "visitNumber": 5,
-//     "email": "test@test.kr",
-//     "tel": "010-1234-5678"
-// }
-
     try {
       const res = await api.post(
         isEdit ? "/api/v1/visit/update" : "/api/v1/visit/insert",
@@ -130,10 +131,13 @@ export default function VisitForm({
 
 
   const generateTimeOptions = (startHour, endHour) => {
-    return Array.from({ length: endHour - startHour + 1 }, (_, i) => {
-      const hour = startHour + i;
-      return `${String(hour).padStart(2, '0')}:00:00`;
-    });
+    const times = [];
+    for (let hour = startHour; hour <= endHour; hour++) {
+      ["00", "30"].forEach((minute) => {
+        times.push(`${String(hour).padStart(2, "0")}:${minute}:00`);
+      });
+    }
+    return times;
   };
 
   const getReservedTimes = () => {
@@ -164,14 +168,15 @@ export default function VisitForm({
     companyId &&
     resveDate &&
     resveTime &&
-    tel &&
+    email.trim() !== "" &&
+    tel.trim() !== "" &&
+    visitPurpose.trim() !== "" &&
+    name.trim() !== "" &&
     visitNumber;
 
 
   return (
     <div className="space-y-5 text-left">
-
-        
 
       <div className="flex gap-4 w-full">
         <div className="w-full">
@@ -197,6 +202,7 @@ export default function VisitForm({
           <label className="block mb-1">방문 시간 <span className="text-red-500">*</span></label>
           <div>
             <select value={resveTime} onChange={(e) => setResveTime(e.target.value)} className="border px-2 py-1 rounded w-full">
+              <option value="">방문시간을 선택하세요</option>
               {generateTimeOptions(9, 17).map((time) => (
                 <option key={time} value={time} disabled={!isTimeAvailable(time)}>
                   {time.slice(0, 5)} {isTimeAvailable(time) ? "" : "(불가)"}
@@ -255,7 +261,7 @@ export default function VisitForm({
           <input
             type="text"
             value={visitNumber}
-            maxLength={2}
+            maxLength={2} // 🔹 2자리까지만 입력 허용
             onChange={(e) => {
               const input = e.target.value;
               if (input === "") {
@@ -263,6 +269,7 @@ export default function VisitForm({
                 return;
               }
               if (!/^\d+$/.test(input)) return;
+              setVisitNumber(input);
             }}
             className="w-full border px-2 py-1 rounded"
           />
@@ -288,10 +295,10 @@ export default function VisitForm({
 
       <div className="w-[50%]">
         <label className="block mb-1">출입카드 번호</label>
-        <input value={card} onChange={(e) => setCard(e.target.value)} className="w-full border px-2 py-1 rounded" disabled={true} />
+        <input value={card} onChange={(e) => setCard(e.target.value)} className="w-full border px-2 py-1 rounded" />
       </div>
 
-      <div className="flex justify-between gap-3">
+      <div className="flex justify-center gap-3">
         <button
           onClick={handleSubmit}
           disabled={!isFormValid}
@@ -300,12 +307,6 @@ export default function VisitForm({
           }`}
         >
           저장
-        </button>
-        <button
-          onClick={closeModal}
-          className="rounded border px-4 py-2 cursor-pointer"
-        >
-          취소
         </button>
       </div>
     </div>
