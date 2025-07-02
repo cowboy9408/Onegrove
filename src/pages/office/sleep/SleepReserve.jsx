@@ -1,4 +1,3 @@
-// SleepReserve.jsx
 import React, { useState, useContext, useEffect } from "react";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
@@ -21,6 +20,7 @@ export default function SleepReserve() {
   const [timeSlots, setTimeSlots] = useState([]);
   const [expandedSlot, setExpandedSlot] = useState(null);
   const [reservationDetails, setReservationDetails] = useState({});
+  const [reservationCounts, setReservationCounts] = useState({});
 
   const fetchMeta = async () => {
     const res = await api.get(`/api/v1/sleep/reserve/list/room`);
@@ -48,16 +48,34 @@ export default function SleepReserve() {
     }
   };
 
+  const fetchReservationCounts = async (roomId) => {
+    const res = await api.get(`/api/v1/sleep/reserve/list/count`, {
+      params: {
+        roomId,
+        reserveDt: selectedDate,
+      },
+    });
+    if (res.data.success) {
+      const countsMap = {};
+      res.data.data.forEach((item) => {
+        const key = item.reserveTime?.substring(0, 5); // "10:00:00" → "10:00"
+        if (key) countsMap[key] = item.reserveCount;
+      });
+      setReservationCounts(countsMap);
+    }
+  };
+
+
   const generateTimeSlots = (start, end) => {
     const slots = [];
     let current = dayjs(`2020-01-01T${start}`);
     const endTime = dayjs(`2020-01-01T${end}`);
-    while (current.add(50, "minute").isSameOrBefore(endTime)) {
+    while (current.add(60, "minute").isSameOrBefore(endTime)) {
       slots.push({
         start: current.format("HH:mm"),
         end: current.add(50, "minute").format("HH:mm"),
       });
-      current = current.add(50, "minute");
+      current = current.add(60, "minute");
     }
     return slots;
   };
@@ -84,6 +102,12 @@ export default function SleepReserve() {
       setTimeSlots(slots);
     }
   }, [meetingOptions, selectedDate]);
+
+  useEffect(() => {
+    if (selectedRoom && selectedDate && meetingOptions.startTime) {
+      fetchReservationCounts(selectedRoom);
+    }
+  }, [selectedRoom, selectedDate, meetingOptions.startTime]);
 
   const handleSlotToggle = (time) => {
     if (expandedSlot === time) {
@@ -137,6 +161,7 @@ export default function SleepReserve() {
                   closeModal={closeModal}
                   onSubmit={() => {
                     fetchRoomDetail(selectedRoom);
+                    fetchReservationCounts(selectedRoom);
                     closeModal();
                   }}
                 />
@@ -148,19 +173,17 @@ export default function SleepReserve() {
         </Button>
       </div>
 
-      {/* 수동 날짜 이동 */}
       <div className="mb-4 flex justify-center gap-4 items-center text-sm">
-        <Button size="sm" variant="ghost" onClick={() => handleDateChange("prev")}>&lt;</Button>
+        <Button size="sm" variant="ghost" onClick={() => handleDateChange("prev")}>←</Button>
         <div className="text-[20px] font-bold">{selectedDate}</div>
-        <Button size="sm" variant="ghost" onClick={() => handleDateChange("next")}>&gt;</Button>
+        <Button size="sm" variant="ghost" onClick={() => handleDateChange("next")}>→</Button>
       </div>
 
-      {/* 타임 슬롯 */}
       <div className="mt-6 space-y-3 mx-auto w-[50%]">
         {timeSlots.map((slot) => {
           const time = slot.start;
           const reserveList = reservationDetails[time] || [];
-          const reserveCount = reserveList.length;
+          const reserveCount = reservationCounts[time] || 0;
           const totalCount = (meetingOptions.infoList || []).filter(info => info.useYn === "Y").length;
 
           return (
@@ -176,7 +199,7 @@ export default function SleepReserve() {
               </button>
 
               {expandedSlot === time && (
-                <div className="p-3 space-y-2 bg-gray-200">
+                <div className="p-3 space-y-2 bg-gray-100">
                   {(meetingOptions.infoList || [])
                     .filter((info) => info.useYn === "Y")
                     .map((info) => {
