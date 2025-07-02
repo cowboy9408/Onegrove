@@ -327,7 +327,7 @@ export default function AffairDetailPage() {
         </div>
         <div>
           <p className="mb-2 text-sm font-medium text-gray-800">
-            회의실 예약 기능
+            어메니티 예약 기능
           </p>
           <div className="flex gap-4">
             <Radio

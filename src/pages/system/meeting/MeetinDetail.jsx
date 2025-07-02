@@ -216,7 +216,7 @@ export default function MeetingDetail() {
   return (
     <FormProvider {...methods}>
       <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
-        회의실 설정 상세
+        Meeting Room 설정 상세
       </div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="max-w mx-auto space-y-6 rounded-lg bg-white p-6 shadow-md">
