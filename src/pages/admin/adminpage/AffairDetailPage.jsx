@@ -22,7 +22,7 @@ export default function AffairDetailPage() {
     username: "",
     phone: "",
     email: "",
-    isContact: "",
+    isManager: "",
     isReservation: "",
   });
 
@@ -30,7 +30,7 @@ export default function AffairDetailPage() {
     const fetchData = async () => {
       try {
         const res = await api.get(`/api/v1/user/admin/${id}`);
-        console.log("조회 응답:", res.data);
+
         if (res.data.success && res.data.data) {
           const data = res.data.data;
           setForm({
@@ -44,7 +44,8 @@ export default function AffairDetailPage() {
               ? data.phoneNumber.split("-").slice(1).join("-")
               : data.phoneNumber || "",
             email: data.email || "",
-            isContact: data.isContact ?? "",
+            isManager: data.isManager === "Y" ? "Y" : "N", // 무조건 Y/N으로 변환
+
             isReservation: data.isReservation === "Y" ? "Y" : "N",
           });
           setIsLocked(data.isLock === "Y");
@@ -129,7 +130,7 @@ export default function AffairDetailPage() {
   const handleUpdate = async () => {
     if (!form.name || !form.username || !form.phone || !form.email) {
       showModal({
-        title: "필수 항목 누락",
+        title: "필수 항목 확인",
         message: "모든 필수 항목을 입력해주세요.",
         showCancel: false,
       });
@@ -147,8 +148,7 @@ export default function AffairDetailPage() {
         gender:
           form.gender === "male" ? "M" : form.gender === "female" ? "W" : "",
         isUse: form.status === "active" ? "Y" : "N",
-        isManager: "N",
-        isContact: form.isContact,
+        isManager: form.isManager,
         isReservation: form.isReservation,
       };
 
@@ -164,7 +164,7 @@ export default function AffairDetailPage() {
                 title: "수정 완료",
                 message: "수정이 완료되었습니다.",
                 showCancel: false,
-                onConfirm: () => navigate("/admin/list"),
+                onConfirm: () => navigate("/admin/affair"),
               });
             } else {
               showModal({
@@ -310,18 +310,18 @@ export default function AffairDetailPage() {
           <p className="mb-2 text-sm font-medium text-gray-800">담당자 여부</p>
           <div className="flex gap-4">
             <Radio
-              name="isContact"
+              name="isManager"
               label="등록"
               value="Y"
-              checked={form.isContact === "Y"}
-              onChange={() => handleChange("isContact", "Y")}
+              checked={form.isManager === "Y"}
+              onChange={() => handleChange("isManager", "Y")}
             />
             <Radio
-              name="isContact"
+              name="isManager"
               label="미등록"
               value="N"
-              checked={form.isContact === "N"}
-              onChange={() => handleChange("isContact", "N")}
+              checked={form.isManager === "N"}
+              onChange={() => handleChange("isManager", "N")}
             />
           </div>
         </div>

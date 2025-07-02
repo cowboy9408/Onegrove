@@ -32,86 +32,94 @@ export default function BrandRegist() {
 
   const handleSave = async () => {
     if (isSaving) return;
-    setIsSaving(true);
-    try {
-      const ref = currentLang === 0 ? koFormRef : enFormRef;
-      const form = await ref.current?.submit?.((message) => {
-        showModal({
-          title: "필수 항목을 입력해 주세요.",
-          message,
-          showCancel: false,
-        });
+
+    const ref = currentLang === 0 ? koFormRef : enFormRef;
+
+    // 유효성 검사 수행
+    const form = await ref.current?.submit?.((message) => {
+      showModal({
+        title: "필수 항목을 입력해 주세요.",
+        message,
+        showCancel: false,
       });
-      if (!form) return;
+    });
 
-      const payload = {
-        lang: currentLang === 0 ? "KO" : "EN",
-        name: form.brandName,
-        // title: form.title,
-        // subTitle: form.subTitle,
-        thumbText: form.thumbText,
-        content: form.description,
+    if (!form) return; // 유효성 실패 시 중단
 
-        category: form.office,
-        thumbImg: form.mainImage,
-        mainPcImg: form.pcImage,
-        mainMoImg: form.moImage,
-        contentImg1: form.contentImage1,
-        contentImg2: form.contentImage2,
-        contentImg3: form.contentImage3,
-        contentImg4: form.contentImage4,
-        contentImg5: form.contentImage5,
-        pcBodyImage: form.pcBodyImage,
-        moBodyImage: form.moBodyImage,
+    // 유효성 통과 후 저장 확인 모달 표시
+    showModal({
+      title: "저장 확인",
+      message: "저장하시겠습니까?",
+      showCancel: true,
+      onConfirm: async () => {
+        setIsSaving(true);
+        try {
+          const payload = {
+            lang: currentLang === 0 ? "KO" : "EN",
+            name: form.brandName,
+            thumbText: form.thumbText,
+            content: form.description,
 
-        brandTel: form.storePhone,
-        brandLocation: form.storeLocation,
+            category: form.office,
+            thumbImg: form.mainImage,
+            mainPcImg: form.pcImage,
+            mainMoImg: form.moImage,
+            contentImg1: form.contentImage1,
+            contentImg2: form.contentImage2,
+            contentImg3: form.contentImage3,
+            contentImg4: form.contentImage4,
+            contentImg5: form.contentImage5,
+            pcBodyImage: form.pcBodyImage,
+            moBodyImage: form.moBodyImage,
 
-        homeUrl: form.homepageUrl || "",
-        homeUrlNew: form.homepageNewTab ? "Y" : "N",
+            brandTel: form.storePhone,
+            brandLocation: form.storeLocation,
 
-        instagram: form.sns?.instagram?.url || "",
-        facebook: form.sns?.facebook?.url || "",
-        youtube: form.sns?.youtube?.url || "",
-        twitter: form.sns?.twitter?.url || "",
-        blog: form.sns?.blog?.url || "",
+            homeUrl: form.homepageUrl || "",
+            homeUrlNew: form.homepageNewTab ? "Y" : "N",
 
-        mon: form.openingHours?.월?.time || "",
-        tue: form.openingHours?.화?.time || "",
-        wed: form.openingHours?.수?.time || "",
-        thu: form.openingHours?.목?.time || "",
-        fri: form.openingHours?.금?.time || "",
-        sat: form.openingHours?.토?.time || "",
-        sun: form.openingHours?.일?.time || "",
+            instagram: form.sns?.instagram?.url || "",
+            facebook: form.sns?.facebook?.url || "",
+            youtube: form.sns?.youtube?.url || "",
+            twitter: form.sns?.twitter?.url || "",
+            blog: form.sns?.blog?.url || "",
 
-        monHoliday: form.openingHours?.월?.holiday ? "Y" : "",
-        tueHoliday: form.openingHours?.화?.holiday ? "Y" : "",
-        wedHoliday: form.openingHours?.수?.holiday ? "Y" : "",
-        thuHoliday: form.openingHours?.목?.holiday ? "Y" : "",
-        friHoliday: form.openingHours?.금?.holiday ? "Y" : "",
-        satHoliday: form.openingHours?.토?.holiday ? "Y" : "",
-        sunHoliday: form.openingHours?.일?.holiday ? "Y" : "",
+            mon: form.openingHours?.월?.time || "",
+            tue: form.openingHours?.화?.time || "",
+            wed: form.openingHours?.수?.time || "",
+            thu: form.openingHours?.목?.time || "",
+            fri: form.openingHours?.금?.time || "",
+            sat: form.openingHours?.토?.time || "",
+            sun: form.openingHours?.일?.time || "",
 
-        breakTime: form.openingHours?.breakTime?.time || "",
-        breakYn: form.openingHours?.breakTime?.none ? "Y" : "N",
+            monHoliday: form.openingHours?.월?.holiday ? "Y" : "",
+            tueHoliday: form.openingHours?.화?.holiday ? "Y" : "",
+            wedHoliday: form.openingHours?.수?.holiday ? "Y" : "",
+            thuHoliday: form.openingHours?.목?.holiday ? "Y" : "",
+            friHoliday: form.openingHours?.금?.holiday ? "Y" : "",
+            satHoliday: form.openingHours?.토?.holiday ? "Y" : "",
+            sunHoliday: form.openingHours?.일?.holiday ? "Y" : "",
 
-        useYn: form.useStatus === "active" ? "Y" : "N",
-        keywordList: form.keywordList ? form.keywordList : [],
-      };
+            breakTime: form.openingHours?.breakTime?.time || "",
+            breakYn: form.openingHours?.breakTime?.none ? "Y" : "N",
 
-      console.log("저장할 키워드 정보:", payload?.keywordList);
+            useYn: form.useStatus === "active" ? "Y" : "N",
+            keywordList: form.keywordList ? form.keywordList : [],
+          };
 
-      await api.post("/api/v1/brand/insert", payload);
-      alert("브랜드 정보가 저장되었습니다.");
-      navigate("/retail/brand");
-    } catch (err) {
-      console.error("저장 실패:", err);
-      alert(
-        "브랜드 등록 실패: " + (err.response?.data?.message || err.message)
-      );
-    } finally {
-      setIsSaving(false);
-    }
+          await api.post("/api/v1/brand/insert", payload);
+          alert("브랜드 정보가 저장되었습니다.");
+          navigate("/retail/brand");
+        } catch (err) {
+          console.error("저장 실패:", err);
+          alert(
+            "브랜드 등록 실패: " + (err.response?.data?.message || err.message)
+          );
+        } finally {
+          setIsSaving(false);
+        }
+      },
+    });
   };
 
   return (
@@ -133,17 +141,7 @@ export default function BrandRegist() {
       </Tabs>
 
       <div className="flex justify-end gap-4 px-6 pb-6">
-        <Button
-          disabled={isSaving}
-          onClick={() =>
-            showModal({
-              title: "저장 확인",
-              message: "저장하시겠습니까?",
-              showCancel: true,
-              onConfirm: handleSave,
-            })
-          }
-        >
+        <Button disabled={isSaving} onClick={handleSave}>
           {isSaving ? "저장 중..." : "저장"}
         </Button>
         <Button

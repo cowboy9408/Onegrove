@@ -8,11 +8,48 @@ import api from "@/lib/apiClient";
 import { ArrowDownIcon } from "@/components/ui/arrow-down";
 
 export default function SleepReserve() {
-  const [selectedRoom, setSelectedRoom] = useState(1);
+  const [selectedRoom, setSelectedRoom] = useState(null); // ✅ 초기값 null
   const { showModal } = useContext(ModalContext);
   const [meetingOptions, setMeetingOptions] = useState({});
   const [officeOptions, setOfficeOptions] = useState([]);
   const [scheduleList, setScheduleList] = useState([]);
+
+  const fetchSchedules = async () => {
+    try {
+      const res = await api.get(`/api/v1/sleep/room/detail/${selectedRoom}`);
+      if (res.data?.success) {
+        setMeetingOptions(res.data.data);
+      }
+    } catch (err) {
+      console.error("수면실 roomlist 예약 조회 실패:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedRoom !== null) {
+      fetchSchedules();
+    }
+  }, [selectedRoom]);
+
+  useEffect(() => {
+    const fetchMeta = async () => {
+      try {
+        const settingRes = await api.get(`/api/v1/sleep/room`);
+        if (settingRes.data.success) {
+          setOfficeOptions(settingRes.data.data);
+        }
+      } catch (err) {
+        console.error("수면실 roomlist 예약 조회 실패:", err);
+      }
+    };
+    fetchMeta();
+  }, []);
+
+  useEffect(() => {
+    if (officeOptions.length > 0 && selectedRoom === null) {
+      setSelectedRoom(officeOptions[0].id);
+    }
+  }, [officeOptions, selectedRoom]);
 
   const add50Min = (timeStr) => {
     const [hour, minute] = timeStr.split(":").map(Number);
@@ -21,49 +58,6 @@ export default function SleepReserve() {
     const newMinute = date.getMinutes().toString().padStart(2, "0");
     return `${newHour}:${newMinute}`;
   };
-
-  const fetchSchedules = async () => {
-    try {
-      const res = await api.get(
-        `/api/v1/meeting?roomId=${selectedRoom}&isVip=N&lang=ko`
-      );
-      if (res.data?.success && Array.isArray(res.data.data)) {
-        const mapped = res.data.data.map((item) => ({
-          id: item.id,
-          title: `${item.paymentType}예약 ${item.resveStartTime} ~ ${item.resveEndTime} ${item.reserver} (${item.companyName})`,
-          start: new Date(`${item.resveDate}T${item.resveStartTime}`),
-          end: new Date(`${item.resveDate}T${item.resveEndTime}`),
-          resource: item,
-        }));
-        setScheduleList(mapped);
-      }
-    } catch (err) {
-      console.error("회의실 예약 조회 실패:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchSchedules();
-  }, [selectedRoom]);
-
-  useEffect(() => {
-    const fetchMeta = async () => {
-      try {
-        const settingRes = await api.get(`/api/v1/sleep/room`);
-        if (settingRes.data.success) setOfficeOptions(settingRes.data.data);
-
-        if(settingRes.data.data?.id) {
-          const categoryRes = await api.get(`/api/v1/sleep/room/detail/${settingRes.data.data?.id}`);
-          if (categoryRes.data.success) setMeetingOptions(categoryRes.data.data);
-        }
-
-        
-      } catch (err) {
-        console.error("메타 정보 조회 실패:", err);
-      }
-    };
-    fetchMeta();
-  }, []);
 
   const handleEventClick = async (event) => {
     try {
@@ -223,7 +217,7 @@ export default function SleepReserve() {
       <div className="mb-4 flex items-center justify-between">
         <Select
           label="수면실 선택"
-          value={selectedRoom}
+          value={selectedRoom ?? ""} // ✅ null이면 ""으로 처리
           className="w-sm"
           onChange={(e) => setSelectedRoom(Number(e.target.value))}
         >
@@ -279,11 +273,11 @@ export default function SleepReserve() {
                   </p>
                   <div className="flex items-center gap-2">
                     <label className="text-sm font-medium whitespace-nowrap">
-                      잔여 Relax Room 수 : "-"
+                      잔여 Relax Room 수 : 
                     </label>
                     <div className="relative inline-block">
                       <select
-                        value=""
+                        value="-"
                         onChange={() => {}}
                         className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
                       >
@@ -306,11 +300,11 @@ export default function SleepReserve() {
                   </p>
                   <div className="flex items-center gap-2">
                     <label className="text-sm font-medium whitespace-nowrap">
-                      잔여 Relax Room 수 : "-"
+                      잔여 Relax Room 수 :
                     </label>
                     <div className="relative inline-block">
                       <select
-                        value=""
+                        value="-"
                         onChange={() => {}}
                         className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
                       >

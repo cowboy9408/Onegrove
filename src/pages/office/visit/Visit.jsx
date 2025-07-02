@@ -37,7 +37,7 @@ export default function Visit() {
       try {
         const res = await api.get("/api/v1/visit");
         if (res.data?.success && Array.isArray(res.data.data)) {
-          console.log(res.data.data);
+          // console.log(res.data.data);
           setVisitList(res.data.data);
         }
       } catch (err) {
@@ -98,7 +98,7 @@ export default function Visit() {
 
   return (
     <div>
-      <SearchSection>
+      {/* <SearchSection>
         <Box>
           <Row>
             <Col>
@@ -116,17 +116,17 @@ export default function Visit() {
               </Select>
             </Col>
             <Col>
-        <DateRangePicker
-          startDate={startDate}
-          endDate={endDate}
-          onChange={({ startDate, endDate }) => {
-            setStartDate(startDate);
-            setEndDate(endDate);
-          }}
-        />
-      </Col>
-      <Row>
-        <Col>
+              <DateRangePicker
+                startDate={startDate}
+                endDate={endDate}
+                onChange={({ startDate, endDate }) => {
+                  setStartDate(startDate);
+                  setEndDate(endDate);
+                }}
+              />
+            </Col>
+            <Row>
+              <Col>
               <Input
                 id={nameId}
                 label={"방문객"}
@@ -150,27 +150,27 @@ export default function Visit() {
             </Col>
           </Row>
         </Box>
-      </SearchSection>
-<div className="flex items-center justify-between mb-4">
-  <ResultSummary total={total} />
+      </SearchSection> */}
+      <div className="flex items-center justify-between mb-4">
+        <ResultSummary total={total} />
 
-  <div className="flex gap-2">
-    <Button
-      className="bg-black text-white hover:bg-gray-800"
-      onClick={() => {
-        // 등록 버튼 클릭 시 로직
-      }}
-    >
-      방문객 추가
-    </Button>
-    
-  </div>
-</div>
+        {/* <div className="flex gap-2">
+          <Button
+            className="bg-black text-white hover:bg-gray-800"
+            onClick={() => {
+              // 등록 버튼 클릭 시 로직
+            }}
+          >
+            방문객 추가
+          </Button>
+          
+        </div> */}
+      </div>
       <ResultSection>
         
         <DataTable
           columns={[
-            { key: "no", label: "번호" },
+            { key: "rownum", label: "번호" },
             { key: "companyName", label: "입주사" },
             { key: "name", label: "방문객" },
             { key: "visitPurpose", label: "방문 목적" },
@@ -178,12 +178,13 @@ export default function Visit() {
             { key: "visitTime", label: "방문 시간" },
             { key: "visitNumber", label: "방문 인원" },
             { key: "visitBuilding", label: "방문동" },
-            { key: "", label: "카드번호" },
+            // { key: "", label: "카드번호" },
             { key: "createDatetime", label: "등록일시" },
             { key: "status", label: "상태" },
           ]}
           data={visitList}
           link={{ base: "/admin", path: "no" }}
+          checkable={true}
         />
         <Pagination
           current={page}
