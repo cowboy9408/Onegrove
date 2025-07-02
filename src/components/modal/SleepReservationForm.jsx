@@ -137,7 +137,7 @@ export default function SleepReservationForm({
           Relax Room 호실 선택 <span className="text-red-500">*</span>
         </label>
         <select
-          value={roomId}
+          value={roomDetailId}
           onChange={(e) => setRoomDetailId(e.target.value)}
           className="w-full rounded border px-2 py-1"
         >
@@ -150,7 +150,6 @@ export default function SleepReservationForm({
                 </option>
               )}
             </>
-            
           ))}
         </select>
       </div>

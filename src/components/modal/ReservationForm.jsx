@@ -72,7 +72,8 @@ export default function ReservationForm({
       } else alert("처리 실패");
     } catch (err) {
       console.error("예약 처리 실패:", err);
-      alert("필수 입력 내용을 확인해 주세요.");
+      alert(err?.respopnse?.data?.message);
+      // alert("필수 입력 내용을 확인해 주세요.");
     }
   };
 
