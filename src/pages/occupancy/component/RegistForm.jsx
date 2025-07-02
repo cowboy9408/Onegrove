@@ -356,7 +356,7 @@ const RegistForm = forwardRef(
             )}
 
             <Input
-              label="회의실 무료 예약시간"
+              label="어메니티 무료 예약시간"
               type="text"
               required
               inputMode="numeric"

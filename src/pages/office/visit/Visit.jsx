@@ -1,3 +1,7 @@
+
+import { useEffect, useId, useState, useContext } from "react";
+import { useSearchParams } from "react-router-dom";
+
 import Button from "@/components/common/Button";
 import DataTable from "@/components/common/DataTable";
 import Input from "@/components/common/Input";
@@ -9,15 +13,23 @@ import Col from "@/components/layout/Col";
 import ResultSection from "@/components/layout/ResultSection";
 import Row from "@/components/layout/Row";
 import SearchSection from "@/components/layout/SearchSection";
+
+import { ModalContext } from "@/context/ModalContext";
 import { faker } from "@faker-js/faker";
-import { useEffect, useId, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+
 import DateRangePicker from "@/components/common/Datepicker";
+
+
+import VisitForm from "@/components/modal/VisitForm";
 import api from "@/lib/apiClient";
 
-export default function Visit() {
+export default function Visit({
+  selected = [],
+}) {
+  const { showModal } = useContext(ModalContext);
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const [checked, setChecked] = useState(selected.map(String)); // 체크된 ID (문자열로 변환)
   const [name, setName] = useState(searchParams.get("name") || "");
   const [email, setEmail] = useState(searchParams.get("email") || "");
   const [page, setPage] = useState(searchParams.get("page") || 1);
@@ -32,8 +44,7 @@ export default function Visit() {
 
   const size = 10;
 
-  useEffect(() => {
-    const fetchList = async () => {
+  const fetchList = async () => {
       try {
         const res = await api.get("/api/v1/visit");
         if (res.data?.success && Array.isArray(res.data.data)) {
@@ -43,58 +54,145 @@ export default function Visit() {
       } catch (err) {
         console.error("목록 불러오기 실패:", err);
       }
-    };
+  };
 
+
+  useEffect(() => {
     fetchList();
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      // TODO: faker 삭제
-      const generateFakePagedUsers = ({ page = 1, size = 10 }) => {
-        const totalElements = 23;
-        const totalPages = Math.ceil(totalElements / size);
-        const start = (page - 1) * size;
 
-        const data = Array.from({ length: size }, (_, i) => {
-          const index = start + i + 1;
-          return {
-            no: index,
-            type: faker.helpers.arrayElement(["관리자", "일반", "외부"]),
-            occupancy: faker.company.name(),
-            name: faker.person.lastName() + faker.person.firstName(),
-            username: faker.internet.userName(),
-            email: faker.internet.email(),
-            status: faker.helpers.arrayElement(["활성", "비활성"]),
-            created_user: faker.person.fullName(),
-            created_at: faker.date
-              .recent({ days: 30 })
-              .toISOString()
-              .split("T")[0],
-          };
-        });
+  const handleEventClick = async (event) => {
+    try {
+      const res = await api.get(`/api/v1/visit/detail/${event}`);
+      if (!res.data.success) return;
+      const detail = res.data.data;
+      console.log(detail);
 
-        return {
-          pageable: {
-            totalPages,
-            totalElements,
-            currentPage: page,
-            pageSize: size,
-          },
-          data: data.slice(0, totalElements - start), // 마지막 페이지 size 조정
-        };
-      };
-      // END TODO faker 삭제
+      showModal({
+        title: "방문 예약 상세",
+        size: "2xl",
+        customButton: true,
+        showCancel: true,
+        children: ({ closeModal }) => (
+          <div className="space-y-5 text-sm text-gray-700">
+            <table className="w-full border text-left">
+              <tbody>
+                <tr>
+                  <th className="p-2 border">예약일시</th><td className="p-2 border">{detail.reservationDatetime}</td>
+                  <th className="p-2 border">예약 상태</th><td className={`p-2 border ${detail.status === '예약 확정' ? 'text-[#00AAFF]' : 'text-[#4CAF50]'} font-bold`}>{detail.status}</td>
+                </tr>
+                <tr>
+                  <th className="p-2 border">방문 날짜</th><td className="p-2 border">{detail.visitDate}</td>
+                  <th className="p-2 border">방문 시간</th><td className="p-2 border">{detail.visitTime}</td>
+                </tr>
+                <tr>
+                  <th className="p-2 border">방문 입주사</th><td className="p-2 border">{detail.companyName}</td>
+                  <th className="p-2 border">방문 동</th><td className="p-2 border">{detail.visitBuilding}</td>
+                </tr>
+                <tr>
+                  <th className="p-2 border">방문 목적</th>
+                  <td className="p-2 border h-[80px]" colSpan={3}>{detail.visitPurpose}</td>
+                </tr>
+                <tr>
+                  <th className="p-2 border">방문자명</th><td className="p-2 border">{detail.name}</td>
+                  <th className="p-2 border">방문 인원</th><td className="p-2 border">{detail.visitNumber}</td>
+                </tr>
+                <tr>
+                  <th className="p-2 border">방문자 이메일</th><td className="p-2 border">{detail.email}</td>
+                  <th className="p-2 border">방문자 연락처</th><td className="p-2 border">{detail.tel}</td>
+                </tr>
+                <tr>
+                  <th className="p-2 border">예약자</th><td className="p-2 border">{detail.name}</td>
+                  <th className="p-2 border">전화번호</th><td className="p-2 border">{detail.tel}</td>
+                </tr>
+                <tr>
+                  <th className="p-2 border">출입카드 번호</th><td className="p-2 border">-</td>
+                  <th className="p-2 border"></th><td className="p-2 border"></td>
+                </tr>
+              </tbody>
+            </table>
 
-      // TODO: FETCH DATA
-      const res = generateFakePagedUsers(page);
+            <div className="flex justify-between gap-3">
+              <div className="flex gap-3">
+                {detail.status === '가예약' && (
+                  <Button
+                    theme="danger"
+                    onClick={async () => {
+                      if (confirm("예약을 확정하겠습니까?")) {
+                        try {
+                          const res = await api.post("/api/v1/visit/confirm", { checkArr : [detail.id]});
+                          if (res.data?.success) {
+                            alert("예약 확정 완료");
+                            fetchList();
+                            closeModal();
+                          } else alert("예약 확정 실패");
+                        } catch (err) {
+                          console.error("예약 확정 오류:", err);
+                        }
+                      }
+                    }}
+                  >예약 확정</Button>
+                )}
+                
+                <Button
+                  theme="danger"
+                  onClick={async () => {
+                    if (confirm("예약을 취소하겠습니까?")) {
+                      try {
+                        const res = await api.post("/api/v1/visit/cancel", {
+                          id: detail.id,
+                          companyId: detail.companyId,
+                          tel: detail.tel,
+                        });
+                        if (res.data?.success) {
+                          alert("취소 완료");
+                          fetchList();
+                          closeModal();
+                        } else alert("취소 실패");
+                      } catch (err) {
+                        console.error("취소 오류:", err);
+                      }
+                    }
+                  }}
+                >예약 취소</Button>
+              </div>
+              <div>
+                <Button
+                  onClick={() => {
+                    closeModal();
+                    showModify(detail);
+                  }}
+                >수정</Button>
+              </div>
+            </div>
+          </div>
+        ),
+      });
+    } catch (err) {
+      console.error("상세 조회 실패:", err);
+    }
+  };
 
-      setData(res.data);
-      setTotal(res.pageable.totalElements);
-    };
-
-    fetchData();
-  }, [page]);
+  const showModify = (detail) => {
+    showModal({
+      title: "방문 예약 수정",
+      size: "2xl",
+      customButton: true,
+      showCancel: true,
+      children: ({ closeModal }) => (
+        <VisitForm
+          isEdit
+          initialData={detail}
+          closeModal={closeModal}
+          onSubmit={() => {
+            fetchList();
+            closeModal();
+          }}
+        />
+      ),
+    });
+  };
 
   return (
     <div>
@@ -154,7 +252,7 @@ export default function Visit() {
       <div className="flex items-center justify-between mb-4">
         <ResultSummary total={total} />
 
-        {/* <div className="flex gap-2">
+        <div className="flex gap-2">
           <Button
             className="bg-black text-white hover:bg-gray-800"
             onClick={() => {
@@ -163,17 +261,33 @@ export default function Visit() {
           >
             방문객 추가
           </Button>
-          
-        </div> */}
+        </div>
       </div>
+
       <ResultSection>
-        
         <DataTable
           columns={[
-            { key: "rownum", label: "번호" },
+            { key: "id", label: "번호" },
             { key: "companyName", label: "입주사" },
             { key: "name", label: "방문객" },
-            { key: "visitPurpose", label: "방문 목적" },
+            {
+              key: "visitPurpose",
+              label: "방문 목적",
+              render: (row) => (
+                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                  <button
+                    className={`text-black-600 truncate p-2 text-left cursor-pointer ${row.visitPurpose && "underline"}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      console.log(row.id);
+                      handleEventClick(row.id);
+                    }}
+                  >
+                    {row.visitPurpose}
+                  </button>
+                </div>
+              ),
+            },
             { key: "visitDate", label: "방문 신청일" },
             { key: "visitTime", label: "방문 시간" },
             { key: "visitNumber", label: "방문 인원" },
@@ -183,14 +297,14 @@ export default function Visit() {
             { key: "status", label: "상태" },
           ]}
           data={visitList}
-          link={{ base: "/admin", path: "no" }}
+          rowKey="id"
           checkable={true}
         />
-        <Pagination
+        {/* <Pagination
           current={page}
           totalPages={Math.ceil(total / size)}
           onChange={(page) => setPage(page)}
-        />
+        /> */}
       </ResultSection>
     </div>
   );
