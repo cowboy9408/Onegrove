@@ -139,6 +139,17 @@ export default function UserDetailPage() {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(form.email)) {
+      showModal({
+        title: "이메일 오류",
+        message: "올바른 이메일 형식이 아닙니다.",
+        showCancel: false,
+      });
+      return;
+    }
+
     console.log("폼 데이터:", form);
 
     const payload = {

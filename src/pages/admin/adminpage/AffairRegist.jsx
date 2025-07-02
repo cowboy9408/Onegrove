@@ -102,7 +102,7 @@ export default function AffairRegist() {
     if (!form.username) {
       showModal({
         title: "필수 입력",
-        message: "아이디를 입력해주세요.",
+        message: "모든 필수 항목을 입력해주세요.",
         showCancel: false,
       });
       return;
@@ -121,7 +121,7 @@ export default function AffairRegist() {
     if (!form.email) {
       showModal({
         title: "필수 입력",
-        message: "이메일을 입력해주세요.",
+        message: "모든 필수 항목을 입력해주세요.",
         showCancel: false,
       });
       return;
