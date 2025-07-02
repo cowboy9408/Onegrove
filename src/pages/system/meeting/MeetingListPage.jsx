@@ -38,7 +38,7 @@ export default function MeetingListPage() {
             username: item.location,
             capacity: item.capacity,
             isVip: item.isVip,
-            createdDt: "-", // createdDt 없음 → 대체 문자
+            createdDt: item.createDatetime || "-", // createdDt 없음 → 대체 문자
             useYn: item.useYn,
             id: item.id,
           }));

@@ -215,7 +215,7 @@ export default function Viproom() {
       <div className="relative overflow-hidden bg-white p-4 rounded-xl shadow-md space-y-4">
         <div className="absolute top-6 right-6">
           <ul className="flex gap-2">
-            <li className="flex items-center gap-1"><span className="inline-block w-4 h-4 rounded-2xl bg-[#4CAF50]"></span> 가계약</li>
+            <li className="flex items-center gap-1"><span className="inline-block w-4 h-4 rounded-2xl bg-[#4CAF50]"></span> 가예약</li>
             <li className="flex items-center gap-1"><span className="inline-block w-4 h-4 rounded-2xl bg-[#00AAFF]"></span> 예약 확정</li>
           </ul>
         </div>

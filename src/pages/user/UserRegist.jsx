@@ -11,7 +11,7 @@ export default function AdminRegist() {
   const [form, setForm] = useState({
     status: "active",
     name: "",
-    gender: "",
+    gender: "male",
     username: "",
     password: "",
     confirmPassword: "",

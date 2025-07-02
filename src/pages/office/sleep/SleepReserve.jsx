@@ -58,22 +58,24 @@ export default function SleepReserve() {
     if (res.data.success) {
       const countsMap = {};
       res.data.data.forEach((item) => {
-        countsMap[item.reserveTime.substring(0, 5)] = item.reserveCount;
+        const key = item.reserveTime?.substring(0, 5); // "10:00:00" → "10:00"
+        if (key) countsMap[key] = item.reserveCount;
       });
       setReservationCounts(countsMap);
     }
   };
 
+
   const generateTimeSlots = (start, end) => {
     const slots = [];
     let current = dayjs(`2020-01-01T${start}`);
     const endTime = dayjs(`2020-01-01T${end}`);
-    while (current.add(50, "minute").isSameOrBefore(endTime)) {
+    while (current.add(60, "minute").isSameOrBefore(endTime)) {
       slots.push({
         start: current.format("HH:mm"),
         end: current.add(50, "minute").format("HH:mm"),
       });
-      current = current.add(50, "minute");
+      current = current.add(60, "minute");
     }
     return slots;
   };
@@ -102,10 +104,10 @@ export default function SleepReserve() {
   }, [meetingOptions, selectedDate]);
 
   useEffect(() => {
-    if (selectedRoom && selectedDate) {
+    if (selectedRoom && selectedDate && meetingOptions.startTime) {
       fetchReservationCounts(selectedRoom);
     }
-  }, [selectedRoom, selectedDate]);
+  }, [selectedRoom, selectedDate, meetingOptions.startTime]);
 
   const handleSlotToggle = (time) => {
     if (expandedSlot === time) {

@@ -67,6 +67,7 @@ import SleepSetting from "@/pages/system/sleep/SleepSetting";
 import SleepDetail from "@/pages/system/sleep/SleepDetail";
 import MeetingSetting from "@/pages/system/meeting/MeetingSetting";
 import MeetingDetail from "@/pages/system/meeting/MeetinDetail";
+import VisitDetail from "@/pages/office/visit/VisitDetail";
 
 export const routeMeta = [
   {
@@ -577,10 +578,24 @@ export const routeMeta = [
             ],
           },
           {
+            uuid: "2222fe3c-a0d6-4526-86ab-6b9cd9a68700",
+            path: "/office/visit/detail/:id",
+            element: <VisitDetail />,
+            title: "방문 예약 상세",
+            hidden: true,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "OFFICE_ADMIN",
+              "OFFICE_SECRETARY_ADMIN",
+            ],
+          },
+
+          {
             uuid: "95b2aae3-4ce2-4782-95ca-62c4111dcc17",
             path: "/office/sleep",
             element: <SleepReserve />,
-            title: "수면실 예약",
+            title: "Relax Room 예약",
             hidden: false,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
@@ -608,7 +623,7 @@ export const routeMeta = [
             uuid: "e59c7075-0b1c-4607-b548-c38fa7566532",
             path: "/system/meeting",
             element: <MeetingListPage />,
-            title: "회의실 설정",
+            title: "어메니티 예약 설정",
             hidden: false,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
           },
@@ -616,7 +631,7 @@ export const routeMeta = [
             uuid: "f6d4536d-e76b-4621-9873-bf5b6465e50e",
             path: "/system/meeting/regist",
             element: <MeetingSetting />,
-            title: "회의실 추가",
+            title: "Meeting Room 추가",
             hidden: true,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
           },
@@ -624,7 +639,7 @@ export const routeMeta = [
             uuid: "c4b5101a-61b4-44e7-8efe-4ab822624927",
             path: "/system/meeting/detail/:id",
             element: <MeetingDetail />,
-            title: "회의실 상세",
+            title: "Meeting Room 상세",
             hidden: true,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
           },
@@ -633,7 +648,7 @@ export const routeMeta = [
             uuid: "4bd3ba77-798a-4466-bc3e-48fec787592a",
             path: "/system/sleep",
             element: <SleepListPage />,
-            title: "수면실 설정",
+            title: "Relax Room 설정",
             hidden: false,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
           },
@@ -641,7 +656,7 @@ export const routeMeta = [
             uuid: "cfd0a71c-188d-4cbc-bcc8-aa196bbdce2b",
             path: "/system/sleep/regist",
             element: <SleepSetting />,
-            title: "수면실 추가",
+            title: "Relax Room 추가",
             hidden: true,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
           },

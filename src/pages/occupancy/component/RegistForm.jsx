@@ -81,7 +81,7 @@ const RegistForm = forwardRef(
     };
 
     useEffect(() => {
-      if (data) {
+      if (data && Object.keys(data).length > 0) {
         setValue("companyName", data.name || "");
         setValue("ceoName", data.mainName || "");
         setValue("phone", data.tel || "");
@@ -356,7 +356,7 @@ const RegistForm = forwardRef(
             )}
 
             <Input
-              label="회의실 무료 예약시간"
+              label="어메니티 무료 예약시간"
               type="text"
               required
               inputMode="numeric"

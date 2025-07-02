@@ -173,13 +173,12 @@ const StoriesRegistForm = forwardRef(
         }
 
         const toImageMeta = (file, originalFile = null) => {
-          if (!file || !file.name) return null;
+          if (!file || !(file.name || file.originalName)) return null;
 
+          const fileName = file.originalName || file.name;
           const matchedSiFileId =
-            file.siFileId || originalFile?.siFileId || originalFile?.id || null;
-
+            file.siFileId || originalFile?.siFileId || file.id || null;
           const matchedSiId = file.siId || originalFile?.siId || null;
-
           const isNew = !originalFile || !matchedSiFileId;
 
           return {
@@ -187,20 +186,19 @@ const StoriesRegistForm = forwardRef(
             siId: matchedSiId,
             siFileId: matchedSiFileId,
             originalName: file.originalName || file.name,
-            name: file.name,
-            size: file.size,
-            extension: "." + (file.originalName || file.name).split(".").pop(),
+            name: file.name || file.originalName,
+            size: file.size ?? 0,
+            extension: "." + (fileName.split(".").pop() || "png"),
             mime: file.type || "image/png",
             classification: "StoriesImg",
             path:
               file.path ||
-              `https://assets.onegrove.kr/dev/StoriesImg/${file.originalName || file.name}`,
-            status: file.status || (isNew ? "C" : "R"), // 수정 포인트
+              `https://assets.onegrove.kr/dev/StoriesImg/${fileName}`,
+            status: file.status || (isNew ? "C" : "R"),
             delYn: file.delYn || "N",
           };
         };
 
-        // 새로 구성된 이미지 리스트
         const storiesImgList = imageFields
           .map((i, idx) => {
             const img = values[`storiesImgList${i}`];
@@ -215,9 +213,9 @@ const StoriesRegistForm = forwardRef(
             );
 
             const fileMeta = toImageMeta(img, originalImg);
+
             fileMeta.sort = String(idx + 1);
 
-            // 기존 이미지인데 캡션이 변경됨 => E
             if (
               originalImg &&
               (originalImg.caption || "") !== caption &&
@@ -234,20 +232,14 @@ const StoriesRegistForm = forwardRef(
           .filter(Boolean);
 
         // 삭제된 이미지 반영
+        const currentImageSiIds = Object.entries(values)
+          .filter(([key]) => key.startsWith("storiesImgList"))
+          .map(([, val]) => val?.siFileId)
+          .filter(Boolean);
+
         const replacedImages = (data?.storiesImgList || [])
           .filter((originalImg) => {
-            const index = Number(originalImg.sort) || 0;
-            const currentImg = values[`storiesImgList${index}`];
-
-            // 같은 위치의 이미지가 존재하지 않거나, siFileId 또는 originalName이 다른 경우 삭제 처리
-            const isModified =
-              !currentImg ||
-              (currentImg?.siFileId &&
-                currentImg?.siFileId !== originalImg?.siFileId) ||
-              (currentImg?.originalName &&
-                currentImg?.originalName !== originalImg?.originalName);
-
-            return isModified;
+            return !currentImageSiIds.includes(originalImg.siFileId);
           })
           .map((img) => ({
             ...toImageMeta(img),
@@ -258,12 +250,21 @@ const StoriesRegistForm = forwardRef(
         // 최종 이미지 리스트 구성
         const finalStoriesImgList = [
           ...storiesImgList, // 입력한 이미지 (R, E, C)
-          ...replacedImages, // 덮어쓴 기존 이미지 → D
-          ...deletedImages.map((img) => ({
-            ...toImageMeta(img),
-            status: "D",
-            delYn: "Y",
-          })), // 명시적으로 삭제한 이미지
+          ...replacedImages, // 누락된 기존 이미지 → D
+          ...deletedImages
+            .map((img) => {
+              const meta = toImageMeta(img);
+              if (!meta) return null;
+
+              return {
+                ...meta,
+                status: "D",
+                delYn: "Y",
+                caption: img.caption || "",
+                sort: img.sort || "",
+              };
+            })
+            .filter(Boolean), // null 제거
         ];
 
         return {

@@ -28,6 +28,7 @@ export default function AffairListPage() {
     email: "",
     status: "",
     type: "",
+    companyName: "",
   };
   const [searchFilter, setSearchFilter] = useState(defaultFilter);
   const [activeFilter, setActiveFilter] = useState(defaultFilter);
@@ -117,9 +118,15 @@ export default function AffairListPage() {
           });
 
           if (activeFilter.type) {
-            filtered = filtered.filter(
-              (item) => item.companyId === Number(activeFilter.type)
-            );
+            const companyName = companies.find(
+              (c) => String(c.id) === activeFilter.type
+            )?.name;
+
+            if (companyName) {
+              filtered = filtered.filter(
+                (item) => item.companyName === companyName
+              );
+            }
           }
 
           if (activeFilter.name) {
@@ -145,19 +152,13 @@ export default function AffairListPage() {
           const paginated = filtered.slice(startIndex, startIndex + size);
           const totalFiltered = filtered.length;
 
-          const getCompanyName = (id) => {
-            const company = companies.find((c) => c.id === id);
-            return company ? company.name : "-";
-          };
-
           // 데이터 형식을 맞춰서 상태에 저장
           setData(
             paginated.map((item, index) => ({
               no: totalFiltered - (startIndex + index),
               _id: item.id,
-              companyName: getCompanyName(item.companyId),
+              companyName: item.companyName || "-",
               type: mapRoleToLabel(item.role),
-              occupancy: "", // 입주사 없음
               name: item.name,
               username: item.username,
               email: item.email,
