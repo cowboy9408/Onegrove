@@ -13,9 +13,6 @@ export default function SleepReservationForm({
   const [roomId, setRoomId] = useState(initialData.roomId || room || 1);
   const [roomDetailId, setRoomDetailId] = useState(initialData.roomId || room || 1);
   const [companyId, setCompanyId] = useState(initialData.companyId || "");
-  const [paymentType, setPaymentType] = useState(
-    initialData.paymentType || "free"
-  );
   const [resveDate, setResveDate] = useState(initialData.resveDate || "");
   const [resveStartTime, setResveStartTime] = useState(
     initialData.resveStartTime || "09:00:00"
@@ -23,14 +20,10 @@ export default function SleepReservationForm({
   const [resveEndTime, setResveEndTime] = useState(
     initialData.resveEndTime || "10:00:00"
   );
-  const [content, setContent] = useState(initialData.content || "");
   const [realUser, setRealUser] = useState(initialData.realUser || "");
-  const [numberVisitors, setNumberVisitors] = useState(
-    initialData.numberVisitors || 1
-  );
-  const [note, setNote] = useState(initialData.note || "");
-  const [status, setStatus] = useState(initialData.status || "gs0101");
   const [meetingList, setMeetingList] = useState([]);
+  const [companyList, setCompanyList] = useState([]);
+  const [userList, setUserList] = useState([]);
 
   const getToday = () => {
     const today = new Date();
@@ -70,35 +63,53 @@ export default function SleepReservationForm({
       try {
         const res = await api.get(`/api/v1/sleep/room/detail/${roomId}`);
         if (res.data.success) {
-          // console.log('abdsdfdfdf', res.data.data);
           setMeetingList(res.data.data);
         }
       } catch (err) {
         console.error("방 상세 조회 실패:", err);
       }
+
+      try {
+        const res = await api.get(`/api/v1/sleep/reserve/company`);
+        if (res.data.success) {
+          setCompanyList(res.data.data);
+        }
+      } catch (err) {
+        console.error("입주사 조회 실패:", err);
+      }
     };
     fetchRoomDetail();
   }, [roomId]);
 
+  useEffect(() => {
+    if (!companyId) return;
+    const fetchRoomDetail = async () => {
+      try {
+        const res = await api.get(`/api/v1/sleep/reserve/user?companyId=${companyId}`);
+        if (res.data.success) {
+          setUserList(res.data.data);
+        }
+      } catch (err) {
+        console.error("유저 조회 실패:", err);
+      }
+    };
+    fetchRoomDetail();
+  }, [companyId]);
+
   const handleSubmit = async () => {
     const payload = {
-      roomId: Number(roomId),
-      companyId: Number(companyId),
-      paymentType,
-      resveDate,
-      resveStartTime,
-      resveEndTime,
-      content,
-      realUser,
-      numberVisitors: Number(numberVisitors),
-      note,
+      roomInfoId: Number(roomDetailId),
+      userId: Number(realUser),
+      reserveDt: resveDate,
+      reserveTime: resveStartTime,
       ...(isEdit && { id: initialData.id }),
-      ...(!isEdit && { status }),
     };
+
+    console.log(payload);
 
     try {
       const res = await api.post(
-        isEdit ? "/api/v1/meeting/update" : "/api/v1/meeting/insert",
+        isEdit ? "/api/v1/sleep/reserve/update" : "/api/v1/sleep/reserve/insert",
         payload
       );
       if (res.data?.success) {
@@ -108,7 +119,7 @@ export default function SleepReservationForm({
       } else alert("처리 실패");
     } catch (err) {
       console.error("예약 처리 실패:", err);
-      alert("필수 입력 내용을 확인해 주세요.");
+      alert(err?.response?.data?.message);
     }
   };
 
@@ -142,15 +153,16 @@ export default function SleepReservationForm({
           className="w-full rounded border px-2 py-1"
         >
           <option value="">호실을 선택해 주세요</option>
-          {meetingList?.infoList?.map((room, index) => (
-            <>
-              {room?.useYn === "Y" && !(meetingList?.gender !== "M" && index === 7) && (
+          {meetingList?.infoList?.map((room, index) => {
+            if (room?.useYn === "Y" && !(meetingList?.gender !== "M" && index === 7)) {
+              return (
                 <option key={room.id} value={room.id}>
                   {room.roomNumId}호실
                 </option>
-              )}
-            </>
-          ))}
+              );
+            }
+            return null;
+          })}
         </select>
       </div>
 
@@ -202,9 +214,10 @@ export default function SleepReservationForm({
           onChange={(e) => setCompanyId(e.target.value)}
           className="w-full rounded border px-2 py-1"
         >
-          {meetingOptions?.visitCompanyListRes?.map((c) => (
+          <option value={''}>입주사를 선택하세요</option>
+          {companyList?.map((c) => (
             <option key={c.companyId} value={c.companyId}>
-              {c.companyName}
+              {c.name}
             </option>
           ))}
         </select>
@@ -219,11 +232,9 @@ export default function SleepReservationForm({
           className="w-full rounded border px-2 py-1"
         >
           <option value="">아이디를 선택하세요</option>
-          {meetingOptions?.visitCompanyListRes
-            ?.find((c) => String(c.companyId) === String(companyId))
-            ?.users?.map((user) => (
+          {userList?.map((user) => (
               <option key={user.userId} value={user.userId}>
-                {user.userName} ({user.userId})
+                {user.userName} ({user.gender === 'M' ? '남자' : '여자'})
               </option>
             ))}
         </select>
