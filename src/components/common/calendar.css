@@ -7,6 +7,8 @@
 
 .rbc-show-more {
   font-size: 12px;
+  z-index: 2;
+  position: relative;
 }
 
 .rbc-row-segment .rbc-event-content {
@@ -14,10 +16,13 @@
   white-space: normal;
 }
 
-
 .rbc-month-row {
-  overflow: initial;
-  height: 100%;
+  overflow: visible !important; /* 변경: 더보기 버튼 가려짐 방지 */
+  position: relative;
   padding-bottom: 10px;
-  min-height: 120px;
+  min-height: 140px;
+}
+
+.rbc-event {
+  z-index: 1;
 }

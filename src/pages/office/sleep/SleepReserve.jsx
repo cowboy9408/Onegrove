@@ -49,11 +49,15 @@ export default function SleepReserve() {
   useEffect(() => {
     const fetchMeta = async () => {
       try {
-        const settingRes = await api.get(`/api/v1/meeting/setting`);
+        const settingRes = await api.get(`/api/v1/sleep/room`);
         if (settingRes.data.success) setOfficeOptions(settingRes.data.data);
 
-        const categoryRes = await api.get(`/api/v1/visit/category`);
-        if (categoryRes.data.success) setMeetingOptions(categoryRes.data.data);
+        if(settingRes.data.data?.id) {
+          const categoryRes = await api.get(`/api/v1/sleep/room/detail/${settingRes.data.data?.id}`);
+          if (categoryRes.data.success) setMeetingOptions(categoryRes.data.data);
+        }
+
+        
       } catch (err) {
         console.error("메타 정보 조회 실패:", err);
       }
@@ -218,8 +222,9 @@ export default function SleepReserve() {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <Select
-          label="회의실 선택"
+          label="수면실 선택"
           value={selectedRoom}
+          className="w-sm"
           onChange={(e) => setSelectedRoom(Number(e.target.value))}
         >
           {officeOptions.map((room) => (
@@ -274,11 +279,11 @@ export default function SleepReserve() {
                   </p>
                   <div className="flex items-center gap-2">
                     <label className="text-sm font-medium whitespace-nowrap">
-                      잔여 Relax Room 수 : "-"
+                      잔여 Relax Room 수 : 
                     </label>
                     <div className="relative inline-block">
                       <select
-                        value=""
+                        value="-"
                         onChange={() => {}}
                         className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
                       >
@@ -301,11 +306,11 @@ export default function SleepReserve() {
                   </p>
                   <div className="flex items-center gap-2">
                     <label className="text-sm font-medium whitespace-nowrap">
-                      잔여 Relax Room 수 : "-"
+                      잔여 Relax Room 수 :
                     </label>
                     <div className="relative inline-block">
                       <select
-                        value=""
+                        value="-"
                         onChange={() => {}}
                         className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
                       >
