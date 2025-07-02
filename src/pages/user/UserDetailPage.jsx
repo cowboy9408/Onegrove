@@ -21,7 +21,6 @@ export default function UserDetailPage() {
     username: "",
     phone: "",
     email: "",
-    isReservation: "",
   });
   const [companyOptions, setCompanyOptions] = useState([]);
   const [isLocked, setIsLocked] = useState(false);
@@ -144,7 +143,7 @@ export default function UserDetailPage() {
         form.gender === "male" ? "M" : form.gender === "female" ? "W" : "",
       isUse: form.status === "active" ? "Y" : "N",
       isManager: "N",
-      isReservation: form.isReservation,
+      isReservation: "N",
     };
 
     showModal({
@@ -294,27 +293,6 @@ export default function UserDetailPage() {
             onChange={(e) => handleChange("email", e.target.value)}
             required
           />
-        </div>
-        <div>
-          <p className="mb-2 text-sm font-medium text-gray-800">
-            회의실 예약 기능
-          </p>
-          <div className="flex gap-4">
-            <Radio
-              name="isReservation"
-              label="가능"
-              value="Y"
-              checked={form.isReservation === "Y"}
-              onChange={() => handleChange("isReservation", "Y")}
-            />
-            <Radio
-              name="isReservation"
-              label="불가"
-              value="N"
-              checked={form.isReservation === "N"}
-              onChange={() => handleChange("isReservation", "N")}
-            />
-          </div>
         </div>
       </div>
       <div className="flex justify-end gap-3 px-6 pt-5 pb-6">

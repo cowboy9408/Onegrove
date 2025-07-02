@@ -39,7 +39,6 @@ export default function EventDetail() {
     const fetchData = async () => {
       try {
         const res = await api.get(`/api/v1/event-promotion/item/${emId}`);
-        console.log("API 응답 결과:", res.data);
 
         const list = Array.isArray(res.data?.data) ? res.data.data : [];
 
@@ -320,8 +319,8 @@ export default function EventDetail() {
       setIsReadOnly(true);
       navigate("/contents/whatson/event/list?refresh=" + Date.now());
     } catch (err) {
-      console.error("저장 실패:", err);
-      alert("저장 실패. 다시 시도해주세요.");
+      console.error("수정 실패:", err);
+      alert("수정 실패. 다시 시도해주세요.");
     }
   };
 
@@ -385,7 +384,7 @@ export default function EventDetail() {
           <Button
             onClick={() =>
               showModal({
-                title: "저장 확인",
+                title: "수정 확인",
                 message: "입력한 정보로 수정하시겠습니까",
                 showCancel: true,
                 onConfirm: async () => {
@@ -395,7 +394,7 @@ export default function EventDetail() {
               })
             }
           >
-            저장
+            수정
           </Button>
 
           <Button

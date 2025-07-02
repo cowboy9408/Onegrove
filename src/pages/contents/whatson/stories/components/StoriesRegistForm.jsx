@@ -53,7 +53,6 @@ const StoriesRegistForm = forwardRef(
     };
 
     useEffect(() => {
-      // console.log('start ---', data,  data.startDate, data.endDate)
       if (data?.startDt) {
         const start = new Date(data.startDt);
 
@@ -88,7 +87,6 @@ const StoriesRegistForm = forwardRef(
 
     useImperativeHandle(ref, () => ({
       submit: async (onError) => {
-        console.log(" submit() 호출됨");
         const getCleanedImage = (img) => {
           if (img?.status === "D") return null;
           return img;
@@ -156,20 +154,6 @@ const StoriesRegistForm = forwardRef(
           onError?.("디스크립션을 입력해주세요.");
           return null;
         }
-
-        console.log("검사 대상 값들:", {
-          title: values.title,
-          category: values.category,
-          startDate: startDateStr,
-          endDate: endDateStr,
-          thumbImg: values.thumbImg,
-          patternTopPc: values.patternTopPc,
-          patternTopMo: values.patternTopMo,
-          patternBottomPc: values.patternBottomPc,
-          patternBottomMo: values.patternBottomMo,
-          content,
-          description,
-        });
 
         if (
           !values.title?.trim() ||

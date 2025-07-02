@@ -132,7 +132,6 @@ const RegistForm = forwardRef(
           return null;
         }
 
-        console.log("제출 값 확인:", values);
         console.log(`[${lang}] 제출값:`, getValues("locations"));
 
         if (!values.companyName) {

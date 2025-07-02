@@ -45,7 +45,6 @@ const WhatContentForm = forwardRef(
     }, [data, reset]);
 
     const handleContentSelect = (index, selectedItems) => {
-      console.log("콘텐츠 선택됨:", selectedItems);
       setValue(
         `${name}.${index}.selectedTitles`,
         selectedItems.map((e) => e.title).join(", ")
@@ -64,7 +63,7 @@ const WhatContentForm = forwardRef(
     useImperativeHandle(ref, () => ({
       submit: async (onError) => {
         const values = getValues();
-        console.log("폼 저장 값:", values);
+
         const contentList = values.contents || [];
 
         const mappedItems = contentList

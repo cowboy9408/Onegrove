@@ -27,8 +27,7 @@ export default function StoriesRegist() {
         showCancel: false,
       });
     });
-    console.log("payload:", form);
-    //
+
     if (!form) return;
 
     try {
