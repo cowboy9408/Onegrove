@@ -263,16 +263,13 @@ export default function AdminRegist() {
           <Input
             label="이름"
             value={form.name}
-            onChange={(e) => {
-              handleChange("name", e.target.value);
-              if (e.target.value)
-                setErrors((prev) => ({ ...prev, name: false }));
-            }}
+            onChange={(e) => handleChange("name", e.target.value)}
             required
+            error={errors.name}
           />
-          {errors.name && (
-            <p className="mt-1 text-sm text-red-500">이름을 입력해주세요.</p>
-          )}
+          {/* {errors.name && (
+            <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+          )} */}
         </div>
 
         <div>
@@ -304,14 +301,14 @@ export default function AdminRegist() {
             handleChange("username", e.target.value);
           }}
           required
-          error={errors.name}
+          error={errors.username}
           placeholder="4~16자 내의 영소문자,숫자로 구성"
         />
-        {errors.username && (
+        {/* {errors.username && (
           <p className="mt-1 text-sm text-red-500">
             영소문자와 숫자만 입력할 수 있습니다 (4~16자).
           </p>
-        )}
+        )} */}
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <Input
