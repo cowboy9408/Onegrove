@@ -32,8 +32,13 @@ export default function Viproom() {
     }
   };
 
+  const selectedData = officeOptions.find(i => i.id === selectedRoom) || null;
+
+
   useEffect(() => {
-    fetchSchedules();
+    if(selectedRoom) {
+      fetchSchedules();
+    }
   }, [selectedRoom]);
 
   useEffect(() => {
@@ -45,10 +50,10 @@ export default function Viproom() {
   useEffect(() => {
     const fetchMeta = async () => {
       try {
-        const settingRes = await api.get(`/api/v1/meeting/room-list?isVip=Y`);
+        const settingRes = await api.get(`/api/v1/meeting/setting?isVip=Y`);
         if (settingRes.data.success) setOfficeOptions(settingRes.data.data);
 
-        const categoryRes = await api.get(`/api/v1/visit/category`);
+        const categoryRes = await api.get(`/api/v1/meeting/office-list?lang=ko`);
         if (categoryRes.data.success) setMeetingOptions(categoryRes.data.data);
       } catch (err) {
         console.error("메타 정보 조회 실패:", err);
@@ -89,7 +94,7 @@ export default function Viproom() {
 
             <div className="flex justify-between gap-3">
               <div className="flex gap-3">
-                {detail?.status === '가예약' && (
+                {detail.status === '가예약' && (
                   <Button
                     theme="danger"
                     onClick={async () => {
@@ -139,6 +144,7 @@ export default function Viproom() {
                       children: ({ closeModal }) => (
                         <ReservationForm
                           isEdit
+                          selectData={selectedData}
                           initialData={detail}
                           meetingOptions={meetingOptions}
                           roomList={officeOptions}
@@ -168,12 +174,14 @@ export default function Viproom() {
         <Select
           label="회의실 선택"
           value={selectedRoom}
-          onChange={(e) => setSelectedRoom(Number(e.target.value))}
+          onChange={(e) => {
+            setSelectedRoom(Number(e.target.value));
+          }}
           className="w-sm"
         >
           {officeOptions.map((room) => (
             <option key={room.id} value={room.id}>
-              {room.roomName} ({room.location})
+              {room.name} ({room.location})
             </option>
           ))}
         </Select>
@@ -187,6 +195,7 @@ export default function Viproom() {
               showCancel: true,
               children: ({ closeModal }) => (
                 <ReservationForm
+                  selectData={selectedData}
                   room={selectedRoom}
                   meetingOptions={meetingOptions}
                   existingReservations={scheduleList}
@@ -215,7 +224,6 @@ export default function Viproom() {
           onSelectEvent={handleEventClick}
           onSelectSlot={(slotInfo) => {
             const resveDate = dayjs(slotInfo.start).format("YYYY-MM-DD");
-
             showModal({
               title: "회의실 예약",
               size: "lg",
@@ -223,6 +231,7 @@ export default function Viproom() {
               showCancel: true,
               children: ({ closeModal }) => (
                 <ReservationForm
+                  selectData={selectedData}
                   room={selectedRoom}
                   roomList={officeOptions}
                   meetingOptions={meetingOptions}
