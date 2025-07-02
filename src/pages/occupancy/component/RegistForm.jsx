@@ -73,11 +73,14 @@ const RegistForm = forwardRef(
 
       const finalList = [...updatedList, ...deletedItems];
 
-      // 현재 폼 내부 값 설정
-      setValue("locations", finalList);
+      const cleanedList = finalList.filter(
+        (item) =>
+          item.delYn !== "Y" ||
+          (item.office?.trim() !== "" && item.floor?.trim() !== "")
+      );
 
-      //
-      setLocations(finalList);
+      setValue("locations", cleanedList);
+      setLocations(cleanedList);
     };
 
     useEffect(() => {
