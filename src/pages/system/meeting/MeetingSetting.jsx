@@ -60,6 +60,24 @@ export default function MeetingSetting() {
   };
 
   const onSubmit = async (form) => {
+    if (
+      !form.name ||
+      !form.roomNumber ||
+      !form.location ||
+      !form.capacity ||
+      !form.timeRange?.startDate ||
+      !form.timeRange?.endDate ||
+      !form.file ||
+      !form.freeTime ||
+      !form.pricePerHour
+    ) {
+      showModal({
+        title: "입력 확인",
+        message: "필수 항목을 모두 입력해 주세요.",
+      });
+      return;
+    }
+
     try {
       const payload = {
         name: form.name,
@@ -187,6 +205,7 @@ export default function MeetingSetting() {
             <div>
               <p className="mb-2 text-sm font-medium text-gray-700">
                 운영 시간
+                <span className="text-red-500">*</span>
               </p>
               <Datepicker
                 mode="range"
