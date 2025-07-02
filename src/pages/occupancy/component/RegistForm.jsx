@@ -81,7 +81,7 @@ const RegistForm = forwardRef(
     };
 
     useEffect(() => {
-      if (data) {
+      if (data && Object.keys(data).length > 0) {
         setValue("companyName", data.name || "");
         setValue("ceoName", data.mainName || "");
         setValue("phone", data.tel || "");
