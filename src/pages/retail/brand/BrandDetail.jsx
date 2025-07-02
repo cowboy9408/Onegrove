@@ -5,6 +5,7 @@ import Section from "@/components/layout/Section";
 import Button from "@/components/common/Button";
 import BrandRegistForm from "./component/BrandRegistForm";
 import api from "@/lib/apiClient";
+import useModal from "@/hooks/useModal";
 
 export default function BrandDetail() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export default function BrandDetail() {
   const [isReadOnly, setIsReadOnly] = useState(false); // 읽기 전용
   const [categoryList, setCategoryList] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+  const { showModal } = useModal();
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -178,12 +180,20 @@ export default function BrandDetail() {
   };
 
   const handleSave = async () => {
+    const onError = (message) => {
+      showModal({
+        title: "필수 항목을 입력해 주세요.",
+        message,
+        showCancel: false,
+      });
+    };
+
     if (isSaving) return;
     setIsSaving(true);
 
     try {
-      const koValues = await koFormRef.current?.submit?.();
-      const enValues = await enFormRef.current?.submit?.();
+      const koValues = await koFormRef.current?.submit?.(onError);
+      const enValues = await enFormRef.current?.submit?.(onError);
       console.log("KO 폼 데이터:", koValues);
       console.log("EN 폼 데이터:", enValues);
 
