@@ -274,23 +274,6 @@ const EventRegistForm = forwardRef(
           return null;
         }
 
-        console.log("검사 대상 값들:", {
-          title: values.title,
-          category: values.category,
-          startDate: startDate,
-          endDate: values.manualEndInput ? null : endDateStr,
-          endInput: values.manualEndInput ? values.endInput : null,
-          thumbImg: values.thumbImg,
-          imgBodyPc: values.imgBodyPc,
-          imgBodyMo: values.imgBodyMo,
-          imgPc: values.imgPc,
-          imgMo: values.imgMo,
-          content,
-          description,
-          brands,
-          sort: values.sort,
-        });
-
         if (
           !values.title?.trim() ||
           !values.category ||

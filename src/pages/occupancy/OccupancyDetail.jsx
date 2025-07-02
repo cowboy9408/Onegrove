@@ -192,9 +192,6 @@ export default function OccupancyDetail() {
           mainImg: toImageMeta(data.mainImg, original.mainImg),
           officeList: data.officeList,
         };
-        console.log("payload.email:", payload.email);
-        console.log("저장 payload:", payload);
-        console.log("payload.thumbImgPc:", payload.thumbImgPc);
 
         const isNew = !original?.id || original?.lang !== payload.lang;
 
@@ -228,13 +225,10 @@ export default function OccupancyDetail() {
         });
         return;
       }
-      console.log(
-        "formValues.officeList (before override):",
-        formValues.officeList
-      );
+
       showModal({
-        title: "저장 확인",
-        message: "저장하시겠습니까?",
+        title: "수정 확인",
+        message: "수정하시겠습니까?",
         showCancel: true,
         onConfirm: async () => {
           try {
@@ -250,8 +244,8 @@ export default function OccupancyDetail() {
             await fetchDetail();
 
             showModal({
-              title: "저장 완료",
-              message: "정상적으로 저장되었습니다.",
+              title: "수정 완료",
+              message: "정상적으로 수정되었습니다.",
               showCancel: false,
               onConfirm: () => {
                 setIsReadOnly(true);
@@ -259,10 +253,10 @@ export default function OccupancyDetail() {
               },
             });
           } catch (err) {
-            console.error("저장 실패:", err);
+            console.error("수정 실패:", err);
             showModal({
-              title: "저장 실패",
-              message: "저장 중 문제가 발생했습니다. 다시 시도해주세요.",
+              title: "수정 실패",
+              message: "수정 중 문제가 발생했습니다. 다시 시도해주세요.",
               showCancel: false,
             });
           }

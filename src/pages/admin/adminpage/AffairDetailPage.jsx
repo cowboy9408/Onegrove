@@ -30,7 +30,7 @@ export default function AffairDetailPage() {
     const fetchData = async () => {
       try {
         const res = await api.get(`/api/v1/user/admin/${id}`);
-        console.log("조회 응답:", res.data);
+
         if (res.data.success && res.data.data) {
           const data = res.data.data;
           setForm({
@@ -130,7 +130,7 @@ export default function AffairDetailPage() {
   const handleUpdate = async () => {
     if (!form.name || !form.username || !form.phone || !form.email) {
       showModal({
-        title: "필수 항목 누락",
+        title: "필수 항목 확인",
         message: "모든 필수 항목을 입력해주세요.",
         showCancel: false,
       });
