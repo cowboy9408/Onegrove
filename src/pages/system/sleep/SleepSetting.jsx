@@ -77,6 +77,14 @@ export default function SleepListPage() {
   }, []);
 
   const handleSubmit = async () => {
+    if (!roomName || !startDate || !endDate || !location || !maxTime) {
+      showModal({
+        title: "입력 확인",
+        message: "필수 항목을 모두 입력해 주세요.",
+      });
+      return;
+    }
+
     try {
       const genderCode = gender === "남성" ? "M" : "F";
       const useYnCode = useYn === "사용" ? "Y" : "N";

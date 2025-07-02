@@ -20,7 +20,10 @@
   overflow: visible !important; /* 변경: 더보기 버튼 가려짐 방지 */
   position: relative;
   padding-bottom: 10px;
-  min-height: 140px;
+  height: 100%;
+}
+.rbc-row-content {
+  min-height:120px;
 }
 
 .rbc-event {

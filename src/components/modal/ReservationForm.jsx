@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
 
 export default function ReservationForm({
@@ -8,6 +8,7 @@ export default function ReservationForm({
   existingReservations = [],
   initialData = {},
   isEdit = false,
+  selectData,
   onSubmit,
   closeModal,
 }) {
@@ -72,7 +73,8 @@ export default function ReservationForm({
       } else alert("처리 실패");
     } catch (err) {
       console.error("예약 처리 실패:", err);
-      alert("필수 입력 내용을 확인해 주세요.");
+      alert(err?.respopnse?.data?.message);
+      // alert("필수 입력 내용을 확인해 주세요.");
     }
   };
 
@@ -128,6 +130,7 @@ export default function ReservationForm({
     return options;
   };
 
+
   const isFormValid =
     roomId &&
     companyId &&
@@ -150,7 +153,7 @@ export default function ReservationForm({
         >
           {roomList.map((r) => (
             <option key={r.id} value={r.id}>
-              {r.roomName} ({r.location})
+              {r.name} ({r.location})
             </option>
           ))}
         </select>
@@ -216,13 +219,22 @@ export default function ReservationForm({
       <div>
         <label className="block mb-1">참석인원 <span className="text-red-500">*</span></label>
         <input
-          type="number"
-          min={1}
-          max={99}
+          type="text"
           value={numberVisitors}
           onChange={(e) => {
-            const val = Number(e.target.value);
-            if (val <= 99) setNumberVisitors(val);
+            const input = e.target.value;
+            if (input === "") {
+              setNumberVisitors("");
+              return;
+            }
+            if (!/^\d+$/.test(input)) return;
+            const val = Number(input);
+            if (selectData?.capacity && val > selectData.capacity) {
+              alert(`최대 수용 인원은 ${selectData.capacity}명입니다.`);
+              setNumberVisitors("");
+            } else {
+              setNumberVisitors(val);
+            }
           }}
           className="w-full border px-2 py-1 rounded"
         />
@@ -239,7 +251,7 @@ export default function ReservationForm({
           className="w-full border px-2 py-1 rounded"  
         >
           <option value="">입주사를 선택하세요</option>
-          {meetingOptions?.visitCompanyListRes?.map((c) => (
+          {meetingOptions?.map((c) => (
             <option key={c.companyId} value={c.companyId}>
               {c.companyName}
             </option>
