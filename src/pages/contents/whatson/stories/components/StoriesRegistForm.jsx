@@ -215,9 +215,9 @@ const StoriesRegistForm = forwardRef(
             );
 
             const fileMeta = toImageMeta(img, originalImg);
+
             fileMeta.sort = String(idx + 1);
 
-            // 기존 이미지인데 캡션이 변경됨 => E
             if (
               originalImg &&
               (originalImg.caption || "") !== caption &&
@@ -234,20 +234,14 @@ const StoriesRegistForm = forwardRef(
           .filter(Boolean);
 
         // 삭제된 이미지 반영
+        const currentImageSiIds = Object.entries(values)
+          .filter(([key]) => key.startsWith("storiesImgList"))
+          .map(([, val]) => val?.siFileId)
+          .filter(Boolean);
+
         const replacedImages = (data?.storiesImgList || [])
           .filter((originalImg) => {
-            const index = Number(originalImg.sort) || 0;
-            const currentImg = values[`storiesImgList${index}`];
-
-            // 같은 위치의 이미지가 존재하지 않거나, siFileId 또는 originalName이 다른 경우 삭제 처리
-            const isModified =
-              !currentImg ||
-              (currentImg?.siFileId &&
-                currentImg?.siFileId !== originalImg?.siFileId) ||
-              (currentImg?.originalName &&
-                currentImg?.originalName !== originalImg?.originalName);
-
-            return isModified;
+            return !currentImageSiIds.includes(originalImg.siFileId);
           })
           .map((img) => ({
             ...toImageMeta(img),
