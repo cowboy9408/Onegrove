@@ -21,6 +21,10 @@ export default function AdminDetailPage() {
     phone: "",
     email: "",
   });
+  const [errors, setErrors] = useState({
+    name: "",
+    username: "",
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,6 +56,18 @@ export default function AdminDetailPage() {
   }, [id]);
 
   const handleChange = (key, value) => {
+    if (key === "name") {
+      if (value.length > 10) {
+        setErrors((prev) => ({
+          ...prev,
+          name: "이름은 최대 10자까지 입력 가능합니다.",
+        }));
+        return; // 입력 제한
+      } else {
+        setErrors((prev) => ({ ...prev, name: "" }));
+      }
+    }
+
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -252,6 +268,7 @@ export default function AdminDetailPage() {
             value={form.name}
             onChange={(e) => handleChange("name", e.target.value)}
             required
+            error={errors.name}
           />
           <div>
             <p className="mb-2 text-sm font-medium text-gray-800">성별</p>
