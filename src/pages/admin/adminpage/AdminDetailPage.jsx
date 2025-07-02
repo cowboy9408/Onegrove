@@ -97,7 +97,7 @@ export default function AdminDetailPage() {
   const handleUpdate = async () => {
     if (!form.name || !form.username || !form.phone || !form.email) {
       showModal({
-        title: "필수 항목 누락",
+        title: "필수 항목 확인",
         message: "모든 필수 항목을 입력해주세요.",
         showCancel: false,
       });

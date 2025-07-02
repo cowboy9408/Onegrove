@@ -166,7 +166,7 @@ export default function BrandDetail() {
       size: base.size ?? 0,
       extension: extension,
       mime: base.mime || "image/jpeg",
-      classification: base.classification || "press-media",
+      classification: base.classification || "brand",
       path: base.path || null,
       status:
         base.status !== undefined && base.status !== null
@@ -289,8 +289,8 @@ export default function BrandDetail() {
       navigate("/retail/brand/?refresh=" + Date.now());
       // setIsReadOnly(true); // 다시 읽기 전용으로 전환
     } catch (err) {
-      console.error("저장 실패:", err);
-      alert("저장 실패. 다시 시도해주세요.");
+      console.error("수정 실패:", err);
+      alert("수정 실패. 다시 시도해주세요.");
     } finally {
       setIsSaving(false);
     }

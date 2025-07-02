@@ -167,8 +167,8 @@ export default function PressDetail() {
       if (!formValues) return;
 
       showModal({
-        title: "저장 확인",
-        message: "저장하시겠습니까?",
+        title: "수정 확인",
+        message: "수정하시겠습니까?",
         showCancel: true,
         onConfirm: async () => {
           try {
@@ -186,7 +186,7 @@ export default function PressDetail() {
 
             showModal({
               title: "저장 완료",
-              message: "정상적으로 저장되었습니다.",
+              message: "정상적으로 수정되었습니다.",
               showCancel: false,
               onConfirm: () => {
                 setIsReadOnly(true);
@@ -318,7 +318,7 @@ export default function PressDetail() {
         </Tabs>
 
         <div className="flex justify-end gap-4 px-6 pb-6">
-          <Button onClick={handleSave}>저장</Button>
+          <Button onClick={handleSave}>수정</Button>
 
           <Button
             onClick={() =>

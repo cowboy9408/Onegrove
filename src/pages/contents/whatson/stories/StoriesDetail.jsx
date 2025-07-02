@@ -433,8 +433,8 @@ export default function StoriesDetail() {
           <Button
             onClick={() =>
               showModal({
-                title: "저장 확인",
-                message: "저장하시겠습니까?",
+                title: "수정 확인",
+                message: "수정하시겠습니까?",
                 showCancel: true,
                 onConfirm: async () => {
                   await handleSave();
@@ -443,7 +443,7 @@ export default function StoriesDetail() {
               })
             }
           >
-            저장
+            수정
           </Button>
 
           <Button
