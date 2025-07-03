@@ -163,6 +163,7 @@ export default function AdminListPage() {
                 }
               >
                 <option value="">전체</option>
+                <option value="SUPER_ADMIN">슈퍼 관리자</option>
                 <option value="NORMAL_ADMIN">일반 관리자</option>
                 <option value="RETAIL_ADMIN">리테일 관리자</option>
                 <option value="OFFICE_ADMIN">오피스 관리자</option>
