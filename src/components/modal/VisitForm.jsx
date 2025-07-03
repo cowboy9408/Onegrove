@@ -92,15 +92,20 @@ export default function VisitForm({
     if (
       !resveDate ||
       !resveTime ||
+      !building ||
       !tel ||
-      !companyId
+      !companyId ||
+      !email ||
+      !name ||
+      !card ||
+      !visitNumber
     ) {
       alert("모든 필수 입력 항목을 작성해 주세요.");
       return;
     }
 
     const payload = {
-      companyId: companyId,
+      companyId: Number(companyId),
       visitDate: resveDate,
       visitTime: resveTime,
       visitBuilding: building,
@@ -108,10 +113,12 @@ export default function VisitForm({
       email: email,
       name: name,
       tel: tel,
+      accessCard: card,
       visitNumber: Number(visitNumber),
       ...(isEdit && { id: initialData.id }),
     };
 
+    // console.log(payload)
     try {
       const res = await api.post(
         isEdit ? "/api/v1/visit/update" : "/api/v1/visit/insert",
@@ -119,7 +126,7 @@ export default function VisitForm({
       );
       if (res.data?.success) {
         alert(isEdit ? "수정 완료" : "등록 완료");
-        onSubmit?.(payload);
+        // onSubmit?.(payload);
         closeModal?.();
       } else alert("처리 실패");
     } catch (err) {
@@ -178,17 +185,19 @@ export default function VisitForm({
   return (
     <div className="space-y-5 text-left">
 
-      <div className="flex gap-4 w-full">
-        <div className="w-full">
-          <label className="block mb-1">예약일시 <span className="text-red-500">*</span></label>
-          {initialData?.reservationDatetime}
-        </div>
+      {isEdit && (
+        <div className="flex gap-4 w-full">
+          <div className="w-full">
+            <label className="block mb-1">예약일시 <span className="text-red-500">*</span></label>
+            {initialData?.reservationDatetime}
+          </div>
 
-        <div className="w-full">
-          <label className="block mb-1">예약 상태</label>
-          <div>{initialData?.status}</div>
+          <div className="w-full">
+            <label className="block mb-1">예약 상태</label>
+            <div>{initialData?.status}</div>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex gap-4 w-full">
         <div className="w-full">
@@ -235,11 +244,10 @@ export default function VisitForm({
           >
             <option value="">방문 동 선택하세요</option>
             {buildingList.map((r) => (
-              <option key={r.code} value={r.value}>
+              <option key={r.code} value={r.code}>
                 {r.value}
               </option>
             ))}
-            
           </select>
         </div>
       </div>
