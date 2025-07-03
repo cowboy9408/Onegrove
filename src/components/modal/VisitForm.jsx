@@ -92,15 +92,20 @@ export default function VisitForm({
     if (
       !resveDate ||
       !resveTime ||
+      !building ||
       !tel ||
-      !companyId
+      !companyId ||
+      !email ||
+      !name ||
+      !card ||
+      !visitNumber
     ) {
       alert("모든 필수 입력 항목을 작성해 주세요.");
       return;
     }
 
     const payload = {
-      companyId: companyId,
+      companyId: Number(companyId),
       visitDate: resveDate,
       visitTime: resveTime,
       visitBuilding: building,
@@ -108,10 +113,12 @@ export default function VisitForm({
       email: email,
       name: name,
       tel: tel,
+      accessCard: card,
       visitNumber: Number(visitNumber),
       ...(isEdit && { id: initialData.id }),
     };
 
+    // console.log(payload)
     try {
       const res = await api.post(
         isEdit ? "/api/v1/visit/update" : "/api/v1/visit/insert",
@@ -119,7 +126,7 @@ export default function VisitForm({
       );
       if (res.data?.success) {
         alert(isEdit ? "수정 완료" : "등록 완료");
-        onSubmit?.(payload);
+        // onSubmit?.(payload);
         closeModal?.();
       } else alert("처리 실패");
     } catch (err) {
@@ -239,7 +246,6 @@ export default function VisitForm({
                 {r.value}
               </option>
             ))}
-            
           </select>
         </div>
       </div>
