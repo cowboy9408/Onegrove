@@ -185,17 +185,19 @@ export default function VisitForm({
   return (
     <div className="space-y-5 text-left">
 
-      <div className="flex gap-4 w-full">
-        <div className="w-full">
-          <label className="block mb-1">예약일시 <span className="text-red-500">*</span></label>
-          {initialData?.reservationDatetime}
-        </div>
+      {isEdit && (
+        <div className="flex gap-4 w-full">
+          <div className="w-full">
+            <label className="block mb-1">예약일시 <span className="text-red-500">*</span></label>
+            {initialData?.reservationDatetime}
+          </div>
 
-        <div className="w-full">
-          <label className="block mb-1">예약 상태</label>
-          <div>{initialData?.status}</div>
+          <div className="w-full">
+            <label className="block mb-1">예약 상태</label>
+            <div>{initialData?.status}</div>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex gap-4 w-full">
         <div className="w-full">
