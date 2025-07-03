@@ -114,7 +114,7 @@ export default function Visit() {
                   >예약 확정</Button>
                 )}
                 
-                {(detail.status !== '가예약' && detail.status !== '예약 취소') && (
+                {detail.status !== '예약 취소' && (
                   <Button
                     theme="danger"
                     onClick={async () => {
