@@ -220,7 +220,7 @@ export default function AffairRegist() {
           } else {
             showModal({
               title: "등록 실패",
-              message: "이미 존재하는 이메일입니다. 확인해주세요.",
+              message: "서버 오류로 수정을 완료하지 못했습니다.",
               showCancel: false,
             });
           }
