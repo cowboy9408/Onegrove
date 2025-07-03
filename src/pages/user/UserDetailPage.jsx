@@ -238,7 +238,7 @@ export default function UserDetailPage() {
               value={form.company}
               re
               onChange={(e) => handleChange("company", Number(e.target.value))}
-              className="w-[735px]"
+              className="w-full max-w-[735px]"
               required
             >
               <option value="">선택하세요</option>
@@ -324,7 +324,7 @@ export default function UserDetailPage() {
             </label>
             <div className="flex items-center">
               <span className="rounded-l-md px-3 py-2 text-base">010 -</span>
-              <div className="w-[670px]">
+              <div className="w-full max-w-[670px]">
                 <Input
                   value={form.phone}
                   onChange={(e) => handleChange("phone", e.target.value)}
