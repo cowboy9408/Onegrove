@@ -113,17 +113,34 @@ export default function ReservationForm({
   const getEndOptions = () => {
     if (!resveDate || !resveStartTime) return [];
 
-    const base = new Date(`${resveDate}T${resveStartTime}`);
-    if (isNaN(base)) return [];
+    const reserved = getReservedTimes();
+    const baseStart = new Date(`${resveDate}T${resveStartTime}`);
 
     const options = [];
+    let currentEnd = new Date(baseStart);
 
-    // 시작시간 +1 ~ 18:00 까지
-    for (let hour = base.getHours() + 1; hour <= 18; hour++) {
-      const timeStr = `${String(hour).padStart(2, '0')}:00:00`;
+    for (let hour = baseStart.getHours() + 1; hour <= 18; hour++) {
+      const endTimeStr = `${String(hour).padStart(2, '0')}:00:00`;
+      const endTime = new Date(`${resveDate}T${endTimeStr}`);
+
+      // 회의 종료 후 1시간 버퍼까지 포함한 시간
+      const bufferEnd = new Date(endTime);
+      bufferEnd.setHours(bufferEnd.getHours() + 1);
+
+      // 예약된 구간과 겹치는지 확인 (버퍼 시간 포함)
+      const overlaps = reserved.some(({ start, end }) => {
+        return (
+          (baseStart >= start && baseStart < end) || // 시작이 중간에 겹침
+          (bufferEnd > start && baseStart < end) || // 종료 + 1시간이 다른 예약과 겹침
+          (baseStart <= start && bufferEnd > start) // 전체 덮는 경우
+        );
+      });
+
+      if (overlaps) break;
+
       options.push({
-        value: timeStr,
-        disabled: !isTimeAvailable(timeStr),
+        value: endTimeStr,
+        disabled: false,
       });
     }
 
