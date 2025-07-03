@@ -61,23 +61,23 @@ export default function ReservationForm({
       ...(isEdit && { id: initialData.id }),
       ...(!isEdit && { status }),
     };
-    console.log(payload)
+    // console.log(payload)
 
-    // try {
-    //   const res = await api.post(
-    //     isEdit ? "/api/v1/meeting/update" : "/api/v1/meeting/insert",
-    //     payload
-    //   );
-    //   if (res.data?.success) {
-    //     alert(isEdit ? "수정 완료" : "등록 완료");
-    //     onSubmit?.(payload);
-    //     closeModal?.();
-    //   } else alert("처리 실패");
-    // } catch (err) {
-    //   console.error("예약 처리 실패:", err);
-    //   alert(err?.respopnse?.data?.message || "다시 시도해 주세요.");
-    //   // alert("필수 입력 내용을 확인해 주세요.");
-    // }
+    try {
+      const res = await api.post(
+        isEdit ? "/api/v1/meeting/update" : "/api/v1/meeting/insert",
+        payload
+      );
+      if (res.data?.success) {
+        alert(isEdit ? "수정 완료" : "등록 완료");
+        onSubmit?.(payload);
+        closeModal?.();
+      } else alert("처리 실패");
+    } catch (err) {
+      console.error("예약 처리 실패:", err);
+      alert(err?.respopnse?.data?.message || "다시 시도해 주세요.");
+      // alert("필수 입력 내용을 확인해 주세요.");
+    }
   };
 
   const generateTimeOptions = (startHour, endHour) => {
