@@ -59,7 +59,6 @@ const RegistForm = forwardRef(
         });
 
       if (!isSame) {
-        console.log(`[${lang}] setValue로 locations 반영`);
         setValue("locations", next);
       }
     }, [currentLang]);
@@ -134,8 +133,6 @@ const RegistForm = forwardRef(
 
           return null;
         }
-
-        console.log(`[${lang}] 제출값:`, getValues("locations"));
 
         if (!values.companyName) {
           setTimeout(() => onError?.("입주사명을 입력해주세요."), 0);
@@ -307,7 +304,7 @@ const RegistForm = forwardRef(
 
                 maxLength: {
                   value: 20,
-                  message: "제목은 공백 포함 20자 이하로 입력해주세요.",
+                  message: "전화번호는 공백 포함 20자 이하로 입력해주세요.",
                 },
               })}
               maxLength={20}

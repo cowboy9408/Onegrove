@@ -58,8 +58,6 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
     fetchData();
   }, []);
 
-  console.log("✔ checkedIds:", checked);
-
   const normalize = (str) =>
     (str || "").toLowerCase().trim().replace(/\s/g, "");
 

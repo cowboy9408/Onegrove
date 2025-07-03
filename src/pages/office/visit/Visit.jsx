@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useContext } from "react";
 import Button from "@/components/common/Button";
 import DataTableSimple from "@/components/common/DataTableSimple";
@@ -34,7 +33,7 @@ export default function Visit() {
       if (res.data?.success && Array.isArray(res.data.data)) {
         // console.log(res.data.data);
         setVisitList(res.data.data);
-        setTotal(res.data.data?.length)
+        setTotal(res.data.data?.length);
       }
     } catch (err) {
       console.error("목록 불러오기 실패:", err);
@@ -62,45 +61,65 @@ export default function Visit() {
             <table className="w-full border text-left">
               <tbody>
                 <tr>
-                  <th className="p-2 border">예약일시</th><td className="p-2 border">{detail.reservationDatetime}</td>
-                  <th className="p-2 border">예약 상태</th><td className={`p-2 border ${detail.status === '예약 확정' ? 'text-[#00AAFF]' : 'text-[#4CAF50]'} font-bold`}>{detail.status}</td>
+                  <th className="border p-2">예약일시</th>
+                  <td className="border p-2">{detail.reservationDatetime}</td>
+                  <th className="border p-2">예약 상태</th>
+                  <td
+                    className={`border p-2 ${detail.status === "예약 확정" ? "text-[#00AAFF]" : "text-[#4CAF50]"} font-bold`}
+                  >
+                    {detail.status}
+                  </td>
                 </tr>
                 <tr>
-                  <th className="p-2 border">방문 날짜</th><td className="p-2 border">{detail.visitDate}</td>
-                  <th className="p-2 border">방문 시간</th><td className="p-2 border">{detail.visitTime}</td>
+                  <th className="border p-2">방문 날짜</th>
+                  <td className="border p-2">{detail.visitDate}</td>
+                  <th className="border p-2">방문 시간</th>
+                  <td className="border p-2">{detail.visitTime}</td>
                 </tr>
                 <tr>
-                  <th className="p-2 border">방문 입주사</th><td className="p-2 border">{detail.companyName}</td>
-                  <th className="p-2 border">방문 동</th><td className="p-2 border">{detail.visitBuilding}</td>
+                  <th className="border p-2">방문 입주사</th>
+                  <td className="border p-2">{detail.companyName}</td>
+                  <th className="border p-2">방문 동</th>
+                  <td className="border p-2">{detail.visitBuilding}</td>
                 </tr>
                 <tr>
-                  <th className="p-2 border">방문 목적</th>
-                  <td className="p-2 border h-[80px]" colSpan={3}>{detail.visitPurpose}</td>
+                  <th className="border p-2">방문 목적</th>
+                  <td className="h-[80px] border p-2" colSpan={3}>
+                    {detail.visitPurpose}
+                  </td>
                 </tr>
                 <tr>
-                  <th className="p-2 border">방문자명</th><td className="p-2 border">{detail.name}</td>
-                  <th className="p-2 border">방문 인원</th><td className="p-2 border">{detail.visitNumber}</td>
+                  <th className="border p-2">방문자명</th>
+                  <td className="border p-2">{detail.name}</td>
+                  <th className="border p-2">방문 인원</th>
+                  <td className="border p-2">{detail.visitNumber}</td>
                 </tr>
                 <tr>
-                  <th className="p-2 border">방문자 이메일</th><td className="p-2 border">{detail.email}</td>
-                  <th className="p-2 border">방문자 연락처</th><td className="p-2 border">{detail.tel}</td>
+                  <th className="border p-2">방문자 이메일</th>
+                  <td className="border p-2">{detail.email}</td>
+                  <th className="border p-2">방문자 연락처</th>
+                  <td className="border p-2">{detail.tel}</td>
                 </tr>
                 <tr>
-                  <th className="p-2 border">출입카드 번호</th><td className="p-2 border">-</td>
-                  <th className="p-2 border"></th><td className="p-2 border"></td>
+                  <th className="border p-2">출입카드 번호</th>
+                  <td className="border p-2">-</td>
+                  <th className="border p-2"></th>
+                  <td className="border p-2"></td>
                 </tr>
               </tbody>
             </table>
 
             <div className="flex justify-between gap-3">
               <div className="flex gap-3">
-                {detail.status === '가예약' && (
+                {detail.status === "가예약" && (
                   <Button
                     theme="danger"
                     onClick={async () => {
                       if (confirm("예약을 확정하겠습니까?")) {
                         try {
-                          const res = await api.post("/api/v1/visit/confirm", { checkArr : [detail.id]});
+                          const res = await api.post("/api/v1/visit/confirm", {
+                            checkArr: [detail.id],
+                          });
                           if (res.data?.success) {
                             alert("예약 확정 완료");
                             fetchList();
@@ -111,10 +130,12 @@ export default function Visit() {
                         }
                       }
                     }}
-                  >예약 확정</Button>
+                  >
+                    예약 확정
+                  </Button>
                 )}
-                
-                {detail.status !== '예약 취소' && (
+
+                {detail.status !== "예약 취소" && (
                   <Button
                     theme="danger"
                     onClick={async () => {
@@ -135,7 +156,9 @@ export default function Visit() {
                         }
                       }
                     }}
-                  >예약 취소</Button>
+                  >
+                    예약 취소
+                  </Button>
                 )}
               </div>
               <div>
@@ -144,7 +167,9 @@ export default function Visit() {
                     closeModal();
                     showModify(detail);
                   }}
-                >수정</Button>
+                >
+                  수정
+                </Button>
               </div>
             </div>
           </div>
@@ -196,7 +221,7 @@ export default function Visit() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <ResultSummary total={total} />
 
         <div className="flex gap-2">
@@ -204,20 +229,20 @@ export default function Visit() {
             className="bg-black text-white hover:bg-gray-800"
             onClick={() => {
               showInput({
-                  id: null,
-                  reservationDatetime: null,
-                  status: null,
-                  visitDate: null,
-                  visitTime: null,
-                  companyId: null,
-                  companyName: null,
-                  visitBuilding: null,
-                  visitPurpose: null,
-                  name: null,
-                  visitNumber: null,
-                  email: null,
-                  tel: null,
-                  accessCard: null
+                id: null,
+                reservationDatetime: null,
+                status: null,
+                visitDate: null,
+                visitTime: null,
+                companyId: null,
+                companyName: null,
+                visitBuilding: null,
+                visitPurpose: null,
+                name: null,
+                visitNumber: null,
+                email: null,
+                tel: null,
+                accessCard: null,
               });
             }}
           >
@@ -238,10 +263,10 @@ export default function Visit() {
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
                   <button
-                    className={`text-black-600 truncate p-2 text-left cursor-pointer ${row.visitPurpose && "underline"}`}
+                    className={`text-black-600 cursor-pointer truncate p-2 text-left ${row.visitPurpose && "underline"}`}
                     onClick={(e) => {
                       e.preventDefault();
-                      console.log(row.id);
+
                       handleEventClick(row.id);
                     }}
                   >

@@ -110,8 +110,6 @@ export default function WhatsonPage() {
         })
       );
 
-      console.log("TopContent submit result:", topContentResult);
-
       if (!keyVisualResult || !topContentResult) return;
 
       const eventId = ids[lang] ?? null;
@@ -141,7 +139,7 @@ export default function WhatsonPage() {
         "/api/v1/event-promotion/contents/insert",
         payload
       );
-      console.log(payload);
+
       if (res.data?.success) {
         showModal({
           title: "저장 완료",
