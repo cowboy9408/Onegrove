@@ -210,7 +210,7 @@ export default function Visit() {
       <ResultSection>
         <DataTableSimple
           columns={[
-            { key: "id", label: "번호" },
+            { key: "rownum", label: "번호" },
             { key: "companyName", label: "입주사" },
             { key: "name", label: "방문객" },
             {
