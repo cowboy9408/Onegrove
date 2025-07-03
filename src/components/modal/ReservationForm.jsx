@@ -32,11 +32,6 @@ export default function ReservationForm({
     return `${yyyy}-${mm}-${dd}`;
   };
 
-  useEffect(() => {
-  if(paymentType) {
-    console.log(paymentType);
-  }
-}, [paymentType]);
 
   const handleSubmit = async () => {
     if (
@@ -66,7 +61,7 @@ export default function ReservationForm({
       ...(isEdit && { id: initialData.id }),
       ...(!isEdit && { status }),
     };
-    console.log(payload)
+    // console.log(payload)
 
     try {
       const res = await api.post(
