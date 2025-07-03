@@ -25,13 +25,66 @@ export default function Visit() {
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [visitList, setVisitList] = useState([]);
+  const [searchFilter, setSearchFilter] = useState({
+    company: "",
+    status: "",
+    dateRange: { startDate: null, endDate: null },
+    building: "",
+    cardNumber: "",
+    visitorName: "",
+  });
+  const [activeFilter, setActiveFilter] = useState(searchFilter);
+  const [companyList, setCompanyList] = useState([]);
+  const [buildingList, setBuildingList] = useState([]);
+  const [statusList, setStatusList] = useState([]);
 
   const size = 30;
+
+  const fetchVisitCategoryData = async () => {
+    try {
+      const res = await api.get("/api/v1/visit/category");
+
+      if (res.data?.success) {
+        const {
+          visitCompanyListRes,
+          visitStatusListRes,
+          visitBuildingListRes,
+        } = res.data.data;
+
+        if (Array.isArray(visitCompanyListRes)) {
+          setCompanyList(visitCompanyListRes);
+        }
+        if (Array.isArray(visitStatusListRes)) {
+          setStatusList(visitStatusListRes);
+        }
+        if (Array.isArray(visitBuildingListRes)) {
+          setBuildingList(visitBuildingListRes);
+        }
+      }
+    } catch (err) {
+      console.error("방문 카테고리 데이터 불러오기 실패:", err);
+    }
+  };
+
   const fetchList = async () => {
     try {
-      const res = await api.get("/api/v1/visit");
+      const res = await api.get("/api/v1/visit", {
+        params: {
+          company: activeFilter.company,
+          status: activeFilter.status,
+          building: activeFilter.building,
+          cardNumber: activeFilter.cardNumber,
+          visitorName: activeFilter.visitorName,
+          startDate: activeFilter.dateRange?.startDate
+            ? activeFilter.dateRange.startDate.toISOString().split("T")[0]
+            : undefined,
+          endDate: activeFilter.dateRange?.endDate
+            ? activeFilter.dateRange.endDate.toISOString().split("T")[0]
+            : undefined,
+        },
+      });
+
       if (res.data?.success && Array.isArray(res.data.data)) {
-        // console.log(res.data.data);
         setVisitList(res.data.data);
         setTotal(res.data.data?.length);
       }
@@ -39,6 +92,10 @@ export default function Visit() {
       console.error("목록 불러오기 실패:", err);
     }
   };
+
+  useEffect(() => {
+    fetchVisitCategoryData(); // 하나로 통합된 호출
+  }, []);
 
   useEffect(() => {
     fetchList();
@@ -221,6 +278,159 @@ export default function Visit() {
 
   return (
     <div>
+      <SearchSection>
+        <Box>
+          <div className="flex flex-col gap-6">
+            {/* 첫 줄: 입주사, 상태, 등록일 */}
+            <div className="flex gap-6">
+              <div className="min-w-[200px] flex-1">
+                <Select
+                  label="입주사"
+                  value={searchFilter.company}
+                  onChange={(e) =>
+                    setSearchFilter({
+                      ...searchFilter,
+                      company: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">전체</option>
+                  {companyList.map((c) => (
+                    <option key={c.companyId} value={c.companyName}>
+                      {c.companyName}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+
+              <div className="min-w-[200px] flex-1">
+                <Select
+                  label="상태"
+                  value={searchFilter.status}
+                  onChange={(e) =>
+                    setSearchFilter({ ...searchFilter, status: e.target.value })
+                  }
+                >
+                  <option value="">전체</option>
+                  {statusList.map((s) => (
+                    <option key={s.code} value={s.value}>
+                      {s.value}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+
+              <div className="min-w-[300px] flex-1">
+                <p className="mb-1 block pb-2 pl-1 text-sm font-medium text-gray-800 dark:text-gray-100">
+                  등록일
+                </p>
+                <DateRangePicker
+                  startDate={searchFilter.dateRange.startDate}
+                  endDate={searchFilter.dateRange.endDate}
+                  onRangeChange={({ startDate, endDate }) =>
+                    setSearchFilter({
+                      ...searchFilter,
+                      dateRange: { startDate, endDate },
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            {/* 둘째 줄: 방문동, 카드번호, 방문객 */}
+            <div className="flex gap-6">
+              <div className="min-w-[200px] flex-1">
+                <Select
+                  label="방문동"
+                  value={searchFilter.building}
+                  onChange={(e) =>
+                    setSearchFilter({
+                      ...searchFilter,
+                      building: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">전체</option>
+                  {buildingList.map((b) => (
+                    <option key={b.code} value={b.value}>
+                      {b.value}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+
+              <div className="min-w-[200px] flex-1">
+                <Input
+                  label="카드 번호"
+                  value={searchFilter.cardNumber}
+                  onChange={(e) =>
+                    setSearchFilter({
+                      ...searchFilter,
+                      cardNumber: e.target.value,
+                    })
+                  }
+                  onClear={() =>
+                    setSearchFilter({ ...searchFilter, cardNumber: "" })
+                  }
+                />
+              </div>
+
+              <div className="min-w-[200px] flex-1">
+                <Input
+                  label="방문객"
+                  value={searchFilter.visitorName}
+                  onChange={(e) =>
+                    setSearchFilter({
+                      ...searchFilter,
+                      visitorName: e.target.value,
+                    })
+                  }
+                  onClear={() =>
+                    setSearchFilter({ ...searchFilter, visitorName: "" })
+                  }
+                />
+              </div>
+            </div>
+
+            {/* 버튼 줄 */}
+            <div className="flex justify-end gap-2">
+              <Button
+                onClick={() => {
+                  setPage(1); // 페이지 초기화
+                  setActiveFilter(searchFilter); // 현재 필터를 실제 적용할 필터로 저장
+                  setSearchParams({ page: 1 }); // URL 동기화
+
+                  fetchList(); // 필터 반영하여 데이터 다시 불러오기
+                }}
+              >
+                검색
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const defaultFilter = {
+                    company: "",
+                    status: "",
+                    dateRange: { startDate: null, endDate: null },
+                    building: "",
+                    cardNumber: "",
+                    visitorName: "",
+                  };
+
+                  setSearchFilter(defaultFilter);
+                  setActiveFilter(defaultFilter);
+                  setPage(1);
+                  setSearchParams({ page: 1 });
+                  fetchList();
+                }}
+              >
+                초기화
+              </Button>
+            </div>
+          </div>
+        </Box>
+      </SearchSection>
+
       <div className="mb-4 flex items-center justify-between">
         <ResultSummary total={total} />
 
