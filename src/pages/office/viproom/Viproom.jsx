@@ -144,6 +144,7 @@ export default function Viproom() {
                       children: ({ closeModal }) => (
                         <ReservationForm
                           isEdit
+                          room={selectedRoom}
                           selectData={selectedData}
                           initialData={detail}
                           meetingOptions={meetingOptions}
