@@ -235,7 +235,7 @@ export default function VisitForm({
           >
             <option value="">방문 동 선택하세요</option>
             {buildingList.map((r) => (
-              <option key={r.code} value={r.value}>
+              <option key={r.code} value={r.code}>
                 {r.value}
               </option>
             ))}
