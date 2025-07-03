@@ -28,7 +28,7 @@ export default function SleepListPage() {
           const allData = res.data.data;
 
           const formattedData = allData.map((item, index) => ({
-            no: index + 1,
+            no: allData.length - index,
             name: (
               <Link
                 to={`/system/sleep/detail/${item.id}`}

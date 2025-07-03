@@ -170,8 +170,6 @@ export default function MeetingDetail() {
       return;
     }
 
-    console.log("roomNumber:", form.roomNumber);
-    console.log("location:", form.location);
     try {
       const payload = {
         id: Number(id), // 반드시 포함

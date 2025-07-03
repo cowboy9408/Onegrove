@@ -49,7 +49,6 @@ export default function BrandListPage() {
       try {
         const res = await api.get("/api/v1/brand/category");
         setCategoryList(res.data?.data || []);
-        console.log("카테고리 목록:", res.data?.data);
       } catch (err) {
         console.error("카테고리 목록 불러오기 실패:", err);
       }
@@ -70,17 +69,13 @@ export default function BrandListPage() {
           },
         });
 
-        console.log("브랜드 목록 로딩 성공:", page, res.data);
         const json = res.data;
 
         if (json.success && Array.isArray(json.data)) {
-          console.log("브랜드 목록 데이터:", json.data);
           const rows = json.data.map((entry, index) => {
             const items = entry.contentList || [];
             const koItem = items.find((i) => i.lang === "KO") || {};
             const enItem = items.find((i) => i.lang === "EN") || {};
-
-            // console.log("Item:", items, koItem, enItem);
 
             return {
               id: entry.id,
@@ -167,16 +162,7 @@ export default function BrandListPage() {
 
           const start = (page - 1) * size;
           const end = start + size;
-          console.log("총 필터링된 데이터:", filtered.length);
-          console.log(
-            "현재 페이지:",
-            page,
-            "시작 인덱스:",
-            start,
-            "끝 인덱스:",
-            end
-          );
-          console.log("원본 데이터 총 개수:", json.data.length);
+
           const sliced = sorted.slice(start, end).map((row, idx) => ({
             ...row,
             no: filtered.length - (start + idx),
@@ -186,41 +172,6 @@ export default function BrandListPage() {
           setData(sliced);
           setTotal(filtered.length);
         }
-
-        // const rows = res.data.data.map((brand, idx) => {
-        //   const ko = Array.isArray(brand.contentList)
-        //     ? brand.contentList.find((c) => c.lang?.toUpperCase() === "KO")
-        //     : null;
-        //   const en = Array.isArray(brand.contentList)
-        //     ? brand.contentList.find((c) => c.lang?.toUpperCase() === "EN")
-        //     : null;
-
-        //   console.log("ko.name 확인:", ko?.name);
-        //   console.log("en.name 확인:", en?.name);
-
-        //   return {
-        //     _id: String(brand.id),
-        //     id: brand.id,
-        //     masterId: brand.id,
-        //     no: brand.rownum || (page - 1) * size + idx + 1,
-        //     category: brand.category || "-",
-        //     ko_title: ko?.name || "-",
-        //     en_title: en?.name || "-",
-        //     ko_status: ko?.useYn || "-",
-        //     en_status: en?.useYn || "-",
-        //     ko_created_at: ko?.createDt?.split(" ")[0] || "-",
-        //     en_created_at: en?.createDt?.split(" ")[0] || "-",
-        //     ko_created_user: ko?.createUser || "-",
-        //     en_created_user: en?.createUser || "-",
-        //     ko_updated_at: ko?.updateDt?.split(" ")[0] || "-",
-        //     en_updated_at: en?.updateDt?.split(" ")[0] || "-",
-        //     ko_updated_user: ko?.updateUser || "-",
-        //     en_updated_user: en?.updateUser || "-",
-        //   };
-        // });
-
-        // setData(rows);
-        // setTotal(res.data.pageable.totalElements || 0);
       } catch (err) {
         console.error("브랜드 목록 로딩 실패:", err);
       }
@@ -228,7 +179,6 @@ export default function BrandListPage() {
 
     fetchBrands();
   }, [page, activeFilter, refreshKey]);
-  console.log("적용된 필터", activeFilter);
 
   const handleCheck = (id, checked) => {
     setCheckedIds((prev) =>

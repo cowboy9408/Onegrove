@@ -290,7 +290,7 @@ export default function StoriesListPage() {
                       "/api/v1/stories/delete",
                       checkedIds.map((id) => Number(id))
                     );
-                    console.log("삭제 성공");
+
                     setCheckedIds([]);
                     setPage(1);
                     window.location.reload();

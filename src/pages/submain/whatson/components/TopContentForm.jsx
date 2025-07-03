@@ -130,7 +130,7 @@ const TopContentForm = forwardRef(({ data, setData }, ref) => {
           })
           .filter(Boolean),
       ];
-      console.log("TopContentForm 제출 데이터:", result);
+
       return result;
     },
   }));

@@ -28,7 +28,6 @@ export default function BrandDetail() {
       try {
         const res = await api.get("/api/v1/brand/category");
         setCategoryList(res.data?.data || []);
-        // console.log("카테고리 목록:", res.data?.data);
       } catch (err) {
         console.error("카테고리 목록 불러오기 실패:", err);
       }
@@ -115,15 +114,6 @@ export default function BrandDetail() {
           formValues.bcId = data.bcId;
         }
 
-        console.log("폼에 설정할 데이터:", locale, formValues);
-        // Object.entries(formValues).forEach(([key, value]) => {
-        //   if (locale === "ko") {
-        //     koFormRef.current?.setValue?.(key, value);
-        //   }
-        //   if (locale === "en") {
-        //     enFormRef.current?.setValue?.(key, value);
-        //   }
-        // });
         const formRef = locale === "ko" ? koFormRef.current : enFormRef.current;
 
         const patchImageMeta = (img) =>
@@ -148,9 +138,6 @@ export default function BrandDetail() {
       if (enFormRef.current && enData?.data) {
         patchForm("en", enData.data);
       }
-
-      console.log("koFormRef.current:", koFormRef.current);
-      console.log("enFormRef.current:", enFormRef.current);
     }
   }, [currentLang, koData, enData]);
 
@@ -194,10 +181,6 @@ export default function BrandDetail() {
     try {
       const koValues = await koFormRef.current?.submit?.(onError);
       const enValues = await enFormRef.current?.submit?.(onError);
-      console.log("KO 폼 데이터:", koValues);
-      console.log("EN 폼 데이터:", enValues);
-
-      console.log("return test:", !koValues && !enValues);
 
       if (!koValues && !enValues) {
         setIsSaving(false);
@@ -269,8 +252,6 @@ export default function BrandDetail() {
           }
           setLoading(false);
 
-          console.log(`[${lang}] 서버에 보낼 데이터:`, lang, payload);
-
           const apiUrl =
             payload.contentId !== undefined && payload.contentId !== null
               ? "/api/v1/brand/update"
@@ -286,12 +267,12 @@ export default function BrandDetail() {
       if (currentLang === 0) {
         const koValues = await koFormRef.current?.submit?.();
         if (!koValues) return;
-        console.log("KO 폼 데이터:", koValues);
+
         await saveOne(koValues, "KO", koData.data);
       } else {
         const enValues = await enFormRef.current?.submit?.();
         if (!enValues) return;
-        console.log("EN 폼 데이터:", enValues, "EN", enData.data);
+
         await saveOne(enValues, "EN", enData.data);
       }
 

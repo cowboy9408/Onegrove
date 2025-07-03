@@ -37,9 +37,6 @@ export default function StoriesDetail() {
         const ko = resKO.data.data || [];
         const en = resEN.data.data || [];
 
-        console.log("koData:", ko);
-        console.log("enData:", en);
-
         const patchedKo = ko
           ? {
               ...ko,
