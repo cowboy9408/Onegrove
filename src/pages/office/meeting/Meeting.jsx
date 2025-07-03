@@ -8,9 +8,11 @@ import api from "@/lib/apiClient";
 import dayjs from "dayjs";
 
 export default function Meeting() {
+  const [selectedOffice, setSelectedOffice] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const { showModal } = useContext(ModalContext);
   const [meetingOptions, setMeetingOptions] = useState({});
+  const [locationOptions, setLocationOptions] = useState([]);
   const [officeOptions, setOfficeOptions] = useState([]);
   const [scheduleList, setScheduleList] = useState([]);
 
@@ -43,16 +45,33 @@ export default function Meeting() {
   }, [selectedRoom]);
 
   useEffect(() => {
-    if (officeOptions.length > 0 && !selectedRoom) {
-      setSelectedRoom(officeOptions[0].id);
+    if (officeOptions.length > 0 && !selectedOffice) {
+      setSelectedOffice(officeOptions[0].code);
     }
   }, [officeOptions]);
 
   useEffect(() => {
     const fetchMeta = async () => {
       try {
-        const settingRes = await api.get(`/api/v1/meeting/setting?isVip=N`);
+        const settingRes = await api.get(`/api/v1/meeting/location-list`);
         if (settingRes.data.success) setOfficeOptions(settingRes.data.data);
+      } catch (err) {
+        console.error("오피스 정보 조회 실패:", err);
+      }
+    };
+    fetchMeta();
+  }, []);
+
+  useEffect(() => {
+    const fetchOffice = async () => {
+      try {
+        const settingRes = await api.get(`/api/v1/meeting/room-list?isVip=N&location=${selectedOffice}`);
+        if (settingRes.data.success) {
+          setLocationOptions(settingRes.data.data);
+          if (settingRes.data.data.length > 0) {
+            setSelectedRoom(settingRes.data.data[0].id);
+          }
+        }
 
         const categoryRes = await api.get(`/api/v1/meeting/office-list?lang=ko`);
         if (categoryRes.data.success) setMeetingOptions(categoryRes.data.data);
@@ -60,8 +79,12 @@ export default function Meeting() {
         console.error("메타 정보 조회 실패:", err);
       }
     };
-    fetchMeta();
-  }, []);
+    if(selectedOffice) fetchOffice();
+  }, [selectedOffice]);
+
+
+
+  
 
   const handleEventClick = async (event) => {
     try {
@@ -148,12 +171,15 @@ export default function Meeting() {
                       showCancel: true,
                       children: ({ closeModal }) => (
                         <ReservationForm
-                          isEdit
-                          room={selectedRoom}
+                          locationOptions={officeOptions}
+                          roomOptions={locationOptions}
+                          selectedLocation={selectedOffice}
+                          selectedRoom={selectedRoom}
+                          setSelectedLocation={setSelectedOffice}
+                          setSelectedRoom={setSelectedRoom}
                           selectData={selectedData}
-                          initialData={detail}
                           meetingOptions={meetingOptions}
-                          roomList={officeOptions}
+                          existingReservations={scheduleList}
                           closeModal={closeModal}
                           onSubmit={() => {
                             fetchSchedules();
@@ -177,20 +203,37 @@ export default function Meeting() {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <Select
-          label="회의실 선택"
-          value={selectedRoom}
-          onChange={(e) => {
-            setSelectedRoom(Number(e.target.value));
-          }}
-          className="w-sm"
-        >
-          {officeOptions.map((room) => (
-            <option key={room.id} value={room.id}>
-              {room.name} ({room.location})
-            </option>
-          ))}
-        </Select>
+        <div className="flex gap-2">
+          <Select
+            label="오피스 선택"
+            value={selectedOffice}
+            onChange={(e) => {
+              setSelectedOffice(e.target.value);
+            }}
+            className="w-[8em]"
+          >
+            {officeOptions.map((room) => (
+              <option key={room.code} value={room.code}>
+                {room.location}
+              </option>
+            ))}
+          </Select>
+          <Select
+            label="회의실 선택"
+            value={selectedRoom}
+            onChange={(e) => {
+              setSelectedRoom(Number(e.target.value));
+            }}
+            className="w-[16em]"
+          >
+            {locationOptions.map((room) => (
+              <option key={room.id} value={room.id}>
+                {room.roomName}
+              </option>
+            ))}
+          </Select>
+        </div>
+        
 
         <Button
           onClick={() => {
@@ -201,11 +244,15 @@ export default function Meeting() {
               showCancel: true,
               children: ({ closeModal }) => (
                 <ReservationForm
+                  locationOptions={officeOptions}
+                  roomOptions={locationOptions}
+                  selectedLocation={selectedOffice}
+                  selectedRoom={selectedRoom}
+                  setSelectedLocation={setSelectedOffice}
+                  setSelectedRoom={setSelectedRoom}
                   selectData={selectedData}
-                  room={selectedRoom}
                   meetingOptions={meetingOptions}
                   existingReservations={scheduleList}
-                  roomList={officeOptions}
                   closeModal={closeModal}
                   onSubmit={() => {
                     fetchSchedules();
@@ -237,9 +284,13 @@ export default function Meeting() {
               showCancel: true,
               children: ({ closeModal }) => (
                 <ReservationForm
+                  locationOptions={officeOptions}
+                  roomOptions={locationOptions}
+                  selectedLocation={selectedOffice}
+                  selectedRoom={selectedRoom}
+                  setSelectedLocation={setSelectedOffice}
+                  setSelectedRoom={setSelectedRoom}
                   selectData={selectedData}
-                  room={selectedRoom}
-                  roomList={officeOptions}
                   meetingOptions={meetingOptions}
                   existingReservations={scheduleList}
                   initialData={{ resveDate }}
