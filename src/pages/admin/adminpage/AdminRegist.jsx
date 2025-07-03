@@ -196,7 +196,7 @@ export default function AdminRegist() {
           } else {
             showModal({
               title: "수정 실패",
-              message: "서버 오류로 수정을 완료하지 못했습니다.",
+              message: "서버 오류로 저장을 완료하지 못했습니다.",
               showCancel: false,
             });
           }
