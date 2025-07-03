@@ -12,23 +12,13 @@ export default function ReservationForm({
   onSubmit,
   closeModal,
 }) {
-  const [roomId, setRoomId] = useState(initialData.roomId || room || 1);
-  const [companyId, setCompanyId] = useState(
-    isEdit ? initialData.companyId || "" : ""
-  );
-  const [numberVisitors, setNumberVisitors] = useState(
-    isEdit ? initialData.numberVisitors || "" : ""
-  );
-  const [paymentType, setPaymentType] = useState(
-    isEdit ? initialData.paymentType || "" : "free"
-  );
+  const [roomId, setRoomId] = useState(initialData.roomId || room);
+  const [companyId, setCompanyId] = useState(isEdit ? initialData.companyId || "" : "");
+  const [numberVisitors, setNumberVisitors] = useState(isEdit ? initialData.numberVisitors || "" : "");
+  const [paymentType, setPaymentType] = useState(isEdit ? (initialData.paymentType === "유료 예약") ? "paid" : "free" : "free");
   const [resveDate, setResveDate] = useState(initialData.resveDate || "");
-  const [resveStartTime, setResveStartTime] = useState(
-    initialData.resveStartTime || "09:00:00"
-  );
-  const [resveEndTime, setResveEndTime] = useState(
-    initialData.resveEndTime || "10:00:00"
-  );
+  const [resveStartTime, setResveStartTime] = useState(initialData.resveStartTime && initialData.resveStartTime + ":00" || "09:00:00");
+  const [resveEndTime, setResveEndTime] = useState(initialData.resveEndTime && initialData.resveEndTime + ":00" || "10:00:00");
   const [content, setContent] = useState(initialData.content || "");
   const [realUser, setRealUser] = useState(initialData.realUser || "");
   const [note, setNote] = useState(initialData.note || "");
@@ -41,6 +31,7 @@ export default function ReservationForm({
     const dd = String(today.getDate()).padStart(2, "0");
     return `${yyyy}-${mm}-${dd}`;
   };
+
 
   const handleSubmit = async () => {
     if (
@@ -70,6 +61,7 @@ export default function ReservationForm({
       ...(isEdit && { id: initialData.id }),
       ...(!isEdit && { status }),
     };
+    // console.log(payload)
 
     try {
       const res = await api.post(
@@ -83,7 +75,7 @@ export default function ReservationForm({
       } else alert("처리 실패");
     } catch (err) {
       console.error("예약 처리 실패:", err);
-      alert(err?.respopnse?.data?.message);
+      alert(err?.respopnse?.data?.message || "다시 시도해 주세요.");
       // alert("필수 입력 내용을 확인해 주세요.");
     }
   };
@@ -337,11 +329,9 @@ export default function ReservationForm({
       <div className="flex justify-between gap-3">
         <button
           onClick={handleSubmit}
-          disabled={!isFormValid}
-          className={`cursor-pointer rounded px-4 py-2 text-white ${
-            isFormValid
-              ? "bg-black hover:bg-gray-800"
-              : "cursor-not-allowed bg-gray-400"
+          // disabled={!isFormValid}
+          className={`rounded px-4 py-2 cursor-pointer text-white ${
+            isFormValid ? "bg-black hover:bg-gray-800" : "bg-gray-400 cursor-not-allowed"
           }`}
         >
           저장

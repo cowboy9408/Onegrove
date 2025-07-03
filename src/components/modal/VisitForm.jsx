@@ -124,7 +124,7 @@ export default function VisitForm({
       );
       if (res.data?.success) {
         alert(isEdit ? "수정 완료" : "등록 완료");
-        // onSubmit?.(payload);
+        onSubmit?.(payload);
         closeModal?.();
       } else alert("처리 실패");
     } catch (err) {

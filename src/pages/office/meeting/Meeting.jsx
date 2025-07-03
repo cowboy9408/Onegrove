@@ -37,6 +37,7 @@ export default function Meeting() {
 
   useEffect(() => {
     if(selectedRoom) {
+      console.log(selectedRoom);
       fetchSchedules();
     }
   }, [selectedRoom]);
@@ -135,6 +136,10 @@ export default function Meeting() {
               <div>
                 <Button
                   onClick={() => {
+                    // console.log(
+                    //   detail,
+                    //   selectedRoom
+                    // )
                     closeModal();
                     showModal({
                       title: "Meeting Room 수정",
@@ -144,6 +149,7 @@ export default function Meeting() {
                       children: ({ closeModal }) => (
                         <ReservationForm
                           isEdit
+                          room={selectedRoom}
                           selectData={selectedData}
                           initialData={detail}
                           meetingOptions={meetingOptions}
