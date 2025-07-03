@@ -13,7 +13,7 @@ export default function AffairRegist() {
     status: "active",
     companyId: "",
     name: "",
-    gender: "",
+    gender: "male",
     username: "",
     password: "",
     confirmPassword: "",
@@ -95,6 +95,14 @@ export default function AffairRegist() {
       }
     }
 
+    if (key === "phone") {
+      const numeric = value.replace(/\D/g, "");
+      if (numeric.length > 8) return; // 8자리 초과 방지
+      setForm((prev) => ({ ...prev, phone: numeric }));
+      setErrors((prev) => ({ ...prev, phone: false }));
+      return;
+    }
+
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -102,7 +110,7 @@ export default function AffairRegist() {
     if (!form.username) {
       showModal({
         title: "필수 입력",
-        message: "아이디를 입력해주세요.",
+        message: "모든 필수 항목을 입력해주세요.",
         showCancel: false,
       });
       return;
@@ -121,7 +129,7 @@ export default function AffairRegist() {
     if (!form.email) {
       showModal({
         title: "필수 입력",
-        message: "이메일을 입력해주세요.",
+        message: "모든 필수 항목을 입력해주세요.",
         showCancel: false,
       });
       return;
@@ -131,6 +139,16 @@ export default function AffairRegist() {
       showModal({
         title: "필수 항목 확인",
         message: "모든 필수 항목을 입력해주세요.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    const phoneDigitsOnly = form.phone.replace(/\D/g, "");
+    if (phoneDigitsOnly.length !== 8) {
+      showModal({
+        title: "전화번호 오류",
+        message: "전화번호는 숫자만 입력하며, 8자리여야 합니다.",
         showCancel: false,
       });
       return;
@@ -192,10 +210,7 @@ export default function AffairRegist() {
         } catch (error) {
           const message = error?.response?.data?.message || "";
 
-          if (
-            message.includes("Duplicate entry") &&
-            message.includes("UQ_username")
-          ) {
+          if (message.includes("중복된 아이디가 존재합니다")) {
             showModal({
               title: "중복 아이디",
               message:
@@ -326,8 +341,11 @@ export default function AffairRegist() {
               <Input
                 value={form.phone}
                 onChange={(e) => handleChange("phone", e.target.value)}
-                className="rounded-l-none"
+                maxLength={8}
+                inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder="1234-5678"
+                className="rounded-l-none"
               />
             </div>
           </div>

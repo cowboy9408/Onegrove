@@ -25,6 +25,10 @@ export default function AffairDetailPage() {
     isManager: "",
     isReservation: "",
   });
+  const [errors, setErrors] = useState({
+    name: "",
+    username: "",
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -85,6 +89,26 @@ export default function AffairDetailPage() {
   }, []);
 
   const handleChange = (key, value) => {
+    if (key === "name") {
+      if (value.length > 10) {
+        setErrors((prev) => ({
+          ...prev,
+          name: "이름은 최대 10자까지 입력 가능합니다.",
+        }));
+        return; // 입력 제한
+      } else {
+        setErrors((prev) => ({ ...prev, name: "" }));
+      }
+    }
+
+    if (key === "phone") {
+      const numeric = value.replace(/\D/g, "");
+      if (numeric.length > 8) return; // 8자리 초과 방지
+      setForm((prev) => ({ ...prev, phone: numeric }));
+      setErrors((prev) => ({ ...prev, phone: false }));
+      return;
+    }
+
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -128,10 +152,39 @@ export default function AffairDetailPage() {
   };
 
   const handleUpdate = async () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneDigitsOnly = form.phone.replace(/\D/g, "");
     if (!form.name || !form.username || !form.phone || !form.email) {
       showModal({
         title: "필수 항목 확인",
         message: "모든 필수 항목을 입력해주세요.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    if (form.name.length > 10) {
+      showModal({
+        title: "이름 오류",
+        message: "이름은 최대 10자까지 입력 가능합니다.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    if (phoneDigitsOnly.length !== 8) {
+      showModal({
+        title: "전화번호 오류",
+        message: "전화번호는 숫자만 입력하며, 8자리여야 합니다.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    if (!emailRegex.test(form.email)) {
+      showModal({
+        title: "이메일 오류",
+        message: "올바른 이메일 형식이 아닙니다.",
         showCancel: false,
       });
       return;
@@ -252,6 +305,8 @@ export default function AffairDetailPage() {
             label="이름"
             value={form.name}
             onChange={(e) => handleChange("name", e.target.value)}
+            required
+            error={errors.name}
           />
           <div>
             <p className="mb-2 text-sm font-medium text-gray-800">성별</p>
@@ -294,8 +349,11 @@ export default function AffairDetailPage() {
                 <Input
                   value={form.phone}
                   onChange={(e) => handleChange("phone", e.target.value)}
-                  className="rounded-l-none"
+                  maxLength={8}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   placeholder="1234-5678"
+                  className="rounded-l-none"
                 />
               </div>
             </div>

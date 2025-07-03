@@ -11,7 +11,7 @@ export default function AdminRegist() {
     role: "NORMAL_ADMIN",
     status: "active",
     name: "",
-    gender: "",
+    gender: "male",
     username: "",
     password: "",
     confirmPassword: "",
@@ -64,6 +64,14 @@ export default function AdminRegist() {
       }
     }
 
+    if (key === "phone") {
+      const numeric = value.replace(/\D/g, "");
+      if (numeric.length > 8) return; // 8자리 초과 방지
+      setForm((prev) => ({ ...prev, phone: numeric }));
+      setErrors((prev) => ({ ...prev, phone: false }));
+      return;
+    }
+
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -71,7 +79,7 @@ export default function AdminRegist() {
     if (!form.username) {
       showModal({
         title: "필수 입력",
-        message: "아이디를 입력해주세요.",
+        message: "모든 필수 항목을 입력해주세요.",
         showCancel: false,
       });
       return;
@@ -90,7 +98,7 @@ export default function AdminRegist() {
     if (!form.email) {
       showModal({
         title: "필수 입력",
-        message: "이메일을 입력해주세요.",
+        message: "모든 필수 항목을 입력해주세요.",
         showCancel: false,
       });
       return;
@@ -100,6 +108,16 @@ export default function AdminRegist() {
       showModal({
         title: "필수 항목 확인",
         message: "모든 필수 항목을 입력해주세요.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    const phoneDigitsOnly = form.phone.replace(/\D/g, "");
+    if (phoneDigitsOnly.length !== 8) {
+      showModal({
+        title: "전화번호 오류",
+        message: "전화번호는 숫자만 입력하며, 8자리여야 합니다.",
         showCancel: false,
       });
       return;
@@ -308,8 +326,11 @@ export default function AdminRegist() {
               <Input
                 value={form.phone}
                 onChange={(e) => handleChange("phone", e.target.value)}
-                className="rounded-l-none"
+                maxLength={8}
+                inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder="1234-5678"
+                className="rounded-l-none"
               />
             </div>
           </div>

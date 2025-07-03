@@ -16,7 +16,9 @@ export default function SleepReserve() {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [officeOptions, setOfficeOptions] = useState([]);
   const [meetingOptions, setMeetingOptions] = useState({});
-  const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
+  const [selectedDate, setSelectedDate] = useState(
+    dayjs().format("YYYY-MM-DD")
+  );
   const [timeSlots, setTimeSlots] = useState([]);
   const [expandedSlot, setExpandedSlot] = useState(null);
   const [reservationDetails, setReservationDetails] = useState({});
@@ -65,7 +67,6 @@ export default function SleepReserve() {
     }
   };
 
-
   const generateTimeSlots = (start, end) => {
     const slots = [];
     let current = dayjs(`2020-01-01T${start}`);
@@ -98,7 +99,10 @@ export default function SleepReserve() {
 
   useEffect(() => {
     if (meetingOptions.startTime && meetingOptions.endTime) {
-      const slots = generateTimeSlots(meetingOptions.startTime, meetingOptions.endTime);
+      const slots = generateTimeSlots(
+        meetingOptions.startTime,
+        meetingOptions.endTime
+      );
       setTimeSlots(slots);
     }
   }, [meetingOptions, selectedDate]);
@@ -121,9 +125,10 @@ export default function SleepReserve() {
   const handleDateChange = (direction) => {
     const today = dayjs();
     const tenDaysAgo = today.subtract(10, "day");
-    const newDate = direction === "prev"
-      ? dayjs(selectedDate).subtract(1, "day")
-      : dayjs(selectedDate).add(1, "day");
+    const newDate =
+      direction === "prev"
+        ? dayjs(selectedDate).subtract(1, "day")
+        : dayjs(selectedDate).add(1, "day");
 
     if (newDate.isSameOrAfter(tenDaysAgo) && newDate.isSameOrBefore(today)) {
       setSelectedDate(newDate.format("YYYY-MM-DD"));
@@ -134,7 +139,7 @@ export default function SleepReserve() {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <Select
-          label="수면실 선택"
+          label="Relax Room 선택"
           value={selectedRoom ?? ""}
           className="w-sm"
           onChange={(e) => setSelectedRoom(Number(e.target.value))}
@@ -173,33 +178,50 @@ export default function SleepReserve() {
         </Button>
       </div>
 
-      <div className="mb-4 flex justify-center gap-4 items-center text-sm">
-        <Button size="sm" variant="ghost" onClick={() => handleDateChange("prev")}>←</Button>
+      <div className="mb-4 flex items-center justify-center gap-4 text-sm">
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => handleDateChange("prev")}
+        >
+          ←
+        </Button>
         <div className="text-[20px] font-bold">{selectedDate}</div>
-        <Button size="sm" variant="ghost" onClick={() => handleDateChange("next")}>→</Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => handleDateChange("next")}
+        >
+          →
+        </Button>
       </div>
 
-      <div className="mt-6 space-y-3 mx-auto w-[50%]">
+      <div className="mx-auto mt-6 w-[50%] space-y-3">
         {timeSlots.map((slot) => {
           const time = slot.start;
           const reserveList = reservationDetails[time] || [];
           const reserveCount = reservationCounts[time] || 0;
-          const totalCount = (meetingOptions.infoList || []).filter(info => info.useYn === "Y").length;
+          const totalCount = (meetingOptions.infoList || []).filter(
+            (info) => info.useYn === "Y"
+          ).length;
 
           return (
-            <div key={time} className="border rounded shadow-sm">
+            <div key={time} className="rounded border shadow-sm">
               <button
                 onClick={() => handleSlotToggle(time)}
-                className="w-full flex justify-between items-center px-4 py-2 text-sm font-medium bg-gray-50 hover:bg-gray-100"
+                className="flex w-full items-center justify-between bg-gray-50 px-4 py-2 text-sm font-medium hover:bg-gray-100"
               >
                 <span>
-                  <span className="font-bold mr-2">{slot.start} ~ {slot.end}</span> - 예약된 수: {reserveCount} / {totalCount}
+                  <span className="mr-2 font-bold">
+                    {slot.start} ~ {slot.end}
+                  </span>{" "}
+                  - 예약된 수: {reserveCount} / {totalCount}
                 </span>
                 <span>{expandedSlot === time ? "▲" : "▼"}</span>
               </button>
 
               {expandedSlot === time && (
-                <div className="p-3 space-y-2 bg-gray-100">
+                <div className="space-y-2 bg-gray-100 p-3">
                   {(meetingOptions.infoList || [])
                     .filter((info) => info.useYn === "Y")
                     .map((info) => {
@@ -207,11 +229,14 @@ export default function SleepReserve() {
                         (r) => r.roomNumberId === info.roomNumId
                       );
                       return (
-                        <div key={info.id} className="text-sm border-b pb-2">
+                        <div key={info.id} className="border-b pb-2 text-sm">
                           <strong>
                             {meetingOptions.name} {info.roomNumId}호
                           </strong>{" "}
-                          | {reservation ? `${reservation.userName} (${reservation.companyName})` : "예약자 없음"}
+                          |{" "}
+                          {reservation
+                            ? `${reservation.userName} (${reservation.companyName})`
+                            : "예약자 없음"}
                         </div>
                       );
                     })}

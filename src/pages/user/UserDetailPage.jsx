@@ -24,6 +24,13 @@ export default function UserDetailPage() {
   });
   const [companyOptions, setCompanyOptions] = useState([]);
   const [isLocked, setIsLocked] = useState(false);
+  const [errors, setErrors] = useState({
+    name: "",
+    username: "",
+    phone: false,
+    email: "",
+    company: false,
+  });
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -71,6 +78,27 @@ export default function UserDetailPage() {
   }, [id]);
 
   const handleChange = (key, value) => {
+    if (key === "name") {
+      if (value.length > 10) {
+        setErrors((prev) => ({
+          ...prev,
+          name: "이름은 최대 10자까지 입력 가능합니다.",
+        }));
+        return; // 입력 제한
+      } else {
+        setErrors((prev) => ({ ...prev, name: "" }));
+      }
+    }
+
+    if (key === "phone") {
+      // 숫자만 허용
+      const numeric = value.replace(/\D/g, "");
+      if (numeric.length > 8) return; // 8자 초과 방지
+      setForm((prev) => ({ ...prev, phone: numeric }));
+      setErrors((prev) => ({ ...prev, phone: false }));
+      return;
+    }
+
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -124,6 +152,27 @@ export default function UserDetailPage() {
       showModal({
         title: "필수 항목 누락",
         message: "모든 필수 항목을 입력해주세요.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    const phoneDigitsOnly = form.phone.replace(/\D/g, "");
+    if (phoneDigitsOnly.length !== 8) {
+      showModal({
+        title: "전화번호 오류",
+        message: "전화번호는 숫자만 입력하며, 8자리여야 합니다.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(form.email)) {
+      showModal({
+        title: "이메일 오류",
+        message: "올바른 이메일 형식이 아닙니다.",
         showCancel: false,
       });
       return;
@@ -237,6 +286,7 @@ export default function UserDetailPage() {
             value={form.name}
             onChange={(e) => handleChange("name", e.target.value)}
             required
+            error={errors.name}
           />
           <div>
             <p className="mb-2 text-sm font-medium text-gray-800">성별</p>
@@ -281,8 +331,10 @@ export default function UserDetailPage() {
                 <Input
                   value={form.phone}
                   onChange={(e) => handleChange("phone", e.target.value)}
-                  className="rounded-l-none"
-                  placeholder="1234-5678"
+                  maxLength={8}
+                  inputMode="numeric" // 모바일에서도 숫자 키패드 유도
+                  pattern="[0-9]*"
+                  placeholder="ex) 1234-1234"
                 />
               </div>
             </div>

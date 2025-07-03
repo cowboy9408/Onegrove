@@ -23,10 +23,10 @@ export default function AdminRegist() {
   const [companyOptions, setCompanyOptions] = useState([]);
   const [companyError, setCompanyError] = useState(false);
   const [errors, setErrors] = useState({
-    name: false,
-    username: false,
+    name: "",
+    username: "",
     phone: false,
-    email: false,
+    email: "",
     company: false,
   });
 
@@ -65,6 +65,39 @@ export default function AdminRegist() {
   // };
 
   const handleChange = (key, value) => {
+    if (key === "name") {
+      if (value.length > 10) {
+        setErrors((prev) => ({
+          ...prev,
+          name: "이름은 최대 10자까지 입력 가능합니다.",
+        }));
+        return;
+      } else {
+        setErrors((prev) => ({ ...prev, name: "" }));
+      }
+    }
+
+    if (key === "username") {
+      const usernameRegex = /^[a-z0-9]{0,16}$/;
+      if (!usernameRegex.test(value)) {
+        setErrors((prev) => ({
+          ...prev,
+          username: "영소문자와 숫자만 입력할 수 있습니다 (4~16자).",
+        }));
+      } else {
+        setErrors((prev) => ({ ...prev, username: "" }));
+      }
+    }
+
+    if (key === "phone") {
+      // 숫자만 허용
+      const numeric = value.replace(/\D/g, "");
+      if (numeric.length > 8) return; // 8자 초과 방지
+      setForm((prev) => ({ ...prev, phone: numeric }));
+      setErrors((prev) => ({ ...prev, phone: false }));
+      return;
+    }
+
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -77,6 +110,8 @@ export default function AdminRegist() {
       company: !form.company,
     };
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 이메일 형식 검사
+
     setErrors(newErrors);
 
     const hasError = Object.values(newErrors).some(Boolean);
@@ -88,11 +123,39 @@ export default function AdminRegist() {
       });
       return;
     }
+    const usernameRegex = /^[a-z0-9]{4,16}$/;
+    if (!usernameRegex.test(form.username)) {
+      showModal({
+        title: "아이디 오류",
+        message: "아이디는 4~16자의 영소문자와 숫자만 사용 가능합니다.",
+        showCancel: false,
+      });
+      return;
+    }
 
     if (form.password !== form.confirmPassword) {
       showModal({
         title: "비밀번호 확인",
         message: "비밀번호가 일치하지 않습니다.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    const phoneDigitsOnly = form.phone.replace(/\D/g, "");
+    if (phoneDigitsOnly.length !== 8) {
+      showModal({
+        title: "전화번호 오류",
+        message: "전화번호는 숫자만 입력하며, 8자리여야 합니다.",
+        showCancel: false,
+      });
+      return;
+    }
+
+    if (!emailRegex.test(form.email)) {
+      showModal({
+        title: "이메일 오류",
+        message: "올바른 이메일 형식을 입력해주세요.",
         showCancel: false,
       });
       return;
@@ -204,19 +267,14 @@ export default function AdminRegist() {
       {/* 입력 필드 및 성별 라디오 */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
-          {" "}
           <Input
             label="이름"
             value={form.name}
-            onChange={(e) => {
-              handleChange("name", e.target.value);
-              if (e.target.value)
-                setErrors((prev) => ({ ...prev, name: false }));
-            }}
+            onChange={(e) => handleChange("name", e.target.value)}
             required
           />
           {errors.name && (
-            <p className="mt-1 text-sm text-red-500">이름을 입력해주세요.</p>
+            <p className="mt-1 text-sm text-red-500">{errors.name}</p>
           )}
         </div>
 
@@ -245,15 +303,12 @@ export default function AdminRegist() {
         <Input
           label="아이디"
           value={form.username}
-          onChange={(e) => {
-            handleChange("username", e.target.value);
-            if (e.target.value)
-              setErrors((prev) => ({ ...prev, username: false }));
-          }}
+          onChange={(e) => handleChange("username", e.target.value)}
           required
         />
+
         {errors.username && (
-          <p className="mt-1 text-sm text-red-500">아이디를 입력해주세요.</p>
+          <p className="mt-1 text-sm text-red-500">{errors.username}</p>
         )}
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -284,19 +339,17 @@ export default function AdminRegist() {
             <div className="w-[670px]">
               <Input
                 value={form.phone}
-                onChange={(e) => {
-                  handleChange("phone", e.target.value);
-                  if (e.target.value)
-                    setErrors((prev) => ({ ...prev, phone: false }));
-                }}
-                className="rounded-l-none"
-                placeholder="1234-5678"
+                onChange={(e) => handleChange("phone", e.target.value)}
+                maxLength={8}
+                inputMode="numeric" // 모바일에서도 숫자 키패드 유도
+                pattern="[0-9]*"
+                placeholder="ex) 1234-1234"
               />
-              {errors.phone && (
+              {/* {errors.phone && (
                 <p className="mt-1 text-sm text-red-500">
                   전화번호를 입력해주세요.
                 </p>
-              )}
+              )} */}
             </div>
           </div>
         </div>
@@ -304,16 +357,12 @@ export default function AdminRegist() {
           <Input
             label="이메일"
             value={form.email}
-            onChange={(e) => {
-              handleChange("email", e.target.value);
-              if (e.target.value)
-                setErrors((prev) => ({ ...prev, email: false }));
-            }}
+            onChange={(e) => handleChange("email", e.target.value)}
             required
           />
-          {errors.email && (
-            <p className="mt-1 text-sm text-red-500">이메일을 입력해주세요.</p>
-          )}
+          {/* {errors.email && (
+            // <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+          )} */}
         </div>
       </div>
 
