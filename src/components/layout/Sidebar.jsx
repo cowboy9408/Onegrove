@@ -105,7 +105,6 @@ export default function Sidebar() {
       }
 
       const ancestors = collectAncestorPaths(item);
-      console.log(ancestors);
       [...ancestors, path].forEach((p) => {
         nextState[p] = true;
       });

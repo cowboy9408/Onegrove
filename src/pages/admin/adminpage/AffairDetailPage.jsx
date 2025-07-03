@@ -237,7 +237,6 @@ export default function AffairDetailPage() {
         },
       });
     } catch (error) {
-      // 이 catch는 필요 없어졌지만 남겨도 무방
       console.error("수정 로직 실패:", error);
     }
   };

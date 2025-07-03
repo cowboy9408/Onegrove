@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useContext } from "react";
 import Button from "@/components/common/Button";
 import DataTableSimple from "@/components/common/DataTableSimple";
@@ -26,20 +25,77 @@ export default function Visit() {
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [visitList, setVisitList] = useState([]);
+  const [searchFilter, setSearchFilter] = useState({
+    company: "",
+    status: "",
+    dateRange: { startDate: null, endDate: null },
+    building: "",
+    cardNumber: "",
+    visitorName: "",
+  });
+  const [activeFilter, setActiveFilter] = useState(searchFilter);
+  const [companyList, setCompanyList] = useState([]);
+  const [buildingList, setBuildingList] = useState([]);
+  const [statusList, setStatusList] = useState([]);
 
   const size = 30;
+
+  const fetchVisitCategoryData = async () => {
+    try {
+      const res = await api.get("/api/v1/visit/category");
+
+      if (res.data?.success) {
+        const {
+          visitCompanyListRes,
+          visitStatusListRes,
+          visitBuildingListRes,
+        } = res.data.data;
+
+        if (Array.isArray(visitCompanyListRes)) {
+          setCompanyList(visitCompanyListRes);
+        }
+        if (Array.isArray(visitStatusListRes)) {
+          setStatusList(visitStatusListRes);
+        }
+        if (Array.isArray(visitBuildingListRes)) {
+          setBuildingList(visitBuildingListRes);
+        }
+      }
+    } catch (err) {
+      console.error("방문 카테고리 데이터 불러오기 실패:", err);
+    }
+  };
+
   const fetchList = async () => {
     try {
-      const res = await api.get("/api/v1/visit");
+      const res = await api.get("/api/v1/visit", {
+        params: {
+          company: activeFilter.company,
+          status: activeFilter.status,
+          building: activeFilter.building,
+          cardNumber: activeFilter.cardNumber,
+          visitorName: activeFilter.visitorName,
+          startDate: activeFilter.dateRange?.startDate
+            ? activeFilter.dateRange.startDate.toISOString().split("T")[0]
+            : undefined,
+          endDate: activeFilter.dateRange?.endDate
+            ? activeFilter.dateRange.endDate.toISOString().split("T")[0]
+            : undefined,
+        },
+      });
+
       if (res.data?.success && Array.isArray(res.data.data)) {
-        // console.log(res.data.data);
         setVisitList(res.data.data);
-        setTotal(res.data.data?.length)
+        setTotal(res.data.data?.length);
       }
     } catch (err) {
       console.error("목록 불러오기 실패:", err);
     }
   };
+
+  useEffect(() => {
+    fetchVisitCategoryData(); // 하나로 통합된 호출
+  }, []);
 
   useEffect(() => {
     fetchList();
@@ -62,45 +118,65 @@ export default function Visit() {
             <table className="w-full border text-left">
               <tbody>
                 <tr>
-                  <th className="p-2 border">예약일시</th><td className="p-2 border">{detail.reservationDatetime}</td>
-                  <th className="p-2 border">예약 상태</th><td className={`p-2 border ${detail.status === '예약 확정' ? 'text-[#00AAFF]' : 'text-[#4CAF50]'} font-bold`}>{detail.status}</td>
+                  <th className="border p-2">예약일시</th>
+                  <td className="border p-2">{detail.reservationDatetime}</td>
+                  <th className="border p-2">예약 상태</th>
+                  <td
+                    className={`border p-2 ${detail.status === "예약 확정" ? "text-[#00AAFF]" : "text-[#4CAF50]"} font-bold`}
+                  >
+                    {detail.status}
+                  </td>
                 </tr>
                 <tr>
-                  <th className="p-2 border">방문 날짜</th><td className="p-2 border">{detail.visitDate}</td>
-                  <th className="p-2 border">방문 시간</th><td className="p-2 border">{detail.visitTime}</td>
+                  <th className="border p-2">방문 날짜</th>
+                  <td className="border p-2">{detail.visitDate}</td>
+                  <th className="border p-2">방문 시간</th>
+                  <td className="border p-2">{detail.visitTime}</td>
                 </tr>
                 <tr>
-                  <th className="p-2 border">방문 입주사</th><td className="p-2 border">{detail.companyName}</td>
-                  <th className="p-2 border">방문 동</th><td className="p-2 border">{detail.visitBuilding}</td>
+                  <th className="border p-2">방문 입주사</th>
+                  <td className="border p-2">{detail.companyName}</td>
+                  <th className="border p-2">방문 동</th>
+                  <td className="border p-2">{detail.visitBuilding}</td>
                 </tr>
                 <tr>
-                  <th className="p-2 border">방문 목적</th>
-                  <td className="p-2 border h-[80px]" colSpan={3}>{detail.visitPurpose}</td>
+                  <th className="border p-2">방문 목적</th>
+                  <td className="h-[80px] border p-2" colSpan={3}>
+                    {detail.visitPurpose}
+                  </td>
                 </tr>
                 <tr>
-                  <th className="p-2 border">방문자명</th><td className="p-2 border">{detail.name}</td>
-                  <th className="p-2 border">방문 인원</th><td className="p-2 border">{detail.visitNumber}</td>
+                  <th className="border p-2">방문자명</th>
+                  <td className="border p-2">{detail.name}</td>
+                  <th className="border p-2">방문 인원</th>
+                  <td className="border p-2">{detail.visitNumber}</td>
                 </tr>
                 <tr>
-                  <th className="p-2 border">방문자 이메일</th><td className="p-2 border">{detail.email}</td>
-                  <th className="p-2 border">방문자 연락처</th><td className="p-2 border">{detail.tel}</td>
+                  <th className="border p-2">방문자 이메일</th>
+                  <td className="border p-2">{detail.email}</td>
+                  <th className="border p-2">방문자 연락처</th>
+                  <td className="border p-2">{detail.tel}</td>
                 </tr>
                 <tr>
-                  <th className="p-2 border">출입카드 번호</th><td className="p-2 border">-</td>
-                  <th className="p-2 border"></th><td className="p-2 border"></td>
+                  <th className="border p-2">출입카드 번호</th>
+                  <td className="border p-2">-</td>
+                  <th className="border p-2"></th>
+                  <td className="border p-2"></td>
                 </tr>
               </tbody>
             </table>
 
             <div className="flex justify-between gap-3">
               <div className="flex gap-3">
-                {detail.status === '가예약' && (
+                {detail.status === "가예약" && (
                   <Button
                     theme="danger"
                     onClick={async () => {
                       if (confirm("예약을 확정하겠습니까?")) {
                         try {
-                          const res = await api.post("/api/v1/visit/confirm", { checkArr : [detail.id]});
+                          const res = await api.post("/api/v1/visit/confirm", {
+                            checkArr: [detail.id],
+                          });
                           if (res.data?.success) {
                             alert("예약 확정 완료");
                             fetchList();
@@ -111,10 +187,12 @@ export default function Visit() {
                         }
                       }
                     }}
-                  >예약 확정</Button>
+                  >
+                    예약 확정
+                  </Button>
                 )}
-                
-                {detail.status !== '예약 취소' && (
+
+                {detail.status !== "예약 취소" && (
                   <Button
                     theme="danger"
                     onClick={async () => {
@@ -135,7 +213,9 @@ export default function Visit() {
                         }
                       }
                     }}
-                  >예약 취소</Button>
+                  >
+                    예약 취소
+                  </Button>
                 )}
               </div>
               <div>
@@ -144,7 +224,9 @@ export default function Visit() {
                     closeModal();
                     showModify(detail);
                   }}
-                >수정</Button>
+                >
+                  수정
+                </Button>
               </div>
             </div>
           </div>
@@ -196,7 +278,160 @@ export default function Visit() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <SearchSection>
+        <Box>
+          <div className="flex flex-col gap-6">
+            {/* 첫 줄: 입주사, 상태, 등록일 */}
+            <div className="flex gap-6">
+              <div className="min-w-[200px] flex-1">
+                <Select
+                  label="입주사"
+                  value={searchFilter.company}
+                  onChange={(e) =>
+                    setSearchFilter({
+                      ...searchFilter,
+                      company: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">전체</option>
+                  {companyList.map((c) => (
+                    <option key={c.companyId} value={c.companyName}>
+                      {c.companyName}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+
+              <div className="min-w-[200px] flex-1">
+                <Select
+                  label="상태"
+                  value={searchFilter.status}
+                  onChange={(e) =>
+                    setSearchFilter({ ...searchFilter, status: e.target.value })
+                  }
+                >
+                  <option value="">전체</option>
+                  {statusList.map((s) => (
+                    <option key={s.code} value={s.value}>
+                      {s.value}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+
+              <div className="min-w-[300px] flex-1">
+                <p className="mb-1 block pb-2 pl-1 text-sm font-medium text-gray-800 dark:text-gray-100">
+                  등록일
+                </p>
+                <DateRangePicker
+                  startDate={searchFilter.dateRange.startDate}
+                  endDate={searchFilter.dateRange.endDate}
+                  onRangeChange={({ startDate, endDate }) =>
+                    setSearchFilter({
+                      ...searchFilter,
+                      dateRange: { startDate, endDate },
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            {/* 둘째 줄: 방문동, 카드번호, 방문객 */}
+            <div className="flex gap-6">
+              <div className="min-w-[200px] flex-1">
+                <Select
+                  label="방문동"
+                  value={searchFilter.building}
+                  onChange={(e) =>
+                    setSearchFilter({
+                      ...searchFilter,
+                      building: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">전체</option>
+                  {buildingList.map((b) => (
+                    <option key={b.code} value={b.value}>
+                      {b.value}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+
+              <div className="min-w-[200px] flex-1">
+                <Input
+                  label="카드 번호"
+                  value={searchFilter.cardNumber}
+                  onChange={(e) =>
+                    setSearchFilter({
+                      ...searchFilter,
+                      cardNumber: e.target.value,
+                    })
+                  }
+                  onClear={() =>
+                    setSearchFilter({ ...searchFilter, cardNumber: "" })
+                  }
+                />
+              </div>
+
+              <div className="min-w-[200px] flex-1">
+                <Input
+                  label="방문객"
+                  value={searchFilter.visitorName}
+                  onChange={(e) =>
+                    setSearchFilter({
+                      ...searchFilter,
+                      visitorName: e.target.value,
+                    })
+                  }
+                  onClear={() =>
+                    setSearchFilter({ ...searchFilter, visitorName: "" })
+                  }
+                />
+              </div>
+            </div>
+
+            {/* 버튼 줄 */}
+            <div className="flex justify-end gap-2">
+              <Button
+                onClick={() => {
+                  setPage(1); // 페이지 초기화
+                  setActiveFilter(searchFilter); // 현재 필터를 실제 적용할 필터로 저장
+                  setSearchParams({ page: 1 }); // URL 동기화
+
+                  fetchList(); // 필터 반영하여 데이터 다시 불러오기
+                }}
+              >
+                검색
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const defaultFilter = {
+                    company: "",
+                    status: "",
+                    dateRange: { startDate: null, endDate: null },
+                    building: "",
+                    cardNumber: "",
+                    visitorName: "",
+                  };
+
+                  setSearchFilter(defaultFilter);
+                  setActiveFilter(defaultFilter);
+                  setPage(1);
+                  setSearchParams({ page: 1 });
+                  fetchList();
+                }}
+              >
+                초기화
+              </Button>
+            </div>
+          </div>
+        </Box>
+      </SearchSection>
+
+      <div className="mb-4 flex items-center justify-between">
         <ResultSummary total={total} />
 
         <div className="flex gap-2">
@@ -204,20 +439,20 @@ export default function Visit() {
             className="bg-black text-white hover:bg-gray-800"
             onClick={() => {
               showInput({
-                  id: null,
-                  reservationDatetime: null,
-                  status: null,
-                  visitDate: null,
-                  visitTime: null,
-                  companyId: null,
-                  companyName: null,
-                  visitBuilding: null,
-                  visitPurpose: null,
-                  name: null,
-                  visitNumber: null,
-                  email: null,
-                  tel: null,
-                  accessCard: null
+                id: null,
+                reservationDatetime: null,
+                status: null,
+                visitDate: null,
+                visitTime: null,
+                companyId: null,
+                companyName: null,
+                visitBuilding: null,
+                visitPurpose: null,
+                name: null,
+                visitNumber: null,
+                email: null,
+                tel: null,
+                accessCard: null,
               });
             }}
           >
@@ -238,10 +473,10 @@ export default function Visit() {
               render: (row) => (
                 <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
                   <button
-                    className={`text-black-600 truncate p-2 text-left cursor-pointer ${row.visitPurpose && "underline"}`}
+                    className={`text-black-600 cursor-pointer truncate p-2 text-left ${row.visitPurpose && "underline"}`}
                     onClick={(e) => {
                       e.preventDefault();
-                      console.log(row.id);
+
                       handleEventClick(row.id);
                     }}
                   >
