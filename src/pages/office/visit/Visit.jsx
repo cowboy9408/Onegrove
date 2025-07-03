@@ -450,7 +450,7 @@ export default function Visit() {
                 variant="outline"
                 onClick={() => {
                   const defaultFilter = {
-                    company: "",
+                    companyId: "",
                     status: "",
                     dateRange: { startDate: null, endDate: null },
                     building: "",
