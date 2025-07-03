@@ -37,6 +37,7 @@ export default function Meeting() {
 
   useEffect(() => {
     if(selectedRoom) {
+      console.log(selectedRoom);
       fetchSchedules();
     }
   }, [selectedRoom]);

@@ -12,10 +12,10 @@ export default function ReservationForm({
   onSubmit,
   closeModal,
 }) {
-  const [roomId, setRoomId] = useState(initialData.roomId || room || 1);
+  const [roomId, setRoomId] = useState(initialData.roomId || room);
   const [companyId, setCompanyId] = useState(isEdit ? initialData.companyId || "" : "");
   const [numberVisitors, setNumberVisitors] = useState(isEdit ? initialData.numberVisitors || "" : "");
-  const [paymentType, setPaymentType] = useState(isEdit ? initialData.paymentType || "" : "free");
+  const [paymentType, setPaymentType] = useState(isEdit ? (initialData.paymentType === "유료 예약") ? "paid" : "free" : "free");
   const [resveDate, setResveDate] = useState(initialData.resveDate || "");
   const [resveStartTime, setResveStartTime] = useState(initialData.resveStartTime || "09:00:00");
   const [resveEndTime, setResveEndTime] = useState(initialData.resveEndTime || "10:00:00");
@@ -31,6 +31,12 @@ export default function ReservationForm({
     const dd = String(today.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
   };
+
+  useEffect(() => {
+  if(paymentType) {
+    console.log(paymentType);
+  }
+}, [paymentType]);
 
   const handleSubmit = async () => {
     if (
@@ -60,6 +66,7 @@ export default function ReservationForm({
       ...(isEdit && { id: initialData.id }),
       ...(!isEdit && { status }),
     };
+    console.log(payload)
 
     try {
       const res = await api.post(
