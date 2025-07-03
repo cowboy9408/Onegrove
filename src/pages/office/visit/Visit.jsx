@@ -26,7 +26,7 @@ export default function Visit() {
   const [total, setTotal] = useState(0);
   const [visitList, setVisitList] = useState([]);
   const [searchFilter, setSearchFilter] = useState({
-    company: "",
+    companyId: "",
     status: "",
     dateRange: { startDate: null, endDate: null },
     building: "",
@@ -39,6 +39,21 @@ export default function Visit() {
   const [statusList, setStatusList] = useState([]);
 
   const size = 30;
+
+  const getCompanyNameById = (id) => {
+    const found = companyList.find((c) => String(c.companyId) === String(id));
+    return found?.companyName ?? "";
+  };
+
+  const getBuildingNameByCode = (code) => {
+    const found = buildingList.find((b) => b.code === code);
+    return found?.value ?? "";
+  };
+
+  const getStatusValueByCode = (code) => {
+    const found = statusList.find((s) => s.code === code);
+    return found?.value ?? "";
+  };
 
   const fetchVisitCategoryData = async () => {
     try {
@@ -68,25 +83,11 @@ export default function Visit() {
 
   const fetchList = async () => {
     try {
-      const res = await api.get("/api/v1/visit", {
-        params: {
-          company: activeFilter.company,
-          status: activeFilter.status,
-          building: activeFilter.building,
-          cardNumber: activeFilter.cardNumber,
-          visitorName: activeFilter.visitorName,
-          startDate: activeFilter.dateRange?.startDate
-            ? activeFilter.dateRange.startDate.toISOString().split("T")[0]
-            : undefined,
-          endDate: activeFilter.dateRange?.endDate
-            ? activeFilter.dateRange.endDate.toISOString().split("T")[0]
-            : undefined,
-        },
-      });
+      const res = await api.get("/api/v1/visit");
 
       if (res.data?.success && Array.isArray(res.data.data)) {
-        setVisitList(res.data.data);
-        setTotal(res.data.data?.length);
+        setVisitList(res.data.data); // 전체 데이터 저장
+        setTotal(res.data.data.length);
       }
     } catch (err) {
       console.error("목록 불러오기 실패:", err);
@@ -97,9 +98,46 @@ export default function Visit() {
     fetchVisitCategoryData(); // 하나로 통합된 호출
   }, []);
 
+  const filteredList = visitList.filter((item) => {
+    const matchesCompany =
+      !activeFilter.companyId ||
+      getCompanyNameById(activeFilter.companyId) === item.companyName;
+
+    const matchesBuilding =
+      !activeFilter.building ||
+      getBuildingNameByCode(activeFilter.building) === item.visitBuilding;
+
+    const matchesStatus =
+      !activeFilter.status ||
+      getStatusValueByCode(activeFilter.status) === item.status;
+
+    const matchesVisitor =
+      !activeFilter.visitorName ||
+      item.name?.includes(activeFilter.visitorName);
+
+    const matchesCard =
+      !activeFilter.cardNumber ||
+      item.accessCard?.includes(activeFilter.cardNumber);
+
+    const matchesDate =
+      !activeFilter.dateRange.startDate ||
+      !activeFilter.dateRange.endDate ||
+      (new Date(item.createDatetime) >= activeFilter.dateRange.startDate &&
+        new Date(item.createDatetime) <= activeFilter.dateRange.endDate);
+
+    return (
+      matchesCompany &&
+      matchesBuilding &&
+      matchesStatus &&
+      matchesVisitor &&
+      matchesCard &&
+      matchesDate
+    );
+  });
+
   useEffect(() => {
     fetchList();
-  }, []);
+  }, [activeFilter]);
 
   const handleEventClick = async (event) => {
     try {
@@ -286,17 +324,17 @@ export default function Visit() {
               <div className="min-w-[200px] flex-1">
                 <Select
                   label="입주사"
-                  value={searchFilter.company}
+                  value={searchFilter.companyId}
                   onChange={(e) =>
                     setSearchFilter({
                       ...searchFilter,
-                      company: e.target.value,
+                      companyId: e.target.value,
                     })
                   }
                 >
                   <option value="">전체</option>
                   {companyList.map((c) => (
-                    <option key={c.companyId} value={c.companyName}>
+                    <option key={c.companyId} value={c.companyId}>
                       {c.companyName}
                     </option>
                   ))}
@@ -313,7 +351,7 @@ export default function Visit() {
                 >
                   <option value="">전체</option>
                   {statusList.map((s) => (
-                    <option key={s.code} value={s.value}>
+                    <option key={s.code} value={s.code}>
                       {s.value}
                     </option>
                   ))}
@@ -352,7 +390,7 @@ export default function Visit() {
                 >
                   <option value="">전체</option>
                   {buildingList.map((b) => (
-                    <option key={b.code} value={b.value}>
+                    <option key={b.code} value={b.code}>
                       {b.value}
                     </option>
                   ))}
@@ -396,11 +434,14 @@ export default function Visit() {
             <div className="flex justify-end gap-2">
               <Button
                 onClick={() => {
-                  setPage(1); // 페이지 초기화
-                  setActiveFilter(searchFilter); // 현재 필터를 실제 적용할 필터로 저장
-                  setSearchParams({ page: 1 }); // URL 동기화
-
-                  fetchList(); // 필터 반영하여 데이터 다시 불러오기
+                  console.log("API 검색 파라미터:", {
+                    companyName: getCompanyNameById(searchFilter.companyId),
+                    visitBuilding: getBuildingNameByCode(searchFilter.building),
+                    status: searchFilter.status,
+                  });
+                  setPage(1);
+                  setSearchParams({ page: 1 });
+                  setActiveFilter(searchFilter);
                 }}
               >
                 검색
@@ -432,7 +473,7 @@ export default function Visit() {
       </SearchSection>
 
       <div className="mb-4 flex items-center justify-between">
-        <ResultSummary total={total} />
+        <ResultSummary total={filteredList.length} />
 
         <div className="flex gap-2">
           <Button
@@ -493,14 +534,14 @@ export default function Visit() {
             { key: "createDatetime", label: "등록일시" },
             { key: "status", label: "상태" },
           ]}
-          data={visitList}
+          data={filteredList.slice((page - 1) * size, page * size)}
           rowKey="id"
           checkable={true}
         />
 
         <Pagination
           current={page}
-          totalPages={Math.ceil(total / size)}
+          totalPages={Math.ceil(filteredList.length / size)}
           onChange={(page) => setPage(page)}
         />
       </ResultSection>
