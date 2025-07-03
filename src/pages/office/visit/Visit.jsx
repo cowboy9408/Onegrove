@@ -155,6 +155,25 @@ export default function Visit() {
     }
   };
 
+  const showInput = (detail) => {
+    showModal({
+      title: "방문 예약 수정",
+      size: "2xl",
+      customButton: true,
+      showCancel: true,
+      children: ({ closeModal }) => (
+        <VisitForm
+          initialData={detail}
+          closeModal={closeModal}
+          onSubmit={() => {
+            fetchList();
+            closeModal();
+          }}
+        />
+      ),
+    });
+  };
+
   const showModify = (detail) => {
     showModal({
       title: "방문 예약 수정",
@@ -184,7 +203,7 @@ export default function Visit() {
           <Button
             className="bg-black text-white hover:bg-gray-800"
             onClick={() => {
-              showModify({
+              showInput({
                   id: null,
                   reservationDatetime: null,
                   status: null,
@@ -235,6 +254,7 @@ export default function Visit() {
             { key: "visitTime", label: "방문 시간" },
             { key: "visitNumber", label: "방문 인원" },
             { key: "visitBuilding", label: "방문동" },
+            { key: "accessCard", label: "카드번호" },
             { key: "createDatetime", label: "등록일시" },
             { key: "status", label: "상태" },
           ]}

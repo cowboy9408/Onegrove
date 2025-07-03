@@ -92,8 +92,13 @@ export default function VisitForm({
     if (
       !resveDate ||
       !resveTime ||
+      !building ||
       !tel ||
-      !companyId
+      !companyId ||
+      !email ||
+      !name ||
+      !card ||
+      !visitNumber
     ) {
       alert("모든 필수 입력 항목을 작성해 주세요.");
       return;
@@ -108,6 +113,7 @@ export default function VisitForm({
       email: email,
       name: name,
       tel: tel,
+      accessCard: card,
       visitNumber: Number(visitNumber),
       ...(isEdit && { id: initialData.id }),
     };
