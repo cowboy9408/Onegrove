@@ -99,10 +99,12 @@ export default function StoriesListPage() {
             const normalize = (str) =>
               (str || "").toLowerCase().replace(/\s/g, "").trim();
 
+            const filterCategory = normalize(activeFilter.category);
+
             const categoryMatch =
-              normalize(activeFilter.category) === "" ||
-              normalize(row.ko_category) === normalize(activeFilter.category) ||
-              normalize(row.en_category) === normalize(activeFilter.category);
+              filterCategory === "" ||
+              normalize(row.ko_category).includes(filterCategory) ||
+              normalize(row.en_category).includes(filterCategory);
 
             const visibilityMatch =
               activeFilter.visibility === "" ||
