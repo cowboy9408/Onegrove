@@ -89,6 +89,15 @@ export default function AdminRegist() {
       }
     }
 
+    if (key === "phone") {
+      // 숫자만 허용
+      const numeric = value.replace(/\D/g, "");
+      if (numeric.length > 8) return; // 8자 초과 방지
+      setForm((prev) => ({ ...prev, phone: numeric }));
+      setErrors((prev) => ({ ...prev, phone: false }));
+      return;
+    }
+
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -330,13 +339,11 @@ export default function AdminRegist() {
             <div className="w-[670px]">
               <Input
                 value={form.phone}
-                onChange={(e) => {
-                  handleChange("phone", e.target.value);
-                  if (e.target.value)
-                    setErrors((prev) => ({ ...prev, phone: false }));
-                }}
-                className="rounded-l-none"
-                placeholder="1234-5678"
+                onChange={(e) => handleChange("phone", e.target.value)}
+                maxLength={8}
+                inputMode="numeric" // 모바일에서도 숫자 키패드 유도
+                pattern="[0-9]*"
+                placeholder="ex) 1234-1234"
               />
               {/* {errors.phone && (
                 <p className="mt-1 text-sm text-red-500">
