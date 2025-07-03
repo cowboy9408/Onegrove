@@ -194,10 +194,7 @@ export default function AdminRegist() {
         } catch (error) {
           const message = error?.response?.data?.message || "";
 
-          if (
-            message.includes("Duplicate entry") &&
-            message.includes("UQ_username")
-          ) {
+          if (message.includes("중복된 아이디가 존재합니다")) {
             showModal({
               title: "중복 아이디",
               message:
