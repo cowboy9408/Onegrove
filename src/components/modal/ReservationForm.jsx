@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
+import { isWeekend, isHoliday } from "@/lib/utils";
 
 export default function ReservationForm({
-  room,
-  roomList,
+  locationOptions = [],
+  roomOptions = [],
+  selectedLocation: propSelectedLocation,
+  selectedRoom: propSelectedRoom,
+  setSelectedLocation: propSetSelectedLocation,
+  setSelectedRoom: propSetSelectedRoom,
   meetingOptions,
   existingReservations = [],
   initialData = {},
@@ -12,7 +17,8 @@ export default function ReservationForm({
   onSubmit,
   closeModal,
 }) {
-  const [roomId, setRoomId] = useState(initialData.roomId || room);
+  const [selectedLocation, setSelectedLocation] = useState(propSelectedLocation || (locationOptions[0]?.code ?? ""));
+  const [roomId, setRoomId] = useState(initialData.roomId || propSelectedRoom || (roomOptions[0]?.id ?? ""));
   const [companyId, setCompanyId] = useState(isEdit ? initialData.companyId || "" : "");
   const [numberVisitors, setNumberVisitors] = useState(isEdit ? initialData.numberVisitors || "" : "");
   const [paymentType, setPaymentType] = useState(isEdit ? (initialData.paymentType === "유료 예약") ? "paid" : "free" : "free");
@@ -22,7 +28,7 @@ export default function ReservationForm({
   const [content, setContent] = useState(initialData.content || "");
   const [realUser, setRealUser] = useState(initialData.realUser || "");
   const [note, setNote] = useState(initialData.note || "");
-  const [status, setStatus] = useState(initialData.status || "gs0101");
+  const [status] = useState(initialData.status || "gs0101");
 
   const getToday = () => {
     const today = new Date();
@@ -32,6 +38,28 @@ export default function ReservationForm({
     return `${yyyy}-${mm}-${dd}`;
   };
 
+  useEffect(() => {
+    if (!isEdit && roomOptions.length > 0) {
+      setRoomId(roomOptions[0].id);
+      if (propSetSelectedRoom) propSetSelectedRoom(roomOptions[0].id);
+    }
+  }, [selectedLocation, roomOptions]);
+
+  useEffect(() => {
+    if (!isEdit && locationOptions.length > 0 && !selectedLocation) {
+      setSelectedLocation(locationOptions[0].code);
+      if (propSetSelectedLocation) propSetSelectedLocation(locationOptions[0].code);
+    }
+  }, [locationOptions]);
+
+  useEffect(() => {
+    if (propSelectedLocation) setSelectedLocation(propSelectedLocation);
+  }, [propSelectedLocation]);
+  useEffect(() => {
+    if (propSelectedRoom) {
+      setRoomId(propSelectedRoom);
+    }
+  }, [propSelectedRoom]);
 
   const handleSubmit = async () => {
     if (
@@ -118,7 +146,6 @@ export default function ReservationForm({
     const baseStart = new Date(`${resveDate}T${resveStartTime}`);
 
     const options = [];
-    let currentEnd = new Date(baseStart);
 
     for (let hour = baseStart.getHours() + 1; hour <= 18; hour++) {
       const endTimeStr = `${String(hour).padStart(2, "0")}:00:00`;
@@ -164,17 +191,36 @@ export default function ReservationForm({
     <div className="space-y-5 text-left">
       <div>
         <label className="mb-1 block">
+          오피스/지점 <span className="text-red-500">*</span>
+        </label>
+        <select
+          value={selectedLocation}
+          onChange={e => {
+            setSelectedLocation(e.target.value);
+            if (propSetSelectedLocation) propSetSelectedLocation(e.target.value);
+          }}
+          className="w-full rounded border px-2 py-1"
+          disabled={isEdit}
+        >
+          {locationOptions.map(loc => (
+            <option key={loc.code} value={loc.code}>{loc.location}</option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="mb-1 block">
           Meeting Room <span className="text-red-500">*</span>
         </label>
         <select
           value={roomId}
-          onChange={(e) => setRoomId(e.target.value)}
+          onChange={e => {
+            setRoomId(e.target.value);
+            if (propSetSelectedRoom) propSetSelectedRoom(e.target.value);
+          }}
           className="w-full rounded border px-2 py-1"
         >
-          {roomList.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.name} ({r.location})
-            </option>
+          {roomOptions.map(r => (
+            <option key={r.id} value={r.id}>{r.roomName}</option>
           ))}
         </select>
       </div>
@@ -214,7 +260,14 @@ export default function ReservationForm({
             type="date"
             value={resveDate}
             min={getToday()}
-            onChange={(e) => setResveDate(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (isWeekend(val) || isHoliday(val)) {
+                // alert("주말 및 공휴일은 선택할 수 없습니다.");
+                return;
+              }
+              setResveDate(val);
+            }}
             className="rounded border px-2 py-1"
           />
           <select

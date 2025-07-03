@@ -3,6 +3,7 @@ import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./calendar.css";
+import { isWeekend, isHoliday } from "@/lib/utils";
 
 const localizer = momentLocalizer(moment);
 
@@ -96,7 +97,11 @@ export default function CommonCalendar({
           const selectedDate = new Date(slotInfo.start);
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          if (selectedDate >= today) {
+          if (
+            selectedDate >= today &&
+            !isWeekend(selectedDate) &&
+            !isHoliday(selectedDate)
+          ) {
             onSelectSlot?.(slotInfo);
           }
         }}
