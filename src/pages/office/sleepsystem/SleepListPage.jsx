@@ -89,6 +89,7 @@ export default function SleepListPage() {
           ]}
           data={data}
           link={{ base: "/admin/sleep", path: "id", key: "name" }}
+          checkable={false}
         />
         <Pagination
           current={page}

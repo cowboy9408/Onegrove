@@ -128,7 +128,8 @@ export default function Visit() {
 
     const matchesCard =
       !activeFilter.cardNumber ||
-      item.accessCard?.includes(activeFilter.cardNumber);
+      (activeFilter.cardNumber.length >= 3 &&
+        item.accessCard?.includes(activeFilter.cardNumber));
 
     const matchesDate =
       !activeFilter.dateRange.startDate ||
@@ -155,7 +156,7 @@ export default function Visit() {
       const res = await api.get(`/api/v1/visit/detail/${event}`);
       if (!res.data.success) return;
       const detail = res.data.data;
-      console.log('상세 데이터:', detail);
+      console.log("상세 데이터:", detail);
 
       showModal({
         title: "방문 예약 상세",
@@ -177,7 +178,7 @@ export default function Visit() {
                   </td>
                 </tr>
                 <tr>
-                  <th className="border p-2 min-w-[80px]">방문 날짜</th>
+                  <th className="min-w-[80px] border p-2">방문 날짜</th>
                   <td className="border p-2">{detail.visitDate}</td>
                   <th className="border p-2">방문 시간</th>
                   <td className="border p-2">{detail.visitTime}</td>
@@ -427,6 +428,7 @@ export default function Visit() {
                       handleSearch();
                     }
                   }}
+                  placeholder="예: 123 (3자리 이상 입력 시 검색 가능)"
                 />
               </div>
 
