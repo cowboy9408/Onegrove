@@ -239,15 +239,17 @@ export default function VisitForm({
               className="w-full rounded border px-2 py-1"
             >
               <option value="">방문시간을 선택하세요</option>
-              {generateTimeOptions(9, 17).map((time) => (
-                <option
-                  key={time}
-                  value={time}
-                  disabled={!isTimeAvailable(time)}
-                >
-                  {time.slice(0, 5)} {isTimeAvailable(time) ? "" : "(불가)"}
-                </option>
-              ))}
+              {generateTimeOptions(9, 18)
+                .filter((time) => time.slice(0, 5) <= "18:00")
+                .map((time) => (
+                  <option
+                    key={time}
+                    value={time}
+                    disabled={!isTimeAvailable(time)}
+                  >
+                    {time.slice(0, 5)} {isTimeAvailable(time) ? "" : "(불가)"}
+                  </option>
+                ))}
             </select>
           </div>
         </div>

@@ -329,7 +329,7 @@ export default function ReservationForm({
 
       <div>
         <label className="mb-1 block">
-          회의 내용 <span className="text-red-500">*</span>
+          회의명 <span className="text-red-500">*</span>
         </label>
         <input
           value={content}
