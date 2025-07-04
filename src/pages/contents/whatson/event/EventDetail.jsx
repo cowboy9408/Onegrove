@@ -333,7 +333,7 @@ export default function EventDetail() {
 
   return (
     <>
-      <div className="mb-6 text-2xl font-bold">Event & Promotion 상세</div>
+      <div className="mb-6 text-2xl font-bold">Event & Promotion 상세 정보</div>
       <Section>
         <Tabs
           tabs={[

@@ -290,7 +290,7 @@ export default function BrandDetail() {
   return (
     <>
       <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
-        브랜드 관리 상세
+        브랜드 관리 상세 정보
       </div>
       <Section>
         <Tabs

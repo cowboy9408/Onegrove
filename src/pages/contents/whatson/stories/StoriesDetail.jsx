@@ -318,7 +318,7 @@ export default function StoriesDetail() {
   return (
     <>
       <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
-        Stories of OneGrove 상세
+        Stories of OneGrove 상세 정보
       </div>
       <Section>
         <Tabs
