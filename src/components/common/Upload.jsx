@@ -148,20 +148,20 @@ export default function Upload({
       const result = res.data;
 
       const isUpdate =
-        value?.originalName !== selectedFile.name ||
-        value?.path !== result.path;
+        (value?.originalName && value?.originalName !== selectedFile.name) ||
+        (value?.path && value?.path !== result.path);
 
       let status = "C";
-      if ((value?.siFileId || value?.id) && isUpdate) {
+      if (value?.siFileId && isUpdate) {
         status = "E";
-      } else if (value?.siFileId || value?.id) {
-        status = "R"; // 실제 변경이 없는 경우
+      } else if (value?.siFileId && !isUpdate) {
+        status = "R";
       }
 
       if (result.name && result.path) {
         const uploadedFile = {
           id: result.id ?? null,
-          siFileId: result.siFileId ?? value?.siFileId ?? null,
+          siFileId: status === "E" ? null : (value?.siFileId ?? null),
           siId: value?.siId ?? null,
           originalName: selectedFile.name,
           name: result.name,
