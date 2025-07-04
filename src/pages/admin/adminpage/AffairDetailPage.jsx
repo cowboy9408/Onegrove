@@ -342,19 +342,19 @@ export default function AffairDetailPage() {
             <label className="mb-2 block text-sm font-medium text-gray-800">
               전화번호
             </label>
-            <div className="flex items-center">
-              <span className="rounded-l-md px-3 py-2 text-base">010 -</span>
-              <div className="w-[670px]">
-                <Input
-                  value={form.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
-                  maxLength={8}
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  placeholder="1234-5678"
-                  className="rounded-l-none"
-                />
-              </div>
+            <div className="flex items-center space-x-2">
+              <span className="rounded-l-md px-3 py-2 text-base whitespace-nowrap">
+                010 -
+              </span>
+              <Input
+                value={form.phone}
+                onChange={(e) => handleChange("phone", e.target.value)}
+                maxLength={8}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="1234-5678"
+                className="w-full"
+              />
             </div>
           </div>
           <Input
