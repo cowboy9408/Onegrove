@@ -180,6 +180,12 @@ export default function StoriesListPage() {
                 onClear={() =>
                   setSearchFilter({ ...searchFilter, category: "" })
                 }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSearch();
+                  }
+                }}
               />
             </Col>
             <Col className="flex flex-col items-start gap-4">
