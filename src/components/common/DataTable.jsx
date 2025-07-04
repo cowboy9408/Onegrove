@@ -4,7 +4,7 @@ export default function DataTable({
   columns = [],
   data = [],
   link = {},
-  checkable = true,
+  checkable,
   checkedIds = [],
   onCheck = () => {},
 }) {
