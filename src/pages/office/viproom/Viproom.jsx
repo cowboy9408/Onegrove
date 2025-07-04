@@ -98,14 +98,14 @@ export default function Viproom() {
                 <tr><th className="p-2 border">예약 종류</th><td className="p-2 border">{detail.paymentType}</td></tr>
                 <tr><th className="p-2 border">일정</th><td className="p-2 border">{detail.resveDate} {detail.resveStartTime} ~ {detail.resveEndTime}</td></tr>
                 <tr><th className="p-2 border">상태</th><td className="p-2 border">{detail.status}</td></tr>
-                <tr><th className="p-2 border">내용</th><td className="p-2 border">{detail.content}</td></tr>
+                <tr><th className="p-2 border">내용</th><td className="p-2 border break-all">{detail.content}</td></tr>
                 <tr><th className="p-2 border">사용자</th><td className="p-2 border">{detail.realUser}</td></tr>
                 <tr><th className="p-2 border">참석인원</th><td className="p-2 border">{detail.numberVisitors}</td></tr>
                 <tr><th className="p-2 border">입주사</th><td className="p-2 border">{detail.companyName}</td></tr>
                 <tr><th className="p-2 border">예약자</th><td className="p-2 border">{detail.reserver}</td></tr>
                 <tr><th className="p-2 border">전화번호</th><td className="p-2 border">{detail.reserverTel}</td></tr>
                 <tr><th className="p-2 border">이메일</th><td className="p-2 border">{detail.reserverEmail}</td></tr>
-                <tr><th className="p-2 border">비고</th><td className="p-2 border">{detail.note}</td></tr>
+                <tr><th className="p-2 border">비고</th><td className="p-2 border break-all">{detail.note}</td></tr>
               </tbody>
             </table>
 

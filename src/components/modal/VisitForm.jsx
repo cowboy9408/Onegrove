@@ -289,6 +289,7 @@ export default function VisitForm({
         </label>
         <input
           value={visitPurpose}
+          maxLength={200}
           onChange={(e) => setVisitPurpose(e.target.value)}
           className="w-full rounded border px-2 py-1"
         />
@@ -301,6 +302,7 @@ export default function VisitForm({
           </label>
           <input
             value={name}
+            maxLength={50}
             onChange={(e) => setName(e.target.value)}
             className="w-full rounded border px-2 py-1"
           />
@@ -313,7 +315,7 @@ export default function VisitForm({
           <input
             type="text"
             value={visitNumber}
-            maxLength={2} // 🔹 2자리까지만 입력 허용
+            maxLength={2}
             onChange={(e) => {
               const input = e.target.value;
               if (input === "") {
@@ -335,6 +337,7 @@ export default function VisitForm({
           </label>
           <input
             value={email}
+            maxLength={20}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full rounded border px-2 py-1"
           />
@@ -346,6 +349,7 @@ export default function VisitForm({
           </label>
           <input
             value={tel}
+            maxLength={20}
             onChange={(e) => setTel(e.target.value)}
             className="w-full rounded border px-2 py-1"
           />
@@ -356,6 +360,7 @@ export default function VisitForm({
         <label className="mb-1 block">출입카드 번호</label>
         <input
           value={card}
+          maxLength={20}
           onChange={(e) => setCard(e.target.value)}
           className="w-full rounded border px-2 py-1"
         />
