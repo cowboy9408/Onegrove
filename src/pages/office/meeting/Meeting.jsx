@@ -128,7 +128,7 @@ export default function Meeting() {
           <div className="space-y-5 text-sm text-gray-700">
             <table className="w-full border text-left">
               <tbody>
-                <tr><th className="p-2 border">회의실</th><td className="p-2 border">{detail.roomName} ({detail.location})</td></tr>
+                <tr><th className="p-2 border min-w-[80px]">회의실</th><td className="p-2 border">{detail.roomName} ({detail.location})</td></tr>
                 <tr><th className="p-2 border">예약 종류</th><td className="p-2 border">{detail.paymentType}</td></tr>
                 <tr><th className="p-2 border">일정</th><td className="p-2 border">{detail.resveDate} {detail.resveStartTime} ~ {detail.resveEndTime}</td></tr>
                 <tr><th className="p-2 border">상태</th><td className="p-2 border">{detail.status}</td></tr>

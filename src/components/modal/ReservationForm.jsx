@@ -137,7 +137,10 @@ export default function ReservationForm({
 
   const getReservedTimes = () => {
     return existingReservations
-      .filter((r) => r.resource.resveDate === resveDate)
+      .filter((r) => 
+        r.resource.resveDate === resveDate &&
+        (!isEdit || r.resource.id !== initialData.id) // 본인 예약은 제외
+      )
       .map((r) => ({
         start: new Date(`${r.resource.resveDate}T${r.resource.resveStartTime}`),
         end: new Date(`${r.resource.resveDate}T${r.resource.resveEndTime}`),
