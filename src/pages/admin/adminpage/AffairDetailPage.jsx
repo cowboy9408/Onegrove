@@ -163,6 +163,15 @@ export default function AffairDetailPage() {
       return;
     }
 
+    if (!form.companyId) {
+      showModal({
+        title: "필수 입력",
+        message: "모든 필수 항목을 입력해주세요.",
+        showCancel: false,
+      });
+      return;
+    }
+
     if (form.name.length > 10) {
       showModal({
         title: "이름 오류",
