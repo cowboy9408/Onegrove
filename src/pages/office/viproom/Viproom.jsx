@@ -79,14 +79,18 @@ export default function Viproom() {
     }
   }, [selectedRoom]);
 
-  // Executive Room 최대 수용인원 매핑
-  const capacityMap = {
-    "Executive Room": 4,
-  };
+
   const mappedRoomOptions = roomOptions.map(room => ({
     ...room,
-    capacity: capacityMap[room.roomName] || 4,
+    capacity: 4,
   }));
+
+  // 디버깅용 로그
+  useEffect(() => {
+    if (roomOptions.length > 0) {
+      console.log("Viproom.jsx - 회의실 목록:", roomOptions.map(r => ({ name: r.roomName, capacity: 4 })));
+    }
+  }, [roomOptions]);
 
   const handleEventClick = async (event) => {
     try {
@@ -288,7 +292,7 @@ export default function Viproom() {
               children: ({ closeModal }) => (
                 <ReservationForm
                   locationOptions={locationOptions}
-                  roomOptions={roomOptions}
+                  roomOptions={mappedRoomOptions}
                   selectedLocation={selectedLocation}
                   selectedRoom={selectedRoom}
                   setSelectedLocation={setSelectedLocation}
@@ -297,6 +301,7 @@ export default function Viproom() {
                   meetingOptions={meetingOptions}
                   existingReservations={scheduleList}
                   initialData={{ resveDate }}
+                  isVip={true}
                   closeModal={closeModal}
                   onSubmit={() => {
                     fetchSchedules();

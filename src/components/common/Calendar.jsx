@@ -97,8 +97,10 @@ export default function CommonCalendar({
           const selectedDate = new Date(slotInfo.start);
           const today = new Date();
           today.setHours(0, 0, 0, 0);
+          const tomorrow = new Date(today);
+          tomorrow.setDate(tomorrow.getDate() + 1);
           if (
-            selectedDate >= today &&
+            selectedDate >= tomorrow &&
             !isWeekend(selectedDate) &&
             !isHoliday(selectedDate)
           ) {

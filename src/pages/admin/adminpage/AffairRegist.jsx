@@ -71,15 +71,25 @@ export default function AffairRegist() {
 
   const handleChange = (key, value) => {
     if (key === "name") {
+      const hasNumber = /\d/; // 숫자 포함 여부 검사
+
+      if (hasNumber.test(value)) {
+        setErrors((prev) => ({
+          ...prev,
+          name: "이름에는 숫자를 입력할 수 없습니다.",
+        }));
+        return;
+      }
+
       if (value.length > 10) {
         setErrors((prev) => ({
           ...prev,
           name: "이름은 최대 10자까지 입력 가능합니다.",
         }));
-        return; // 입력 제한
-      } else {
-        setErrors((prev) => ({ ...prev, name: "" }));
+        return;
       }
+
+      setErrors((prev) => ({ ...prev, name: "" }));
     }
 
     // 아이디 유효성 처리
