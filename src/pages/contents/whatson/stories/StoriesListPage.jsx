@@ -41,6 +41,17 @@ export default function StoriesListPage() {
   const [searchFilter, setSearchFilter] = useState(defaultFilter);
   const [activeFilter, setActiveFilter] = useState(defaultFilter);
 
+  const handleSearch = () => {
+    setPage(1);
+    setActiveFilter(searchFilter);
+    setSearchParams({
+      name: searchFilter.name,
+      category: searchFilter.category,
+      visibility: searchFilter.visibility,
+      page: 1,
+    });
+  };
+
   const size = 30;
 
   useEffect(() => {
@@ -195,6 +206,12 @@ export default function StoriesListPage() {
                   setSearchFilter({ ...searchFilter, name: e.target.value })
                 }
                 onClear={() => setSearchFilter({ ...searchFilter, name: "" })}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSearch();
+                  }
+                }}
               />
             </Col>
 
@@ -233,20 +250,7 @@ export default function StoriesListPage() {
             </Col>
 
             <Col className="flex justify-center gap-2 self-end">
-              <Button
-                onClick={() => {
-                  setPage(1);
-                  setActiveFilter(searchFilter);
-                  setSearchParams({
-                    name: searchFilter.name,
-                    category: searchFilter.category,
-                    visibility: searchFilter.visibility,
-                    page: 1,
-                  });
-                }}
-              >
-                검색
-              </Button>
+              <Button onClick={handleSearch}>검색</Button>
 
               <Button
                 variant="outline"

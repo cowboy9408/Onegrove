@@ -55,6 +55,17 @@ export default function Visit() {
     return found?.value ?? "";
   };
 
+  const handleSearch = () => {
+    console.log("API 검색 파라미터:", {
+      companyName: getCompanyNameById(searchFilter.companyId),
+      visitBuilding: getBuildingNameByCode(searchFilter.building),
+      status: searchFilter.status,
+    });
+    setPage(1);
+    setSearchParams({ page: 1 });
+    setActiveFilter(searchFilter);
+  };
+
   const fetchVisitCategoryData = async () => {
     try {
       const res = await api.get("/api/v1/visit/category");
@@ -410,6 +421,12 @@ export default function Visit() {
                   onClear={() =>
                     setSearchFilter({ ...searchFilter, cardNumber: "" })
                   }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleSearch();
+                    }
+                  }}
                 />
               </div>
 
@@ -426,26 +443,20 @@ export default function Visit() {
                   onClear={() =>
                     setSearchFilter({ ...searchFilter, visitorName: "" })
                   }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleSearch();
+                    }
+                  }}
                 />
               </div>
             </div>
 
             {/* 버튼 줄 */}
             <div className="flex justify-end gap-2">
-              <Button
-                onClick={() => {
-                  console.log("API 검색 파라미터:", {
-                    companyName: getCompanyNameById(searchFilter.companyId),
-                    visitBuilding: getBuildingNameByCode(searchFilter.building),
-                    status: searchFilter.status,
-                  });
-                  setPage(1);
-                  setSearchParams({ page: 1 });
-                  setActiveFilter(searchFilter);
-                }}
-              >
-                검색
-              </Button>
+              <Button onClick={handleSearch}>검색</Button>
+
               <Button
                 variant="outline"
                 onClick={() => {
