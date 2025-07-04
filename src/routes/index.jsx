@@ -149,7 +149,7 @@ export const routeMeta = [
         path: "/user",
         group: "/user",
         element: <UserListPage />,
-        title: "회원 관리",
+        title: "임직원 관리",
         icon: <UsersIcon size={18} />,
         hidden: false,
         permissions: [
@@ -164,7 +164,7 @@ export const routeMeta = [
         path: "/user/regist",
         group: "/user",
         element: <UserRegist />,
-        title: "회원 등록",
+        title: "임직원 등록",
         icon: <UsersIcon size={18} />,
         hidden: true,
         permissions: [
@@ -179,7 +179,7 @@ export const routeMeta = [
         path: "/user/detail/:id",
         group: "/user",
         element: <UserDetailPage />,
-        title: "회원 상세",
+        title: "임직원 상세",
         icon: <UsersIcon size={18} />,
         hidden: true,
         permissions: [
@@ -528,7 +528,7 @@ export const routeMeta = [
         uuid: "b7bd1575-4a90-4c6c-8edd-a638d05fb371",
         path: "/office",
         element: <OfficeLayout />,
-        title: "오피스 관리",
+        title: "어메니티 예약 관리",
         icon: <CalendarDaysIcon size={18} />,
         hidden: false,
         permissions: [
@@ -614,7 +614,7 @@ export const routeMeta = [
         uuid: "c9c84ed1-a896-4d9b-b659-cd6a43dc8cd2",
         path: "/system",
         element: <SystemLayout />,
-        title: "시스템 관리",
+        title: "어메니티 시스템 관리",
         icon: <SettingsGearIcon size={18} />,
         hidden: false,
         permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],

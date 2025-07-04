@@ -280,7 +280,7 @@ export default function OccupancyDetail() {
   return (
     <>
       <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
-        입주사 관리 상세
+        입주사 관리 상세 정보
       </div>
       <Section>
         <Tabs
