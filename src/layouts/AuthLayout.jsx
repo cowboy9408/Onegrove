@@ -65,6 +65,8 @@ export default function AuthLayout() {
         setAccessToken(token); // 쿠키에서 accessToken을 가져올 수도 있음
       }
 
+      console.log(permission, route?.permissions);
+
       if (route?.permissions && !route.permissions.includes(permission)) {
         removeAccessToken();
         localStorage.removeItem("accessToken");

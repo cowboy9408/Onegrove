@@ -68,26 +68,22 @@ export default function ReservationForm({
 
   // resveStartTime 변경 시 resveEndTime 자동 업데이트
   useEffect(() => {
-    console.log("resveStartTime 변경 감지:", { resveStartTime, resveEndTime, isEdit, initialData: initialData.resveEndTime });
     if (resveStartTime && (!resveEndTime || resveEndTime === "10:00:00")) {
       const startHour = parseInt(resveStartTime.split(':')[0]);
       const endHour = startHour + 1;
       if (endHour <= 18) {
         const newEndTime = `${String(endHour).padStart(2, "0")}:00:00`;
-        console.log("resveEndTime 자동 설정:", newEndTime);
         setResveEndTime(newEndTime);
       }
     }
   }, [resveStartTime, resveEndTime]);
 
   useEffect(() => {
-    // console.log("initialData 변경 감지:", initialData);
     if (initialData.resveDate) setResveDate(initialData.resveDate);
     if (initialData.resveStartTime) setResveStartTime(initialData.resveStartTime + ":00");
     if (initialData.resveEndTime) {
       const end = initialData.resveEndTime;
       const formattedEnd = end.length === 8 ? end : end + ":00";
-      // console.log("initialData에서 resveEndTime 설정:", formattedEnd);
       setResveEndTime(formattedEnd);
     }
     if (initialData.content) setContent(initialData.content);
@@ -108,7 +104,7 @@ export default function ReservationForm({
       !companyId
     ) {
       alert("모든 필수 입력 항목을 작성해 주세요.");
-      // return;
+      return;
     }
 
     const payload = {
