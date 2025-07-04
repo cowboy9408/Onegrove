@@ -6,6 +6,7 @@ import { ModalContext } from "@/context/ModalContext";
 import ReservationForm from "@/components/modal/ReservationForm";
 import api from "@/lib/apiClient";
 import dayjs from "dayjs";
+import { getBusinessDaysDiff } from "@/lib/utils";
 
 export default function Meeting() {
   const [selectedOffice, setSelectedOffice] = useState(null);
@@ -124,105 +125,110 @@ export default function Meeting() {
         size: "lg",
         customButton: true,
         showCancel: true,
-        children: ({ closeModal }) => (
-          <div className="space-y-5 text-sm text-gray-700">
-            <table className="w-full border text-left">
-              <tbody>
-                <tr><th className="p-2 border">회의실</th><td className="p-2 border">{detail.roomName} ({detail.location})</td></tr>
-                <tr><th className="p-2 border">예약 종류</th><td className="p-2 border">{detail.paymentType}</td></tr>
-                <tr><th className="p-2 border">일정</th><td className="p-2 border">{detail.resveDate} {detail.resveStartTime} ~ {detail.resveEndTime}</td></tr>
-                <tr><th className="p-2 border">상태</th><td className="p-2 border">{detail.status}</td></tr>
-                <tr><th className="p-2 border">내용</th><td className="p-2 border">{detail.content}</td></tr>
-                <tr><th className="p-2 border">사용자</th><td className="p-2 border">{detail.realUser}</td></tr>
-                <tr><th className="p-2 border">참석인원</th><td className="p-2 border">{detail.numberVisitors}</td></tr>
-                <tr><th className="p-2 border">입주사</th><td className="p-2 border">{detail.companyName}</td></tr>
-                <tr><th className="p-2 border">예약자</th><td className="p-2 border">{detail.reserver}</td></tr>
-                <tr><th className="p-2 border">전화번호</th><td className="p-2 border">{detail.reserverTel}</td></tr>
-                <tr><th className="p-2 border">이메일</th><td className="p-2 border">{detail.reserverEmail}</td></tr>
-                <tr><th className="p-2 border">비고</th><td className="p-2 border">{detail.note}</td></tr>
-              </tbody>
-            </table>
+        children: ({ closeModal }) => {
+          const isPaid = detail.paymentType === "유료 예약";
+          const today = new Date();
+          const resveDate = new Date(detail.resveDate);
+          const businessDays = getBusinessDaysDiff(today, resveDate);
+          const hideEditCancel = isPaid && businessDays <= 3;
+          return (
+            <div className="space-y-5 text-sm text-gray-700">
+              <p>유료 예약 시 오늘 기준 영업일 3일 이내<br />수정 및 삭제 불가하며 별도의 수수료가 발생됩니다.</p>
+              <table className="w-full border text-left">
+                <tbody>
+                  <tr><th className="p-2 border min-w-[80px]">회의실</th><td className="p-2 border">{detail.roomName} ({detail.location})</td></tr>
+                  <tr><th className="p-2 border">예약 종류</th><td className="p-2 border">{detail.paymentType}</td></tr>
+                  <tr><th className="p-2 border">일정</th><td className="p-2 border">{detail.resveDate} {detail.resveStartTime} ~ {detail.resveEndTime}</td></tr>
+                  <tr><th className="p-2 border">상태</th><td className="p-2 border">{detail.status}</td></tr>
+                  <tr><th className="p-2 border">내용</th><td className="p-2 border break-all">{detail.content}</td></tr>
+                  <tr><th className="p-2 border">사용자</th><td className="p-2 border">{detail.realUser}</td></tr>
+                  <tr><th className="p-2 border">참석인원</th><td className="p-2 border">{detail.numberVisitors}</td></tr>
+                  <tr><th className="p-2 border">입주사</th><td className="p-2 border">{detail.companyName}</td></tr>
+                  <tr><th className="p-2 border">예약자</th><td className="p-2 border">{detail.reserver}</td></tr>
+                  <tr><th className="p-2 border">전화번호</th><td className="p-2 border">{detail.reserverTel}</td></tr>
+                  <tr><th className="p-2 border">이메일</th><td className="p-2 border">{detail.reserverEmail}</td></tr>
+                  <tr><th className="p-2 border">비고</th><td className="p-2 border break-all">{detail.note}</td></tr>
+                </tbody>
+              </table>
 
-            <div className="flex justify-between gap-3">
-              <div className="flex gap-3">
-                {detail.status === '가예약' && (
-                  <Button
-                    theme="danger"
-                    onClick={async () => {
-                      if (confirm("예약을 확정하겠습니까?")) {
-                        try {
-                          const res = await api.post("/api/v1/meeting/confirm", { id: detail.id });
-                          if (res.data?.success) {
-                            alert("예약 확정 완료");
-                            fetchSchedules();
-                            closeModal();
-                          } else alert("예약 확정 실패");
-                        } catch (err) {
-                          console.error("예약 확정 오류:", err);
+              <div className="flex justify-between gap-3">
+                <div className="flex gap-3">
+                  {detail.status === '가예약' && (
+                    <Button
+                      theme="danger"
+                      onClick={async () => {
+                        if (confirm("예약을 확정하겠습니까?")) {
+                          try {
+                            const res = await api.post("/api/v1/meeting/confirm", { id: detail.id });
+                            if (res.data?.success) {
+                              alert("예약 확정 완료");
+                              fetchSchedules();
+                              closeModal();
+                            } else alert("예약 확정 실패");
+                          } catch (err) {
+                            console.error("예약 확정 오류:", err);
+                          }
                         }
-                      }
+                      }}
+                    >예약 확정</Button>
+                  )}
+                  {!hideEditCancel && (
+                    <Button
+                      theme="danger"
+                      onClick={async () => {
+                        if (confirm("예약을 취소하겠습니까?")) {
+                          try {
+                            const res = await api.post("/api/v1/meeting/cancel", { id: detail.id });
+                            if (res.data?.success) {
+                              alert("취소 완료");
+                              fetchSchedules();
+                              closeModal();
+                            } else alert("취소 실패");
+                          } catch (err) {
+                            console.error("취소 오류:", err);
+                          }
+                        }
+                      }}
+                    >예약 취소</Button>
+                  )}
+                </div>
+                {!hideEditCancel && (
+                  <Button
+                    onClick={() => {
+                      closeModal();
+                      showModal({
+                        title: "Meeting Room 수정",
+                        size: "lg",
+                        customButton: true,
+                        showCancel: true,
+                        children: ({ closeModal }) => (
+                          <ReservationForm
+                            locationOptions={officeOptions}
+                            roomOptions={locationOptions}
+                            selectedLocation={selectedOffice}
+                            selectedRoom={selectedRoom}
+                            setSelectedLocation={setSelectedOffice}
+                            setSelectedRoom={setSelectedRoom}
+                            selectData={selectedData}
+                            meetingOptions={meetingOptions}
+                            existingReservations={scheduleList}
+                            initialData={detail}
+                            isEdit={true}
+                            closeModal={closeModal}
+                            onSubmit={() => {
+                              fetchSchedules();
+                              closeModal();
+                            }}
+                          />
+                        ),
+                      });
                     }}
-                  >예약 확정</Button>
+                  >수정</Button>
                 )}
-                
-                <Button
-                  theme="danger"
-                  onClick={async () => {
-                    if (confirm("예약을 취소하겠습니까?")) {
-                      try {
-                        const res = await api.post("/api/v1/meeting/cancel", { id: detail.id });
-                        if (res.data?.success) {
-                          alert("취소 완료");
-                          fetchSchedules();
-                          closeModal();
-                        } else alert("취소 실패");
-                      } catch (err) {
-                        console.error("취소 오류:", err);
-                      }
-                    }
-                  }}
-                >예약 취소</Button>
-              </div>
-              <div>
-                <Button
-                  onClick={() => {
-                    // console.log(
-                    //   detail,
-                    //   selectedRoom
-                    // )
-                    closeModal();
-                    showModal({
-                      title: "Meeting Room 수정",
-                      size: "lg",
-                      customButton: true,
-                      showCancel: true,
-                      children: ({ closeModal }) => (
-                        <ReservationForm
-                          locationOptions={officeOptions}
-                          roomOptions={locationOptions}
-                          selectedLocation={selectedOffice}
-                          selectedRoom={selectedRoom}
-                          setSelectedLocation={setSelectedOffice}
-                          setSelectedRoom={setSelectedRoom}
-                          selectData={selectedData}
-                          meetingOptions={meetingOptions}
-                          existingReservations={scheduleList}
-                          initialData={detail}
-                          isEdit={true}
-                          closeModal={closeModal}
-                          onSubmit={() => {
-                            fetchSchedules();
-                            closeModal();
-                          }}
-                        />
-                      ),
-                    });
-                  }}
-                >수정</Button>
               </div>
             </div>
-          </div>
-        ),
+          );
+        },
       });
     } catch (err) {
       console.error("상세 조회 실패:", err);

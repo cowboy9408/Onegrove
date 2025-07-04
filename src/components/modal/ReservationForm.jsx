@@ -70,7 +70,10 @@ export default function ReservationForm({
   useEffect(() => {
     if (initialData.resveDate) setResveDate(initialData.resveDate);
     if (initialData.resveStartTime) setResveStartTime(initialData.resveStartTime + ":00");
-    if (initialData.resveEndTime) setResveEndTime(initialData.resveEndTime + ":00");
+    if (initialData.resveEndTime) {
+      const end = initialData.resveEndTime;
+      setResveEndTime(end.length === 8 ? end : end + ":00");
+    }
     if (initialData.content) setContent(initialData.content);
     if (initialData.realUser) setRealUser(initialData.realUser);
     if (initialData.numberVisitors) setNumberVisitors(initialData.numberVisitors);
@@ -134,7 +137,10 @@ export default function ReservationForm({
 
   const getReservedTimes = () => {
     return existingReservations
-      .filter((r) => r.resource.resveDate === resveDate)
+      .filter((r) => 
+        r.resource.resveDate === resveDate &&
+        (!isEdit || r.resource.id !== initialData.id) // 본인 예약은 제외
+      )
       .map((r) => ({
         start: new Date(`${r.resource.resveDate}T${r.resource.resveStartTime}`),
         end: new Date(`${r.resource.resveDate}T${r.resource.resveEndTime}`),
@@ -323,10 +329,11 @@ export default function ReservationForm({
 
       <div>
         <label className="mb-1 block">
-          회의 내용 <span className="text-red-500">*</span>
+          회의명 <span className="text-red-500">*</span>
         </label>
         <input
           value={content}
+          maxLength={200}
           onChange={(e) => setContent(e.target.value)}
           className="w-full rounded border px-2 py-1"
         />
@@ -339,6 +346,7 @@ export default function ReservationForm({
         <input
           type="text"
           value={numberVisitors}
+          maxLength={2}
           onChange={(e) => {
             const input = e.target.value;
             if (input === "") {
@@ -364,6 +372,7 @@ export default function ReservationForm({
         </label>
         <input
           value={realUser}
+          maxLength={20}
           onChange={(e) => setRealUser(e.target.value)}
           className="w-full rounded border px-2 py-1"
         />
@@ -392,6 +401,7 @@ export default function ReservationForm({
         <label className="mb-1 block">비고</label>
         <input
           value={note}
+          maxLength={50}
           onChange={(e) => setNote(e.target.value)}
           className="w-full rounded border px-2 py-1"
         />

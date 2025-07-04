@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
+import { isWeekend, isHoliday } from "@/lib/utils";
 
 export default function VisitForm({
   existingReservations = [],
@@ -78,6 +79,14 @@ export default function VisitForm({
       fetchBuilding();
     }
   }, [companyId]);
+
+  useEffect(() => {
+    if (initialData.visitBuilding && buildingList.length > 0) {
+      const found = buildingList.find(b => b.value === initialData.visitBuilding);
+      if (found) setBuilding(found.code);
+      else setBuilding("");
+    }
+  }, [initialData.visitBuilding, buildingList]);
 
   const getToday = () => {
     const today = new Date();
@@ -206,7 +215,14 @@ export default function VisitForm({
               type="date"
               value={resveDate}
               min={getToday()}
-              onChange={(e) => setResveDate(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (isWeekend(val) || isHoliday(val)) {
+                  // alert("주말 및 공휴일은 선택할 수 없습니다.");
+                  return;
+                }
+                setResveDate(val);
+              }}
               className="w-full rounded border px-2 py-1"
             />
           </div>
@@ -223,15 +239,17 @@ export default function VisitForm({
               className="w-full rounded border px-2 py-1"
             >
               <option value="">방문시간을 선택하세요</option>
-              {generateTimeOptions(9, 17).map((time) => (
-                <option
-                  key={time}
-                  value={time}
-                  disabled={!isTimeAvailable(time)}
-                >
-                  {time.slice(0, 5)} {isTimeAvailable(time) ? "" : "(불가)"}
-                </option>
-              ))}
+              {generateTimeOptions(9, 18)
+                .filter((time) => time.slice(0, 5) <= "18:00")
+                .map((time) => (
+                  <option
+                    key={time}
+                    value={time}
+                    disabled={!isTimeAvailable(time)}
+                  >
+                    {time.slice(0, 5)} {isTimeAvailable(time) ? "" : "(불가)"}
+                  </option>
+                ))}
             </select>
           </div>
         </div>
@@ -281,6 +299,7 @@ export default function VisitForm({
         </label>
         <input
           value={visitPurpose}
+          maxLength={200}
           onChange={(e) => setVisitPurpose(e.target.value)}
           className="w-full rounded border px-2 py-1"
         />
@@ -293,6 +312,7 @@ export default function VisitForm({
           </label>
           <input
             value={name}
+            maxLength={50}
             onChange={(e) => setName(e.target.value)}
             className="w-full rounded border px-2 py-1"
           />
@@ -305,7 +325,7 @@ export default function VisitForm({
           <input
             type="text"
             value={visitNumber}
-            maxLength={2} // 🔹 2자리까지만 입력 허용
+            maxLength={2}
             onChange={(e) => {
               const input = e.target.value;
               if (input === "") {
@@ -327,6 +347,7 @@ export default function VisitForm({
           </label>
           <input
             value={email}
+            maxLength={20}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full rounded border px-2 py-1"
           />
@@ -338,6 +359,7 @@ export default function VisitForm({
           </label>
           <input
             value={tel}
+            maxLength={20}
             onChange={(e) => setTel(e.target.value)}
             className="w-full rounded border px-2 py-1"
           />
@@ -348,6 +370,7 @@ export default function VisitForm({
         <label className="mb-1 block">출입카드 번호</label>
         <input
           value={card}
+          maxLength={20}
           onChange={(e) => setCard(e.target.value)}
           className="w-full rounded border px-2 py-1"
         />

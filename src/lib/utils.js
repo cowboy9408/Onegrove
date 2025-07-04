@@ -26,3 +26,14 @@ export function isHoliday(date) {
   ];
   return holidays.includes(mmdd);
 }
+
+export function getBusinessDaysDiff(from, to) {
+  let count = 0;
+  let current = new Date(from);
+  const end = new Date(to);
+  while (current < end) {
+    if (!isWeekend(current) && !isHoliday(current)) count++;
+    current.setDate(current.getDate() + 1);
+  }
+  return count;
+}
