@@ -64,22 +64,8 @@ const RegistForm = forwardRef(
     }, [currentLang]);
 
     const handleOfficeChange = (updatedList) => {
-      const prevList = getValues("locations") || [];
-
-      const deletedItems = prevList
-        .filter((prev) => !updatedList.some((u) => u.id === prev.id))
-        .map((item) => ({ ...item, delYn: "Y" }));
-
-      const finalList = [...updatedList, ...deletedItems];
-
-      const cleanedList = finalList.filter(
-        (item) =>
-          item.delYn !== "Y" ||
-          (item.office?.trim() !== "" && item.floor?.trim() !== "")
-      );
-
-      setValue("locations", cleanedList);
-      setLocations(cleanedList);
+      setValue("locations", updatedList);
+      setLocations(updatedList); // 👈 이게 핵심! 상태에 반영됨
     };
 
     useEffect(() => {
@@ -110,6 +96,7 @@ const RegistForm = forwardRef(
       submit: async (onError) => {
         const values = getValues();
         const locations = values.locations || [];
+        const allLocations = getValues("locations") || [];
         const isValid = await methods.trigger();
 
         if (!isValid) {
@@ -125,10 +112,11 @@ const RegistForm = forwardRef(
 
           if (firstErrorField) {
             const message =
-              errors[firstErrorField]?.message || "입력값을 다시 확인해주세요.";
+              errors[firstErrorField]?.message ||
+              "모든 필수 항목을 입력해주세요.";
             onError?.(message);
           } else {
-            onError?.("입력값을 다시 확인해주세요.");
+            onError?.("모든 필수 항목을 입력해주세요.");
           }
 
           return null;
@@ -138,18 +126,17 @@ const RegistForm = forwardRef(
           setTimeout(() => onError?.("입주사명을 입력해주세요."), 0);
           return null;
         }
-        const activeLocations = locations.filter((loc) => loc.delYn !== "Y");
 
-        // 둘 중 하나라도 입력 안 됐으면 오류 반환
-        const hasInvalid = activeLocations.some(
-          (loc) => !loc.office?.trim() || !loc.floor?.trim()
-        );
+        const hasInvalid = allLocations
+          .filter((loc) => loc.delYn !== "Y")
+          .some((loc) => !loc.office?.trim() || !loc.floor?.trim());
+
         if (hasInvalid) {
           setTimeout(() => onError?.("오피스와 층 수를 모두 입력해주세요."), 0);
           return null;
         }
 
-        if (activeLocations.length === 0) {
+        if (allLocations.filter((loc) => loc.delYn !== "Y").length === 0) {
           setTimeout(() => onError?.("오피스를 1개 이상 등록해주세요."), 0);
           return null;
         }
@@ -201,13 +188,15 @@ const RegistForm = forwardRef(
           };
         };
 
-        const sortedOfficeList = (values.locations || []).map((item, idx) => ({
-          id: item.id ?? null,
-          office: item.office?.trim(),
-          floor: item.floor?.trim(),
-          sort: idx + 1,
-          delYn: item.delYn ?? "N", // 삭제 여부 반드시 포함
-        }));
+        const sortedOfficeList = (getValues("locations") || []).map(
+          (item, idx) => ({
+            id: item.id ?? null,
+            office: item.office?.trim(),
+            floor: item.floor?.trim(),
+            sort: idx + 1,
+            delYn: item.delYn === "Y" ? "Y" : "N",
+          })
+        );
 
         return {
           id: data?.id,
