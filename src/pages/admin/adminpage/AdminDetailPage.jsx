@@ -227,10 +227,10 @@ export default function AdminDetailPage() {
               />
               <Radio
                 name="role"
-                label="리테일"
-                value="RETAIL_ADMIN"
-                checked={form.role === "RETAIL_ADMIN"}
-                onChange={() => handleChange("role", "RETAIL_ADMIN")}
+                label="콘텐츠"
+                value="CONTENTS_ADMIN"
+                checked={form.role === "CONTENTS_ADMIN"}
+                onChange={() => handleChange("role", "CONTENTS_ADMIN")}
               />
               <Radio
                 name="role"
