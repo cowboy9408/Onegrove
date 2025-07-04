@@ -180,20 +180,18 @@ const StoriesRegistForm = forwardRef(
           let status = "C";
 
           if (
-            originalFile?.siFileId &&
-            file?.siFileId &&
-            originalFile.siFileId === file.siFileId
+            originalFile &&
+            (originalFile.originalName !== file.originalName ||
+              originalFile.path !== file.path ||
+              originalFile.size !== file.size)
           ) {
-            const isChanged =
-              originalFile?.originalName !== file.originalName ||
-              originalFile?.path !== file.path ||
-              originalFile?.size !== file.size;
-
-            status = isChanged ? "E" : "R";
+            status = "E"; // 무조건 변경 처리
+          } else if (originalFile) {
+            status = "R"; // 같으면 참조
           } else {
-            // siFileId 다르면 새로운 파일로 간주
-            status = "C";
+            status = "C"; // 새 파일
           }
+
           console.log("toImageMeta input file", file);
           console.log("toImageMeta originalFile", originalFile);
           return {
