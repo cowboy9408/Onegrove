@@ -18,7 +18,6 @@ export default function Meeting() {
   const [initialData] = useState({});
   const [resveDate, setResveDate] = useState("");
   const [resveStartTime, setResveStartTime] = useState("");
-  const [resveEndTime, setResveEndTime] = useState("");
   const [content, setContent] = useState("");
   const [realUser, setRealUser] = useState("");
   const [numberVisitors, setNumberVisitors] = useState("");
@@ -51,8 +50,15 @@ export default function Meeting() {
   };
   const mappedRoomOptions = locationOptions.map(room => ({
     ...room,
-    capacity: capacityMap[room.roomName] || 99,
+    capacity: capacityMap[room.roomName] || 64,
   }));
+  
+  // 디버깅용 로그
+  useEffect(() => {
+    if (locationOptions.length > 0) {
+      console.log("Meeting.jsx - 회의실 목록:", locationOptions.map(r => ({ name: r.roomName, capacity: capacityMap[r.roomName] || 99 })));
+    }
+  }, [locationOptions]);
 
   useEffect(() => {
     if(selectedRoom) {
@@ -112,7 +118,6 @@ export default function Meeting() {
   useEffect(() => {
     if (initialData.resveDate) setResveDate(initialData.resveDate);
     if (initialData.resveStartTime) setResveStartTime(initialData.resveStartTime + ":00");
-    if (initialData.resveEndTime) setResveEndTime(initialData.resveEndTime + ":00");
     if (initialData.content) setContent(initialData.content);
     if (initialData.realUser) setRealUser(initialData.realUser);
     if (initialData.numberVisitors) setNumberVisitors(initialData.numberVisitors);
@@ -294,7 +299,7 @@ export default function Meeting() {
                   selectData={selectedData}
                   meetingOptions={meetingOptions}
                   existingReservations={scheduleList}
-                  initialData={{ resveDate, resveStartTime, resveEndTime, content, realUser, numberVisitors, companyId }}
+                  initialData={{ resveDate, resveStartTime, content, realUser, numberVisitors, companyId }}
                   closeModal={closeModal}
                   onSubmit={() => {
                     fetchSchedules();
