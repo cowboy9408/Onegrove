@@ -186,6 +186,18 @@ export default function StoriesDetail() {
       path = `https://assets.onegrove.kr/dev/StoriesImg/${originalName}`;
     }
 
+    let status = "R"; // 기본값
+    const isNew = !original?.siFileId;
+
+    if (isNew) {
+      status = "C"; // 신규
+    } else if (
+      file?.originalName !== original?.originalName ||
+      file?.path !== original?.path
+    ) {
+      status = "E"; // 기존과 다르면 수정
+    }
+
     return {
       id: base.id ?? null,
       originalName: originalName,
@@ -195,12 +207,7 @@ export default function StoriesDetail() {
       mime: base.mime || "image/jpeg",
       classification: base.classification || "StoriesImg",
       path: base.path || "",
-      status:
-        base.status !== undefined && base.status !== null
-          ? base.status
-          : file?.changed
-            ? "E"
-            : "R", // 수정 안 하면 R
+      status,
     };
   };
 
