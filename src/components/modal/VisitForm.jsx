@@ -80,6 +80,14 @@ export default function VisitForm({
     }
   }, [companyId]);
 
+  useEffect(() => {
+    if (initialData.visitBuilding && buildingList.length > 0) {
+      const found = buildingList.find(b => b.value === initialData.visitBuilding);
+      if (found) setBuilding(found.code);
+      else setBuilding("");
+    }
+  }, [initialData.visitBuilding, buildingList]);
+
   const getToday = () => {
     const today = new Date();
     const yyyy = today.getFullYear();
