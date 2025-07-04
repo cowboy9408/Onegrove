@@ -174,30 +174,26 @@ const StoriesRegistForm = forwardRef(
 
         const toImageMeta = (file, originalFile = null) => {
           if (!file || !(file.name || file.originalName)) return null;
-
           if (!file?.path && !originalFile?.path) return null;
 
           let status = "C";
 
-          if (
+          const sameFile =
             originalFile &&
-            (originalFile.originalName !== file.originalName ||
-              originalFile.path !== file.path ||
-              originalFile.size !== file.size)
-          ) {
-            status = "E"; // 무조건 변경 처리
+            file?.originalName === originalFile?.originalName &&
+            file?.path === originalFile?.path &&
+            file?.size === originalFile?.size;
+
+          if (originalFile && sameFile) {
+            status = "R";
           } else if (originalFile) {
-            status = "R"; // 같으면 참조
-          } else {
-            status = "C"; // 새 파일
+            status = "E";
           }
 
-          console.log("toImageMeta input file", file);
-          console.log("toImageMeta originalFile", originalFile);
-          return {
+          const meta = {
             id: file.id ?? null,
-            siId: file.siId || originalFile?.siId || null,
-            siFileId: file.siFileId || originalFile?.siFileId || null,
+            siId: originalFile?.siId ?? file.siId ?? null,
+            siFileId: originalFile?.siFileId ?? file.siFileId ?? null,
             originalName: file.originalName || file.name,
             name: file.name || file.originalName,
             size: file.size ?? 0,
@@ -208,55 +204,64 @@ const StoriesRegistForm = forwardRef(
             status,
             delYn: file.delYn || "N",
           };
+
+          return meta;
         };
 
-        const storiesImgList = imageFields
-          .sort((a, b) => a - b)
-          .map((i, idx) => {
+        const activeImages = imageFields
+          .map((i) => {
             const img = values[`storiesImgList${i}`];
-            if (!img) return null;
-
             const caption = values[`storiesImgCaption${i}`] || "";
+            return img ? { img, caption } : null;
+          })
+          .filter(Boolean); // null 제거
 
-            // 기존 이미지 찾아오기 (siFileId 기준으로 빠르게 탐색)
-            const originalImg = (data?.storiesImgList || []).find(
-              (o) => o?.siFileId && o?.siFileId === img?.siFileId
-            );
+        const storiesImgList = activeImages.map((entry, idx) => {
+          const { img, caption } = entry;
+          const originalImg = (data?.storiesImgList || []).find(
+            (o) => o?.siFileId && o?.siFileId === img?.siFileId
+          );
 
-            const fileMeta = toImageMeta(img, originalImg);
-            fileMeta.sort = String(idx + 1);
+          const fileMeta = toImageMeta(img, originalImg);
+          const newSort = String(idx + 1);
 
-            // 캡션만 바뀐 경우도 수정 상태로 처리
-            if (
-              originalImg &&
-              (originalImg.caption || "") !== caption &&
-              fileMeta.status === "R"
-            ) {
+          if (originalImg && fileMeta.status === "R") {
+            const originalSort = String(originalImg.sort || "");
+            const captionChanged = (originalImg.caption || "") !== caption;
+
+            if (originalSort !== newSort || captionChanged) {
               fileMeta.status = "E";
             }
+          }
 
-            return {
-              ...fileMeta,
-              caption,
-            };
-          })
-          .filter((item) => item && item.status !== "D" && item.delYn !== "Y")
-          .map((item, idx) => ({
-            ...item,
-            sort: String(idx + 1),
-          }));
+          return {
+            ...fileMeta,
+            caption,
+            sort: newSort,
+          };
+        });
 
         // 삭제된 이미지 반영
 
+        // 수정된 이미지들의 siId 목록 수집
+        const updatedSiIds = storiesImgList
+          .filter((img) => img.status === "E" && img.siId)
+          .map((img) => String(img.siId));
+
+        // 기존 리스트에서 수정된 것 제외하고 진짜 삭제만 추출
         const replacedImages = (data?.storiesImgList || [])
           .filter((originalImg) => {
-            return !storiesImgList.some((newImg) => {
+            const isDeleted = !storiesImgList.some((newImg) => {
               return (
-                originalImg?.siFileId === newImg?.siFileId &&
-                originalImg?.path === newImg?.path &&
-                originalImg?.name === newImg?.name
+                newImg.siId === originalImg.siId &&
+                (newImg.path === originalImg.path ||
+                  newImg.name === originalImg.name)
               );
             });
+
+            const isUpdated = updatedSiIds.includes(String(originalImg.siId));
+
+            return isDeleted && !isUpdated; // 삭제됐지만 수정된 것은 제외
           })
           .map((img) => ({
             ...toImageMeta(img),

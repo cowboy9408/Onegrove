@@ -13,7 +13,6 @@ export default function ReservationForm({
   existingReservations = [],
   initialData = {},
   isEdit = false,
-  selectData,
   onSubmit,
   closeModal,
 }) {
@@ -117,13 +116,23 @@ export default function ReservationForm({
         payload
       );
       if (res.data?.success) {
-        alert(isEdit ? "수정 완료" : "등록 완료");
+        if(res.data?.message) {
+          alert(res.data?.message);
+        } else {
+          alert(isEdit ? "수정 완료" : "등록 완료");
+        }
         onSubmit?.(payload);
         closeModal?.();
-      } else alert("처리 실패");
+      } else {
+        if(res.data?.message) {
+          alert(res.data?.message);
+        } else {
+          alert("처리 실패");
+        }
+      }
     } catch (err) {
       console.error("예약 처리 실패:", err);
-      alert(err?.respopnse?.data?.message || "다시 시도해 주세요.");
+      alert(err?.respopnse?.message || "다시 시도해 주세요.");
       // alert("필수 입력 내용을 확인해 주세요.");
     }
   };
@@ -197,6 +206,10 @@ export default function ReservationForm({
 
     return options;
   };
+
+  // 현재 선택된 회의실의 최대 수용인원 구하기
+  const selectedRoomObj = roomOptions.find(r => String(r.id) === String(roomId));
+  const maxCapacity = selectedRoomObj?.capacity || 99;
 
   const isFormValid =
     roomId &&
@@ -341,7 +354,7 @@ export default function ReservationForm({
 
       <div>
         <label className="mb-1 block">
-          참석인원 (최대 수용인원) <span className="text-red-500">*</span>
+          참석인원 (최대 수용인원: {maxCapacity}명) <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
@@ -355,13 +368,14 @@ export default function ReservationForm({
             }
             if (!/^\d+$/.test(input)) return;
             const val = Number(input);
-            if (selectData?.capacity && val > selectData.capacity) {
-              alert(`최대 수용 인원은 ${selectData.capacity}명입니다.`);
+            if (val > maxCapacity) {
+              alert(`최대 수용 인원은 ${maxCapacity}명입니다.`);
               setNumberVisitors("");
             } else {
               setNumberVisitors(val);
             }
           }}
+          max={maxCapacity}
           className="w-full rounded border px-2 py-1"
         />
       </div>
