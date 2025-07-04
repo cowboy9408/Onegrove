@@ -41,8 +41,8 @@ export default function OccupancyDetail() {
 
       setKoData(ko);
       setEnData(en);
-      setKoLocations(ko.officeList ?? []);
-      setEnLocations(en.officeList ?? []);
+      setKoLocations(ko.officeList ?? cloneDeep(en.officeList || []));
+      setEnLocations(en.officeList ?? cloneDeep(ko.officeList || []));
 
       setLoading(false);
 
@@ -216,7 +216,7 @@ export default function OccupancyDetail() {
       const formValues = await formRef.current?.submit?.(showError);
       if (!formValues) {
         // 유효성 검사 실패 시, 상태 초기화
-        await fetchDetail(); // 상태 초기화 (koData, enData, koLocations, enLocations)
+
         return;
       }
 
