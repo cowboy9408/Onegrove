@@ -10,21 +10,6 @@ export default function SleepReservationForm({
   onSubmit,
   closeModal,
 }) {
-  const [roomId, setRoomId] = useState(initialData.roomId || room || 1);
-  const [roomDetailId, setRoomDetailId] = useState(initialData.roomId || room || 1);
-  const [companyId, setCompanyId] = useState(initialData.companyId || "");
-  const [resveDate, setResveDate] = useState(initialData.resveDate || "");
-  const [resveStartTime, setResveStartTime] = useState(
-    initialData.resveStartTime || "09:00:00"
-  );
-  const [resveEndTime, setResveEndTime] = useState(
-    initialData.resveEndTime || "10:00:00"
-  );
-  const [realUser, setRealUser] = useState(initialData.realUser || "");
-  const [meetingList, setMeetingList] = useState([]);
-  const [companyList, setCompanyList] = useState([]);
-  const [userList, setUserList] = useState([]);
-
   const getToday = () => {
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -33,17 +18,49 @@ export default function SleepReservationForm({
     return `${yyyy}-${mm}-${dd}`;
   };
 
+  const [roomId, setRoomId] = useState(String(initialData.roomId || room || 1));
+  const [roomDetailId, setRoomDetailId] = useState(String(initialData.roomInfoId || initialData.roomNumberId || initialData.roomId || room || 1));
+  const [companyId, setCompanyId] = useState(String(initialData.companyId || ""));
+  const [resveDate, setResveDate] = useState(initialData.reserveDt || initialData.resveDate || (!isEdit ? getToday() : ""));
+  const [resveStartTime, setResveStartTime] = useState(
+    initialData.reserveTime || initialData.resveStartTime || "09:00:00"
+  );
+  const [resveEndTime, setResveEndTime] = useState(
+    initialData.resveEndTime || "10:00:00"
+  );
+  const [realUser, setRealUser] = useState(String(initialData.userId || initialData.realUser || ""));
+  const [meetingList, setMeetingList] = useState([]);
+  const [companyList, setCompanyList] = useState([]);
+  const [userList, setUserList] = useState([]);
+
   const getStartOptions = () => {
     const options = [];
-    const now = new Date();
     const todayStr = getToday();
     let startHour = 9;
-    if (resveDate === todayStr) {
-      startHour = Math.max(9, now.getHours() + 1); // 현재 시간 이후
+    
+    // 수정모드가 아니고 오늘 날짜인 경우에만 현재 시간 이후로 제한
+    if (!isEdit && resveDate === todayStr) {
+      // startHour = Math.max(9, now.getHours() + 1); // 현재 시간 이후
     }
+    
+    // startHour가 17을 초과하지 않도록 제한
+    startHour = Math.min(startHour, 17);
+    
     for (let hour = startHour; hour <= 17; hour++) {
       options.push(`${String(hour).padStart(2, "0")}:00:00`);
     }
+    
+    // 수정모드에서 현재 설정된 시간이 옵션에 없으면 추가
+    if (isEdit && resveStartTime && !options.includes(resveStartTime)) {
+      options.push(resveStartTime);
+      options.sort(); // 시간순으로 정렬
+    }
+    
+    // 옵션이 비어있으면 최소한 9시는 포함
+    if (options.length === 0) {
+      options.push("09:00:00");
+    }
+    
     return options;
   };
 
@@ -105,6 +122,79 @@ export default function SleepReservationForm({
     fetchRoomDetail();
   }, [companyId]);
 
+  // 수정모드일 때 즉시 설정 가능한 값들을 설정
+  useEffect(() => {
+    if (isEdit && initialData) {
+      // 수면실 설정 (roomId)
+      if (initialData.roomId) {
+        setRoomId(String(initialData.roomId));
+      }
+      
+      // 날짜 설정
+      if (initialData.reserveDt) {
+        setResveDate(initialData.reserveDt);
+      }
+      
+      // 예약 시간 설정
+      if (initialData.reserveTime) {
+        setResveStartTime(initialData.reserveTime);
+      }
+      
+      // 종료시간 설정 (수정모드에서만)
+      if (initialData.resveEndTime) {
+        setResveEndTime(initialData.resveEndTime);
+      }
+    }
+  }, [isEdit, initialData]);
+
+  // 수정모드에서 meetingList가 로드된 후 roomDetailId 설정
+  useEffect(() => {
+    if (isEdit && initialData?.roomNumberId && meetingList?.infoList) {
+      // console.log("수정모드에서 호실 설정:", initialData.roomNumberId);
+      const roomInfo = meetingList.infoList.find(room => room.roomNumId === initialData.roomNumberId);
+      if (roomInfo) {
+        setRoomDetailId(String(roomInfo.id));
+        if (roomInfo.roomInfoId) {
+          setRoomId(String(roomInfo.roomInfoId));
+        }
+      }
+    }
+  }, [isEdit, initialData, meetingList]);
+
+  // 수정모드에서 companyList가 로드된 후 companyId 설정
+  useEffect(() => {
+    if (isEdit && initialData?.companyName && companyList?.length > 0) {
+      // console.log("수정모드에서 입주사 설정:", initialData.companyName);
+      const company = companyList.find(comp => comp.name === initialData.companyName);
+      if (company) {
+        setCompanyId(String(company.companyId));
+      }
+    }
+  }, [isEdit, initialData, companyList]);
+
+  // 수정모드에서 userList가 로드된 후 realUser 설정
+  useEffect(() => {
+    if (isEdit && initialData?.userName && userList?.length > 0) {
+      console.log("수정모드에서 사용자 설정:", initialData);
+      const user = userList.find(u => u.userName === initialData.userName);
+      if (user) {
+        setRealUser(String(user.userId));
+      }
+    }
+  }, [isEdit, initialData, userList]);
+
+  // roomDetailId가 변경될 때 해당 호실이 속한 수면실(roomId) 설정 (신규 등록 시에만)
+  useEffect(() => {
+    if (!isEdit && roomDetailId && meetingList?.infoList) {
+      const roomInfo = meetingList.infoList.find(room => room.id === Number(roomDetailId));
+      if (roomInfo && roomInfo.roomInfoId) {
+        setRoomId(String(roomInfo.roomInfoId));
+      }
+    }
+  }, [roomDetailId, meetingList, isEdit]);
+
+
+
   const handleSubmit = async () => {
     const payload = {
       roomInfoId: Number(roomDetailId),
@@ -129,6 +219,24 @@ export default function SleepReservationForm({
     } catch (err) {
       console.error("예약 처리 실패:", err);
       alert(err?.response?.data?.message);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("정말로 삭제하시겠습니까?")) {
+      return;
+    }
+
+    try {
+      const res = await api.get(`/api/v1/sleep/reserve/delete?id=${initialData.id}`);
+      if (res.data?.success) {
+        alert("삭제 완료");
+        onSubmit?.();
+        closeModal?.();
+      } else alert("삭제 실패");
+    } catch (err) {
+      console.error("삭제 실패:", err);
+      alert(err?.response?.data?.message || "삭제 중 오류가 발생했습니다.");
     }
   };
 
@@ -255,19 +363,21 @@ export default function SleepReservationForm({
         </select>
       </div>
 
-      <div className="flex justify-between gap-3">
+      <div className="flex justify-center gap-3">
         <button
           onClick={handleSubmit}
           className="cursor-pointer rounded bg-black px-4 py-2 text-white hover:bg-gray-800"
         >
-          저장
+          {isEdit ? "수정" : "저장"}
         </button>
-        <button
-          onClick={closeModal}
-          className="cursor-pointer rounded border px-4 py-2"
-        >
-          취소
-        </button>
+        {isEdit && (
+          <button
+            onClick={handleDelete}
+            className="cursor-pointer rounded border px-4 py-2"
+          >
+            삭제
+          </button>
+        )}
       </div>
     </div>
   );

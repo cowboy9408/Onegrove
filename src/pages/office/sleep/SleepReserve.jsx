@@ -124,15 +124,27 @@ export default function SleepReserve() {
 
   const handleDateChange = (direction) => {
     const today = dayjs();
-    const tenDaysAgo = today.subtract(10, "day");
+    const sevenDaysAgo = today.subtract(7, "day");
+    const sevenDaysLater = today.add(7, "day");
     const newDate =
       direction === "prev"
         ? dayjs(selectedDate).subtract(1, "day")
         : dayjs(selectedDate).add(1, "day");
 
-    if (newDate.isSameOrAfter(tenDaysAgo) && newDate.isSameOrBefore(today)) {
+    if (newDate.isSameOrAfter(sevenDaysAgo) && newDate.isSameOrBefore(sevenDaysLater)) {
       setSelectedDate(newDate.format("YYYY-MM-DD"));
     }
+  };
+
+  // 날짜 이동 버튼 활성화 상태 확인
+  const canGoPrev = () => {
+    const sevenDaysAgo = dayjs().subtract(7, "day");
+    return dayjs(selectedDate).subtract(1, "day").isSameOrAfter(sevenDaysAgo);
+  };
+
+  const canGoNext = () => {
+    const sevenDaysLater = dayjs().add(7, "day");
+    return dayjs(selectedDate).add(1, "day").isSameOrBefore(sevenDaysLater);
   };
 
   return (
@@ -183,16 +195,20 @@ export default function SleepReserve() {
           size="sm"
           variant="ghost"
           onClick={() => handleDateChange("prev")}
+          disabled={!canGoPrev()}
+          className={!canGoPrev() ? "opacity-50 cursor-not-allowed" : ""}
         >
-          ←
+          &lt;
         </Button>
         <div className="text-[20px] font-bold">{selectedDate}</div>
         <Button
           size="sm"
           variant="ghost"
           onClick={() => handleDateChange("next")}
+          disabled={!canGoNext()}
+          className={!canGoNext() ? "opacity-50 cursor-not-allowed" : ""}
         >
-          →
+          &gt;
         </Button>
       </div>
 
@@ -229,7 +245,35 @@ export default function SleepReserve() {
                         (r) => r.roomNumberId === info.roomNumId
                       );
                       return (
-                        <div key={info.id} className="border-b pb-2 text-sm">
+                        <div 
+                          key={info.id} 
+                          className={`border-b pb-2 text-sm ${reservation ? 'cursor-pointer hover:bg-gray-200' : ''}`}
+                          onClick={() => {
+                            if (reservation) {
+                              showModal({
+                                title: "수면실 수정",
+                                size: "lg",
+                                customButton: true,
+                                showCancel: true,
+                                children: ({ closeModal }) => (
+                                  <SleepReservationForm
+                                    room={selectedRoom}
+                                    meetingOptions={meetingOptions}
+                                    roomList={officeOptions}
+                                    initialData={reservation}
+                                    isEdit={true}
+                                    closeModal={closeModal}
+                                    onSubmit={() => {
+                                      fetchRoomDetail(selectedRoom);
+                                      fetchReservationCounts(selectedRoom);
+                                      closeModal();
+                                    }}
+                                  />
+                                ),
+                              });
+                            }
+                          }}
+                        >
                           <strong>
                             {meetingOptions.name} {info.roomNumId}호
                           </strong>{" "}
