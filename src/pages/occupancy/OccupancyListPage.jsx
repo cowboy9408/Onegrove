@@ -43,6 +43,12 @@ export default function OccupancyListPage() {
     });
   };
 
+  const handleSearch = () => {
+    setPage(1);
+    setActiveFilter(searchFilter);
+    setRefreshKey((prev) => prev + 1);
+  };
+
   useEffect(() => {
     const fetchOfficeOptions = async () => {
       try {
@@ -164,6 +170,12 @@ export default function OccupancyListPage() {
                 onChange={(e) =>
                   setSearchFilter({ ...searchFilter, name: e.target.value })
                 }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSearch();
+                  }
+                }}
               />
             </Col>
 
@@ -191,6 +203,12 @@ export default function OccupancyListPage() {
                 onChange={(e) =>
                   setSearchFilter({ ...searchFilter, floor: e.target.value })
                 }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSearch();
+                  }
+                }}
               />
             </Col>
 
@@ -219,15 +237,8 @@ export default function OccupancyListPage() {
             </Col>
 
             <Col className="flex gap-2 self-end">
-              <Button
-                onClick={() => {
-                  setPage(1);
-                  setActiveFilter(searchFilter);
-                  setRefreshKey((prev) => prev + 1);
-                }}
-              >
-                검색
-              </Button>
+              <Button onClick={handleSearch}>검색</Button>
+
               <Button
                 variant="outline"
                 onClick={() => {

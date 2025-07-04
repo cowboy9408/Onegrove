@@ -48,6 +48,28 @@ export default function PressListPage() {
   const [searchFilter, setSearchFilter] = useState(defaultFilter);
   const [activeFilter, setActiveFilter] = useState(defaultFilter);
 
+  const handleSearch = () => {
+    setPage(1);
+    setActiveFilter(searchFilter);
+    const params = {
+      name: searchFilter.name,
+      category: searchFilter.category,
+      visibility: searchFilter.visibility,
+      page: 1,
+    };
+    if (searchFilter.dateRange.startDate) {
+      params.startDate = searchFilter.dateRange.startDate
+        .toISOString()
+        .split("T")[0];
+    }
+    if (searchFilter.dateRange.endDate) {
+      params.endDate = searchFilter.dateRange.endDate
+        .toISOString()
+        .split("T")[0];
+    }
+    setSearchParams(params);
+  };
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -258,6 +280,12 @@ export default function PressListPage() {
                     setSearchFilter({ ...searchFilter, name: e.target.value })
                   }
                   onClear={() => setSearchFilter({ ...searchFilter, name: "" })}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleSearch();
+                    }
+                  }}
                 />
               </div>
 
@@ -295,31 +323,8 @@ export default function PressListPage() {
               </div>
             </Row>
             <Col className="flex w-1/4 justify-end gap-2">
-              <Button
-                onClick={() => {
-                  setPage(1);
-                  setActiveFilter(searchFilter);
-                  const params = {
-                    name: searchFilter.name,
-                    category: searchFilter.category,
-                    visibility: searchFilter.visibility,
-                    page: 1,
-                  };
-                  if (searchFilter.dateRange.startDate) {
-                    params.startDate = searchFilter.dateRange.startDate
-                      .toISOString()
-                      .split("T")[0];
-                  }
-                  if (searchFilter.dateRange.endDate) {
-                    params.endDate = searchFilter.dateRange.endDate
-                      .toISOString()
-                      .split("T")[0];
-                  }
-                  setSearchParams(params);
-                }}
-              >
-                검색
-              </Button>
+              <Button onClick={handleSearch}>검색</Button>
+
               <Button
                 variant="outline"
                 onClick={() => {

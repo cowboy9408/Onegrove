@@ -152,7 +152,16 @@ export default function AdminListPage() {
   return (
     <div>
       <SearchSection>
-        <Box>
+        <Box
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              setPage(1);
+              setActiveFilter(searchFilter);
+              setSearchParams({ ...searchFilter, page: 1 });
+            }
+          }}
+        >
           <Row>
             <Col>
               <Select
@@ -178,6 +187,14 @@ export default function AdminListPage() {
                   setSearchFilter({ ...searchFilter, name: e.target.value })
                 }
                 onClear={() => setSearchFilter({ ...searchFilter, name: "" })}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    setPage(1);
+                    setActiveFilter(searchFilter);
+                    setSearchParams({ ...searchFilter, page: 1 });
+                  }
+                }}
               />
             </Col>
             <Col>
@@ -189,6 +206,14 @@ export default function AdminListPage() {
                   setSearchFilter({ ...searchFilter, email: e.target.value })
                 }
                 onClear={() => setSearchFilter({ ...searchFilter, email: "" })}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    setPage(1);
+                    setActiveFilter(searchFilter);
+                    setSearchParams({ ...searchFilter, page: 1 });
+                  }
+                }}
               />
             </Col>
             <Col className="flex items-center gap-4">

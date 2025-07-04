@@ -322,18 +322,19 @@ export default function UserDetailPage() {
               전화번호
               <span className="text-red-500">*</span>
             </label>
-            <div className="flex items-center">
-              <span className="rounded-l-md px-3 py-2 text-base">010 -</span>
-              <div className="w-full max-w-[670px]">
-                <Input
-                  value={form.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
-                  maxLength={8}
-                  inputMode="numeric" // 모바일에서도 숫자 키패드 유도
-                  pattern="[0-9]*"
-                  placeholder="ex) 1234-1234"
-                />
-              </div>
+            <div className="flex items-center space-x-2">
+              <span className="rounded-l-md px-3 py-2 text-base whitespace-nowrap">
+                010 -
+              </span>
+              <Input
+                value={form.phone}
+                onChange={(e) => handleChange("phone", e.target.value)}
+                maxLength={8}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="1234-5678"
+                className="w-full"
+              />
             </div>
           </div>
           <Input
