@@ -121,7 +121,7 @@ export default function ReservationForm({
       ...(isEdit && { id: initialData.id }),
       ...(!isEdit && { status }),
     };
-    // console.log(payload)
+    console.log(payload)
 
     try {
       const res = await api.post(
@@ -331,7 +331,7 @@ export default function ReservationForm({
             ))}
           </select>
           <span>~</span>
-          {console.log("resveEndTime selectbox 렌더링:", { resveEndTime, getEndOptions: getEndOptions().length })}
+          {/* {console.log("resveEndTime selectbox 렌더링:", { resveEndTime, getEndOptions: getEndOptions().length })} */}
           <select
             value={resveEndTime}
             onChange={(e) => {
