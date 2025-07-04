@@ -177,7 +177,7 @@ export default function Visit() {
                   </td>
                 </tr>
                 <tr>
-                  <th className="border p-2">방문 날짜</th>
+                  <th className="border p-2 min-w-[80px]">방문 날짜</th>
                   <td className="border p-2">{detail.visitDate}</td>
                   <th className="border p-2">방문 시간</th>
                   <td className="border p-2">{detail.visitTime}</td>
@@ -208,7 +208,7 @@ export default function Visit() {
                 </tr>
                 <tr>
                   <th className="border p-2">출입카드 번호</th>
-                  <td className="border p-2">-</td>
+                  <td className="border p-2">{detail.accessCard}</td>
                   <th className="border p-2"></th>
                   <td className="border p-2"></td>
                 </tr>
