@@ -175,36 +175,42 @@ const StoriesRegistForm = forwardRef(
         const toImageMeta = (file, originalFile = null) => {
           if (!file || !(file.name || file.originalName)) return null;
 
+          if (!file.path && !originalFile?.path) {
+            console.warn(
+              "이미지에 path가 없습니다. 저장 대상에서 제외됩니다.",
+              file
+            );
+            return null;
+          }
+
+          const isSameImage =
+            originalFile &&
+            file?.path === originalFile?.path &&
+            file?.originalName === originalFile?.originalName &&
+            file?.size === originalFile?.size;
+
           let status = "C";
 
-          if (
-            originalFile?.siFileId &&
-            file?.siFileId &&
-            originalFile.siFileId === file.siFileId
-          ) {
-            const isChanged =
-              originalFile?.originalName !== file.originalName ||
-              originalFile?.path !== file.path ||
-              originalFile?.size !== file.size;
-
-            status = isChanged ? "E" : "R";
-          } else {
-            // siFileId 다르면 새로운 파일로 간주
-            status = "C";
+          if (isSameImage) {
+            status = "R";
+          } else if (originalFile) {
+            status = "E";
           }
-          console.log("toImageMeta input file", file);
-          console.log("toImageMeta originalFile", originalFile);
+
           return {
             id: file.id ?? null,
             siId: file.siId || originalFile?.siId || null,
-            siFileId: file.siFileId || originalFile?.siFileId || null,
+            siFileId:
+              status === "E"
+                ? null
+                : file.siFileId || originalFile?.siFileId || null,
             originalName: file.originalName || file.name,
             name: file.name || file.originalName,
             size: file.size ?? 0,
             extension: "." + (file.name || "").split(".").pop(),
             mime: file.mime || "image/png",
             classification: "StoriesImg",
-            path: file.path || "",
+            path: file.path || originalFile?.path || "",
             status,
             delYn: file.delYn || "N",
           };

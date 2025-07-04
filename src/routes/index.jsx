@@ -91,7 +91,7 @@ export const routeMeta = [
         title: "관리자 관리",
         icon: <UsersIcon size={18} />,
         hidden: false,
-        permissions: ["SUPER_ADMIN"],
+        permissions: ["SUPER_ADMIN", "OFFICE_ADMIN", "NORMAL_ADMIN"],
         children: [
           {
             uuid: "12b3ef89-1b74-450d-9f51-2888b953c1fd",
