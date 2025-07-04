@@ -66,15 +66,25 @@ export default function AdminRegist() {
 
   const handleChange = (key, value) => {
     if (key === "name") {
+      const hasNumber = /\d/; // 숫자 포함 여부 검사
+
+      if (hasNumber.test(value)) {
+        setErrors((prev) => ({
+          ...prev,
+          name: "이름에는 숫자를 입력할 수 없습니다.",
+        }));
+        return;
+      }
+
       if (value.length > 10) {
         setErrors((prev) => ({
           ...prev,
           name: "이름은 최대 10자까지 입력 가능합니다.",
         }));
         return;
-      } else {
-        setErrors((prev) => ({ ...prev, name: "" }));
       }
+
+      setErrors((prev) => ({ ...prev, name: "" }));
     }
 
     if (key === "username") {
