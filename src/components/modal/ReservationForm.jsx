@@ -70,7 +70,10 @@ export default function ReservationForm({
   useEffect(() => {
     if (initialData.resveDate) setResveDate(initialData.resveDate);
     if (initialData.resveStartTime) setResveStartTime(initialData.resveStartTime + ":00");
-    if (initialData.resveEndTime) setResveEndTime(initialData.resveEndTime + ":00");
+    if (initialData.resveEndTime) {
+      const end = initialData.resveEndTime;
+      setResveEndTime(end.length === 8 ? end : end + ":00");
+    }
     if (initialData.content) setContent(initialData.content);
     if (initialData.realUser) setRealUser(initialData.realUser);
     if (initialData.numberVisitors) setNumberVisitors(initialData.numberVisitors);
