@@ -242,7 +242,7 @@ export const routeMeta = [
         element: <PopupListPage />,
         title: "팝업 관리",
         icon: <BellIcon size={18} />,
-        hidden: false,
+        hidden: true,
         permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN"],
       },
       {
