@@ -215,7 +215,7 @@ export default function PressDetail() {
   return (
     <>
       <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
-        Press & Media 상세
+        Press & Media 상세 정보
       </div>
       <Section>
         <Tabs

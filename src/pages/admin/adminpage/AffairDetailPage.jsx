@@ -244,7 +244,7 @@ export default function AffairDetailPage() {
   return (
     <>
       <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
-        입주사 총무팀 상세
+        입주사 총무팀 상세 정보
       </div>
       <div className="max-w mx-auto space-y-6 rounded-lg bg-white p-6 shadow-md">
         <div className="flex flex-wrap gap-8">

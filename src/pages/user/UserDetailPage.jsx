@@ -228,7 +228,7 @@ export default function UserDetailPage() {
   return (
     <>
       <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
-        회원 상세
+        임직원 상세 정보
       </div>
       <div className="max-w mx-auto space-y-6 rounded-lg bg-white p-6 shadow-md">
         <div className="flex flex-wrap gap-8">

@@ -91,7 +91,7 @@ export const routeMeta = [
         title: "관리자 관리",
         icon: <UsersIcon size={18} />,
         hidden: false,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+        permissions: ["SUPER_ADMIN"],
         children: [
           {
             uuid: "12b3ef89-1b74-450d-9f51-2888b953c1fd",
@@ -149,45 +149,30 @@ export const routeMeta = [
         path: "/user",
         group: "/user",
         element: <UserListPage />,
-        title: "회원 관리",
+        title: "임직원 관리",
         icon: <UsersIcon size={18} />,
         hidden: false,
-        permissions: [
-          "SUPER_ADMIN",
-          "NORMAL_ADMIN",
-          "OFFICE_ADMIN",
-          "OFFICE_SECRETARY_ADMIN",
-        ],
+        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_SECRETARY_ADMIN"],
       },
       {
         uuid: "b269e884-b419-4961-9b85-144d20ff3b4d",
         path: "/user/regist",
         group: "/user",
         element: <UserRegist />,
-        title: "회원 등록",
+        title: "임직원 등록",
         icon: <UsersIcon size={18} />,
         hidden: true,
-        permissions: [
-          "SUPER_ADMIN",
-          "NORMAL_ADMIN",
-          "OFFICE_ADMIN",
-          "OFFICE_SECRETARY_ADMIN",
-        ],
+        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_SECRETARY_ADMIN"],
       },
       {
         uuid: "aeab286e-bb23-471f-a050-7b812fecf13a",
         path: "/user/detail/:id",
         group: "/user",
         element: <UserDetailPage />,
-        title: "회원 상세",
+        title: "임직원 상세",
         icon: <UsersIcon size={18} />,
         hidden: true,
-        permissions: [
-          "SUPER_ADMIN",
-          "NORMAL_ADMIN",
-          "OFFICE_ADMIN",
-          "OFFICE_SECRETARY_ADMIN",
-        ],
+        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_SECRETARY_ADMIN"],
       },
 
       {
@@ -197,12 +182,7 @@ export const routeMeta = [
         title: "입주사 관리",
         icon: <HomeIcon size={18} />,
         hidden: false,
-        permissions: [
-          "SUPER_ADMIN",
-          "NORMAL_ADMIN",
-          "RETAIL_ADMIN",
-          "OFFICE_ADMIN",
-        ],
+        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN"],
       },
       {
         uuid: "89309bbd-2edc-4cf0-8b6c-6960e023b340",
@@ -210,12 +190,7 @@ export const routeMeta = [
         element: <OccupancyRegist />,
         title: "입주사 등록",
         hidden: true,
-        permissions: [
-          "SUPER_ADMIN",
-          "NORMAL_ADMIN",
-          "RETAIL_ADMIN",
-          "OFFICE_ADMIN",
-        ],
+        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN"],
       },
       {
         uuid: "6f56e1bc-b894-4403-8399-dd389d4540b6",
@@ -223,12 +198,7 @@ export const routeMeta = [
         element: <OccupancyDetail />,
         title: "입주사 상세 페이지",
         hidden: true,
-        permissions: [
-          "SUPER_ADMIN",
-          "NORMAL_ADMIN",
-          "RETAIL_ADMIN",
-          "OFFICE_ADMIN",
-        ],
+        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "RETAIL_ADMIN"],
       },
 
       {
@@ -386,7 +356,7 @@ export const routeMeta = [
         title: "콘텐츠 관리",
         icon: <FileTextIcon size={18} />,
         hidden: false,
-        permissions: ["SUPER_ADMIN", "RETAIL_ADMIN", "OFFICE_ADMIN"],
+        permissions: ["SUPER_ADMIN", "RETAIL_ADMIN"],
         children: [
           {
             uuid: "952664cb-fbe1-4ecd-bb18-ca6aecead4d1",
@@ -528,7 +498,7 @@ export const routeMeta = [
         uuid: "b7bd1575-4a90-4c6c-8edd-a638d05fb371",
         path: "/office",
         element: <OfficeLayout />,
-        title: "오피스 관리",
+        title: "어메니티 예약 관리",
         icon: <CalendarDaysIcon size={18} />,
         hidden: false,
         permissions: [
@@ -614,10 +584,10 @@ export const routeMeta = [
         uuid: "c9c84ed1-a896-4d9b-b659-cd6a43dc8cd2",
         path: "/system",
         element: <SystemLayout />,
-        title: "시스템 관리",
+        title: "어메니티 시스템 관리",
         icon: <SettingsGearIcon size={18} />,
         hidden: false,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
+        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
         children: [
           {
             uuid: "e59c7075-0b1c-4607-b548-c38fa7566532",
@@ -625,7 +595,7 @@ export const routeMeta = [
             element: <MeetingListPage />,
             title: "어메니티 예약 설정",
             hidden: false,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
           {
             uuid: "f6d4536d-e76b-4621-9873-bf5b6465e50e",
@@ -633,7 +603,7 @@ export const routeMeta = [
             element: <MeetingSetting />,
             title: "Meeting Room 추가",
             hidden: true,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
           {
             uuid: "c4b5101a-61b4-44e7-8efe-4ab822624927",
@@ -641,7 +611,7 @@ export const routeMeta = [
             element: <MeetingDetail />,
             title: "Meeting Room 상세",
             hidden: true,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
 
           {
@@ -650,7 +620,7 @@ export const routeMeta = [
             element: <SleepListPage />,
             title: "Relax Room 설정",
             hidden: false,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
           {
             uuid: "cfd0a71c-188d-4cbc-bcc8-aa196bbdce2b",
@@ -658,15 +628,15 @@ export const routeMeta = [
             element: <SleepSetting />,
             title: "Relax Room 추가",
             hidden: true,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
           {
             uuid: "cdfad14f-7e62-44eb-accd-68696dbbd0b0",
             path: "/system/sleep/detail/:id",
             element: <SleepDetail />,
-            title: "수면실 상세",
+            title: "Relax Room 상세",
             hidden: true,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
 
           {
