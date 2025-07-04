@@ -171,33 +171,25 @@ const StoriesRegistForm = forwardRef(
           alert("모든 필수 항목을 입력해주세요.");
           return null;
         }
-
         const toImageMeta = (file, originalFile = null) => {
           if (!file || !(file.name || file.originalName)) return null;
-
           if (!file?.path && !originalFile?.path) return null;
 
           let status = "C";
-
           if (
             originalFile &&
             (originalFile.originalName !== file.originalName ||
               originalFile.path !== file.path ||
               originalFile.size !== file.size)
           ) {
-            status = "E"; // 무조건 변경 처리
+            status = "E";
           } else if (originalFile) {
-            status = "R"; // 같으면 참조
-          } else {
-            status = "C"; // 새 파일
+            status = "R";
           }
 
-          console.log("toImageMeta input file", file);
-          console.log("toImageMeta originalFile", originalFile);
-          return {
+          // 기본 세팅
+          const meta = {
             id: file.id ?? null,
-            siId: file.siId || originalFile?.siId || null,
-            siFileId: file.siFileId || originalFile?.siFileId || null,
             originalName: file.originalName || file.name,
             name: file.name || file.originalName,
             size: file.size ?? 0,
@@ -205,9 +197,23 @@ const StoriesRegistForm = forwardRef(
             mime: file.mime || "image/png",
             classification: "StoriesImg",
             path: file.path || "",
-            status,
             delYn: file.delYn || "N",
+            status,
           };
+
+          // 상태에 따라 siId, siFileId 분기 처리
+          if (status === "C") {
+            meta.siId = null;
+            meta.siFileId = null;
+          } else if (status === "E") {
+            meta.siId = originalFile?.siId ?? null;
+            meta.siFileId = null;
+          } else {
+            meta.siId = file.siId || originalFile?.siId || null;
+            meta.siFileId = file.siFileId || originalFile?.siFileId || null;
+          }
+
+          return meta;
         };
 
         const storiesImgList = imageFields
@@ -250,13 +256,24 @@ const StoriesRegistForm = forwardRef(
 
         const replacedImages = (data?.storiesImgList || [])
           .filter((originalImg) => {
-            return !storiesImgList.some((newImg) => {
+            const isReplacedByNewImage = storiesImgList.some((newImg) => {
               return (
-                originalImg?.siFileId === newImg?.siFileId &&
-                originalImg?.path === newImg?.path &&
-                originalImg?.name === newImg?.name
+                newImg?.sort === String(originalImg?.sort) &&
+                newImg?.status === "E"
               );
             });
+
+            if (isReplacedByNewImage) return false;
+
+            const stillExists = storiesImgList.some((newImg) => {
+              return (
+                newImg?.siFileId === originalImg?.siFileId &&
+                newImg?.path === originalImg?.path &&
+                newImg?.name === originalImg?.name
+              );
+            });
+
+            return !stillExists;
           })
           .map((img) => ({
             ...toImageMeta(img),
