@@ -132,7 +132,13 @@ const RegistForm = forwardRef(
           .some((loc) => !loc.office?.trim() || !loc.floor?.trim());
 
         if (hasInvalid) {
-          setTimeout(() => onError?.("오피스와 층 수를 모두 입력해주세요."), 0);
+          setTimeout(
+            () =>
+              onError?.(
+                "오피스와 층 수를 확인해주세요.\n(동일한 오피스 선택 불가)"
+              ),
+            0
+          );
           return null;
         }
 
