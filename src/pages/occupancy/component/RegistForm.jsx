@@ -65,7 +65,7 @@ const RegistForm = forwardRef(
 
     const handleOfficeChange = (updatedList) => {
       setValue("locations", updatedList);
-      setLocations(updatedList); // 👈 이게 핵심! 상태에 반영됨
+      setLocations(updatedList);
     };
 
     useEffect(() => {
@@ -135,7 +135,7 @@ const RegistForm = forwardRef(
           setTimeout(
             () =>
               onError?.(
-                "오피스와 층 수를 확인해주세요.\n(동일한 오피스 선택 불가)"
+                "오피스와 층 수를 확인해주세요.\n(동일한 오피스 입력 불가)"
               ),
             0
           );
