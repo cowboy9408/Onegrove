@@ -216,7 +216,7 @@ export default function OccupancyDetail() {
       const formValues = await formRef.current?.submit?.(showError);
       if (!formValues) {
         // 유효성 검사 실패 시, 상태 초기화
-
+        await fetchDetail(); // 상태 초기화 (koData, enData, koLocations, enLocations)
         return;
       }
 
