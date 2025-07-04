@@ -190,7 +190,7 @@ export default function Visit() {
                 </tr>
                 <tr>
                   <th className="border p-2">방문 목적</th>
-                  <td className="h-[80px] border p-2" colSpan={3}>
+                  <td className="h-[80px] border p-2 break-all" colSpan={3}>
                     {detail.visitPurpose}
                   </td>
                 </tr>
