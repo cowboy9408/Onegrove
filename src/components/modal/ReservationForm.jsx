@@ -23,7 +23,7 @@ export default function ReservationForm({
   const [paymentType, setPaymentType] = useState(isEdit ? (initialData.paymentType === "유료 예약") ? "paid" : "free" : "free");
   const [resveDate, setResveDate] = useState(initialData.resveDate || "");
   const [resveStartTime, setResveStartTime] = useState(initialData.resveStartTime && initialData.resveStartTime + ":00" || "09:00:00");
-  const [resveEndTime, setResveEndTime] = useState(initialData.resveEndTime && initialData.resveEndTime + ":00" || "");
+  const [resveEndTime, setResveEndTime] = useState("");
   const [content, setContent] = useState(initialData.content || "");
   const [realUser, setRealUser] = useState(initialData.realUser || "");
   const [note, setNote] = useState(initialData.note || "");
@@ -68,22 +68,27 @@ export default function ReservationForm({
 
   // resveStartTime 변경 시 resveEndTime 자동 업데이트
   useEffect(() => {
-    if (resveStartTime && !resveEndTime) {
+    console.log("resveStartTime 변경 감지:", { resveStartTime, resveEndTime, isEdit, initialData: initialData.resveEndTime });
+    if (resveStartTime && (!resveEndTime || resveEndTime === "10:00:00")) {
       const startHour = parseInt(resveStartTime.split(':')[0]);
       const endHour = startHour + 1;
       if (endHour <= 18) {
         const newEndTime = `${String(endHour).padStart(2, "0")}:00:00`;
+        console.log("resveEndTime 자동 설정:", newEndTime);
         setResveEndTime(newEndTime);
       }
     }
   }, [resveStartTime, resveEndTime]);
 
   useEffect(() => {
+    // console.log("initialData 변경 감지:", initialData);
     if (initialData.resveDate) setResveDate(initialData.resveDate);
     if (initialData.resveStartTime) setResveStartTime(initialData.resveStartTime + ":00");
     if (initialData.resveEndTime) {
       const end = initialData.resveEndTime;
-      setResveEndTime(end.length === 8 ? end : end + ":00");
+      const formattedEnd = end.length === 8 ? end : end + ":00";
+      // console.log("initialData에서 resveEndTime 설정:", formattedEnd);
+      setResveEndTime(formattedEnd);
     }
     if (initialData.content) setContent(initialData.content);
     if (initialData.realUser) setRealUser(initialData.realUser);
@@ -103,7 +108,7 @@ export default function ReservationForm({
       !companyId
     ) {
       alert("모든 필수 입력 항목을 작성해 주세요.");
-      return;
+      // return;
     }
 
     const payload = {
@@ -330,9 +335,13 @@ export default function ReservationForm({
             ))}
           </select>
           <span>~</span>
+          {console.log("resveEndTime selectbox 렌더링:", { resveEndTime, getEndOptions: getEndOptions().length })}
           <select
             value={resveEndTime}
-            onChange={(e) => setResveEndTime(e.target.value)}
+            onChange={(e) => {
+              console.log("resveEndTime 수동 변경:", e.target.value);
+              setResveEndTime(e.target.value);
+            }}
             className="rounded border px-2 py-1"
           >
             {!resveDate || !resveStartTime ? (

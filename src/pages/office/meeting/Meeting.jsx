@@ -18,7 +18,6 @@ export default function Meeting() {
   const [initialData] = useState({});
   const [resveDate, setResveDate] = useState("");
   const [resveStartTime, setResveStartTime] = useState("");
-  const [resveEndTime, setResveEndTime] = useState("");
   const [content, setContent] = useState("");
   const [realUser, setRealUser] = useState("");
   const [numberVisitors, setNumberVisitors] = useState("");
@@ -119,7 +118,6 @@ export default function Meeting() {
   useEffect(() => {
     if (initialData.resveDate) setResveDate(initialData.resveDate);
     if (initialData.resveStartTime) setResveStartTime(initialData.resveStartTime + ":00");
-    if (initialData.resveEndTime) setResveEndTime(initialData.resveEndTime + ":00");
     if (initialData.content) setContent(initialData.content);
     if (initialData.realUser) setRealUser(initialData.realUser);
     if (initialData.numberVisitors) setNumberVisitors(initialData.numberVisitors);
@@ -301,7 +299,7 @@ export default function Meeting() {
                   selectData={selectedData}
                   meetingOptions={meetingOptions}
                   existingReservations={scheduleList}
-                  initialData={{ resveDate, resveStartTime, resveEndTime, content, realUser, numberVisitors, companyId }}
+                  initialData={{ resveDate, resveStartTime, content, realUser, numberVisitors, companyId }}
                   closeModal={closeModal}
                   onSubmit={() => {
                     fetchSchedules();

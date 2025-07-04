@@ -88,7 +88,7 @@ export default function Viproom() {
   // 디버깅용 로그
   useEffect(() => {
     if (roomOptions.length > 0) {
-      console.log("Viproom.jsx - 회의실 목록:", roomOptions.map(r => ({ name: r.roomName, capacity: capacityMap[r.roomName] || 4 })));
+      console.log("Viproom.jsx - 회의실 목록:", roomOptions.map(r => ({ name: r.roomName, capacity: 4 })));
     }
   }, [roomOptions]);
 
