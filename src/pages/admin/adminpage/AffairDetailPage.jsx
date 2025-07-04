@@ -163,6 +163,15 @@ export default function AffairDetailPage() {
       return;
     }
 
+    if (!form.companyId) {
+      showModal({
+        title: "필수 입력",
+        message: "모든 필수 항목을 입력해주세요.",
+        showCancel: false,
+      });
+      return;
+    }
+
     if (form.name.length > 10) {
       showModal({
         title: "이름 오류",
@@ -237,7 +246,6 @@ export default function AffairDetailPage() {
         },
       });
     } catch (error) {
-      // 이 catch는 필요 없어졌지만 남겨도 무방
       console.error("수정 로직 실패:", error);
     }
   };
@@ -245,7 +253,7 @@ export default function AffairDetailPage() {
   return (
     <>
       <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
-        입주사 총무팀 상세
+        입주사 총무팀 상세 정보
       </div>
       <div className="max-w mx-auto space-y-6 rounded-lg bg-white p-6 shadow-md">
         <div className="flex flex-wrap gap-8">
@@ -343,19 +351,19 @@ export default function AffairDetailPage() {
             <label className="mb-2 block text-sm font-medium text-gray-800">
               전화번호
             </label>
-            <div className="flex items-center">
-              <span className="rounded-l-md px-3 py-2 text-base">010 -</span>
-              <div className="w-[670px]">
-                <Input
-                  value={form.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
-                  maxLength={8}
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  placeholder="1234-5678"
-                  className="rounded-l-none"
-                />
-              </div>
+            <div className="flex items-center space-x-2">
+              <span className="rounded-l-md px-3 py-2 text-base whitespace-nowrap">
+                010 -
+              </span>
+              <Input
+                value={form.phone}
+                onChange={(e) => handleChange("phone", e.target.value)}
+                maxLength={8}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="1234-5678"
+                className="w-full"
+              />
             </div>
           </div>
           <Input

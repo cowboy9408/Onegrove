@@ -170,8 +170,6 @@ export default function MeetingDetail() {
       return;
     }
 
-    console.log("roomNumber:", form.roomNumber);
-    console.log("location:", form.location);
     try {
       const payload = {
         id: Number(id), // 반드시 포함
@@ -216,7 +214,7 @@ export default function MeetingDetail() {
   return (
     <FormProvider {...methods}>
       <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
-        어메니티 설정 상세
+        어메니티 설정 상세 정보
       </div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="max-w mx-auto space-y-6 rounded-lg bg-white p-6 shadow-md">

@@ -11,7 +11,6 @@ export default function UserDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { showModal } = useModal();
-  console.log("현재 상세 페이지 ID:", id);
 
   const [form, setForm] = useState({
     role: "admin",
@@ -178,8 +177,6 @@ export default function UserDetailPage() {
       return;
     }
 
-    console.log("폼 데이터:", form);
-
     const payload = {
       id: Number(id),
       companyId: form.company,
@@ -231,7 +228,7 @@ export default function UserDetailPage() {
   return (
     <>
       <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
-        회원 상세
+        임직원 상세 정보
       </div>
       <div className="max-w mx-auto space-y-6 rounded-lg bg-white p-6 shadow-md">
         <div className="flex flex-wrap gap-8">
@@ -241,7 +238,7 @@ export default function UserDetailPage() {
               value={form.company}
               re
               onChange={(e) => handleChange("company", Number(e.target.value))}
-              className="w-[735px]"
+              className="w-full max-w-[735px]"
               required
             >
               <option value="">선택하세요</option>
@@ -325,18 +322,19 @@ export default function UserDetailPage() {
               전화번호
               <span className="text-red-500">*</span>
             </label>
-            <div className="flex items-center">
-              <span className="rounded-l-md px-3 py-2 text-base">010 -</span>
-              <div className="w-[670px]">
-                <Input
-                  value={form.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
-                  maxLength={8}
-                  inputMode="numeric" // 모바일에서도 숫자 키패드 유도
-                  pattern="[0-9]*"
-                  placeholder="ex) 1234-1234"
-                />
-              </div>
+            <div className="flex items-center space-x-2">
+              <span className="rounded-l-md px-3 py-2 text-base whitespace-nowrap">
+                010 -
+              </span>
+              <Input
+                value={form.phone}
+                onChange={(e) => handleChange("phone", e.target.value)}
+                maxLength={8}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="1234-5678"
+                className="w-full"
+              />
             </div>
           </div>
           <Input

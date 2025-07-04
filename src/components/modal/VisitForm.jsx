@@ -8,38 +8,41 @@ export default function VisitForm({
   onSubmit,
   closeModal,
 }) {
-  const [companyId, setCompanyId] = useState(isEdit ? initialData.companyId || "" : "");
-  const [visitNumber, setVisitNumber] = useState(isEdit ? initialData.visitNumber || "" : "");
-  const [visitPurpose, setVisitPurpose] = useState(isEdit ? initialData.visitPurpose || "" : "");
+  const [companyId, setCompanyId] = useState(
+    isEdit ? initialData.companyId || "" : ""
+  );
+  const [visitNumber, setVisitNumber] = useState(
+    isEdit ? initialData.visitNumber || "" : ""
+  );
+  const [visitPurpose, setVisitPurpose] = useState(
+    isEdit ? initialData.visitPurpose || "" : ""
+  );
   const normalizeTime = (time) => {
     if (!time) return "09:00:00";
     return time.length === 5 ? `${time}:00` : time;
   };
 
-  const [resveTime, setResveTime] = useState(normalizeTime(initialData.visitTime));
+  const [resveTime, setResveTime] = useState(
+    normalizeTime(initialData.visitTime)
+  );
   const [name, setName] = useState(initialData.name || "");
-  
+
   const [tel, setTel] = useState(initialData.tel || "");
-  const [card, setCard] = useState( initialData.accessCard || "");
+  const [card, setCard] = useState(initialData.accessCard || "");
   const [email, setEmail] = useState(initialData.email || "");
   const [building, setBuilding] = useState(initialData.visitBuilding || "");
 
   const formatDateToInput = (value) => {
-  if (!value) return "";
-  return value.replace(/\./g, "-").replace(/-$/, "").trim();
-};
+    if (!value) return "";
+    return value.replace(/\./g, "-").replace(/-$/, "").trim();
+  };
 
   const [resveDate, setResveDate] = useState(
     initialData.visitDate ? formatDateToInput(initialData.visitDate) : ""
   );
 
-
-  
   const [companyList, setCompanyList] = useState([]);
   const [buildingList, setBuildingList] = useState([]);
-
-
-  console.log(initialData);
 
   const fetchCompany = async () => {
     try {
@@ -65,26 +68,22 @@ export default function VisitForm({
     }
   };
 
-
-
   useEffect(() => {
     fetchCompany();
     fetchBuilding();
   }, []);
 
   useEffect(() => {
-    if ( companyId ) {
+    if (companyId) {
       fetchBuilding();
     }
-    
   }, [companyId]);
-
 
   const getToday = () => {
     const today = new Date();
     const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
     return `${yyyy}-${mm}-${dd}`;
   };
 
@@ -118,7 +117,6 @@ export default function VisitForm({
       ...(isEdit && { id: initialData.id }),
     };
 
-    // console.log(payload)
     try {
       const res = await api.post(
         isEdit ? "/api/v1/visit/update" : "/api/v1/visit/insert",
@@ -126,7 +124,7 @@ export default function VisitForm({
       );
       if (res.data?.success) {
         alert(isEdit ? "수정 완료" : "등록 완료");
-        // onSubmit?.(payload);
+        onSubmit?.(payload);
         closeModal?.();
       } else alert("처리 실패");
     } catch (err) {
@@ -135,7 +133,6 @@ export default function VisitForm({
       // alert("필수 입력 내용을 확인해 주세요.");
     }
   };
-
 
   const generateTimeOptions = (startHour, endHour) => {
     const times = [];
@@ -181,39 +178,57 @@ export default function VisitForm({
     name.trim() !== "" &&
     visitNumber;
 
-
   return (
     <div className="space-y-5 text-left">
-
       {isEdit && (
-        <div className="flex gap-4 w-full">
+        <div className="flex w-full gap-4">
           <div className="w-full">
-            <label className="block mb-1">예약일시 <span className="text-red-500">*</span></label>
+            <label className="mb-1 block">
+              예약일시 <span className="text-red-500">*</span>
+            </label>
             {initialData?.reservationDatetime}
           </div>
 
           <div className="w-full">
-            <label className="block mb-1">예약 상태</label>
+            <label className="mb-1 block">예약 상태</label>
             <div>{initialData?.status}</div>
           </div>
         </div>
       )}
 
-      <div className="flex gap-4 w-full">
+      <div className="flex w-full gap-4">
         <div className="w-full">
-          <label className="block mb-1">방문 날짜 <span className="text-red-500">*</span></label>
+          <label className="mb-1 block">
+            방문 날짜 <span className="text-red-500">*</span>
+          </label>
           <div className="flex gap-2">
-            <input type="date" value={resveDate} min={getToday()} onChange={(e) => setResveDate(e.target.value)} className="border px-2 py-1 rounded w-full" />
+            <input
+              type="date"
+              value={resveDate}
+              min={getToday()}
+              onChange={(e) => setResveDate(e.target.value)}
+              className="w-full rounded border px-2 py-1"
+            />
           </div>
         </div>
 
         <div className="w-full">
-          <label className="block mb-1">방문 시간 <span className="text-red-500">*</span></label>
+          <label className="mb-1 block">
+            방문 시간 <span className="text-red-500">*</span>
+          </label>
           <div>
-            <select value={resveTime} onChange={(e) => setResveTime(e.target.value)} className="border px-2 py-1 rounded w-full">
+            <select
+              value={resveTime}
+              onChange={(e) => setResveTime(e.target.value)}
+              className="w-full rounded border px-2 py-1"
+            >
               <option value="">방문시간을 선택하세요</option>
               {generateTimeOptions(9, 17).map((time) => (
-                <option key={time} value={time} disabled={!isTimeAvailable(time)}>
+                <option
+                  key={time}
+                  value={time}
+                  disabled={!isTimeAvailable(time)}
+                >
                   {time.slice(0, 5)} {isTimeAvailable(time) ? "" : "(불가)"}
                 </option>
               ))}
@@ -222,11 +237,15 @@ export default function VisitForm({
         </div>
       </div>
 
-      <div className="flex gap-4 w-full">
+      <div className="flex w-full gap-4">
         <div className="w-full">
-          <label className="block mb-1">방문 입주사 <span className="text-red-500">*</span></label>
-          <select value={companyId} onChange={(e) => setCompanyId(e.target.value)}
-            className="w-full border px-2 py-1 rounded"  
+          <label className="mb-1 block">
+            방문 입주사 <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={companyId}
+            onChange={(e) => setCompanyId(e.target.value)}
+            className="w-full rounded border px-2 py-1"
           >
             <option value="">입주사를 선택하세요</option>
             {companyList.map((r) => (
@@ -238,9 +257,13 @@ export default function VisitForm({
         </div>
 
         <div className="w-full">
-          <label className="block mb-1">방문 동 <span className="text-red-500">*</span></label>
-          <select value={building} onChange={(e) => setBuilding(e.target.value)}
-            className="w-full border px-2 py-1 rounded"  
+          <label className="mb-1 block">
+            방문 동 <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={building}
+            onChange={(e) => setBuilding(e.target.value)}
+            className="w-full rounded border px-2 py-1"
           >
             <option value="">방문 동 선택하세요</option>
             {buildingList.map((r) => (
@@ -253,19 +276,32 @@ export default function VisitForm({
       </div>
 
       <div className="w-full">
-        <label className="block mb-1">방문 목적 <span className="text-red-500">*</span></label>
-        <input value={visitPurpose} onChange={(e) => setVisitPurpose(e.target.value)} className="w-full border px-2 py-1 rounded" />
+        <label className="mb-1 block">
+          방문 목적 <span className="text-red-500">*</span>
+        </label>
+        <input
+          value={visitPurpose}
+          onChange={(e) => setVisitPurpose(e.target.value)}
+          className="w-full rounded border px-2 py-1"
+        />
       </div>
 
-      <div className="flex gap-4 w-full">
+      <div className="flex w-full gap-4">
         <div className="w-full">
-          <label className="block mb-1">방문자명 <span className="text-red-500">*</span></label>
-          <input value={name} onChange={(e) => setName(e.target.value)} className="w-full border px-2 py-1 rounded" />
+          <label className="mb-1 block">
+            방문자명 <span className="text-red-500">*</span>
+          </label>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full rounded border px-2 py-1"
+          />
         </div>
 
-        
         <div className="w-full">
-          <label className="block mb-1">방문 인원 <span className="text-red-500">*</span></label>
+          <label className="mb-1 block">
+            방문 인원 <span className="text-red-500">*</span>
+          </label>
           <input
             type="text"
             value={visitNumber}
@@ -279,39 +315,52 @@ export default function VisitForm({
               if (!/^\d+$/.test(input)) return;
               setVisitNumber(input);
             }}
-            className="w-full border px-2 py-1 rounded"
+            className="w-full rounded border px-2 py-1"
           />
         </div>
       </div>
 
-      <div className="flex gap-4 w-full">
+      <div className="flex w-full gap-4">
         <div className="w-full">
-          <label className="block mb-1">방문자 이메일 <span className="text-red-500">*</span></label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} className="w-full border px-2 py-1 rounded" />
+          <label className="mb-1 block">
+            방문자 이메일 <span className="text-red-500">*</span>
+          </label>
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded border px-2 py-1"
+          />
         </div>
 
-
-      
         <div className="w-full">
-          <label className="block mb-1">방문자 연락처 <span className="text-red-500">*</span></label>
-          <input value={tel} onChange={(e) => setTel(e.target.value)} className="w-full border px-2 py-1 rounded" />
+          <label className="mb-1 block">
+            방문자 연락처 <span className="text-red-500">*</span>
+          </label>
+          <input
+            value={tel}
+            onChange={(e) => setTel(e.target.value)}
+            className="w-full rounded border px-2 py-1"
+          />
         </div>
       </div>
 
-
-      
-
       <div className="w-[50%]">
-        <label className="block mb-1">출입카드 번호</label>
-        <input value={card} onChange={(e) => setCard(e.target.value)} className="w-full border px-2 py-1 rounded" />
+        <label className="mb-1 block">출입카드 번호</label>
+        <input
+          value={card}
+          onChange={(e) => setCard(e.target.value)}
+          className="w-full rounded border px-2 py-1"
+        />
       </div>
 
       <div className="flex justify-center gap-3">
         <button
           onClick={handleSubmit}
           disabled={!isFormValid}
-          className={`rounded px-4 py-2 cursor-pointer text-white ${
-            isFormValid ? "bg-black hover:bg-gray-800" : "bg-gray-400 cursor-not-allowed"
+          className={`cursor-pointer rounded px-4 py-2 text-white ${
+            isFormValid
+              ? "bg-black hover:bg-gray-800"
+              : "cursor-not-allowed bg-gray-400"
           }`}
         >
           저장

@@ -175,47 +175,58 @@ const StoriesRegistForm = forwardRef(
         const toImageMeta = (file, originalFile = null) => {
           if (!file || !(file.name || file.originalName)) return null;
 
-          const fileName = file.originalName || file.name;
-          const matchedSiFileId =
-            file.siFileId || originalFile?.siFileId || file.id || null;
-          const matchedSiId = file.siId || originalFile?.siId || null;
-          const isNew = !originalFile || !matchedSiFileId;
+          let status = "C";
 
+          if (
+            originalFile?.siFileId &&
+            file?.siFileId &&
+            originalFile.siFileId === file.siFileId
+          ) {
+            const isChanged =
+              originalFile?.originalName !== file.originalName ||
+              originalFile?.path !== file.path ||
+              originalFile?.size !== file.size;
+
+            status = isChanged ? "E" : "R";
+          } else {
+            // siFileId 다르면 새로운 파일로 간주
+            status = "C";
+          }
+          console.log("toImageMeta input file", file);
+          console.log("toImageMeta originalFile", originalFile);
           return {
             id: file.id ?? null,
-            siId: matchedSiId,
-            siFileId: matchedSiFileId,
+            siId: file.siId || originalFile?.siId || null,
+            siFileId: file.siFileId || originalFile?.siFileId || null,
             originalName: file.originalName || file.name,
             name: file.name || file.originalName,
             size: file.size ?? 0,
-            extension: "." + (fileName.split(".").pop() || "png"),
-            mime: file.type || "image/png",
+            extension: "." + (file.name || "").split(".").pop(),
+            mime: file.mime || "image/png",
             classification: "StoriesImg",
-            path:
-              file.path ||
-              `https://assets.onegrove.kr/dev/StoriesImg/${fileName}`,
-            status: file.status || (isNew ? "C" : "R"),
+            path: file.path || "",
+            status,
             delYn: file.delYn || "N",
           };
         };
 
         const storiesImgList = imageFields
+          .sort((a, b) => a - b)
           .map((i, idx) => {
             const img = values[`storiesImgList${i}`];
             if (!img) return null;
 
             const caption = values[`storiesImgCaption${i}`] || "";
 
+            // 기존 이미지 찾아오기 (siFileId 기준으로 빠르게 탐색)
             const originalImg = (data?.storiesImgList || []).find(
-              (o) =>
-                o?.siFileId === img?.siFileId ||
-                o?.originalName === img?.originalName
+              (o) => o?.siFileId && o?.siFileId === img?.siFileId
             );
 
             const fileMeta = toImageMeta(img, originalImg);
-
             fileMeta.sort = String(idx + 1);
 
+            // 캡션만 바뀐 경우도 수정 상태로 처리
             if (
               originalImg &&
               (originalImg.caption || "") !== caption &&
@@ -229,17 +240,23 @@ const StoriesRegistForm = forwardRef(
               caption,
             };
           })
-          .filter(Boolean);
+          .filter((item) => item && item.status !== "D" && item.delYn !== "Y")
+          .map((item, idx) => ({
+            ...item,
+            sort: String(idx + 1),
+          }));
 
         // 삭제된 이미지 반영
-        const currentImageSiIds = Object.entries(values)
-          .filter(([key]) => key.startsWith("storiesImgList"))
-          .map(([, val]) => val?.siFileId)
-          .filter(Boolean);
 
         const replacedImages = (data?.storiesImgList || [])
           .filter((originalImg) => {
-            return !currentImageSiIds.includes(originalImg.siFileId);
+            return !storiesImgList.some((newImg) => {
+              return (
+                originalImg?.siFileId === newImg?.siFileId &&
+                originalImg?.path === newImg?.path &&
+                originalImg?.name === newImg?.name
+              );
+            });
           })
           .map((img) => ({
             ...toImageMeta(img),

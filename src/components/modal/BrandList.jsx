@@ -138,7 +138,6 @@ export default function BrandList({
           checkable
           checkedIds={checked}
           onCheck={(id, isChecked) => {
-            console.log("체크된 id:", id, "체크 상태:", isChecked);
             const idStr = String(id);
             setChecked((prev) =>
               isChecked ? [...prev, idStr] : prev.filter((v) => v !== idStr)

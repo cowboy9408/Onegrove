@@ -140,9 +140,6 @@ export default function Upload({
       formData.append("file", selectedFile);
       formData.append("classification", classification);
 
-      // console.log("파일 업로드 시작", selectedFile);
-      // console.log("파일 업로드 시작", classification);
-
       const res = await api.post("/api/v1/file/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
@@ -150,9 +147,22 @@ export default function Upload({
 
       const result = res.data;
 
+      const isUpdate =
+        value?.originalName !== selectedFile.name ||
+        value?.path !== result.path;
+
+      let status = "C";
+      if ((value?.siFileId || value?.id) && isUpdate) {
+        status = "E";
+      } else if (value?.siFileId || value?.id) {
+        status = "R"; // 실제 변경이 없는 경우
+      }
+
       if (result.name && result.path) {
         const uploadedFile = {
           id: result.id ?? null,
+          siFileId: result.siFileId ?? value?.siFileId ?? null,
+          siId: value?.siId ?? null,
           originalName: selectedFile.name,
           name: result.name,
           size: result.size,
@@ -160,7 +170,7 @@ export default function Upload({
           mime: result.mime || selectedFile.type,
           classification,
           path: result.path,
-          status: value?.id ? "E" : "C",
+          status,
           field: name,
         };
         onChange(uploadedFile);
@@ -188,7 +198,6 @@ export default function Upload({
   };
 
   const handleClick = () => {
-    console.log("Upload 영역 클릭됨");
     if (readOnly) {
       return;
     }
@@ -273,7 +282,6 @@ export default function Upload({
         accept={accepted}
         className="hidden"
         onChange={(e) => {
-          // console.log("파일 선택됨"); // 반드시 찍히는지 확인
           handleFileChange(e);
         }}
       />
