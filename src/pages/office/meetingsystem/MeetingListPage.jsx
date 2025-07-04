@@ -90,6 +90,7 @@ export default function MeetingListPage() {
           ]}
           data={data}
           link={{ base: "/system/meeting", path: "id", key: "name" }}
+          checkable={false}
         />
         <Pagination
           current={page}
