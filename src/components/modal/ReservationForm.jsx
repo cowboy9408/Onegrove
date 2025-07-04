@@ -61,6 +61,23 @@ export default function ReservationForm({
     }
   }, [propSelectedRoom]);
 
+  useEffect(() => {
+    if (meetingOptions) {
+      console.log(meetingOptions);
+    }
+  }, [meetingOptions]);
+
+  useEffect(() => {
+    if (initialData.resveDate) setResveDate(initialData.resveDate);
+    if (initialData.resveStartTime) setResveStartTime(initialData.resveStartTime + ":00");
+    if (initialData.resveEndTime) setResveEndTime(initialData.resveEndTime + ":00");
+    if (initialData.content) setContent(initialData.content);
+    if (initialData.realUser) setRealUser(initialData.realUser);
+    if (initialData.numberVisitors) setNumberVisitors(initialData.numberVisitors);
+    if (initialData.companyId) setCompanyId(initialData.companyId);
+    if (initialData.note) setNote(initialData.note);
+  }, [initialData]);
+
   const handleSubmit = async () => {
     if (
       !resveDate ||
