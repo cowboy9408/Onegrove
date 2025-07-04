@@ -43,8 +43,8 @@ export default function AdminListPage() {
         return "슈퍼관리자";
       case "NORMAL_ADMIN":
         return "일반 관리자";
-      case "RETAIL_ADMIN":
-        return "리테일 관리자";
+      case "CONTENTS_ADMIN":
+        return "콘텐츠 관리자";
       case "OFFICE_ADMIN":
         return "오피스 관리자";
       case "OFFICE_SECRETARY_ADMIN":
