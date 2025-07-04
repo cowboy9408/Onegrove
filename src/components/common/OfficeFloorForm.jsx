@@ -3,7 +3,11 @@ import Button from "./Button"; // 기존 Button 컴포넌트 사용
 import { useFormContext } from "react-hook-form";
 import api from "@/lib/apiClient";
 
-export default function OfficeFloorForm({ value = [], readOnly = false }) {
+export default function OfficeFloorForm({
+  value = [],
+  readOnly = false,
+  onChange,
+}) {
   const { setValue, trigger } = useFormContext();
   const [items, setItems] = useState(
     value.length ? value : [{ office: "cp0101", floor: "" }]
@@ -33,8 +37,14 @@ export default function OfficeFloorForm({ value = [], readOnly = false }) {
 
   const updateItems = (newItems) => {
     setItems(newItems);
-    setValue("locations", newItems);
-    trigger("locations"); // <- 이게 없으면 submit 시 반영되지 않음
+
+    const allItems = newItems; // 삭제 항목 포함 전체 리스트
+    setValue("locations", allItems); //
+    trigger("locations");
+
+    if (typeof onChange === "function") {
+      onChange(allItems); //
+    }
   };
 
   const handleChange = (index, key, val) => {
