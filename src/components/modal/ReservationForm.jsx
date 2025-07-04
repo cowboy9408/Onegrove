@@ -330,6 +330,7 @@ export default function ReservationForm({
         </label>
         <input
           value={content}
+          maxLength={200}
           onChange={(e) => setContent(e.target.value)}
           className="w-full rounded border px-2 py-1"
         />
@@ -342,6 +343,7 @@ export default function ReservationForm({
         <input
           type="text"
           value={numberVisitors}
+          maxLength={2}
           onChange={(e) => {
             const input = e.target.value;
             if (input === "") {
@@ -367,6 +369,7 @@ export default function ReservationForm({
         </label>
         <input
           value={realUser}
+          maxLength={20}
           onChange={(e) => setRealUser(e.target.value)}
           className="w-full rounded border px-2 py-1"
         />
@@ -395,6 +398,7 @@ export default function ReservationForm({
         <label className="mb-1 block">비고</label>
         <input
           value={note}
+          maxLength={50}
           onChange={(e) => setNote(e.target.value)}
           className="w-full rounded border px-2 py-1"
         />
