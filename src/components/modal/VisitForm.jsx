@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
+import { isWeekend, isHoliday } from "@/lib/utils";
 
 export default function VisitForm({
   existingReservations = [],
@@ -206,7 +207,14 @@ export default function VisitForm({
               type="date"
               value={resveDate}
               min={getToday()}
-              onChange={(e) => setResveDate(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (isWeekend(val) || isHoliday(val)) {
+                  // alert("주말 및 공휴일은 선택할 수 없습니다.");
+                  return;
+                }
+                setResveDate(val);
+              }}
               className="w-full rounded border px-2 py-1"
             />
           </div>

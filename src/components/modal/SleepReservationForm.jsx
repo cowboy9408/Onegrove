@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
+import { isWeekend, isHoliday } from "@/lib/utils";
 
 export default function SleepReservationForm({
   room,
   roomList,
-  meetingOptions,
   initialData = {},
   isEdit = false,
   onSubmit,
@@ -33,11 +33,20 @@ export default function SleepReservationForm({
     return `${yyyy}-${mm}-${dd}`;
   };
 
-  const startOptions = Array.from({ length: 9 }, (_, i) => {
-    const hour = 9 + i; // 9시부터 17시까지
-    return `${String(hour).padStart(2, "0")}:00:00`;
-  });
-  
+  const getStartOptions = () => {
+    const options = [];
+    const now = new Date();
+    const todayStr = getToday();
+    let startHour = 9;
+    if (resveDate === todayStr) {
+      startHour = Math.max(9, now.getHours() + 1); // 현재 시간 이후
+    }
+    for (let hour = startHour; hour <= 17; hour++) {
+      options.push(`${String(hour).padStart(2, "0")}:00:00`);
+    }
+    return options;
+  };
+
   const endOptions = () => {
     const [hour, min] = resveStartTime.split(":");
     const baseHour = parseInt(hour, 10);
@@ -153,16 +162,15 @@ export default function SleepReservationForm({
           className="w-full rounded border px-2 py-1"
         >
           <option value="">호실을 선택해 주세요</option>
-          {meetingList?.infoList?.map((room, index) => {
-            if (room?.useYn === "Y" && !(meetingList?.gender !== "M" && index === 7)) {
-              return (
+          {meetingList?.infoList
+            ?.slice(0, meetingList.gender === "M" ? 8 : 7)
+            .map((room) => (
+              room?.useYn === "Y" && (
                 <option key={room.id} value={room.id}>
                   {room.roomNumId}호실
                 </option>
-              );
-            }
-            return null;
-          })}
+              )
+            ))}
         </select>
       </div>
 
@@ -175,7 +183,14 @@ export default function SleepReservationForm({
             type="date"
             value={resveDate}
             min={getToday()}
-            onChange={(e) => setResveDate(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (isWeekend(val) || isHoliday(val)) {
+                // alert("주말 및 공휴일은 선택할 수 없습니다.");
+                return;
+              }
+              setResveDate(val);
+            }}
             className="rounded border px-2 py-1"
           />
           <select
@@ -183,7 +198,7 @@ export default function SleepReservationForm({
             onChange={(e) => setResveStartTime(e.target.value)}
             className="rounded border px-2 py-1"
           >
-            {startOptions.map((time) => (
+            {getStartOptions().map((time) => (
               <option key={time} value={time}>
                 {time.slice(0, 5)}
               </option>
