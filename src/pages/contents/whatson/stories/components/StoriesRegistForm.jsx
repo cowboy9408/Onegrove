@@ -175,6 +175,8 @@ const StoriesRegistForm = forwardRef(
         const toImageMeta = (file, originalFile = null) => {
           if (!file || !(file.name || file.originalName)) return null;
 
+          if (!file?.path && !originalFile?.path) return null;
+
           let status = "C";
 
           if (
