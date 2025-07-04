@@ -107,6 +107,15 @@ export default function AffairRegist() {
   };
 
   const handleSubmit = async () => {
+    if (!form.companyId) {
+      showModal({
+        title: "필수 입력",
+        message: "모든 필수 항목을 입력해주세요.",
+        showCancel: false,
+      });
+      return;
+    }
+
     if (!form.username) {
       showModal({
         title: "필수 입력",
