@@ -51,8 +51,15 @@ export default function Meeting() {
   };
   const mappedRoomOptions = locationOptions.map(room => ({
     ...room,
-    capacity: capacityMap[room.roomName] || 99,
+    capacity: capacityMap[room.roomName] || 64,
   }));
+  
+  // 디버깅용 로그
+  useEffect(() => {
+    if (locationOptions.length > 0) {
+      console.log("Meeting.jsx - 회의실 목록:", locationOptions.map(r => ({ name: r.roomName, capacity: capacityMap[r.roomName] || 99 })));
+    }
+  }, [locationOptions]);
 
   useEffect(() => {
     if(selectedRoom) {

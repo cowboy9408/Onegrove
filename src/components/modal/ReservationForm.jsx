@@ -23,7 +23,7 @@ export default function ReservationForm({
   const [paymentType, setPaymentType] = useState(isEdit ? (initialData.paymentType === "유료 예약") ? "paid" : "free" : "free");
   const [resveDate, setResveDate] = useState(initialData.resveDate || "");
   const [resveStartTime, setResveStartTime] = useState(initialData.resveStartTime && initialData.resveStartTime + ":00" || "09:00:00");
-  const [resveEndTime, setResveEndTime] = useState(initialData.resveEndTime && initialData.resveEndTime + ":00" || "10:00:00");
+  const [resveEndTime, setResveEndTime] = useState(initialData.resveEndTime && initialData.resveEndTime + ":00" || "");
   const [content, setContent] = useState(initialData.content || "");
   const [realUser, setRealUser] = useState(initialData.realUser || "");
   const [note, setNote] = useState(initialData.note || "");
@@ -65,6 +65,18 @@ export default function ReservationForm({
       console.log(meetingOptions);
     }
   }, [meetingOptions]);
+
+  // resveStartTime 변경 시 resveEndTime 자동 업데이트
+  useEffect(() => {
+    if (resveStartTime && !resveEndTime) {
+      const startHour = parseInt(resveStartTime.split(':')[0]);
+      const endHour = startHour + 1;
+      if (endHour <= 18) {
+        const newEndTime = `${String(endHour).padStart(2, "0")}:00:00`;
+        setResveEndTime(newEndTime);
+      }
+    }
+  }, [resveStartTime, resveEndTime]);
 
   useEffect(() => {
     if (initialData.resveDate) setResveDate(initialData.resveDate);
@@ -209,7 +221,7 @@ export default function ReservationForm({
 
   // 현재 선택된 회의실의 최대 수용인원 구하기
   const selectedRoomObj = roomOptions.find(r => String(r.id) === String(roomId));
-  const maxCapacity = selectedRoomObj?.capacity || 99;
+  const maxCapacity = selectedRoomObj?.capacity || 64;
 
   const isFormValid =
     roomId &&
@@ -323,8 +335,10 @@ export default function ReservationForm({
             onChange={(e) => setResveEndTime(e.target.value)}
             className="rounded border px-2 py-1"
           >
-            {getEndOptions().length === 0 ? (
-              <option disabled>날짜와 시작시간 선택</option>
+            {!resveDate || !resveStartTime ? (
+              <option value="" disabled>날짜와 시작시간 선택</option>
+            ) : getEndOptions().length === 0 ? (
+              <option value="" disabled>사용 가능한 종료시간 없음</option>
             ) : (
               getEndOptions().map((opt) => (
                 <option
