@@ -373,6 +373,7 @@ export default function ReservationForm({
         <label className="mb-1 block">
           입주사 <span className="text-red-500">*</span>
         </label>
+        
         <select
           value={companyId}
           onChange={(e) => setCompanyId(e.target.value)}
