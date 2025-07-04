@@ -193,10 +193,7 @@ const StoriesRegistForm = forwardRef(
           const meta = {
             id: file.id ?? null,
             siId: originalFile?.siId ?? file.siId ?? null,
-            siFileId:
-              status === "E"
-                ? null
-                : (originalFile?.siFileId ?? file.siFileId ?? null),
+            siFileId: originalFile?.siFileId ?? file.siFileId ?? null,
             originalName: file.originalName || file.name,
             name: file.name || file.originalName,
             size: file.size ?? 0,
