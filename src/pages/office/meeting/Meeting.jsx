@@ -15,6 +15,14 @@ export default function Meeting() {
   const [locationOptions, setLocationOptions] = useState([]);
   const [officeOptions, setOfficeOptions] = useState([]);
   const [scheduleList, setScheduleList] = useState([]);
+  const [initialData] = useState({});
+  const [resveDate, setResveDate] = useState("");
+  const [resveStartTime, setResveStartTime] = useState("");
+  const [resveEndTime, setResveEndTime] = useState("");
+  const [content, setContent] = useState("");
+  const [realUser, setRealUser] = useState("");
+  const [numberVisitors, setNumberVisitors] = useState("");
+  const [companyId, setCompanyId] = useState("");
 
   const fetchSchedules = async () => {
     try {
@@ -72,9 +80,6 @@ export default function Meeting() {
             setSelectedRoom(settingRes.data.data[0].id);
           }
         }
-
-        const categoryRes = await api.get(`/api/v1/meeting/office-list?lang=ko`);
-        if (categoryRes.data.success) setMeetingOptions(categoryRes.data.data);
       } catch (err) {
         console.error("메타 정보 조회 실패:", err);
       }
@@ -82,15 +87,37 @@ export default function Meeting() {
     if(selectedOffice) fetchOffice();
   }, [selectedOffice]);
 
+  useEffect(() => {
+    const fetchMeetingOptions = async () => {
+      try {
+        const categoryRes = await api.get(`/api/v1/meeting/office-list?lang=ko`);
+        console.log('meetingOptions API 응답:', categoryRes);
+        if (categoryRes.data.success) setMeetingOptions(categoryRes.data.data);
+      } catch (err) {
+        console.error("입주사 정보 조회 실패:", err);
+      }
+    };
+    fetchMeetingOptions();
+  }, []);
 
-
-  
+  useEffect(() => {
+    if (initialData.resveDate) setResveDate(initialData.resveDate);
+    if (initialData.resveStartTime) setResveStartTime(initialData.resveStartTime + ":00");
+    if (initialData.resveEndTime) setResveEndTime(initialData.resveEndTime + ":00");
+    if (initialData.content) setContent(initialData.content);
+    if (initialData.realUser) setRealUser(initialData.realUser);
+    if (initialData.numberVisitors) setNumberVisitors(initialData.numberVisitors);
+    if (initialData.companyId) setCompanyId(initialData.companyId);
+  }, [initialData]);
 
   const handleEventClick = async (event) => {
     try {
+      console.log('이벤트 클릭됨, ID:', event.id);
       const res = await api.get(`/api/v1/meeting/${event.id}`);
+      console.log('API 응답:', res);
       if (!res.data.success) return;
       const detail = res.data.data;
+      console.log('상세 데이터:', detail);
 
       showModal({
         title: "Meeting Room 상세",
@@ -180,6 +207,8 @@ export default function Meeting() {
                           selectData={selectedData}
                           meetingOptions={meetingOptions}
                           existingReservations={scheduleList}
+                          initialData={detail}
+                          isEdit={true}
                           closeModal={closeModal}
                           onSubmit={() => {
                             fetchSchedules();
@@ -197,6 +226,8 @@ export default function Meeting() {
       });
     } catch (err) {
       console.error("상세 조회 실패:", err);
+      console.error("에러 응답:", err.response);
+      alert("상세 정보를 불러올 수 없습니다.");
     }
   };
 
@@ -253,6 +284,7 @@ export default function Meeting() {
                   selectData={selectedData}
                   meetingOptions={meetingOptions}
                   existingReservations={scheduleList}
+                  initialData={{ resveDate, resveStartTime, resveEndTime, content, realUser, numberVisitors, companyId }}
                   closeModal={closeModal}
                   onSubmit={() => {
                     fetchSchedules();

@@ -155,7 +155,7 @@ export default function Visit() {
       const res = await api.get(`/api/v1/visit/detail/${event}`);
       if (!res.data.success) return;
       const detail = res.data.data;
-      console.log(detail);
+      console.log('상세 데이터:', detail);
 
       showModal({
         title: "방문 예약 상세",
