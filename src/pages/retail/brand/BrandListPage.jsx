@@ -44,6 +44,18 @@ export default function BrandListPage() {
   const size = 30;
   const nameId = useId();
 
+  const handleSearch = () => {
+    setActiveFilter(searchFilter);
+    setPage(1);
+    setRefreshKey((prev) => prev + 1);
+    setSearchParams({
+      name: searchFilter.name,
+      category: searchFilter.category,
+      status: searchFilter.status,
+      page: 1,
+    });
+  };
+
   useEffect(() => {
     const fetchCategory = async () => {
       try {
@@ -243,6 +255,12 @@ export default function BrandListPage() {
                   setSearchFilter({ ...searchFilter, name: e.target.value })
                 }
                 onClear={() => setSearchFilter({ ...searchFilter, name: "" })}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSearch();
+                  }
+                }}
               />
             </Col>
             <Col className="flex flex-col items-start justify-center gap-4">
@@ -269,21 +287,7 @@ export default function BrandListPage() {
               </div>
             </Col>
             <Col className="flex gap-2 self-end">
-              <Button
-                onClick={() => {
-                  setActiveFilter(searchFilter);
-                  setPage(1);
-                  setRefreshKey((prev) => prev + 1);
-                  setSearchParams({
-                    name: searchFilter.name,
-                    category: searchFilter.category,
-                    status: searchFilter.status,
-                    page: 1,
-                  });
-                }}
-              >
-                검색
-              </Button>
+              <Button onClick={handleSearch}>검색</Button>
 
               <Button
                 variant="outline"

@@ -200,6 +200,7 @@ const StoriesRegistForm = forwardRef(
         };
 
         const storiesImgList = imageFields
+          .sort((a, b) => a - b)
           .map((i, idx) => {
             const img = values[`storiesImgList${i}`];
             if (!img) return null;
@@ -226,11 +227,15 @@ const StoriesRegistForm = forwardRef(
 
             return {
               ...fileMeta,
+
               caption,
             };
           })
-          .filter(Boolean);
-
+          .filter((item) => item && item.status !== "D" && item.delYn !== "Y")
+          .map((item, idx) => ({
+            ...item,
+            sort: String(idx + 1),
+          }));
         // 삭제된 이미지 반영
         const currentImageSiIds = Object.entries(values)
           .filter(([key]) => key.startsWith("storiesImgList"))
