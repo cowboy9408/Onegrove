@@ -428,6 +428,7 @@ export default function Visit() {
                       handleSearch();
                     }
                   }}
+                  placeholder="예: 123 (3자리 이상 입력 시 검색 가능)"
                 />
               </div>
 
