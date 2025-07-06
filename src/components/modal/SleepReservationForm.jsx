@@ -218,7 +218,7 @@ export default function SleepReservationForm({
       } else alert("처리 실패");
     } catch (err) {
       console.error("예약 처리 실패:", err);
-      alert(err?.response?.data?.message);
+      alert(err?.response?.data?.message || err?.data?.message || "예약이 실패되었습니다. 다시시도 해주세요.");
     }
   };
 
@@ -236,9 +236,18 @@ export default function SleepReservationForm({
       } else alert("삭제 실패");
     } catch (err) {
       console.error("삭제 실패:", err);
-      alert(err?.response?.data?.message || "삭제 중 오류가 발생했습니다.");
+      alert(err?.response?.data?.message || err?.data?.message || "삭제가 실패되었습니다. 다시시도 해주세요.");
     }
   };
+
+  // 필수 입력 항목들이 모두 입력되었는지 확인
+  const isFormValid = 
+    roomId &&
+    roomDetailId &&
+    resveDate &&
+    resveStartTime &&
+    companyId &&
+    realUser;
 
   return (
     <div className="space-y-5 text-left">
@@ -262,20 +271,20 @@ export default function SleepReservationForm({
 
       <div>
         <label className="mb-1 block">
-          Relax Room 호실 선택 <span className="text-red-500">*</span>
+          Relax Room 좌석 선택 <span className="text-red-500">*</span>
         </label>
         <select
           value={roomDetailId}
           onChange={(e) => setRoomDetailId(e.target.value)}
           className="w-full rounded border px-2 py-1"
         >
-          <option value="">호실을 선택해 주세요</option>
+          <option value="">좌석을 선택해 주세요</option>
           {meetingList?.infoList
             ?.slice(0, meetingList.gender === "M" ? 8 : 7)
             .map((room) => (
               room?.useYn === "Y" && (
                 <option key={room.id} value={room.id}>
-                  {room.roomNumId}호실
+                  {room.roomNumId}호
                 </option>
               )
             ))}
@@ -366,7 +375,12 @@ export default function SleepReservationForm({
       <div className="flex justify-center gap-3">
         <button
           onClick={handleSubmit}
-          className="cursor-pointer rounded bg-black px-4 py-2 text-white hover:bg-gray-800"
+          disabled={!isFormValid}
+          className={`cursor-pointer rounded px-4 py-2 text-white ${
+            isFormValid
+              ? "bg-black hover:bg-gray-800"
+              : "cursor-not-allowed bg-gray-400"
+          }`}
         >
           {isEdit ? "수정" : "저장"}
         </button>

@@ -25,45 +25,65 @@ export default function SleepReserve() {
   const [reservationCounts, setReservationCounts] = useState({});
 
   const fetchMeta = async () => {
-    const res = await api.get(`/api/v1/sleep/reserve/list/room`);
-    if (res.data.success) setOfficeOptions(res.data.data);
+    try {
+      const res = await api.get(`/api/v1/sleep/reserve/list/room`);
+      if (res.data.success) setOfficeOptions(res.data.data);
+    } catch (error) {
+      console.error("수면실 목록 조회 실패:", error);
+      alert(error?.response?.data?.message || error?.data?.message || "수면실 목록 조회가 실패되었습니다. 다시시도 해주세요.");
+    }
   };
 
   const fetchRoomDetail = async (roomId) => {
-    const res = await api.get(`/api/v1/sleep/room/detail/${roomId}`);
-    if (res.data.success) setMeetingOptions(res.data.data);
+    try {
+      const res = await api.get(`/api/v1/sleep/room/detail/${roomId}`);
+      if (res.data.success) setMeetingOptions(res.data.data);
+    } catch (error) {
+      console.error("수면실 상세 조회 실패:", error);
+      alert(error?.response?.data?.message || error?.data?.message || "수면실 상세 조회가 실패되었습니다. 다시시도 해주세요.");
+    }
   };
 
   const fetchReservations = async (roomId, time) => {
-    const res = await api.get(`/api/v1/sleep/reserve/list/detail`, {
-      params: {
-        roomId,
-        reserveDt: selectedDate,
-        reserveTime: time,
-      },
-    });
-    if (res.data.success) {
-      setReservationDetails((prev) => ({
-        ...prev,
-        [time]: res.data.data,
-      }));
+    try {
+      const res = await api.get(`/api/v1/sleep/reserve/list/detail`, {
+        params: {
+          roomId,
+          reserveDt: selectedDate,
+          reserveTime: time,
+        },
+      });
+      if (res.data.success) {
+        setReservationDetails((prev) => ({
+          ...prev,
+          [time]: res.data.data,
+        }));
+      }
+    } catch (error) {
+      console.error("예약 상세 조회 실패:", error);
+      alert(error?.response?.data?.message || error?.data?.message || "예약 상세 조회가 실패되었습니다. 다시시도 해주세요.");
     }
   };
 
   const fetchReservationCounts = async (roomId) => {
-    const res = await api.get(`/api/v1/sleep/reserve/list/count`, {
-      params: {
-        roomId,
-        reserveDt: selectedDate,
-      },
-    });
-    if (res.data.success) {
-      const countsMap = {};
-      res.data.data.forEach((item) => {
-        const key = item.reserveTime?.substring(0, 5); // "10:00:00" → "10:00"
-        if (key) countsMap[key] = item.reserveCount;
+    try {
+      const res = await api.get(`/api/v1/sleep/reserve/list/count`, {
+        params: {
+          roomId,
+          reserveDt: selectedDate,
+        },
       });
-      setReservationCounts(countsMap);
+      if (res.data.success) {
+        const countsMap = {};
+        res.data.data.forEach((item) => {
+          const key = item.reserveTime?.substring(0, 5); // "10:00:00" → "10:00"
+          if (key) countsMap[key] = item.reserveCount;
+        });
+        setReservationCounts(countsMap);
+      }
+    } catch (error) {
+      console.error("예약 카운트 조회 실패:", error);
+      alert(error?.response?.data?.message || error?.data?.message || "예약 카운트 조회가 실패되었습니다. 다시시도 해주세요.");
     }
   };
 
@@ -179,6 +199,10 @@ export default function SleepReserve() {
                   onSubmit={() => {
                     fetchRoomDetail(selectedRoom);
                     fetchReservationCounts(selectedRoom);
+                    // 현재 확장된 시간 슬롯이 있다면 해당 상세 정보도 다시 가져오기
+                    if (expandedSlot) {
+                      fetchReservations(selectedRoom, expandedSlot);
+                    }
                     closeModal();
                   }}
                 />
@@ -217,9 +241,10 @@ export default function SleepReserve() {
           const time = slot.start;
           const reserveList = reservationDetails[time] || [];
           const reserveCount = reservationCounts[time] || 0;
-          const totalCount = (meetingOptions.infoList || []).filter(
-            (info) => info.useYn === "Y"
-          ).length;
+          const totalCount = Math.min(
+            (meetingOptions.infoList || []).filter((info) => info.useYn === "Y").length,
+            meetingOptions.gender === "M" ? 8 : 7
+          );
 
           return (
             <div key={time} className="rounded border shadow-sm">
@@ -240,6 +265,7 @@ export default function SleepReserve() {
                 <div className="space-y-2 bg-gray-100 p-3">
                   {(meetingOptions.infoList || [])
                     .filter((info) => info.useYn === "Y")
+                    .slice(0, meetingOptions.gender === "M" ? 8 : 7)
                     .map((info) => {
                       const reservation = reserveList.find(
                         (r) => r.roomNumberId === info.roomNumId
@@ -266,6 +292,10 @@ export default function SleepReserve() {
                                     onSubmit={() => {
                                       fetchRoomDetail(selectedRoom);
                                       fetchReservationCounts(selectedRoom);
+                                      // 현재 확장된 시간 슬롯이 있다면 해당 상세 정보도 다시 가져오기
+                                      if (expandedSlot) {
+                                        fetchReservations(selectedRoom, expandedSlot);
+                                      }
                                       closeModal();
                                     }}
                                   />
