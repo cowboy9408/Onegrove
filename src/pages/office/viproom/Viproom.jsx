@@ -16,17 +16,17 @@ export default function Viproom() {
   const [locationOptions, setLocationOptions] = useState([]);
   const [roomOptions, setRoomOptions] = useState([]);
   const [scheduleList, setScheduleList] = useState([]);
-  const { permission, companyId: userCompanyId } = useAuthStore();
+  const { permission, id: userId } = useAuthStore();
 
   const fetchSchedules = async () => {
     try {
       let apiUrl = `/api/v1/meeting?roomId=${selectedRoom}&isVip=Y&lang=ko`;
 
-      console.log(permission, userCompanyId);
+      console.log(permission, userId);
       
       // OFFICE_SECRETARY_ADMIN 계정일 때 본인이 속한 입주사의 일정만 필터링
-      if (permission === 'OFFICE_SECRETARY_ADMIN' && userCompanyId) {
-        apiUrl += `&companyId=${userCompanyId}`;
+      if (permission === 'OFFICE_SECRETARY_ADMIN' && userId) {
+        apiUrl += `&companyId=${userId}`;
       }
       
       const res = await api.get(apiUrl);
