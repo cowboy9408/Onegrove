@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
 import { isWeekend, isHoliday } from "@/lib/utils";
+import dayjs from "dayjs";
 
 export default function ReservationForm({
   locationOptions = [],
@@ -27,13 +28,27 @@ export default function ReservationForm({
   const [content, setContent] = useState(initialData.content || "");
   const [realUser, setRealUser] = useState(initialData.realUser || "");
   const [note, setNote] = useState(initialData.note || "");
+  const [isThreeDay, setIsThreeDay] = useState(true);
   const [status] = useState(initialData.status || "gs0101");
+
+
+
+  
 
   const getToday = () => {
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, "0");
     const dd = String(today.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  const getMaxDate = () => {
+    const today = new Date();
+    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+    const yyyy = nextMonth.getFullYear();
+    const mm = String(nextMonth.getMonth() + 1).padStart(2, "0");
+    const dd = String(nextMonth.getDate()).padStart(2, "0");
     return `${yyyy}-${mm}-${dd}`;
   };
 
@@ -75,6 +90,13 @@ export default function ReservationForm({
         const newEndTime = `${String(endHour).padStart(2, "0")}:00:00`;
         setResveEndTime(newEndTime);
       }
+    }
+
+    if (resveStartTime) {
+      const threeDaysAgo = dayjs().add(3, "day");
+      const resveDate = dayjs(resveStartTime);
+      const isAfterThreeDaysAgo = resveDate.isAfter(threeDaysAgo);
+      setIsThreeDay(isAfterThreeDaysAgo);
     }
   }, [resveStartTime, resveEndTime]);
 
@@ -272,6 +294,9 @@ export default function ReservationForm({
             <option key={r.id} value={r.id}>{r.roomName}</option>
           ))}
         </select>
+
+        
+        
       </div>
 
       <div>
@@ -309,6 +334,7 @@ export default function ReservationForm({
             type="date"
             value={resveDate}
             min={getToday()}
+            max={getMaxDate()}
             onChange={(e) => {
               const val = e.target.value;
               if (isWeekend(val) || isHoliday(val)) {
@@ -357,6 +383,7 @@ export default function ReservationForm({
             )}
           </select>
         </div>
+        {/* {(!isThreeDay && paymentType === "paid") && (<p>유료 예약 시 오늘 기준 영업일 3일 이내<br />수정 및 삭제 불가하며 별도의 수수료가 발생됩니다.</p>)} */}
       </div>
 
       <div>

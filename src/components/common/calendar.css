@@ -9,6 +9,17 @@
   font-size: 12px;
   z-index: 2;
   position: relative;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 6px;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.rbc-show-more:hover {
+  background: #0056b3;
 }
 
 .rbc-row-segment .rbc-event-content {
@@ -17,15 +28,81 @@
 }
 
 .rbc-month-row {
-  overflow: visible !important; /* 변경: 더보기 버튼 가려짐 방지 */
+  overflow: visible !important;
   position: relative;
   padding-bottom: 10px;
   height: 100%;
 }
+
 .rbc-row-content {
-  min-height:120px;
+  min-height: 100px;
 }
 
 .rbc-event {
   z-index: 1;
+}
+
+/* Popup 스타일 */
+.rbc-overlay {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 300px;
+  max-width: 400px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.rbc-overlay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+  background: #f8f9fa;
+  border-radius: 8px 8px 0 0;
+}
+
+.rbc-overlay-header h6 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.rbc-overlay-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rbc-overlay-close:hover {
+  color: #333;
+}
+
+.rbc-overlay-body {
+  padding: 12px 16px;
+}
+
+.rbc-overlay-body .rbc-event {
+  margin-bottom: 8px;
+  border: none;
+  background: none;
+  padding: 0;
+  height: auto;
+}
+
+.rbc-overlay-body .rbc-event:last-child {
+  margin-bottom: 0;
 }
