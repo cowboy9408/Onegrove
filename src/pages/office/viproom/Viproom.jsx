@@ -139,6 +139,7 @@ export default function Viproom() {
                           } else alert("예약 확정 실패");
                         } catch (err) {
                           console.error("예약 확정 오류:", err);
+                          alert(err?.response?.data?.message || err?.data?.message || "예약 확정이 실패되었습니다. 다시시도 해주세요.");
                         }
                       }
                     }}
@@ -158,6 +159,7 @@ export default function Viproom() {
                         } else alert("취소 실패");
                       } catch (err) {
                         console.error("취소 오류:", err);
+                        alert(err?.response?.data?.message || err?.data?.message || "예약 취소가 실패되었습니다. 다시시도 해주세요.");
                       }
                     }
                   }}

@@ -25,45 +25,65 @@ export default function SleepReserve() {
   const [reservationCounts, setReservationCounts] = useState({});
 
   const fetchMeta = async () => {
-    const res = await api.get(`/api/v1/sleep/reserve/list/room`);
-    if (res.data.success) setOfficeOptions(res.data.data);
+    try {
+      const res = await api.get(`/api/v1/sleep/reserve/list/room`);
+      if (res.data.success) setOfficeOptions(res.data.data);
+    } catch (error) {
+      console.error("수면실 목록 조회 실패:", error);
+      alert(error?.response?.data?.message || error?.data?.message || "수면실 목록 조회가 실패되었습니다. 다시시도 해주세요.");
+    }
   };
 
   const fetchRoomDetail = async (roomId) => {
-    const res = await api.get(`/api/v1/sleep/room/detail/${roomId}`);
-    if (res.data.success) setMeetingOptions(res.data.data);
+    try {
+      const res = await api.get(`/api/v1/sleep/room/detail/${roomId}`);
+      if (res.data.success) setMeetingOptions(res.data.data);
+    } catch (error) {
+      console.error("수면실 상세 조회 실패:", error);
+      alert(error?.response?.data?.message || error?.data?.message || "수면실 상세 조회가 실패되었습니다. 다시시도 해주세요.");
+    }
   };
 
   const fetchReservations = async (roomId, time) => {
-    const res = await api.get(`/api/v1/sleep/reserve/list/detail`, {
-      params: {
-        roomId,
-        reserveDt: selectedDate,
-        reserveTime: time,
-      },
-    });
-    if (res.data.success) {
-      setReservationDetails((prev) => ({
-        ...prev,
-        [time]: res.data.data,
-      }));
+    try {
+      const res = await api.get(`/api/v1/sleep/reserve/list/detail`, {
+        params: {
+          roomId,
+          reserveDt: selectedDate,
+          reserveTime: time,
+        },
+      });
+      if (res.data.success) {
+        setReservationDetails((prev) => ({
+          ...prev,
+          [time]: res.data.data,
+        }));
+      }
+    } catch (error) {
+      console.error("예약 상세 조회 실패:", error);
+      alert(error?.response?.data?.message || error?.data?.message || "예약 상세 조회가 실패되었습니다. 다시시도 해주세요.");
     }
   };
 
   const fetchReservationCounts = async (roomId) => {
-    const res = await api.get(`/api/v1/sleep/reserve/list/count`, {
-      params: {
-        roomId,
-        reserveDt: selectedDate,
-      },
-    });
-    if (res.data.success) {
-      const countsMap = {};
-      res.data.data.forEach((item) => {
-        const key = item.reserveTime?.substring(0, 5); // "10:00:00" → "10:00"
-        if (key) countsMap[key] = item.reserveCount;
+    try {
+      const res = await api.get(`/api/v1/sleep/reserve/list/count`, {
+        params: {
+          roomId,
+          reserveDt: selectedDate,
+        },
       });
-      setReservationCounts(countsMap);
+      if (res.data.success) {
+        const countsMap = {};
+        res.data.data.forEach((item) => {
+          const key = item.reserveTime?.substring(0, 5); // "10:00:00" → "10:00"
+          if (key) countsMap[key] = item.reserveCount;
+        });
+        setReservationCounts(countsMap);
+      }
+    } catch (error) {
+      console.error("예약 카운트 조회 실패:", error);
+      alert(error?.response?.data?.message || error?.data?.message || "예약 카운트 조회가 실패되었습니다. 다시시도 해주세요.");
     }
   };
 

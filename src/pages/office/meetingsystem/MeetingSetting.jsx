@@ -109,7 +109,10 @@ export default function MeetingSetting() {
         showModal({ title: "등록 실패", message: res.data.message });
       }
     } catch (error) {
-      showModal({ title: "오류", message: "API 요청 중 문제가 발생했습니다." });
+      showModal({ 
+        title: "오류", 
+        message: error?.response?.data?.message || error?.data?.message || "예약이 실패되었습니다. 다시시도 해주세요." 
+      });
       console.error("Insert API Error:", error);
     }
   };
