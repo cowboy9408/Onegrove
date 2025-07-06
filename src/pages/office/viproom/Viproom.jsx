@@ -6,6 +6,7 @@ import { ModalContext } from "@/context/ModalContext";
 import ReservationForm from "@/components/modal/ReservationForm";
 import api from "@/lib/apiClient";
 import dayjs from "dayjs";
+import { useAuthStore } from "@/store/authStore";
 
 export default function Viproom() {
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -15,6 +16,7 @@ export default function Viproom() {
   const [locationOptions, setLocationOptions] = useState([]);
   const [roomOptions, setRoomOptions] = useState([]);
   const [scheduleList, setScheduleList] = useState([]);
+  const { permission } = useAuthStore();
 
   const fetchSchedules = async () => {
     try {
@@ -125,7 +127,7 @@ export default function Viproom() {
 
             <div className="flex justify-between gap-3">
               <div className="flex gap-3">
-                {detail.status === '가예약' && (
+                {detail.status === '가예약' && permission !== 'OFFICE_SECRETARY_ADMIN' && (
                   <Button
                     theme="danger"
                     onClick={async () => {
