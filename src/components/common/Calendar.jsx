@@ -60,6 +60,42 @@ export default function CommonCalendar({
     );
   };
 
+  const CustomPopup = ({ events, date, onSelectEvent, onClose }) => {
+    const formattedDate = moment(date).format('YYYY년 MM월 DD일');
+    
+    return (
+      <div className="rbc-overlay" role="dialog" tabIndex="-1">
+        <div className="rbc-overlay-header">
+          <h6>{formattedDate}</h6>
+          <button
+            className="rbc-overlay-close"
+            onClick={onClose}
+            type="button"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="rbc-overlay-body">
+          {events.map((event, idx) => (
+            <div
+              key={idx}
+              className="rbc-event cursor-pointer hover:bg-gray-100 p-2 rounded mb-1"
+              onClick={() => {
+                onSelectEvent(event);
+                onClose();
+              }}
+            >
+              <div className="font-medium text-sm">{event.title}</div>
+              <div className="text-xs text-gray-600">
+                {moment(event.start).format('HH:mm')} ~ {moment(event.end).format('HH:mm')}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="bg-white">
       <Calendar
@@ -71,8 +107,12 @@ export default function CommonCalendar({
         date={currentDate}
         defaultView="month"
         views={["month"]}
-        popup
+        popup={true}
+        length={3}
         dayLayoutAlgorithm="no-overlap"
+        step={60}
+        timeslots={1}
+        showMultiDayTimes={false}
         eventPropGetter={(event) => ({
           style: {
             whiteSpace: "normal",
@@ -90,8 +130,12 @@ export default function CommonCalendar({
           previous: "이전",
           today: "오늘",
           month: "월",
+          more: "더보기",
         }}
-        components={{ toolbar: CustomToolbar }}
+        components={{ 
+          toolbar: CustomToolbar,
+          popup: CustomPopup
+        }}
         onSelectEvent={onSelectEvent}
         onSelectSlot={(slotInfo) => {
           const selectedDate = new Date(slotInfo.start);

@@ -105,7 +105,7 @@ export default function Viproom() {
         showCancel: true,
         children: ({ closeModal }) => (
           <div className="space-y-5 text-sm text-gray-700">
-            <p>유료 예약 시 오늘 기준 영업일 3일 이내<br />수정 및 삭제 불가하며 별도의 수수료가 발생됩니다.</p>
+            
             <table className="w-full border text-left">
               <tbody>
                 <tr><th className="p-2 border min-w-[80px]">회의실</th><td className="p-2 border">{detail.roomName} ({detail.location})</td></tr>
