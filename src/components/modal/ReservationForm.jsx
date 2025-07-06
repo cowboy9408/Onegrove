@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
 import { isWeekend, isHoliday } from "@/lib/utils";
-import dayjs from "dayjs";
 
 export default function ReservationForm({
   locationOptions = [],
@@ -28,7 +27,6 @@ export default function ReservationForm({
   const [content, setContent] = useState(initialData.content || "");
   const [realUser, setRealUser] = useState(initialData.realUser || "");
   const [note, setNote] = useState(initialData.note || "");
-  const [isThreeDay, setIsThreeDay] = useState(true);
   const [status] = useState(initialData.status || "gs0101");
 
 
@@ -92,12 +90,7 @@ export default function ReservationForm({
       }
     }
 
-    if (resveStartTime) {
-      const threeDaysAgo = dayjs().add(3, "day");
-      const resveDate = dayjs(resveStartTime);
-      const isAfterThreeDaysAgo = resveDate.isAfter(threeDaysAgo);
-      setIsThreeDay(isAfterThreeDaysAgo);
-    }
+
   }, [resveStartTime, resveEndTime]);
 
   useEffect(() => {
@@ -337,7 +330,7 @@ export default function ReservationForm({
             onChange={(e) => {
               const val = e.target.value;
               if (isWeekend(val) || isHoliday(val)) {
-                // alert("주말 및 공휴일은 선택할 수 없습니다.");
+                alert("주말 및 공휴일은 선택할 수 없습니다.");
                 return;
               }
               setResveDate(val);
@@ -382,6 +375,9 @@ export default function ReservationForm({
             )}
           </select>
         </div>
+        <p className="text-sm text-gray-600 mt-1">
+          * 주말 및 공휴일은 선택할 수 없습니다.
+        </p>
         {/* {(!isThreeDay && paymentType === "paid") && (<p>유료 예약 시 오늘 기준 영업일 3일 이내<br />수정 및 삭제 불가하며 별도의 수수료가 발생됩니다.</p>)} */}
       </div>
 
