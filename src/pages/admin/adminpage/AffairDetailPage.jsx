@@ -22,7 +22,7 @@ export default function AffairDetailPage() {
     username: "",
     phone: "",
     email: "",
-    isManager: "",
+    isManager: "Y",
     isReservation: "",
   });
   const [errors, setErrors] = useState({
@@ -220,7 +220,7 @@ export default function AffairDetailPage() {
         gender:
           form.gender === "male" ? "M" : form.gender === "female" ? "W" : "",
         isUse: form.status === "active" ? "Y" : "N",
-        isManager: form.isManager,
+        isManager: "Y",
         isReservation: form.isReservation,
       };
 
@@ -382,6 +382,7 @@ export default function AffairDetailPage() {
             onChange={(e) => handleChange("email", e.target.value)}
           />
         </div>
+
         {/* <div className="mt-4">
           <p className="mb-2 text-sm font-medium text-gray-800">담당자 여부</p>
           <div className="flex gap-4">
@@ -401,6 +402,7 @@ export default function AffairDetailPage() {
             />
           </div>
         </div> */}
+
         <div>
           <p className="mb-2 text-sm font-medium text-gray-800">
             어메니티 예약 기능
