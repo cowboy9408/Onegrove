@@ -22,7 +22,7 @@ export const useAuthStore = create(
         set({ accessToken: token, permission: role, id });
 
         Cookies.set(accessToken, token, {
-          expires: new Date(new Date().getTime() + 15 * 60 * 1000),
+          expires: new Date(new Date().getTime() + 12 * 60 * 60 * 1000),
           // secure: import.meta.env.MODE === "production",
           secure: import.meta.env.MODE === "development",
           sameSite: "strict",
