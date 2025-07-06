@@ -49,7 +49,7 @@ export default function SleepDetail() {
           setMaxTime(d.maxHour);
           setStartDate(new Date(`2000-01-01T${d.startTime}`));
           setEndDate(new Date(`2000-01-01T${d.endTime}`));
-          setGender(d.gender === "M" ? "남성" : "여성");
+          setGender(d.gender === "M" ? "남성" : d.gender === "W" ? "여성" : "여성");
           setUseYn(d.useYn === "Y" ? "사용" : "미사용");
           setRoomInfoList(d.infoList || []);
 
@@ -58,7 +58,7 @@ export default function SleepDetail() {
             .map((room) => room.roomNumId);
           
           // 여성인 경우 8호실도 자동으로 체크
-          if (d.gender === "F") {
+          if (d.gender === "W") {
             const room8 = roomNumList.find(room => room.name === "8호실");
             if (room8 && !checked.includes(room8.id)) {
               checked.push(room8.id);
@@ -154,7 +154,7 @@ export default function SleepDetail() {
     }
 
     try {
-      const genderCode = gender === "남성" ? "M" : "F";
+      const genderCode = gender === "남성" ? "M" : "W";
       const useYnCode = useYn === "사용" ? "Y" : "N";
       const locationCode = locationCodeMap[location];
 
