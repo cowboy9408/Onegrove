@@ -156,13 +156,16 @@ export default function Meeting() {
         const reservationDate = dayjs(detail.resveDate);
         const today = dayjs();
         
-        if (detail.paymentType === '유료예약') {
-          // 유료예약: 예약일이 오늘로부터 3일 이상 차이나는 경우에만 수정/삭제 가능
-          return reservationDate.diff(today, 'day') >= 3;
-        } else {
-          // 무료예약: 예약일이 당일인 경우에만 수정/삭제 가능
-          return reservationDate.diff(today, 'day') === 0;
+        if( permission === 'OFFICE_SECRETARY_ADMIN' ) {
+          if (detail.paymentType === '유료예약') {
+            // 유료예약: 예약일이 오늘로부터 3일 이상 차이나는 경우에만 수정/삭제 가능
+            return reservationDate.diff(today, 'day') >= 3;
+          } else {
+            // 무료예약: 예약일이 당일인 경우에만 수정/삭제 가능
+            return reservationDate.diff(today, 'day') === 0;
+          }
         }
+        
       };
 
       showModal({
@@ -191,7 +194,7 @@ export default function Meeting() {
 
             <div className="flex justify-between gap-3">
               <div className="flex gap-3">
-                {detail.status === '가예약' && permission !== 'OFFICE_SECRETARY_ADMIN' && (
+                {(detail.status === '가예약' && permission !== 'OFFICE_SECRETARY_ADMIN') && (
                   <Button
                     theme="danger"
                     onClick={async () => {
