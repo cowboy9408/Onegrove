@@ -167,8 +167,7 @@ export default function ReservationForm({
       }
     } catch (err) {
       console.error("예약 처리 실패:", err);
-      alert(err?.respopnse?.message || "다시 시도해 주세요.");
-      // alert("필수 입력 내용을 확인해 주세요.");
+      alert(err?.response?.data?.message || err?.data?.message || "예약이 실패되었습니다. 다시시도 해주세요.");
     }
   };
 
@@ -470,7 +469,7 @@ export default function ReservationForm({
       <div className="flex justify-between gap-3">
         <button
           onClick={handleSubmit}
-          // disabled={!isFormValid}
+          disabled={!isFormValid}
           className={`rounded px-4 py-2 cursor-pointer text-white ${
             isFormValid ? "bg-black hover:bg-gray-800" : "bg-gray-400 cursor-not-allowed"
           }`}

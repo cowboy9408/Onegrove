@@ -6,6 +6,7 @@ import { ModalContext } from "@/context/ModalContext";
 import ReservationForm from "@/components/modal/ReservationForm";
 import api from "@/lib/apiClient";
 import dayjs from "dayjs";
+import { useAuthStore } from "@/store/authStore";
 
 export default function Viproom() {
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -15,6 +16,7 @@ export default function Viproom() {
   const [locationOptions, setLocationOptions] = useState([]);
   const [roomOptions, setRoomOptions] = useState([]);
   const [scheduleList, setScheduleList] = useState([]);
+  const { permission } = useAuthStore();
 
   const fetchSchedules = async () => {
     try {
@@ -125,7 +127,7 @@ export default function Viproom() {
 
             <div className="flex justify-between gap-3">
               <div className="flex gap-3">
-                {detail.status === '가예약' && (
+                {detail.status === '가예약' && permission !== 'OFFICE_SECRETARY_ADMIN' && (
                   <Button
                     theme="danger"
                     onClick={async () => {
@@ -139,6 +141,7 @@ export default function Viproom() {
                           } else alert("예약 확정 실패");
                         } catch (err) {
                           console.error("예약 확정 오류:", err);
+                          alert(err?.response?.data?.message || err?.data?.message || "예약 확정이 실패되었습니다. 다시시도 해주세요.");
                         }
                       }
                     }}
@@ -158,6 +161,7 @@ export default function Viproom() {
                         } else alert("취소 실패");
                       } catch (err) {
                         console.error("취소 오류:", err);
+                        alert(err?.response?.data?.message || err?.data?.message || "예약 취소가 실패되었습니다. 다시시도 해주세요.");
                       }
                     }
                   }}

@@ -54,6 +54,7 @@ export default function VisitForm({
       }
     } catch (err) {
       console.error("입주사 조회 실패:", err);
+      alert(err?.response?.data?.message || err?.data?.message || "입주사 조회가 실패되었습니다. 다시시도 해주세요.");
     }
   };
 
@@ -66,6 +67,7 @@ export default function VisitForm({
       }
     } catch (err) {
       console.error("동 조회 실패:", err);
+      alert(err?.response?.data?.message || err?.data?.message || "건물 조회가 실패되었습니다. 다시시도 해주세요.");
     }
   };
 
@@ -138,8 +140,7 @@ export default function VisitForm({
       } else alert("처리 실패");
     } catch (err) {
       console.error("예약 처리 실패:", err);
-      alert(err?.respopnse?.data?.message);
-      // alert("필수 입력 내용을 확인해 주세요.");
+      alert(err?.response?.data?.message || err?.data?.message || "예약이 실패되었습니다. 다시시도 해주세요.");
     }
   };
 
@@ -181,6 +182,7 @@ export default function VisitForm({
     companyId &&
     resveDate &&
     resveTime &&
+    building &&
     email.trim() !== "" &&
     tel.trim() !== "" &&
     visitPurpose.trim() !== "" &&
