@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
 import { isWeekend, isHoliday } from "@/lib/utils";
+import dayjs from "dayjs";
 
 export default function ReservationForm({
   locationOptions = [],
