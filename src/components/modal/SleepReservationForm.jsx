@@ -218,7 +218,10 @@ export default function SleepReservationForm({
       } else alert("처리 실패");
     } catch (err) {
       console.error("예약 처리 실패:", err);
-      alert(err?.response?.data?.message || err?.data?.message || "예약이 실패되었습니다. 다시시도 해주세요.");
+
+      if(err?.response?.data?.message === "400 BAD_REQUEST \"성별에 일치하는 수면실을 선택해주세요.\"") {
+        alert("성별에 일치하는 수면실을 선택해주세요.");
+      } else alert(err?.response?.data?.message || err?.data?.message || "예약이 실패되었습니다. 다시시도 해주세요.");
     }
   };
 
