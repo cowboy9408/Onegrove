@@ -309,7 +309,7 @@ export default function SleepReservationForm({
         >
           <option value="">좌석을 선택해 주세요</option>
           {meetingList?.infoList
-            ?.slice(0, meetingList.gender === "M" ? 8 : 7)
+            ?.slice(0, meetingList.gender === "M" ? 8 : meetingList.gender === "W" ? 7 : 7)
             .map((room) => (
               room?.useYn === "Y" && (
                 <option key={room.id} value={room.id}>
@@ -400,7 +400,7 @@ export default function SleepReservationForm({
                 disabled={user.isDisabled}
                 className={user.isDisabled ? "text-gray-400" : ""}
               >
-                {user.userName} ({user.gender === 'M' ? '남자' : '여자'})
+                {user.userName} ({user.gender === 'M' ? '남자' : user.gender === 'W' ? '여자' : '여자'})
                 {user.isDisabled && " (성별 불일치)"}
               </option>
             ))}

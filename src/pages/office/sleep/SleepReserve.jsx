@@ -243,7 +243,7 @@ export default function SleepReserve() {
           const reserveCount = reservationCounts[time] || 0;
           const totalCount = Math.min(
             (meetingOptions.infoList || []).filter((info) => info.useYn === "Y").length,
-            meetingOptions.gender === "M" ? 8 : 7
+            meetingOptions.gender === "M" ? 8 : meetingOptions.gender === "W" ? 7 : 7
           );
 
           return (
@@ -265,7 +265,7 @@ export default function SleepReserve() {
                 <div className="space-y-2 bg-gray-100 p-3">
                   {(meetingOptions.infoList || [])
                     .filter((info) => info.useYn === "Y")
-                    .slice(0, meetingOptions.gender === "M" ? 8 : 7)
+                    .slice(0, meetingOptions.gender === "M" ? 8 : meetingOptions.gender === "W" ? 7 : 7)
                     .map((info) => {
                       const reservation = reserveList.find(
                         (r) => r.roomNumberId === info.roomNumId

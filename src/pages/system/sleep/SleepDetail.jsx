@@ -49,13 +49,22 @@ export default function SleepDetail() {
           setMaxTime(d.maxHour);
           setStartDate(new Date(`2000-01-01T${d.startTime}`));
           setEndDate(new Date(`2000-01-01T${d.endTime}`));
-          setGender(d.gender === "M" ? "남성" : "여성");
+          setGender(d.gender === "M" ? "남성" : d.gender === "W" ? "여성" : "여성");
           setUseYn(d.useYn === "Y" ? "사용" : "미사용");
           setRoomInfoList(d.infoList || []);
 
           const checked = d.infoList
             .filter((room) => room.useYn === "N")
             .map((room) => room.roomNumId);
+          
+          // 여성인 경우 8호실도 자동으로 체크
+          if (d.gender === "W") {
+            const room8 = roomNumList.find(room => room.name === "8호실");
+            if (room8 && !checked.includes(room8.id)) {
+              checked.push(room8.id);
+            }
+          }
+          
           setCheckedRooms(checked);
         }
       } catch (err) {
@@ -63,10 +72,10 @@ export default function SleepDetail() {
       }
     };
 
-    if (locationOptions.length > 0 && id) {
+    if (locationOptions.length > 0 && roomNumList.length > 0 && id) {
       fetchDetail();
     }
-  }, [id, locationOptions]);
+  }, [id, locationOptions, roomNumList]);
 
   const getRoomLabel = (num) => {
     const prefix = gender === "여성" ? "여자" : "남자";
@@ -85,6 +94,23 @@ export default function SleepDetail() {
       prev.includes(room) ? prev.filter((r) => r !== room) : [...prev, room]
     );
   };
+
+  // 성별 변경 시 8호실 자동 체크/해제
+  useEffect(() => {
+    if (gender === "여성") {
+      // 여성인 경우 8호실 자동 체크
+      const room8 = roomNumList.find(room => room.name === "8호실");
+      if (room8 && !checkedRooms.includes(room8.id)) {
+        setCheckedRooms(prev => [...prev, room8.id]);
+      }
+    } else {
+      // 남성인 경우 8호실 체크 해제
+      const room8 = roomNumList.find(room => room.name === "8호실");
+      if (room8 && checkedRooms.includes(room8.id)) {
+        setCheckedRooms(prev => prev.filter(r => r !== room8.id));
+      }
+    }
+  }, [gender, roomNumList]);
 
   useEffect(() => {
     const fetchRoomNums = async () => {
@@ -128,7 +154,7 @@ export default function SleepDetail() {
     }
 
     try {
-      const genderCode = gender === "남성" ? "M" : "F";
+      const genderCode = gender === "남성" ? "M" : "W";
       const useYnCode = useYn === "사용" ? "Y" : "N";
       const locationCode = locationCodeMap[location];
 
@@ -159,6 +185,8 @@ export default function SleepDetail() {
         useYn: useYnCode,
         infoList,
       };
+
+      // console.log(payload);
 
       const res = await api.post("/api/v1/sleep/room/update", payload);
 

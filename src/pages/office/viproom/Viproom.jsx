@@ -16,15 +16,17 @@ export default function Viproom() {
   const [locationOptions, setLocationOptions] = useState([]);
   const [roomOptions, setRoomOptions] = useState([]);
   const [scheduleList, setScheduleList] = useState([]);
-  const { permission, companyId: userCompanyId } = useAuthStore();
+  const { permission, id: userId } = useAuthStore();
 
   const fetchSchedules = async () => {
     try {
       let apiUrl = `/api/v1/meeting?roomId=${selectedRoom}&isVip=Y&lang=ko`;
+
+      console.log(permission, userId);
       
       // OFFICE_SECRETARY_ADMIN 계정일 때 본인이 속한 입주사의 일정만 필터링
-      if (permission === 'OFFICE_SECRETARY_ADMIN' && userCompanyId) {
-        apiUrl += `&companyId=${userCompanyId}`;
+      if (permission === 'OFFICE_SECRETARY_ADMIN' && userId) {
+        apiUrl += `&companyId=${userId}`;
       }
       
       const res = await api.get(apiUrl);
@@ -107,21 +109,17 @@ export default function Viproom() {
       if (!res.data.success) return;
       const detail = res.data.data;
 
-      // OFFICE_SECRETARY_ADMIN 계정일 때 수정/삭제 가능 여부 확인
+      // 수정/삭제 가능 여부 확인
       const isModifiable = () => {
-        if (permission !== 'OFFICE_SECRETARY_ADMIN') {
-          return true; // 다른 권한은 항상 수정 가능
-        }
-        
         const reservationDate = dayjs(detail.resveDate);
         const today = dayjs();
         
         if (detail.paymentType === '유료예약') {
-          // 유료예약: 3일 전까지만 수정/삭제 가능
+          // 유료예약: 예약일이 오늘로부터 3일 이상 차이나는 경우에만 수정/삭제 가능
           return reservationDate.diff(today, 'day') >= 3;
         } else {
-          // 무료예약: 당일까지만 수정/삭제 가능
-          return reservationDate.diff(today, 'day') >= 0;
+          // 무료예약: 예약일이 당일인 경우에만 수정/삭제 가능
+          return reservationDate.diff(today, 'day') === 0;
         }
       };
 
