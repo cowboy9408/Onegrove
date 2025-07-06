@@ -195,13 +195,15 @@ export default function SleepReservationForm({
 
   // 성별에 따른 사용자 필터링
   const getFilteredUserList = () => {
-    if (!userList?.length || !meetingList?.gender) {
-      return userList || [];
+    if (!userList?.length) {
+      return [];
     }
     
-    // meetingList.gender가 "M"이면 남자(M), "F"이면 여자(F)만 필터링
-    const roomGender = meetingList.gender;
-    return userList.filter(user => user.gender === roomGender);
+    // 모든 사용자를 반환하되, 성별 불일치 정보를 포함
+    return userList.map(user => ({
+      ...user,
+      isDisabled: meetingList?.gender && user.gender !== meetingList.gender
+    }));
   };
 
   // realUser가 현재 선택된 Relax Room의 성별과 맞지 않으면 초기화
@@ -392,8 +394,14 @@ export default function SleepReservationForm({
         >
           <option value="">아이디를 선택하세요</option>
           {getFilteredUserList().map((user) => (
-              <option key={user.userId} value={user.userId}>
+              <option 
+                key={user.userId} 
+                value={user.userId}
+                disabled={user.isDisabled}
+                className={user.isDisabled ? "text-gray-400" : ""}
+              >
                 {user.userName} ({user.gender === 'M' ? '남자' : '여자'})
+                {user.isDisabled && " (성별 불일치)"}
               </option>
             ))}
         </select>
