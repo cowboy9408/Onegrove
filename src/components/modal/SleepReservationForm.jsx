@@ -246,6 +246,8 @@ export default function SleepReservationForm({
         alert("예약 시간이 존재하지 않습니다.");
       } else if(err?.response?.data?.message === "400 BAD_REQUEST \"Relax Room은 1일 1회만 예약 가능합니다.\"") {  
         alert("Relax Room은 1일 1회만 예약 가능합니다.");
+      } else if(err?.response?.data?.message === "400 BAD_REQUEST \"해당 수면실은 이미 예약된 수면실 입니다.\"") {
+        alert("해당 수면실은 이미 예약된 수면실 입니다.");
       }
       else alert(err?.response?.data?.message || err?.data?.message || "예약이 실패되었습니다. 다시시도 해주세요.");
     }
