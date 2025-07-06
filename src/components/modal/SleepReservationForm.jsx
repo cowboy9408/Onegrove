@@ -193,7 +193,26 @@ export default function SleepReservationForm({
     }
   }, [roomDetailId, meetingList, isEdit]);
 
+  // 성별에 따른 사용자 필터링
+  const getFilteredUserList = () => {
+    if (!userList?.length || !meetingList?.gender) {
+      return userList || [];
+    }
+    
+    // meetingList.gender가 "M"이면 남자(M), "F"이면 여자(F)만 필터링
+    const roomGender = meetingList.gender;
+    return userList.filter(user => user.gender === roomGender);
+  };
 
+  // realUser가 현재 선택된 Relax Room의 성별과 맞지 않으면 초기화
+  useEffect(() => {
+    if (realUser && userList?.length > 0 && meetingList?.gender) {
+      const selectedUser = userList.find(u => u.userId === Number(realUser));
+      if (selectedUser && selectedUser.gender !== meetingList.gender) {
+        setRealUser(""); // 성별이 맞지 않으면 초기화
+      }
+    }
+  }, [realUser, userList, meetingList]);
 
   const handleSubmit = async () => {
     const payload = {
@@ -221,7 +240,12 @@ export default function SleepReservationForm({
 
       if(err?.response?.data?.message === "400 BAD_REQUEST \"성별에 일치하는 수면실을 선택해주세요.\"") {
         alert("성별에 일치하는 수면실을 선택해주세요.");
-      } else alert(err?.response?.data?.message || err?.data?.message || "예약이 실패되었습니다. 다시시도 해주세요.");
+      } else if(err?.response?.data?.message === "400 BAD_REQUEST \"예약 시간이 존재하지 않습니다.\"") {
+        alert("예약 시간이 존재하지 않습니다.");
+      } else if(err?.response?.data?.message === "400 BAD_REQUEST \"Relax Room은 1일 1회만 예약 가능합니다.\"") {  
+        alert("Relax Room은 1일 1회만 예약 가능합니다.");
+      }
+      else alert(err?.response?.data?.message || err?.data?.message || "예약이 실패되었습니다. 다시시도 해주세요.");
     }
   };
 
@@ -367,7 +391,7 @@ export default function SleepReservationForm({
           className="w-full rounded border px-2 py-1"
         >
           <option value="">아이디를 선택하세요</option>
-          {userList?.map((user) => (
+          {getFilteredUserList().map((user) => (
               <option key={user.userId} value={user.userId}>
                 {user.userName} ({user.gender === 'M' ? '남자' : '여자'})
               </option>
