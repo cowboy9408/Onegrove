@@ -382,7 +382,7 @@ export default function AffairDetailPage() {
             onChange={(e) => handleChange("email", e.target.value)}
           />
         </div>
-        <div className="mt-4">
+        {/* <div className="mt-4">
           <p className="mb-2 text-sm font-medium text-gray-800">담당자 여부</p>
           <div className="flex gap-4">
             <Radio
@@ -400,7 +400,7 @@ export default function AffairDetailPage() {
               onChange={() => handleChange("isManager", "N")}
             />
           </div>
-        </div>
+        </div> */}
         <div>
           <p className="mb-2 text-sm font-medium text-gray-800">
             어메니티 예약 기능

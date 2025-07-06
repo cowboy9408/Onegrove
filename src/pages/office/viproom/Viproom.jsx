@@ -24,20 +24,22 @@ export default function Viproom() {
 
       console.log(permission, userId);
       
-      // OFFICE_SECRETARY_ADMIN 계정일 때 본인이 속한 입주사의 일정만 필터링
-      if (permission === 'OFFICE_SECRETARY_ADMIN' && userId) {
-        apiUrl += `&companyId=${userId}`;
-      }
-      
       const res = await api.get(apiUrl);
       if (res.data?.success && Array.isArray(res.data.data)) {
-        const mapped = res.data.data.map((item) => ({
-          id: item.id,
-          title: `${item.paymentType}예약 ${item.resveStartTime} ~ ${item.resveEndTime} ${item.reserver} (${item.companyName})`,
-          start: new Date(`${item.resveDate}T${item.resveStartTime}`),
-          end: new Date(`${item.resveDate}T${item.resveEndTime}`),
-          resource: item,
-        }));
+        const mapped = res.data.data.map((item) => {
+          // OFFICE_SECRETARY_ADMIN 계정일 때 본인이 예약한 것만 상세 정보 표시
+          const isOwnReservation = permission === 'OFFICE_SECRETARY_ADMIN' ? item.userId === userId : true;
+          
+          return {
+            id: item.id,
+            title: isOwnReservation 
+              ? `${item.paymentType}예약 ${item.resveStartTime} ~ ${item.resveEndTime} ${item.reserver} (${item.companyName})`
+              : `${item.resveStartTime} ~ ${item.resveEndTime} 예약됨`,
+            start: new Date(`${item.resveDate}T${item.resveStartTime}`),
+            end: new Date(`${item.resveDate}T${item.resveEndTime}`),
+            resource: { ...item, isOwnReservation },
+          };
+        });
         setScheduleList(mapped);
       }
     } catch (err) {
@@ -105,6 +107,11 @@ export default function Viproom() {
 
   const handleEventClick = async (event) => {
     try {
+      // OFFICE_SECRETARY_ADMIN 계정일 때 본인 예약이 아니면 클릭 불가능
+      if (permission === 'OFFICE_SECRETARY_ADMIN' && !event.resource.isOwnReservation) {
+        return;
+      }
+
       const res = await api.get(`/api/v1/meeting/${event.id}`);
       if (!res.data.success) return;
       const detail = res.data.data;
