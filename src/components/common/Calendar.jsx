@@ -79,10 +79,16 @@ export default function CommonCalendar({
           {events.map((event, idx) => (
             <div
               key={idx}
-              className="rbc-event cursor-pointer hover:bg-gray-100 p-2 rounded mb-1"
+              className={`rbc-event p-2 rounded mb-1 ${
+                event.resource?.isOwnReservation === false 
+                  ? 'cursor-default text-gray-500' 
+                  : 'cursor-pointer hover:bg-gray-100'
+              }`}
               onClick={() => {
-                onSelectEvent(event);
-                onClose();
+                if (event.resource?.isOwnReservation !== false) {
+                  onSelectEvent(event);
+                  onClose();
+                }
               }}
             >
               <div className="font-medium text-sm">{event.title}</div>
@@ -113,18 +119,38 @@ export default function CommonCalendar({
         step={60}
         timeslots={1}
         showMultiDayTimes={false}
-        eventPropGetter={(event) => ({
-          style: {
-            whiteSpace: "normal",
-            overflow: "visible",
-            textOverflow: "clip",
-            fontSize: "12px",
-            padding: "2px 4px",
-            backgroundColor:
-              event.resource?.status === "예약 확정" ? "#00AAFF" : "#4CAF50",
-            color: "white",
-          },
-        })}
+        eventPropGetter={(event) => {
+          // 본인 예약이 아닌 경우 (예약됨으로 표시)
+          if (event.resource?.isOwnReservation === false) {
+            return {
+              style: {
+                whiteSpace: "normal",
+                overflow: "visible",
+                textOverflow: "clip",
+                fontSize: "12px",
+                padding: "2px 4px",
+                backgroundColor: "transparent",
+                color: "#6B7280",
+                border: "none",
+                cursor: "default",
+              },
+            };
+          }
+          
+          // 본인 예약인 경우 기존 스타일 유지
+          return {
+            style: {
+              whiteSpace: "normal",
+              overflow: "visible",
+              textOverflow: "clip",
+              fontSize: "12px",
+              padding: "2px 4px",
+              backgroundColor:
+                event.resource?.status === "예약 확정" ? "#00AAFF" : "#4CAF50",
+              color: "white",
+            },
+          };
+        }}
         messages={{
           next: "다음",
           previous: "이전",
