@@ -262,20 +262,20 @@ export default function SleepReservationForm({
 
       <div>
         <label className="mb-1 block">
-          Relax Room 호실 선택 <span className="text-red-500">*</span>
+          Relax Room 좌석 선택 <span className="text-red-500">*</span>
         </label>
         <select
           value={roomDetailId}
           onChange={(e) => setRoomDetailId(e.target.value)}
           className="w-full rounded border px-2 py-1"
         >
-          <option value="">호실을 선택해 주세요</option>
+          <option value="">좌석을 선택해 주세요</option>
           {meetingList?.infoList
             ?.slice(0, meetingList.gender === "M" ? 8 : 7)
             .map((room) => (
               room?.useYn === "Y" && (
                 <option key={room.id} value={room.id}>
-                  {room.roomNumId}호실
+                  {room.roomNumId}호
                 </option>
               )
             ))}

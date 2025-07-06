@@ -179,6 +179,10 @@ export default function SleepReserve() {
                   onSubmit={() => {
                     fetchRoomDetail(selectedRoom);
                     fetchReservationCounts(selectedRoom);
+                    // 현재 확장된 시간 슬롯이 있다면 해당 상세 정보도 다시 가져오기
+                    if (expandedSlot) {
+                      fetchReservations(selectedRoom, expandedSlot);
+                    }
                     closeModal();
                   }}
                 />
@@ -217,9 +221,10 @@ export default function SleepReserve() {
           const time = slot.start;
           const reserveList = reservationDetails[time] || [];
           const reserveCount = reservationCounts[time] || 0;
-          const totalCount = (meetingOptions.infoList || []).filter(
-            (info) => info.useYn === "Y"
-          ).length;
+          const totalCount = Math.min(
+            (meetingOptions.infoList || []).filter((info) => info.useYn === "Y").length,
+            meetingOptions.gender === "M" ? 8 : 7
+          );
 
           return (
             <div key={time} className="rounded border shadow-sm">
@@ -240,6 +245,7 @@ export default function SleepReserve() {
                 <div className="space-y-2 bg-gray-100 p-3">
                   {(meetingOptions.infoList || [])
                     .filter((info) => info.useYn === "Y")
+                    .slice(0, meetingOptions.gender === "M" ? 8 : 7)
                     .map((info) => {
                       const reservation = reserveList.find(
                         (r) => r.roomNumberId === info.roomNumId
@@ -266,6 +272,10 @@ export default function SleepReserve() {
                                     onSubmit={() => {
                                       fetchRoomDetail(selectedRoom);
                                       fetchReservationCounts(selectedRoom);
+                                      // 현재 확장된 시간 슬롯이 있다면 해당 상세 정보도 다시 가져오기
+                                      if (expandedSlot) {
+                                        fetchReservations(selectedRoom, expandedSlot);
+                                      }
                                       closeModal();
                                     }}
                                   />
