@@ -77,6 +77,7 @@ export default function SleepListPage() {
           </Button>
         </div>
       </div>
+
       <ResultSection>
         <DataTable
           columns={[
@@ -88,9 +89,8 @@ export default function SleepListPage() {
             { key: "useYn", label: "사용여부" },
           ]}
           data={data}
-          link={{ base: "/admin/sleep", path: "id", key: "name" }}
-          checkable={false}
         />
+
         <Pagination
           current={page}
           totalPages={Math.ceil(total / size)}
