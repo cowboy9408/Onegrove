@@ -15,7 +15,7 @@ export default function DataTableSimple({
             {columns.map((col) => (
               <th
                 key={col.key}
-                className="border-r border-gray-200 px-4 py-3 last:border-r-0 dark:border-gray-700"
+                className="border-r border-gray-200 px-4 py-3 whitespace-nowrap last:border-r-0 dark:border-gray-700"
               >
                 {col.label}
               </th>
