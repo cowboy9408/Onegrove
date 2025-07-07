@@ -583,8 +583,8 @@ export const routeMeta = [
             uuid: "952664cb-fbe1-4ecd-bb18-ca6aecead4d1",
             path: "/office/setting",
             element: <SettingLayout />,
-            title: "● 어메니티 설정",
-            hidden: false,
+            title: "어메니티 설정",
+            hidden: true,
             permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN"],
             children: [
               {
@@ -659,16 +659,22 @@ export const routeMeta = [
         uuid: "c9c84ed1-a896-4d9b-b659-cd6a43dc8cd2",
         path: "/system",
         element: <SystemLayout />,
-        title: "어메니티 시스템 관리",
+        title: "어메니티 설정",
         icon: <SettingsGearIcon size={18} />,
-        hidden: true,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+        hidden: false,
+        permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN"],
         children: [
           {
             uuid: "e59c7075-0b1c-4607-b548-c38fa7566532",
             path: "/system/meeting",
             element: <MeetingListPage />,
-            title: "어메니티 예약 설정",
+            title: (
+              <>
+                Metting Room / Executive Room
+                <br />
+                예약 설정
+              </>
+            ),
             hidden: false,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
