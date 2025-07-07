@@ -19,7 +19,7 @@ export default function AffairRegist() {
     confirmPassword: "",
     phone: "",
     email: "",
-    isContact: "Y",
+    isManager: "Y",
     isReservation: "N",
   });
   const navigate = useNavigate();
@@ -375,25 +375,25 @@ export default function AffairRegist() {
           required
         />
       </div>
-      <div className="mt-4">
+      {/* <div className="mt-4">
         <p className="mb-2 text-sm font-medium text-gray-800">담당자 여부</p>
         <div className="flex gap-4">
           <Radio
-            name="isContact"
+            name="isManager"
             label="등록"
             value="Y"
-            checked={form.isContact === "Y"}
-            onChange={() => handleChange("isContact", "Y")}
+            checked={form.isManager === "Y"}
+            onChange={() => handleChange("isManager", "Y")}
           />
           <Radio
-            name="isContact"
+            name="isManager"
             label="미등록"
             value="N"
-            checked={form.isContact === "N"}
-            onChange={() => handleChange("isContact", "N")}
+            checked={form.isManager === "N"}
+            onChange={() => handleChange("isManager", "N")}
           />
         </div>
-      </div>
+      </div> */}
       <div>
         <p className="mb-2 text-sm font-medium text-gray-800">
           어메니티 예약 기능
