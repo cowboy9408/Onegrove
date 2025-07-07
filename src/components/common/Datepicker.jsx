@@ -17,11 +17,11 @@ export default function Datepicker({
   const datepickerRef = useRef(null);
 
   const commonProps = {
-    showTimeSelect: timeOnly,
+    showTimeSelect: false,
     showTimeSelectOnly: timeOnly,
     timeIntervals: 30,
     timeCaption: "시간",
-    dateFormat: timeOnly ? "HH:mm" : "yyyy-MM-dd HH:mm",
+    dateFormat: "yyyy-MM-dd",
   };
 
   if (mode === "icon-only") {

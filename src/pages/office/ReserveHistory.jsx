@@ -87,11 +87,14 @@ export default function Visit() {
 
   const downloadExcel = async () => {
     try {
-      const res = await api.get("/api/v1/meeting/history-excel", {
-        responseType: "blob", // 중요: 바이너리 파일 받기
-      });
+      const res = await api.get(
+        "/api/v1/meeting?export=excel&roomId=0&isVip=false",
+        { responseType: "blob" }
+      );
 
-      const blob = new Blob([res.data], { type: "application/vnd.ms-excel" });
+      const blob = new Blob([res.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -314,6 +317,7 @@ export default function Visit() {
             { key: "companyName", label: "입주사" },
             { key: "paymentType", label: "결제 유형" },
             { key: "resvDatetime", label: "예약 일정" },
+            { key: "freeStackTime", label: "누적 무료 시간" },
             { key: "paidStackTime", label: "누적 유료 시간" },
             { key: "status", label: "예약 상태" },
             { key: "createDatetime", label: "등록일시" },
