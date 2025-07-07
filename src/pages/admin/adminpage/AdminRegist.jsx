@@ -205,8 +205,8 @@ export default function AdminRegist() {
             });
           } else {
             showModal({
-              title: "수정 실패",
-              message: "서버 오류로 저장을 완료하지 못했습니다.",
+              title: "등록 실패",
+              message: "서버 오류로 등록을 완료하지 못했습니다.",
               showCancel: false,
             });
           }

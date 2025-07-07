@@ -1,5 +1,5 @@
 import Button from "@/components/common/Button";
-import DataTable from "@/components/common/DataTable";
+import DataTable from "@/components/common/DataTableSimple";
 
 import Pagination from "@/components/common/Pagination";
 import ResultSummary from "@/components/common/ResultSummary";
@@ -88,7 +88,6 @@ export default function SleepListPage() {
             { key: "useYn", label: "사용여부" },
           ]}
           data={data}
-          link={{ base: "/admin/sleep", path: "id", key: "name" }}
         />
         <Pagination
           current={page}
