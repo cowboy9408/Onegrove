@@ -514,12 +514,15 @@ const EventRegistForm = forwardRef(
                 }}
                 readOnly={readOnly}
               />
-              <input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                className="rounded border px-2 py-1"
-                disabled={readOnly}
+              <Datepicker
+                mode="time-only"
+                selectedDate={new Date(`1970-01-01T${startTime}:00`)} // "HH:mm" → Date 객체로 변환
+                onSingleChange={(date) => {
+                  const hh = String(date.getHours()).padStart(2, "0");
+                  const mm = String(date.getMinutes()).padStart(2, "0");
+                  setStartTime(`${hh}:${mm}`);
+                }}
+                disabled={readOnly || isManualEndInput}
               />
             </div>
             <span>~</span>
@@ -536,15 +539,14 @@ const EventRegistForm = forwardRef(
                 disabled={readOnly || isManualEndInput} // manual이면 readonly 처리
                 startDate={startDate}
               />
-              <input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                className={`rounded border px-2 py-1 transition-colors duration-150 ${
-                  readOnly || isManualEndInput
-                    ? "cursor-not-allowed bg-gray-100 text-gray-500 opacity-70"
-                    : ""
-                }`}
+              <Datepicker
+                mode="time-only"
+                selectedDate={new Date(`1970-01-01T${endTime}:00`)} // "HH:mm" → Date 객체로 변환
+                onSingleChange={(date) => {
+                  const hh = String(date.getHours()).padStart(2, "0");
+                  const mm = String(date.getMinutes()).padStart(2, "0");
+                  setEndTime(`${hh}:${mm}`);
+                }}
                 disabled={readOnly || isManualEndInput}
               />
 
