@@ -87,10 +87,12 @@ export default function Visit() {
 
   const downloadExcel = async () => {
     try {
-      const res = await api.get(
-        "/api/v1/meeting?export=excel&roomId=0&isVip=false",
-        { responseType: "blob" }
-      );
+      const res = await api.post("/api/v1/meeting/history-excel", [], {
+        responseType: "blob",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       const blob = new Blob([res.data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
