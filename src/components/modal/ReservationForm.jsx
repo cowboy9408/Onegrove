@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
 import { isWeekend, isHoliday } from "@/lib/utils";
+import dayjs from "dayjs";
 
 export default function ReservationForm({
   locationOptions = [],
@@ -28,12 +29,26 @@ export default function ReservationForm({
   const [realUser, setRealUser] = useState(initialData.realUser || "");
   const [note, setNote] = useState(initialData.note || "");
   const [status] = useState(initialData.status || "gs0101");
+  const [remainingTime, setRemainingTime] = useState(null);
+
+
+
+  
 
   const getToday = () => {
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, "0");
     const dd = String(today.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  const getMaxDate = () => {
+    const today = new Date();
+    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+    const yyyy = nextMonth.getFullYear();
+    const mm = String(nextMonth.getMonth() + 1).padStart(2, "0");
+    const dd = String(nextMonth.getDate()).padStart(2, "0");
     return `${yyyy}-${mm}-${dd}`;
   };
 
@@ -76,6 +91,13 @@ export default function ReservationForm({
         setResveEndTime(newEndTime);
       }
     }
+
+    if (resveStartTime) {
+      const threeDaysAgo = dayjs().add(3, "day");
+      const resveDate = dayjs(resveStartTime);
+      const _isAfterThreeDaysAgo = resveDate.isAfter(threeDaysAgo);
+      // setIsThreeDay(_isAfterThreeDaysAgo);
+    }
   }, [resveStartTime, resveEndTime]);
 
   useEffect(() => {
@@ -92,6 +114,26 @@ export default function ReservationForm({
     if (initialData.companyId) setCompanyId(initialData.companyId);
     if (initialData.note) setNote(initialData.note);
   }, [initialData]);
+
+  // 잔여 시간 조회 API 호출
+  useEffect(() => {
+    if (roomId && resveDate && companyId) {
+      const fetchRemainingTime = async () => {
+        try {
+          const res = await api.get(`/api/v1/meeting/remaining-time?companyId=${companyId}&resvDate=${resveDate}&roomId=${roomId}`);
+          if (res.data?.success) {
+            setRemainingTime(res.data.data.remainingTime);
+          }
+        } catch (err) {
+          console.error("잔여 시간 조회 실패:", err);
+          setRemainingTime(null);
+        }
+      };
+      fetchRemainingTime();
+    } else {
+      setRemainingTime(null);
+    }
+  }, [roomId, resveDate, companyId]);
 
   const handleSubmit = async () => {
     if (
@@ -145,8 +187,7 @@ export default function ReservationForm({
       }
     } catch (err) {
       console.error("예약 처리 실패:", err);
-      alert(err?.respopnse?.message || "다시 시도해 주세요.");
-      // alert("필수 입력 내용을 확인해 주세요.");
+      alert(err?.response?.data?.message || err?.data?.message || "예약이 실패되었습니다. 다시시도 해주세요.");
     }
   };
 
@@ -272,6 +313,9 @@ export default function ReservationForm({
             <option key={r.id} value={r.id}>{r.roomName}</option>
           ))}
         </select>
+
+        
+        
       </div>
 
       <div>
@@ -287,6 +331,11 @@ export default function ReservationForm({
               onChange={() => setPaymentType("free")}
             />{" "}
             무료
+            {remainingTime !== null && (
+              <span className="text-sm text-gray-600 ml-1">
+                (잔여 시간: {remainingTime}시간)
+              </span>
+            )}
           </label>
           <label className="mb-1 flex w-[50%] items-center gap-2">
             <input
@@ -299,6 +348,7 @@ export default function ReservationForm({
           </label>
         </div>
       </div>
+      
 
       <div>
         <label className="mb-1 block">
@@ -309,10 +359,11 @@ export default function ReservationForm({
             type="date"
             value={resveDate}
             min={getToday()}
+            max={getMaxDate()}
             onChange={(e) => {
               const val = e.target.value;
               if (isWeekend(val) || isHoliday(val)) {
-                // alert("주말 및 공휴일은 선택할 수 없습니다.");
+                alert("주말 및 공휴일은 선택할 수 없습니다.");
                 return;
               }
               setResveDate(val);
@@ -357,6 +408,29 @@ export default function ReservationForm({
             )}
           </select>
         </div>
+        <p className="text-sm text-gray-600 mt-1">
+          * 주말 및 공휴일은 선택할 수 없습니다.
+        </p>
+        {/* {(!isThreeDay && paymentType === "paid") && (<p>유료 예약 시 오늘 기준 영업일 3일 이내<br />수정 및 삭제 불가하며 별도의 수수료가 발생됩니다.</p>)} */}
+      </div>
+
+      <div>
+        <label className="mb-1 block">
+          입주사 <span className="text-red-500">*</span>
+        </label>
+        
+        <select
+          value={companyId}
+          onChange={(e) => setCompanyId(e.target.value)}
+          className="w-full rounded border px-2 py-1"
+        >
+          <option value="">입주사를 선택하세요</option>
+          {meetingOptions?.map((c) => (
+            <option key={c.companyId} value={c.companyId}>
+              {c.companyName}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div>
@@ -411,24 +485,7 @@ export default function ReservationForm({
         />
       </div>
 
-      <div>
-        <label className="mb-1 block">
-          입주사 <span className="text-red-500">*</span>
-        </label>
-        
-        <select
-          value={companyId}
-          onChange={(e) => setCompanyId(e.target.value)}
-          className="w-full rounded border px-2 py-1"
-        >
-          <option value="">입주사를 선택하세요</option>
-          {meetingOptions?.map((c) => (
-            <option key={c.companyId} value={c.companyId}>
-              {c.companyName}
-            </option>
-          ))}
-        </select>
-      </div>
+      
 
       <div>
         <label className="mb-1 block">비고</label>
@@ -443,7 +500,7 @@ export default function ReservationForm({
       <div className="flex justify-between gap-3">
         <button
           onClick={handleSubmit}
-          // disabled={!isFormValid}
+          disabled={!isFormValid}
           className={`rounded px-4 py-2 cursor-pointer text-white ${
             isFormValid ? "bg-black hover:bg-gray-800" : "bg-gray-400 cursor-not-allowed"
           }`}

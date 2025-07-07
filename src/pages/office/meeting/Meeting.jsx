@@ -6,6 +6,7 @@ import { ModalContext } from "@/context/ModalContext";
 import ReservationForm from "@/components/modal/ReservationForm";
 import api from "@/lib/apiClient";
 import dayjs from "dayjs";
+import { useAuthStore } from "@/store/authStore";
 
 export default function Meeting() {
   const [selectedOffice, setSelectedOffice] = useState(null);
@@ -22,18 +23,30 @@ export default function Meeting() {
   const [realUser, setRealUser] = useState("");
   const [numberVisitors, setNumberVisitors] = useState("");
   const [companyId, setCompanyId] = useState("");
+  const { permission, id: userId } = useAuthStore();
 
   const fetchSchedules = async () => {
     try {
-      const res = await api.get(`/api/v1/meeting?roomId=${selectedRoom}&isVip=N&lang=ko`);
+      let apiUrl = `/api/v1/meeting?roomId=${selectedRoom}&isVip=N&lang=ko`;
+
+      console.log(permission, userId);
+      
+      const res = await api.get(apiUrl);
       if (res.data?.success && Array.isArray(res.data.data)) {
-        const mapped = res.data.data.map((item) => ({
-          id: item.id,
-          title: `${item.paymentType}예약 ${item.resveStartTime} ~ ${item.resveEndTime} ${item.reserver} (${item.companyName})`,
-          start: new Date(`${item.resveDate}T${item.resveStartTime}`),
-          end: new Date(`${item.resveDate}T${item.resveEndTime}`),
-          resource: item,
-        }));
+        const mapped = res.data.data.map((item) => {
+          // OFFICE_SECRETARY_ADMIN 계정일 때 본인이 예약한 것만 상세 정보 표시
+          const isOwnReservation = permission === 'OFFICE_SECRETARY_ADMIN' ? item.userId === userId : true;
+          
+          return {
+            id: item.id,
+            title: isOwnReservation 
+              ? `${item.paymentType}예약 ${item.resveStartTime} ~ ${item.resveEndTime} ${item.reserver} (${item.companyName})`
+              : `${item.resveStartTime} ~ ${item.resveEndTime} 예약됨`,
+            start: new Date(`${item.resveDate}T${item.resveStartTime}`),
+            end: new Date(`${item.resveDate}T${item.resveEndTime}`),
+            resource: { ...item, isOwnReservation },
+          };
+        });
         setScheduleList(mapped);
       }
     } catch (err) {
@@ -126,12 +139,31 @@ export default function Meeting() {
 
   const handleEventClick = async (event) => {
     try {
+      // OFFICE_SECRETARY_ADMIN 계정일 때 본인 예약이 아니면 클릭 불가능
+      if (permission === 'OFFICE_SECRETARY_ADMIN' && !event.resource.isOwnReservation) {
+        return;
+      }
+
       console.log('이벤트 클릭됨, ID:', event.id);
       const res = await api.get(`/api/v1/meeting/${event.id}`);
       console.log('API 응답:', res);
       if (!res.data.success) return;
       const detail = res.data.data;
       console.log('상세 데이터:', detail);
+
+      // 수정/삭제 가능 여부 확인
+      const isModifiable = () => {
+        const reservationDate = dayjs(detail.resveDate);
+        const today = dayjs();
+        
+        if (detail.paymentType === '유료예약' && permission === 'OFFICE_SECRETARY_ADMIN') {
+          // 유료예약: 예약일이 오늘로부터 3일 이상 차이나는 경우에만 수정/삭제 가능
+          return reservationDate.diff(today, 'day') >= 3;
+        } else if ( permission === 'OFFICE_SECRETARY_ADMIN') {
+          // 무료예약: 예약일이 당일인 경우에만 수정/삭제 가능
+          return reservationDate.diff(today, 'day') === 0;
+        }
+      };
 
       showModal({
         title: "Meeting Room 상세",
@@ -140,7 +172,6 @@ export default function Meeting() {
         showCancel: true,
         children: ({ closeModal }) => (
           <div className="space-y-5 text-sm text-gray-700">
-            <p>유료 예약 시 오늘 기준 영업일 3일 이내<br />수정 및 삭제 불가하며 별도의 수수료가 발생됩니다.</p>
             <table className="w-full border text-left">
               <tbody>
                 <tr><th className="p-2 border min-w-[80px]">회의실</th><td className="p-2 border">{detail.roomName} ({detail.location})</td></tr>
@@ -160,7 +191,7 @@ export default function Meeting() {
 
             <div className="flex justify-between gap-3">
               <div className="flex gap-3">
-                {detail.status === '가예약' && (
+                {(detail.status === '가예약' && permission !== 'OFFICE_SECRETARY_ADMIN') && (
                   <Button
                     theme="danger"
                     onClick={async () => {
@@ -174,66 +205,72 @@ export default function Meeting() {
                           } else alert("예약 확정 실패");
                         } catch (err) {
                           console.error("예약 확정 오류:", err);
+                          alert(err?.response?.data?.message || err?.data?.message || "예약 확정이 실패되었습니다. 다시시도 해주세요.");
                         }
                       }
                     }}
                   >예약 확정</Button>
                 )}
                 
-                <Button
-                  theme="danger"
-                  onClick={async () => {
-                    if (confirm("예약을 취소하겠습니까?")) {
-                      try {
-                        const res = await api.post("/api/v1/meeting/cancel", { id: detail.id });
-                        if (res.data?.success) {
-                          alert("취소 완료");
-                          fetchSchedules();
-                          closeModal();
-                        } else alert("취소 실패");
-                      } catch (err) {
-                        console.error("취소 오류:", err);
-                      }
-                    }
-                  }}
-                >예약 취소</Button>
-              </div>
-              <div>
-                <Button
-                  onClick={() => {
-                    // console.log(
-                    //   detail,
-                    //   selectedRoom
-                    // )
-                    closeModal();
-                    showModal({
-                      title: "Meeting Room 수정",
-                      size: "lg",
-                      customButton: true,
-                      showCancel: true,
-                      children: ({ closeModal }) => (
-                        <ReservationForm
-                          locationOptions={officeOptions}
-                          roomOptions={mappedRoomOptions}
-                          selectedLocation={selectedOffice}
-                          selectedRoom={selectedRoom}
-                          setSelectedLocation={setSelectedOffice}
-                          setSelectedRoom={setSelectedRoom}
-                          selectData={selectedData}
-                          meetingOptions={meetingOptions}
-                          existingReservations={scheduleList}
-                          initialData={detail}
-                          isEdit={true}
-                          closeModal={closeModal}
-                          onSubmit={() => {
+                {!isModifiable() && (
+                  <Button
+                    theme="danger"
+                    onClick={async () => {
+                      if (confirm("예약을 취소하겠습니까?")) {
+                        try {
+                          const res = await api.post("/api/v1/meeting/cancel", { id: detail.id });
+                          if (res.data?.success) {
+                            alert("취소 완료");
                             fetchSchedules();
                             closeModal();
-                          }}
-                        />
-                      ),
-                    });
-                  }}
-                >수정</Button>
+                          } else alert("취소 실패");
+                        } catch (err) {
+                          console.error("취소 오류:", err);
+                          alert(err?.response?.data?.message || err?.data?.message || "예약 취소가 실패되었습니다. 다시시도 해주세요.");
+                        }
+                      }
+                    }}
+                  >예약 취소</Button>
+                )}
+              </div>
+              <div>
+                {!isModifiable() && (
+                  <Button
+                    onClick={() => {
+                      // console.log(
+                      //   detail,
+                      //   selectedRoom
+                      // )
+                      closeModal();
+                      showModal({
+                        title: "Meeting Room 수정",
+                        size: "lg",
+                        customButton: true,
+                        showCancel: true,
+                        children: ({ closeModal }) => (
+                          <ReservationForm
+                            locationOptions={officeOptions}
+                            roomOptions={mappedRoomOptions}
+                            selectedLocation={selectedOffice}
+                            selectedRoom={selectedRoom}
+                            setSelectedLocation={setSelectedOffice}
+                            setSelectedRoom={setSelectedRoom}
+                            selectData={selectedData}
+                            meetingOptions={meetingOptions}
+                            existingReservations={scheduleList}
+                            initialData={detail}
+                            isEdit={true}
+                            closeModal={closeModal}
+                            onSubmit={() => {
+                              fetchSchedules();
+                              closeModal();
+                            }}
+                          />
+                        ),
+                      });
+                    }}
+                  >수정</Button>
+                )}
               </div>
             </div>
           </div>

@@ -12,15 +12,17 @@ export const useAuthStore = create(
       refreshToken: null,
       permission: null,
       name: null,
+      companyId: null,
       setAccessToken: (token) => {
         if (!token) return;
 
         const decode = jwtDecode(token);
         const role = decode.roles[0];
-        set({ accessToken: token, permission: role });
+        const id = decode.id || null;
+        set({ accessToken: token, permission: role, id });
 
         Cookies.set(accessToken, token, {
-          expires: new Date(new Date().getTime() + 15 * 60 * 1000),
+          expires: new Date(new Date().getTime() + 12 * 60 * 60 * 1000),
           // secure: import.meta.env.MODE === "production",
           secure: import.meta.env.MODE === "development",
           sameSite: "strict",
@@ -33,7 +35,7 @@ export const useAuthStore = create(
         localStorage.setItem("refreshToken", token);
       },
       removeAccessToken: () => {
-        set({ accessToken: null, permission: null });
+        set({ accessToken: null, permission: null, companyId: null });
 
         Cookies.remove(accessToken, {
           sameSite: "strict",

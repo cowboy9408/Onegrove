@@ -193,7 +193,28 @@ export default function SleepReservationForm({
     }
   }, [roomDetailId, meetingList, isEdit]);
 
+  // 성별에 따른 사용자 필터링
+  const getFilteredUserList = () => {
+    if (!userList?.length) {
+      return [];
+    }
+    
+    // 모든 사용자를 반환하되, 성별 불일치 정보를 포함
+    return userList.map(user => ({
+      ...user,
+      isDisabled: meetingList?.gender && user.gender !== meetingList.gender
+    }));
+  };
 
+  // realUser가 현재 선택된 Relax Room의 성별과 맞지 않으면 초기화
+  useEffect(() => {
+    if (realUser && userList?.length > 0 && meetingList?.gender) {
+      const selectedUser = userList.find(u => u.userId === Number(realUser));
+      if (selectedUser && selectedUser.gender !== meetingList.gender) {
+        setRealUser(""); // 성별이 맞지 않으면 초기화
+      }
+    }
+  }, [realUser, userList, meetingList]);
 
   const handleSubmit = async () => {
     const payload = {
@@ -218,7 +239,17 @@ export default function SleepReservationForm({
       } else alert("처리 실패");
     } catch (err) {
       console.error("예약 처리 실패:", err);
-      alert(err?.response?.data?.message);
+
+      if(err?.response?.data?.message === "400 BAD_REQUEST \"성별에 일치하는 수면실을 선택해주세요.\"") {
+        alert("성별에 일치하는 수면실을 선택해주세요.");
+      } else if(err?.response?.data?.message === "400 BAD_REQUEST \"예약 시간이 존재하지 않습니다.\"") {
+        alert("예약 시간이 존재하지 않습니다.");
+      } else if(err?.response?.data?.message === "400 BAD_REQUEST \"Relax Room은 1일 1회만 예약 가능합니다.\"") {  
+        alert("Relax Room은 1일 1회만 예약 가능합니다.");
+      } else if(err?.response?.data?.message === "400 BAD_REQUEST \"해당 수면실은 이미 예약된 수면실 입니다.\"") {
+        alert("해당 수면실은 이미 예약된 수면실 입니다.");
+      }
+      else alert(err?.response?.data?.message || err?.data?.message || "예약이 실패되었습니다. 다시시도 해주세요.");
     }
   };
 
@@ -236,9 +267,18 @@ export default function SleepReservationForm({
       } else alert("삭제 실패");
     } catch (err) {
       console.error("삭제 실패:", err);
-      alert(err?.response?.data?.message || "삭제 중 오류가 발생했습니다.");
+      alert(err?.response?.data?.message || err?.data?.message || "삭제가 실패되었습니다. 다시시도 해주세요.");
     }
   };
+
+  // 필수 입력 항목들이 모두 입력되었는지 확인
+  const isFormValid = 
+    roomId &&
+    roomDetailId &&
+    resveDate &&
+    resveStartTime &&
+    companyId &&
+    realUser;
 
   return (
     <div className="space-y-5 text-left">
@@ -262,20 +302,20 @@ export default function SleepReservationForm({
 
       <div>
         <label className="mb-1 block">
-          Relax Room 호실 선택 <span className="text-red-500">*</span>
+          Relax Room 좌석 선택 <span className="text-red-500">*</span>
         </label>
         <select
           value={roomDetailId}
           onChange={(e) => setRoomDetailId(e.target.value)}
           className="w-full rounded border px-2 py-1"
         >
-          <option value="">호실을 선택해 주세요</option>
+          <option value="">좌석을 선택해 주세요</option>
           {meetingList?.infoList
-            ?.slice(0, meetingList.gender === "M" ? 8 : 7)
+            ?.slice(0, meetingList.gender === "M" ? 8 : meetingList.gender === "W" ? 7 : 7)
             .map((room) => (
               room?.useYn === "Y" && (
                 <option key={room.id} value={room.id}>
-                  {room.roomNumId}호실
+                  {room.roomNumId}호
                 </option>
               )
             ))}
@@ -355,9 +395,15 @@ export default function SleepReservationForm({
           className="w-full rounded border px-2 py-1"
         >
           <option value="">아이디를 선택하세요</option>
-          {userList?.map((user) => (
-              <option key={user.userId} value={user.userId}>
-                {user.userName} ({user.gender === 'M' ? '남자' : '여자'})
+          {getFilteredUserList().map((user) => (
+              <option 
+                key={user.userId} 
+                value={user.userId}
+                disabled={user.isDisabled}
+                className={user.isDisabled ? "text-gray-400" : ""}
+              >
+                {user.userName} ({user.gender === 'M' ? '남자' : user.gender === 'W' ? '여자' : '여자'})
+                {user.isDisabled && " (성별 불일치)"}
               </option>
             ))}
         </select>
@@ -366,7 +412,12 @@ export default function SleepReservationForm({
       <div className="flex justify-center gap-3">
         <button
           onClick={handleSubmit}
-          className="cursor-pointer rounded bg-black px-4 py-2 text-white hover:bg-gray-800"
+          disabled={!isFormValid}
+          className={`cursor-pointer rounded px-4 py-2 text-white ${
+            isFormValid
+              ? "bg-black hover:bg-gray-800"
+              : "cursor-not-allowed bg-gray-400"
+          }`}
         >
           {isEdit ? "수정" : "저장"}
         </button>

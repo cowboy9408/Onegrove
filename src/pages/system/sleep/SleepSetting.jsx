@@ -86,7 +86,7 @@ export default function SleepListPage() {
     }
 
     try {
-      const genderCode = gender === "남성" ? "M" : "F";
+      const genderCode = gender === "남성" ? "M" : "W";
       const useYnCode = useYn === "사용" ? "Y" : "N";
       const locationCode = locationCodeMap[location]; // ex) "WEST" -> "lc0101"
 
