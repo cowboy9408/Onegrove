@@ -1,5 +1,5 @@
 import Button from "@/components/common/Button";
-import DataTable from "@/components/common/DataTable";
+import DataTable from "@/components/common/DataTableSimple";
 import Pagination from "@/components/common/Pagination";
 import ResultSummary from "@/components/common/ResultSummary";
 import ResultSection from "@/components/layout/ResultSection";
@@ -90,7 +90,6 @@ export default function MeetingListPage() {
           ]}
           data={data}
           link={{ base: "/system/meeting", path: "id", key: "name" }}
-          checkable={false}
         />
         <Pagination
           current={page}
