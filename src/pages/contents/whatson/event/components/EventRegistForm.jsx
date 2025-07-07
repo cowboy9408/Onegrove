@@ -173,21 +173,22 @@ const EventRegistForm = forwardRef(
 
     useEffect(() => {
       if (data?.startDate) {
-        const start = new Date(data.startDate);
-        setStartDate(start);
+        const utcStart = new Date(data.startDate);
+        const kstStart = new Date(utcStart.getTime() + 9 * 60 * 60 * 1000);
+        setStartDate(kstStart);
 
-        // 시간 문자열로 변환 (ex: "09:30")
-        const hh = String(start.getHours()).padStart(2, "0");
-        const mm = String(start.getMinutes()).padStart(2, "0");
+        const hh = String(kstStart.getHours()).padStart(2, "0");
+        const mm = String(kstStart.getMinutes()).padStart(2, "0");
         setStartTime(`${hh}:${mm}`);
       }
 
       if (data?.endDate) {
-        const end = new Date(data.endDate);
-        setEndDate(end);
+        const utcEnd = new Date(data.endDate);
+        const kstEnd = new Date(utcEnd.getTime() + 9 * 60 * 60 * 1000);
+        setEndDate(kstEnd);
 
-        const hh = String(end.getHours()).padStart(2, "0");
-        const mm = String(end.getMinutes()).padStart(2, "0");
+        const hh = String(kstEnd.getHours()).padStart(2, "0");
+        const mm = String(kstEnd.getMinutes()).padStart(2, "0");
         setEndTime(`${hh}:${mm}`);
       }
     }, [data]);
@@ -222,7 +223,9 @@ const EventRegistForm = forwardRef(
 
         const end = new Date(endDate);
         end.setHours(endHour, endMin, 0, 0);
-        const endDateStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")}T${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
+
+        const pad = (n) => String(n).padStart(2, "0");
+        const endDateStr = `${end.getFullYear()}-${pad(end.getMonth() + 1)}-${pad(end.getDate())}T${pad(endHour)}:${pad(endMin)}:00`;
 
         if (!values.category) {
           onError?.("카테고리를 선택해주세요.");
