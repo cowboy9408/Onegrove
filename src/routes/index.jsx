@@ -69,6 +69,7 @@ import MeetingSetting from "@/pages/system/meeting/MeetingSetting";
 import MeetingDetail from "@/pages/system/meeting/MeetinDetail";
 import VisitDetail from "@/pages/office/visit/VisitDetail";
 import SettingLayout from "@/pages/office/setting/SettingLayout";
+import ReserveHistory from "@/pages/office/ReserveHistory";
 
 export const routeMeta = [
   {
@@ -567,6 +568,14 @@ export const routeMeta = [
             path: "/office/sleep",
             element: <SleepReserve />,
             title: "Relax Room 예약",
+            hidden: false,
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+          },
+          {
+            uuid: "4dd06e59-f04d-41e7-88be-6c853e12681f",
+            path: "/office/history",
+            element: <ReserveHistory />,
+            title: "Meeting Room 예약 이력",
             hidden: false,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
