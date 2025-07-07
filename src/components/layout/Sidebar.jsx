@@ -173,7 +173,7 @@ export default function Sidebar() {
       </div>
 
       <div
-        className={`flex justify-center rounded-md border-t border-gray-200 pt-2 align-middle dark:border-gray-700 ${isExpanded ? "md:border-2 md:p-2" : ""}`}
+        className={`mt-30 flex justify-center rounded-md border-t border-gray-200 pt-2 align-middle dark:border-gray-700 ${isExpanded ? "md:border-2 md:p-2" : ""}`}
       >
         {isExpanded ? (
           <div className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-gray-800 dark:text-gray-100">
