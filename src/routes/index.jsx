@@ -593,7 +593,7 @@ export const routeMeta = [
                 element: <MeetingListPage />,
                 title: (
                   <>
-                    Metting Room / Executive Room
+                    - Metting Room / Executive Room
                     <br />
                     예약 설정
                   </>
@@ -622,7 +622,7 @@ export const routeMeta = [
                 uuid: "4bd3ba77-798a-4466-bc3e-48fec787592a",
                 path: "system/sleep",
                 element: <SleepListPage />,
-                title: "Relax Room 설정",
+                title: "- Relax Room 설정",
                 hidden: false,
                 permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
               },
