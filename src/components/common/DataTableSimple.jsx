@@ -4,17 +4,8 @@ export default function DataTableSimple({
   columns = [],
   data = [],
   link = {},
-  checkable = true,
-  checkedIds = [],
-  onCheck = () => {},
 }) {
   const navigate = useNavigate();
-
-  const allChecked =
-    data.length > 0 && data.every((row) => checkedIds.includes(row._id));
-  const handleAllCheck = (e) => {
-    data.forEach((row) => onCheck(row._id, e.target.checked));
-  };
 
   return (
     <div className="max-w-full overflow-x-auto rounded-md border border-gray-200 dark:border-gray-700">
@@ -35,39 +26,33 @@ export default function DataTableSimple({
           {data.length === 0 ? (
             <tr>
               <td
-                colSpan={columns.length + (checkable ? 1 : 0)}
+                colSpan={columns.length}
                 className="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500"
               >
                 데이터가 없습니다.
               </td>
             </tr>
           ) : (
-            data.map((row, idx) => {
-              const isChecked = checkedIds.includes(row._id);
-              return (
-                <tr
-                  key={idx}
-                  className={`${(checkable || link.base) && "cursor-pointer"} hover:bg-gray-50 dark:hover:bg-gray-900`}
-                  onClick={(e) => {
-                    if (e.target.tagName === "INPUT") return;
-                    if (!checkable && link) {
-                      navigate(`${link.base}/${row[link.path]}`);
-                    } else if (checkable) {
-                      onCheck(row._id, !isChecked);
-                    }
-                  }}
-                >
-                  {columns.map((col) => (
-                    <td
-                      key={col.key}
-                      className="max-w-[30vw] overflow-hidden border-r border-gray-100 px-4 py-2 whitespace-nowrap last:border-r-0 dark:border-gray-800"
-                    >
-                      {col.render ? col.render(row) : row[col.key]}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })
+            data.map((row, idx) => (
+              <tr
+                key={idx}
+                className={`${link.base && "cursor-pointer"} hover:bg-gray-50 dark:hover:bg-gray-900`}
+                onClick={() => {
+                  if (link && link.base && link.path) {
+                    navigate(`${link.base}/${row[link.path]}`);
+                  }
+                }}
+              >
+                {columns.map((col) => (
+                  <td
+                    key={col.key}
+                    className="max-w-[30vw] overflow-hidden border-r border-gray-100 px-4 py-2 whitespace-nowrap last:border-r-0 dark:border-gray-800"
+                  >
+                    {col.render ? col.render(row) : row[col.key]}
+                  </td>
+                ))}
+              </tr>
+            ))
           )}
         </tbody>
       </table>
