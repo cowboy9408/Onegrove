@@ -101,13 +101,7 @@ export default function EventDetail() {
     }));
   }, [categoryOptions]);
 
-  const parseLocalDateTime = (str) => {
-    if (!str) return null;
-    const [datePart, timePart] = str.split("T"); // ex: "2025-05-27", "14:00"
-    const [year, month, day] = datePart.split("-").map(Number);
-    const [hour, minute] = timePart.split(":").map(Number);
-    return new Date(year, month - 1, day, hour, minute);
-  };
+  const parseLocalDateTime = (str) => new Date(str);
 
   useEffect(() => {
     if (!loading && categoryOptions.length > 0) {

@@ -7,6 +7,7 @@ import Checkbox from "@/components/common/Checkbox";
 import useModal from "@/hooks/useModal";
 import PasswordResetModal from "@/components/modal/PasswordResetModal";
 import { getUserInfo } from "@/api/user";
+import { jwtDecode } from "jwt-decode";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -24,6 +25,7 @@ export default function LoginPage() {
     try {
       const res = await getUserInfo(username, password);
       console.log("로그인 응답 확인:", res);
+      console.log("🔍 accessToken 디코드", jwtDecode(res.accessToken));
 
       setAccessToken(res.accessToken);
       setRefreshToken(res.refreshToken);
@@ -48,8 +50,7 @@ export default function LoginPage() {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("auth-storage");
     localStorage.removeItem("refreshToken");
-  }
-  , []);
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4 font-sans dark:bg-white">

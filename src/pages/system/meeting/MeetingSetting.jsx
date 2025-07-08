@@ -207,17 +207,33 @@ export default function MeetingSetting() {
                 운영 시간
                 <span className="text-red-500">*</span>
               </p>
-              <Datepicker
-                mode="range"
-                timeOnly={true}
-                startDate={startDate}
-                endDate={endDate}
-                onRangeChange={({ startDate, endDate }) => {
-                  setStartDate(startDate);
-                  setEndDate(endDate);
-                  setValue("timeRange", { startDate, endDate });
-                }}
-              />
+              <div className="flex gap-4">
+                <Datepicker
+                  mode="time-only"
+                  selectedDate={startDate}
+                  onSingleChange={(date) => {
+                    setStartDate(date);
+                    setValue("startTime", date); // 유지
+                    setValue("timeRange", {
+                      ...watch("timeRange"),
+                      startDate: date,
+                    });
+                  }}
+                />
+                <span>~</span>
+                <Datepicker
+                  mode="time-only"
+                  selectedDate={endDate}
+                  onSingleChange={(date) => {
+                    setEndDate(date);
+                    setValue("endTime", date); // 유지
+                    setValue("timeRange", {
+                      ...watch("timeRange"),
+                      endDate: date,
+                    });
+                  }}
+                />
+              </div>
             </div>
           </div>
 

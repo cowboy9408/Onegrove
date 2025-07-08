@@ -17,9 +17,14 @@ export const useAuthStore = create(
         if (!token) return;
 
         const decode = jwtDecode(token);
+        console.log("Decoded Token:", decode);
         const role = decode.roles[0];
         const id = decode.id || null;
-        set({ accessToken: token, permission: role, id });
+        const companyId =
+          decode.companyId ?? decode.company_id ?? decode.company?.id ?? null;
+        set({ accessToken: token, permission: role, id, companyId });
+
+        console.log("Decoded Token:", decode);
 
         Cookies.set(accessToken, token, {
           expires: new Date(new Date().getTime() + 12 * 60 * 60 * 1000),

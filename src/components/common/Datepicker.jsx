@@ -1,7 +1,7 @@
 import React from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { FaCalendarAlt } from "react-icons/fa";
+import { FaCalendarAlt, FaClock } from "react-icons/fa";
 import { useRef } from "react";
 
 export default function Datepicker({
@@ -21,8 +21,30 @@ export default function Datepicker({
     showTimeSelectOnly: timeOnly,
     timeIntervals: 30,
     timeCaption: "시간",
-    dateFormat: timeOnly ? "HH:mm" : "yyyy-MM-dd HH:mm",
+    dateFormat: "yyyy-MM-dd",
   };
+
+  if (mode === "time-only") {
+    return (
+      <div className="relative w-32">
+        <DatePicker
+          selected={selectedDate}
+          onChange={onSingleChange}
+          showTimeSelect
+          showTimeSelectOnly
+          timeIntervals={15}
+          timeCaption="시간"
+          dateFormat="HH:mm"
+          placeholderText="시간 선택"
+          disabled={disabled}
+          className={`w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none ${
+            disabled ? "cursor-not-allowed bg-gray-100 text-gray-500" : ""
+          }`}
+        />
+        <FaClock className="pointer-events-none absolute top-3 right-2 text-gray-400" />
+      </div>
+    );
+  }
 
   if (mode === "icon-only") {
     return (

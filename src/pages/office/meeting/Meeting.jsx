@@ -159,7 +159,7 @@ export default function Meeting() {
         if (detail.paymentType === '유료예약' && permission === 'OFFICE_SECRETARY_ADMIN') {
           // 유료예약: 예약일이 오늘로부터 3일 이상 차이나는 경우에만 수정/삭제 가능
           return reservationDate.diff(today, 'day') >= 3;
-        } else {
+        } else if ( permission === 'OFFICE_SECRETARY_ADMIN') {
           // 무료예약: 예약일이 당일인 경우에만 수정/삭제 가능
           return reservationDate.diff(today, 'day') === 0;
         }
@@ -212,7 +212,7 @@ export default function Meeting() {
                   >예약 확정</Button>
                 )}
                 
-                {isModifiable() && (
+                {!isModifiable() && (
                   <Button
                     theme="danger"
                     onClick={async () => {
@@ -234,7 +234,7 @@ export default function Meeting() {
                 )}
               </div>
               <div>
-                {isModifiable() && (
+                {!isModifiable() && (
                   <Button
                     onClick={() => {
                       // console.log(

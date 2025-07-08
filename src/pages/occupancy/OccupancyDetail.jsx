@@ -190,12 +190,13 @@ export default function OccupancyDetail() {
           freeHour: data.freeHour,
           useYn: data.useYn,
           mainImg: toImageMeta(data.mainImg, original.mainImg),
-          officeList: (data.officeList || []).filter(
-            (item) =>
-              item.delYn !== "Y" &&
-              item.office?.trim() !== "" &&
-              item.floor?.trim() !== ""
-          ),
+          officeList: (data.officeList || []).map((item, idx) => ({
+            ...item,
+            office: item.office?.trim() ?? "",
+            floor: item.floor?.trim() ?? "",
+            sort: idx + 1,
+            delYn: item.delYn === "Y" ? "Y" : "N",
+          })),
         };
 
         const isNew = !original?.id || original?.lang !== payload.lang;
@@ -280,7 +281,7 @@ export default function OccupancyDetail() {
   return (
     <>
       <div className="absolute top-14 -mt-3 w-full text-2xl font-bold">
-        입주사 관리 상세 정보
+        입주사 관리 상세
       </div>
       <Section>
         <Tabs

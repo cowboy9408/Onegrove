@@ -68,6 +68,8 @@ import SleepDetail from "@/pages/system/sleep/SleepDetail";
 import MeetingSetting from "@/pages/system/meeting/MeetingSetting";
 import MeetingDetail from "@/pages/system/meeting/MeetinDetail";
 import VisitDetail from "@/pages/office/visit/VisitDetail";
+import SettingLayout from "@/pages/office/setting/SettingLayout";
+import ReserveHistory from "@/pages/office/ReserveHistory";
 
 export const routeMeta = [
   {
@@ -370,7 +372,7 @@ export const routeMeta = [
                 uuid: "d37ccd54-b4bb-4980-b259-2905f47dcc3f",
                 path: "/contents/whatson/event/list",
                 element: <EventListPage />,
-                title: "Event & Promotion",
+                title: " Event & Promotion",
                 hidden: false,
                 permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN"],
               },
@@ -570,53 +572,77 @@ export const routeMeta = [
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
           {
-            uuid: "e59c7075-0b1c-4607-b548-c38fa7566532",
-            path: "/office/meetingsystem",
-            element: <MeetingListPage />,
-            title: "어메니티 예약 설정",
+            uuid: "4dd06e59-f04d-41e7-88be-6c853e12681f",
+            path: "/office/history",
+            element: <ReserveHistory />,
+            title: "Meeting Room 예약 이력",
             hidden: false,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
           {
-            uuid: "f6d4536d-e76b-4621-9873-bf5b6465e50e",
-            path: "/office/meetingsystem/regist",
-            element: <MeetingSetting />,
-            title: "Meeting Room 추가",
+            uuid: "952664cb-fbe1-4ecd-bb18-ca6aecead4d1",
+            path: "/office/setting",
+            element: <SettingLayout />,
+            title: "어메니티 설정",
             hidden: true,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
-          },
-          {
-            uuid: "c4b5101a-61b4-44e7-8efe-4ab822624927",
-            path: "/office/meetingsystem/detail/:id",
-            element: <MeetingDetail />,
-            title: "Meeting Room 상세",
-            hidden: true,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
-          },
+            permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN"],
+            children: [
+              {
+                uuid: "e59c7075-0b1c-4607-b548-c38fa7566532",
+                path: "system/meeting",
+                element: <MeetingListPage />,
+                title: (
+                  <>
+                    - Metting Room / Executive Room
+                    <br />
+                    예약 설정
+                  </>
+                ),
+                hidden: false,
+                permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+              },
+              {
+                uuid: "f6d4536d-e76b-4621-9873-bf5b6465e50e",
+                path: "system/meeting/regist",
+                element: <MeetingSetting />,
+                title: "Meeting Room 추가",
+                hidden: true,
+                permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+              },
+              {
+                uuid: "c4b5101a-61b4-44e7-8efe-4ab822624927",
+                path: "system/meeting/detail/:id",
+                element: <MeetingDetail />,
+                title: "Meeting Room 상세",
+                hidden: true,
+                permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+              },
 
-          {
-            uuid: "4bd3ba77-798a-4466-bc3e-48fec787592a",
-            path: "/office/sleepsystem",
-            element: <SleepListPage />,
-            title: "Relax Room 설정",
-            hidden: false,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
-          },
-          {
-            uuid: "cfd0a71c-188d-4cbc-bcc8-aa196bbdce2b",
-            path: "/office/sleepsystem/regist",
-            element: <SleepSetting />,
-            title: "Relax Room 추가",
-            hidden: true,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
-          },
-          {
-            uuid: "cdfad14f-7e62-44eb-accd-68696dbbd0b0",
-            path: "/office/sleepsystem/detail/:id",
-            element: <SleepDetail />,
-            title: "Relax Room 상세",
-            hidden: true,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+              {
+                uuid: "4bd3ba77-798a-4466-bc3e-48fec787592a",
+                path: "system/sleep",
+                element: <SleepListPage />,
+                title: "- Relax Room 설정",
+                hidden: false,
+                permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+              },
+              {
+                uuid: "cfd0a71c-188d-4cbc-bcc8-aa196bbdce2b",
+                path: "system/sleep/regist",
+                element: <SleepSetting />,
+                title: "Relax Room 추가",
+                hidden: true,
+                permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+              },
+              {
+                uuid: "cdfad14f-7e62-44eb-accd-68696dbbd0b0",
+                path: "system/sleep/detail/:id",
+                element: <SleepDetail />,
+                title: "Relax Room 상세",
+                hidden: true,
+                permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+              },
+            ],
           },
         ],
       },
@@ -633,16 +659,22 @@ export const routeMeta = [
         uuid: "c9c84ed1-a896-4d9b-b659-cd6a43dc8cd2",
         path: "/system",
         element: <SystemLayout />,
-        title: "어메니티 시스템 관리",
+        title: "어메니티 설정",
         icon: <SettingsGearIcon size={18} />,
-        hidden: true,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+        hidden: false,
+        permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN"],
         children: [
           {
             uuid: "e59c7075-0b1c-4607-b548-c38fa7566532",
             path: "/system/meeting",
             element: <MeetingListPage />,
-            title: "어메니티 예약 설정",
+            title: (
+              <>
+                Metting Room / Executive Room
+                <br />
+                예약 설정
+              </>
+            ),
             hidden: false,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },

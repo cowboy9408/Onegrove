@@ -173,21 +173,22 @@ const EventRegistForm = forwardRef(
 
     useEffect(() => {
       if (data?.startDate) {
-        const start = new Date(data.startDate);
-        setStartDate(start);
+        const utcStart = new Date(data.startDate);
+        const kstStart = new Date(utcStart.getTime() + 9 * 60 * 60 * 1000);
+        setStartDate(kstStart);
 
-        // 시간 문자열로 변환 (ex: "09:30")
-        const hh = String(start.getHours()).padStart(2, "0");
-        const mm = String(start.getMinutes()).padStart(2, "0");
+        const hh = String(kstStart.getHours()).padStart(2, "0");
+        const mm = String(kstStart.getMinutes()).padStart(2, "0");
         setStartTime(`${hh}:${mm}`);
       }
 
       if (data?.endDate) {
-        const end = new Date(data.endDate);
-        setEndDate(end);
+        const utcEnd = new Date(data.endDate);
+        const kstEnd = new Date(utcEnd.getTime() + 9 * 60 * 60 * 1000);
+        setEndDate(kstEnd);
 
-        const hh = String(end.getHours()).padStart(2, "0");
-        const mm = String(end.getMinutes()).padStart(2, "0");
+        const hh = String(kstEnd.getHours()).padStart(2, "0");
+        const mm = String(kstEnd.getMinutes()).padStart(2, "0");
         setEndTime(`${hh}:${mm}`);
       }
     }, [data]);
@@ -222,7 +223,9 @@ const EventRegistForm = forwardRef(
 
         const end = new Date(endDate);
         end.setHours(endHour, endMin, 0, 0);
-        const endDateStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")}T${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
+
+        const pad = (n) => String(n).padStart(2, "0");
+        const endDateStr = `${end.getFullYear()}-${pad(end.getMonth() + 1)}-${pad(end.getDate())}T${pad(endHour)}:${pad(endMin)}:00`;
 
         if (!values.category) {
           onError?.("카테고리를 선택해주세요.");
@@ -511,12 +514,15 @@ const EventRegistForm = forwardRef(
                 }}
                 readOnly={readOnly}
               />
-              <input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                className="rounded border px-2 py-1"
-                disabled={readOnly}
+              <Datepicker
+                mode="time-only"
+                selectedDate={new Date(`1970-01-01T${startTime}:00`)} // "HH:mm" → Date 객체로 변환
+                onSingleChange={(date) => {
+                  const hh = String(date.getHours()).padStart(2, "0");
+                  const mm = String(date.getMinutes()).padStart(2, "0");
+                  setStartTime(`${hh}:${mm}`);
+                }}
+                disabled={readOnly || isManualEndInput}
               />
             </div>
             <span>~</span>
@@ -533,15 +539,14 @@ const EventRegistForm = forwardRef(
                 disabled={readOnly || isManualEndInput} // manual이면 readonly 처리
                 startDate={startDate}
               />
-              <input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                className={`rounded border px-2 py-1 transition-colors duration-150 ${
-                  readOnly || isManualEndInput
-                    ? "cursor-not-allowed bg-gray-100 text-gray-500 opacity-70"
-                    : ""
-                }`}
+              <Datepicker
+                mode="time-only"
+                selectedDate={new Date(`1970-01-01T${endTime}:00`)} // "HH:mm" → Date 객체로 변환
+                onSingleChange={(date) => {
+                  const hh = String(date.getHours()).padStart(2, "0");
+                  const mm = String(date.getMinutes()).padStart(2, "0");
+                  setEndTime(`${hh}:${mm}`);
+                }}
                 disabled={readOnly || isManualEndInput}
               />
 
