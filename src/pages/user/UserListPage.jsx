@@ -13,10 +13,12 @@ import { useEffect, useId, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Radio from "@/components/common/Radio";
 import api from "@/lib/apiClient";
+import { useAuthStore } from "@/store/authStore";
 
 export default function UserListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { permission, companyId } = useAuthStore(); // 로그인된 사용자의 역할(role) 가져오기
 
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [data, setData] = useState([]);
@@ -99,6 +101,12 @@ export default function UserListPage() {
           );
 
           let filtered = allData;
+
+          if (permission === "OFFICE_SECRETARY_ADMIN" && companyId) {
+            filtered = filtered.filter(
+              (item) => String(item.companyId) === String(companyId)
+            );
+          }
 
           filtered.sort((a, b) => {
             const dateA = new Date(a.createDatetime);
