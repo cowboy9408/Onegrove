@@ -15,6 +15,7 @@ export default function Meeting() {
   const [meetingOptions, setMeetingOptions] = useState({});
   const [locationOptions, setLocationOptions] = useState([]);
   const [officeOptions, setOfficeOptions] = useState([]);
+  const [settingOptions, setSettingOptions] = useState([]);
   const [scheduleList, setScheduleList] = useState([]);
   const [initialData] = useState({});
   const [resveDate, setResveDate] = useState("");
@@ -56,22 +57,29 @@ export default function Meeting() {
 
   const selectedData = officeOptions.find(i => i.id === selectedRoom) || null;
 
-  // 회의실별 최대 수용인원 매핑
-  const capacityMap = {
-    "Executive Room 1": 4,
-    "Executive Room 2": 4,
-  };
-  const mappedRoomOptions = locationOptions.map(room => ({
-    ...room,
-    capacity: capacityMap[room.roomName] || 4,
-  }));
+  // API에서 가져온 settingOptions를 기반으로 capacity 매핑
+  const mappedRoomOptions = locationOptions.map(room => {
+    // settingOptions에서 해당 룸의 capacity 찾기 (id로 매칭)
+    const settingRoom = settingOptions.find(setting => 
+      setting.id === room.id
+    );
+    
+    return {
+      ...room,
+      capacity: settingRoom?.capacity || 4, // API에서 capacity 가져오거나 기본값 4
+    };
+  });
   
   // 디버깅용 로그
   useEffect(() => {
-    if (locationOptions.length > 0) {
-      console.log("Meeting.jsx - 회의실 목록:", locationOptions.map(r => ({ name: r.roomName, capacity: capacityMap[r.roomName] || 99 })));
+    if (locationOptions.length > 0 && settingOptions.length > 0) {
+      console.log("Viproom.jsx - 회의실 목록:", mappedRoomOptions.map(r => ({ 
+        name: r.roomName, 
+        capacity: r.capacity,
+        location: selectedOffice
+      })));
     }
-  }, [locationOptions]);
+  }, [locationOptions, settingOptions, selectedOffice]);
 
   useEffect(() => {
     if(selectedRoom) {
@@ -89,10 +97,14 @@ export default function Meeting() {
   useEffect(() => {
     const fetchMeta = async () => {
       try {
-        const settingRes = await api.get(`/api/v1/meeting/location-list`);
-        if (settingRes.data.success) setOfficeOptions(settingRes.data.data);
+        const locationRes = await api.get(`/api/v1/meeting/location-list`);
+        if (locationRes.data.success) setOfficeOptions(locationRes.data.data);
+        const settingRes = await api.get(`/api/v1/meeting/setting?isVip=Y`);
+        if (settingRes.data.success) {
+          setSettingOptions(settingRes.data.data);
+        }
       } catch (err) {
-        console.error("오피스 정보 조회 실패:", err);
+        console.error("세팅 정보 조회 실패:", err);
       }
     };
     fetchMeta();
@@ -369,7 +381,7 @@ export default function Meeting() {
               children: ({ closeModal }) => (
                 <ReservationForm
                   locationOptions={officeOptions}
-                  roomOptions={locationOptions}
+                  roomOptions={mappedRoomOptions}
                   selectedLocation={selectedOffice}
                   selectedRoom={selectedRoom}
                   setSelectedLocation={setSelectedOffice}
