@@ -319,6 +319,10 @@ export default function MeetingDetail() {
                   onSingleChange={(date) => {
                     setStartDate(date);
                     setValue("startTime", date);
+                    setValue("timeRange", {
+                      ...watch("timeRange"),
+                      startDate: date,
+                    });
                   }}
                 />
                 <span>~</span>
@@ -328,6 +332,10 @@ export default function MeetingDetail() {
                   onSingleChange={(date) => {
                     setEndDate(date);
                     setValue("endTime", date);
+                    setValue("timeRange", {
+                      ...watch("timeRange"),
+                      endDate: date,
+                    });
                   }}
                 />
               </div>
