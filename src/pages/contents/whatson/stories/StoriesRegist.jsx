@@ -71,17 +71,36 @@ export default function StoriesRegist() {
       </Tabs>
       <div className="flex justify-end gap-4 px-6 pb-6">
         <Button
-          onClick={() =>
+          onClick={async () => {
+            const submitFn =
+              currentLang === 0
+                ? koFormRef.current?.submit
+                : enFormRef.current?.submit;
+
+            const form = await submitFn?.((message) => {
+              showModal({
+                title: "필수 항목을 입력해 주세요.",
+                message,
+                showCancel: false,
+              });
+            });
+
+            if (!form) return;
+
             showModal({
               title: "저장 확인",
               message: "저장하시겠습니까?",
               showCancel: true,
-              onConfirm: handleSave,
-            })
-          }
+              onConfirm: async () => {
+                await api.post("/api/v1/stories/insert", form);
+                navigate("/contents/whatson/stories/list");
+              },
+            });
+          }}
         >
           저장
         </Button>
+
         <Button
           type="button"
           className="bg-gray-200"

@@ -427,17 +427,31 @@ export default function StoriesDetail() {
         </Tabs>
         <div className="flex justify-end gap-4 px-6 pb-6">
           <Button
-            onClick={() =>
+            onClick={async () => {
+              const showError = (msg) =>
+                showModal({
+                  title: "입력 오류",
+                  message: msg,
+                  showCancel: false,
+                });
+
+              const values =
+                currentLang === 0
+                  ? await koFormRef.current?.submit?.(showError)
+                  : await enFormRef.current?.submit?.(showError);
+
+              if (!values) return;
+
               showModal({
                 title: "수정 확인",
                 message: "수정하시겠습니까?",
                 showCancel: true,
                 onConfirm: async () => {
                   await handleSave();
-                  setIsReadOnly(true); // 저장 후 다시 읽기 전용
+                  setIsReadOnly(true);
                 },
-              })
-            }
+              });
+            }}
           >
             수정
           </Button>
