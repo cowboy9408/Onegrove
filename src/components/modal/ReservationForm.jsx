@@ -52,10 +52,22 @@ export default function ReservationForm({
     return `${yyyy}-${mm}-${dd}`;
   };
 
+  // 이전 selectedLocation 추적을 위한 ref
+  const [prevSelectedLocation, setPrevSelectedLocation] = useState(selectedLocation);
+
   useEffect(() => {
-    if (!isEdit && roomOptions.length > 0) {
-      setRoomId(roomOptions[0].id);
-      if (propSetSelectedRoom) propSetSelectedRoom(roomOptions[0].id);
+    if (roomOptions.length > 0) {
+      // 오피스/지점이 실제로 변경되었거나 신규 등록인 경우에만 첫 번째 룸으로 자동 설정
+      const locationChanged = prevSelectedLocation !== selectedLocation;
+      const shouldUpdateRoom = !isEdit || locationChanged;
+      
+      if (shouldUpdateRoom) {
+        setRoomId(roomOptions[0].id);
+        if (propSetSelectedRoom) propSetSelectedRoom(roomOptions[0].id);
+      }
+      
+      // 현재 selectedLocation을 이전 값으로 저장
+      setPrevSelectedLocation(selectedLocation);
     }
   }, [selectedLocation, roomOptions]);
 
@@ -290,7 +302,6 @@ export default function ReservationForm({
             if (propSetSelectedLocation) propSetSelectedLocation(e.target.value);
           }}
           className="w-full rounded border px-2 py-1"
-          disabled={isEdit}
         >
           {locationOptions.map(loc => (
             <option key={loc.code} value={loc.code}>{loc.location}</option>
