@@ -213,7 +213,11 @@ export default function MeetingSetting() {
                   selectedDate={startDate}
                   onSingleChange={(date) => {
                     setStartDate(date);
-                    setValue("startTime", date);
+                    setValue("startTime", date); // 유지
+                    setValue("timeRange", {
+                      ...watch("timeRange"),
+                      startDate: date,
+                    });
                   }}
                 />
                 <span>~</span>
@@ -222,7 +226,11 @@ export default function MeetingSetting() {
                   selectedDate={endDate}
                   onSingleChange={(date) => {
                     setEndDate(date);
-                    setValue("endTime", date);
+                    setValue("endTime", date); // 유지
+                    setValue("timeRange", {
+                      ...watch("timeRange"),
+                      endDate: date,
+                    });
                   }}
                 />
               </div>
