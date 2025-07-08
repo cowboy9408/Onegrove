@@ -65,6 +65,7 @@ export default function ReservationForm({
         setRoomId(roomOptions[0].id);
         if (propSetSelectedRoom) propSetSelectedRoom(roomOptions[0].id);
       }
+      console.log("selectedLocation", selectedLocation);
       
       // 현재 selectedLocation을 이전 값으로 저장
       setPrevSelectedLocation(selectedLocation);
@@ -228,12 +229,14 @@ export default function ReservationForm({
 
     return reserved.every(({ start, end }) => {
       const beforeStart = new Date(start);
+
       beforeStart.setHours(beforeStart.getHours() - 1);
 
       const afterEnd = new Date(end);
       afterEnd.setHours(afterEnd.getHours() + 1);
 
-      return timeDate < beforeStart || timeDate > afterEnd;
+      // console.log("startcheck", beforeStart, afterEnd);
+      return timeDate < beforeStart || timeDate > afterEnd - 1;
     });
   };
 
@@ -274,8 +277,30 @@ export default function ReservationForm({
   };
 
   // 현재 선택된 회의실의 최대 수용인원 구하기
-  const selectedRoomObj = roomOptions.find(r => String(r.id) === String(roomId));
-  const maxCapacity = selectedRoomObj?.capacity || 64;
+  const [maxCapacity, setMaxCapacity] = useState(64);
+  
+  // roomId 변경 시 maxCapacity 업데이트
+  useEffect(() => {
+    console.log("roomId 변경 감지:", { roomId, roomOptionsLength: roomOptions.length });
+    
+    if (roomOptions.length > 0 && roomId) {
+      const selectedRoomObj = roomOptions.find(r => String(r.id) === String(roomId));
+      console.log("선택된 룸 객체:", selectedRoomObj);
+      
+      const newMaxCapacity = selectedRoomObj?.capacity || 64;
+      console.log("새로운 maxCapacity:", newMaxCapacity);
+      
+      setMaxCapacity(newMaxCapacity);
+    }
+  }, [roomId, roomOptions]); // numberVisitors 의존성 제거
+
+  // numberVisitors 변경 시 maxCapacity 체크
+  useEffect(() => {
+    if (numberVisitors && Number(numberVisitors) > maxCapacity) {
+      setNumberVisitors("");
+      alert(`선택한 회의실의 최대 수용 인원은 ${maxCapacity}명입니다.`);
+    }
+  }, [numberVisitors, maxCapacity]);
 
   const isFormValid =
     roomId &&
