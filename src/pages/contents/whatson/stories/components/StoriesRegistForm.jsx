@@ -216,6 +216,11 @@ const StoriesRegistForm = forwardRef(
           })
           .filter(Boolean); // null 제거
 
+        if (activeImages.length < 3) {
+          onError?.("스와이프 이미지는 최소 3개 이상 등록해주세요.");
+          return null;
+        }
+
         const storiesImgList = activeImages.map((entry, idx) => {
           const { img, caption } = entry;
           const originalImg = (data?.storiesImgList || []).find(

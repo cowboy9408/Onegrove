@@ -382,7 +382,7 @@ export default function Visit() {
 
               <div className="min-w-[300px] flex-1">
                 <p className="mb-1 block pb-2 pl-1 text-sm font-medium text-gray-800 dark:text-gray-100">
-                  벙문 신청일
+                  방문 신청일
                 </p>
                 <DateRangePicker
                   startDate={searchFilter.dateRange.startDate}

@@ -87,16 +87,26 @@ export default function Visit() {
 
   const downloadExcel = async () => {
     try {
-      const res = await api.post("/api/v1/meeting/history-excel", [], {
-        responseType: "blob",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      if (!filteredList.length) {
+        alert("다운로드할 데이터가 없습니다.");
+        return;
+      }
+
+      const res = await api.post(
+        "/api/v1/meeting/history-excel",
+        filteredList,
+        {
+          responseType: "blob",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       const blob = new Blob([res.data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
+
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
