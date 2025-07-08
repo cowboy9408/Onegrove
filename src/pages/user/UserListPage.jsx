@@ -20,6 +20,11 @@ export default function UserListPage() {
   const navigate = useNavigate();
   const { permission, companyId } = useAuthStore(); // 로그인된 사용자의 역할(role) 가져오기
 
+  useEffect(() => {
+    console.log("내 권한:", permission);
+    console.log("내 companyId:", companyId); // 🔍 이 값이 정확해야 함
+  }, []);
+
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
@@ -60,25 +65,45 @@ export default function UserListPage() {
   // };
 
   useEffect(() => {
-    const fetchCompanies = async () => {
+    const fetchData = async () => {
       try {
-        const res = await api.get("/api/v1/user/company");
-        if (res.data.success) {
-          // 중복 제거: companyId 기준
-          const uniqueCompanies = Array.from(
-            new Map(
-              res.data.data.map((item) => [item.companyId, item])
-            ).values()
+        const response = await api.get("/api/v1/user/member");
+        const res = response.data;
+
+        if (res.success) {
+          let allData = res.data;
+
+          console.log(
+            "총무 계정 임직원 목록:",
+            allData.map((v) => v.companyName)
           );
-          setCompanyOptions(uniqueCompanies);
+
+          if (permission === "OFFICE_SECRETARY_ADMIN") {
+            const myCompanyName = allData[0]?.companyName;
+            if (myCompanyName) {
+              setSearchFilter((prev) => ({ ...prev, type: myCompanyName }));
+              setActiveFilter((prev) => ({ ...prev, type: myCompanyName }));
+              setCompanyOptions([
+                { companyId: null, companyName: myCompanyName },
+              ]);
+            }
+          } else {
+            // 관리자일 경우 전체 회사 옵션 구성
+            const uniqueCompanies = Array.from(
+              new Map(allData.map((item) => [item.companyId, item])).values()
+            );
+            setCompanyOptions(uniqueCompanies);
+          }
+
+          // 이후 필터 처리...
         }
-      } catch (err) {
-        console.error("입주사 목록 가져오기 실패:", err);
+      } catch (error) {
+        console.error("API 요청 실패:", error);
       }
     };
 
-    fetchCompanies();
-  }, []);
+    fetchData();
+  }, [page, refreshKey]);
 
   const handleCheck = (id, checked) => {
     setCheckedIds((prev) =>
@@ -116,7 +141,7 @@ export default function UserListPage() {
 
           if (activeFilter.type) {
             filtered = filtered.filter(
-              (item) => String(item.companyId) === String(activeFilter.type)
+              (item) => item.companyName === activeFilter.type
             );
           }
 
@@ -186,15 +211,18 @@ export default function UserListPage() {
           <Row>
             <Col>
               <Select
-                label={"입주사"}
+                label="입주사"
                 value={searchFilter.type}
+                disabled={permission === "OFFICE_SECRETARY_ADMIN"}
                 onChange={(e) =>
                   setSearchFilter({ ...searchFilter, type: e.target.value })
                 }
               >
-                <option value="">전체</option>
+                {permission !== "OFFICE_SECRETARY_ADMIN" && (
+                  <option value="">전체</option>
+                )}
                 {companyOptions.map((company) => (
-                  <option key={company.companyId} value={company.companyId}>
+                  <option key={company.companyName} value={company.companyName}>
                     {company.companyName}
                   </option>
                 ))}
