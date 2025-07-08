@@ -309,19 +309,28 @@ export default function MeetingDetail() {
             />
             <div>
               <p className="mb-2 text-sm font-medium text-gray-700">
-                운영 시간<span className="text-red-500">*</span>
+                운영 시간
+                <span className="text-red-500">*</span>
               </p>
-              <Datepicker
-                mode="range"
-                timeOnly={true}
-                startDate={startDate}
-                endDate={endDate}
-                onRangeChange={({ startDate, endDate }) => {
-                  setStartDate(startDate);
-                  setEndDate(endDate);
-                  setValue("timeRange", { startDate, endDate });
-                }}
-              />
+              <div className="flex gap-4">
+                <Datepicker
+                  mode="time-only"
+                  selectedDate={startDate}
+                  onSingleChange={(date) => {
+                    setStartDate(date);
+                    setValue("startTime", date);
+                  }}
+                />
+                <span>~</span>
+                <Datepicker
+                  mode="time-only"
+                  selectedDate={endDate}
+                  onSingleChange={(date) => {
+                    setEndDate(date);
+                    setValue("endTime", date);
+                  }}
+                />
+              </div>
             </div>
           </div>
 

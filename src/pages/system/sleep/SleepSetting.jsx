@@ -183,16 +183,23 @@ export default function SleepListPage() {
             <p className="text-sm font-medium">
               운영 시간<span className="text-red-500">*</span>
             </p>
-            <Datepicker
-              mode="range"
-              timeOnly={true}
-              startDate={startDate}
-              endDate={endDate}
-              onRangeChange={({ startDate, endDate }) => {
-                setStartDate(startDate);
-                setEndDate(endDate);
-              }}
-            />
+            <div className="flex gap-4">
+              <Datepicker
+                mode="time-only"
+                selectedDate={startDate}
+                onSingleChange={(date) => {
+                  setStartDate(date);
+                }}
+              />
+              <span className="mt-2">~</span>
+              <Datepicker
+                mode="time-only"
+                selectedDate={endDate}
+                onSingleChange={(date) => {
+                  setEndDate(date);
+                }}
+              />
+            </div>
           </div>
         </div>
 

@@ -17,7 +17,7 @@ export default function Datepicker({
   const datepickerRef = useRef(null);
 
   const commonProps = {
-    showTimeSelect: false,
+    showTimeSelect: timeOnly,
     showTimeSelectOnly: timeOnly,
     timeIntervals: 30,
     timeCaption: "시간",
