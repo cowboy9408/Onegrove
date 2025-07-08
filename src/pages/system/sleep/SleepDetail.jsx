@@ -49,22 +49,24 @@ export default function SleepDetail() {
           setMaxTime(d.maxHour);
           setStartDate(new Date(`2000-01-01T${d.startTime}`));
           setEndDate(new Date(`2000-01-01T${d.endTime}`));
-          setGender(d.gender === "M" ? "남성" : d.gender === "W" ? "여성" : "여성");
+          setGender(
+            d.gender === "M" ? "남성" : d.gender === "W" ? "여성" : "여성"
+          );
           setUseYn(d.useYn === "Y" ? "사용" : "미사용");
           setRoomInfoList(d.infoList || []);
 
           const checked = d.infoList
             .filter((room) => room.useYn === "N")
             .map((room) => room.roomNumId);
-          
+
           // 여성인 경우 8호실도 자동으로 체크
           if (d.gender === "W") {
-            const room8 = roomNumList.find(room => room.name === "8호실");
+            const room8 = roomNumList.find((room) => room.name === "8호실");
             if (room8 && !checked.includes(room8.id)) {
               checked.push(room8.id);
             }
           }
-          
+
           setCheckedRooms(checked);
         }
       } catch (err) {
@@ -99,15 +101,15 @@ export default function SleepDetail() {
   useEffect(() => {
     if (gender === "여성") {
       // 여성인 경우 8호실 자동 체크
-      const room8 = roomNumList.find(room => room.name === "8호실");
+      const room8 = roomNumList.find((room) => room.name === "8호실");
       if (room8 && !checkedRooms.includes(room8.id)) {
-        setCheckedRooms(prev => [...prev, room8.id]);
+        setCheckedRooms((prev) => [...prev, room8.id]);
       }
     } else {
       // 남성인 경우 8호실 체크 해제
-      const room8 = roomNumList.find(room => room.name === "8호실");
+      const room8 = roomNumList.find((room) => room.name === "8호실");
       if (room8 && checkedRooms.includes(room8.id)) {
-        setCheckedRooms(prev => prev.filter(r => r !== room8.id));
+        setCheckedRooms((prev) => prev.filter((r) => r !== room8.id));
       }
     }
   }, [gender, roomNumList]);
@@ -268,16 +270,23 @@ export default function SleepDetail() {
             <p className="text-sm font-medium">
               운영 시간<span className="text-red-500">*</span>
             </p>
-            <Datepicker
-              mode="range"
-              timeOnly={true}
-              startDate={startDate}
-              endDate={endDate}
-              onRangeChange={({ startDate, endDate }) => {
-                setStartDate(startDate);
-                setEndDate(endDate);
-              }}
-            />
+            <div className="flex gap-4">
+              <Datepicker
+                mode="time-only"
+                selectedDate={startDate}
+                onSingleChange={(date) => {
+                  setStartDate(date);
+                }}
+              />
+              <span className="mt-2">~</span>
+              <Datepicker
+                mode="time-only"
+                selectedDate={endDate}
+                onSingleChange={(date) => {
+                  setEndDate(date);
+                }}
+              />
+            </div>
           </div>
         </div>
 

@@ -22,7 +22,7 @@ export default function UserListPage() {
 
   useEffect(() => {
     console.log("내 권한:", permission);
-    console.log("내 companyId:", companyId); // 🔍 이 값이 정확해야 함
+    console.log("내 companyId:", companyId);
   }, []);
 
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
@@ -95,7 +95,7 @@ export default function UserListPage() {
             setCompanyOptions(uniqueCompanies);
           }
 
-          // 이후 필터 처리...
+          // 이후 필터 처리
         }
       } catch (error) {
         console.error("API 요청 실패:", error);
