@@ -24,7 +24,7 @@ export default function PasswordResetModal({ closeModal }) {
       closeModal();
     } catch (error) {
       console.error("비밀번호 찾기 오류:", error);
-      alert("비밀번호 재설정 요청에 실패했습니다. 다시 시도해주세요.");
+      alert("등록된 이메일이 없습니다. 이메일을 다시 확인해주세요.");
     }
   };
 

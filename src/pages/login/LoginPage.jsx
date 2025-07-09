@@ -25,7 +25,7 @@ export default function LoginPage() {
     try {
       const res = await getUserInfo(username, password);
       console.log("로그인 응답 확인:", res);
-      console.log("🔍 accessToken 디코드", jwtDecode(res.accessToken));
+      console.log("accessToken 디코드", jwtDecode(res.accessToken));
 
       setAccessToken(res.accessToken);
       setRefreshToken(res.refreshToken);
