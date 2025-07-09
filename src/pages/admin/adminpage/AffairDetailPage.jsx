@@ -435,7 +435,7 @@ export default function AffairDetailPage() {
                   id: Number(id),
                   username: form.username,
                   email: form.email,
-                  role: form.role,
+                  role: "OFFICE_SECRETARY_ADMIN",
                 };
 
                 const res = await api.post("/api/v1/user/unlock", payload);
@@ -489,7 +489,7 @@ export default function AffairDetailPage() {
                 id: Number(id),
                 username: form.username,
                 email: form.email,
-                role: form.role,
+                role: "OFFICE_SECRETARY_ADMIN",
               };
 
               console.log("payload", payload); // 요청값 확인용
