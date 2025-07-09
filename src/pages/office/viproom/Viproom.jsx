@@ -156,12 +156,12 @@ export default function Meeting() {
         return;
       }
 
-      console.log('이벤트 클릭됨, ID:', event.id);
+      // console.log('이벤트 클릭됨, ID:', event.id);
       const res = await api.get(`/api/v1/meeting/${event.id}`);
-      console.log('API 응답:', res);
+      // console.log('API 응답:', res);
       if (!res.data.success) return;
       const detail = res.data.data;
-      console.log('상세 데이터:', detail);
+      // console.log('상세 데이터:', detail);
 
       // 수정/삭제 가능 여부 확인
       const isModifiable = () => {
@@ -169,8 +169,8 @@ export default function Meeting() {
         const today = dayjs();
         
         if (detail.paymentType === '유료예약' && permission === 'OFFICE_SECRETARY_ADMIN') {
-          // 유료예약: 예약일이 오늘로부터 3일 이상 차이나는 경우에만 수정/삭제 가능
-          return reservationDate.diff(today, 'day') >= 3;
+          // 유료예약: 예약일이 당일이 아닌 경우에만 수정/삭제 가능 (하루 전부터 가능)
+          return reservationDate.diff(today, 'day') >= 1;
         } else if ( permission === 'OFFICE_SECRETARY_ADMIN') {
           // 무료예약: 예약일이 당일인 경우에만 수정/삭제 가능
           return reservationDate.diff(today, 'day') === 0;
