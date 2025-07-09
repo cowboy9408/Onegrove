@@ -199,8 +199,16 @@ export default function ReservationForm({
         }
       }
     } catch (err) {
-      console.error("예약 처리 실패:", err);
-      alert(err?.response?.data?.message || err?.data?.message || "예약이 실패되었습니다. 다시시도 해주세요.");
+      console.error("예약 처리 실패:", err.response?.data?.message );
+      if(err.response?.data?.message === "400 BAD_REQUEST \"예약을 수정할 수 없습니다.\"") {
+        alert("해당 날짜와 시간으로는 예약을 수정할 수 없습니다.");
+        return;
+      } else if(err.response?.data?.message === "400 BAD_REQUEST \"예약을 등록할 수 없습니다.\"") {
+        alert("해당 날짜와 시간으로는 예약을 등록할 수 없습니다.");
+        return;
+      } else {
+        alert(err?.response?.data?.message || err?.data?.message || "예약이 실패되었습니다. 다시시도 해주세요.");
+      }
     }
   };
 
