@@ -365,7 +365,7 @@ export default function UserDetailPage() {
                   id: Number(id),
                   username: form.username,
                   email: form.email,
-                  role: form.role,
+                  role: "MEMBER",
                 };
 
                 const res = await api.post("/api/v1/user/unlock", payload);
@@ -419,7 +419,7 @@ export default function UserDetailPage() {
                 id: Number(id),
                 username: form.username,
                 email: form.email,
-                role: form.role,
+                role: "MEMBER",
               };
 
               console.log("payload", payload); // 요청값 확인용
