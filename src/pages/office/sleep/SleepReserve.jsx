@@ -114,6 +114,9 @@ export default function SleepReserve() {
   useEffect(() => {
     if (selectedRoom) {
       fetchRoomDetail(selectedRoom);
+      // 방이 변경될 때 예약 상세 정보와 확장된 슬롯 초기화
+      setReservationDetails({});
+      setExpandedSlot(null);
     }
   }, [selectedRoom]);
 
@@ -130,6 +133,9 @@ export default function SleepReserve() {
   useEffect(() => {
     if (selectedRoom && selectedDate && meetingOptions.startTime) {
       fetchReservationCounts(selectedRoom);
+      // 날짜가 변경될 때 예약 상세 정보와 확장된 슬롯 초기화
+      setReservationDetails({});
+      setExpandedSlot(null);
     }
   }, [selectedRoom, selectedDate, meetingOptions.startTime]);
 
@@ -144,8 +150,8 @@ export default function SleepReserve() {
 
   const handleDateChange = (direction) => {
     const today = dayjs();
-    const sevenDaysAgo = today.subtract(7, "day");
-    const sevenDaysLater = today.add(7, "day");
+    const sevenDaysAgo = today.subtract(8, "day");
+    const sevenDaysLater = today.add(0, "day");
     const newDate =
       direction === "prev"
         ? dayjs(selectedDate).subtract(1, "day")
@@ -158,12 +164,12 @@ export default function SleepReserve() {
 
   // 날짜 이동 버튼 활성화 상태 확인
   const canGoPrev = () => {
-    const sevenDaysAgo = dayjs().subtract(7, "day");
+    const sevenDaysAgo = dayjs().subtract(8, "day");
     return dayjs(selectedDate).subtract(1, "day").isSameOrAfter(sevenDaysAgo);
   };
 
   const canGoNext = () => {
-    const sevenDaysLater = dayjs().add(7, "day");
+    const sevenDaysLater = dayjs().add(0, "day");
     return dayjs(selectedDate).add(1, "day").isSameOrBefore(sevenDaysLater);
   };
 
@@ -220,7 +226,7 @@ export default function SleepReserve() {
           variant="ghost"
           onClick={() => handleDateChange("prev")}
           disabled={!canGoPrev()}
-          className={!canGoPrev() ? "opacity-50 cursor-not-allowed" : ""}
+          className={`!bg-white ${!canGoPrev() ? "opacity-50 cursor-not-allowed" : ""}`}
         >
           &lt;
         </Button>
@@ -230,7 +236,7 @@ export default function SleepReserve() {
           variant="ghost"
           onClick={() => handleDateChange("next")}
           disabled={!canGoNext()}
-          className={!canGoNext() ? "opacity-50 cursor-not-allowed" : ""}
+          className={`!bg-white ${!canGoNext() ? "opacity-50 cursor-not-allowed" : ""}`}  
         >
           &gt;
         </Button>
