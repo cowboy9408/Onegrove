@@ -208,7 +208,7 @@ export default function UserListPage() {
     <div>
       <SearchSection>
         <Box>
-          <Row>
+          <Row className="gap-12">
             <Col>
               <Select
                 label="입주사"
@@ -266,26 +266,30 @@ export default function UserListPage() {
                 }}
               />
             </Col>
-            <Col className="flex items-center gap-4">
-              <span className="text-sm font-medium">사용 여부</span>
-              <Radio
-                name="status"
-                value="active"
-                label="사용"
-                checked={searchFilter.status === "active"}
-                onChange={() =>
-                  setSearchFilter({ ...searchFilter, status: "active" })
-                }
-              />
-              <Radio
-                name="status"
-                value="inactive"
-                label="미사용"
-                checked={searchFilter.status === "inactive"}
-                onChange={() =>
-                  setSearchFilter({ ...searchFilter, status: "inactive" })
-                }
-              />
+            <Col>
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-medium">사용 여부</span>
+                <div className="flex flex-row items-center gap-4">
+                  <Radio
+                    name="status"
+                    value="active"
+                    label="사용"
+                    checked={searchFilter.status === "active"}
+                    onChange={() =>
+                      setSearchFilter({ ...searchFilter, status: "active" })
+                    }
+                  />
+                  <Radio
+                    name="status"
+                    value="inactive"
+                    label="미사용"
+                    checked={searchFilter.status === "inactive"}
+                    onChange={() =>
+                      setSearchFilter({ ...searchFilter, status: "inactive" })
+                    }
+                  />
+                </div>
+              </div>
             </Col>
             <Col className="flex gap-2 self-end">
               <Button

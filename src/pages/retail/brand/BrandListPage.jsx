@@ -228,7 +228,7 @@ export default function BrandListPage() {
     <div>
       <SearchSection>
         <Box>
-          <Row>
+          <Row className="gap-12">
             <Col>
               <Select
                 label="카테고리"
