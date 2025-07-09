@@ -6,6 +6,7 @@ import Select from "@/components/common/Select";
 import Button from "@/components/common/Button";
 import { ModalContext } from "@/context/ModalContext";
 import SleepReservationForm from "@/components/modal/SleepReservationForm";
+import SleepReservationDetail from "@/components/modal/SleepReservationDetail";
 import api from "@/lib/apiClient";
 
 dayjs.extend(isSameOrBefore);
@@ -283,26 +284,24 @@ export default function SleepReserve() {
                           onClick={() => {
                             if (reservation) {
                               showModal({
-                                title: "수면실 수정",
-                                size: "lg",
+                                title: "Relax Room 예약현황",
+                                size: "2xl",
                                 customButton: true,
                                 showCancel: true,
                                 children: ({ closeModal }) => (
-                                  <SleepReservationForm
+                                  <SleepReservationDetail
+                                    reservationId={reservation.id}
+                                    closeModal={closeModal}
                                     room={selectedRoom}
                                     meetingOptions={meetingOptions}
                                     roomList={officeOptions}
-                                    initialData={reservation}
-                                    isEdit={true}
-                                    closeModal={closeModal}
-                                    onSubmit={() => {
+                                    onUpdate={() => {
                                       fetchRoomDetail(selectedRoom);
                                       fetchReservationCounts(selectedRoom);
                                       // 현재 확장된 시간 슬롯이 있다면 해당 상세 정보도 다시 가져오기
                                       if (expandedSlot) {
                                         fetchReservations(selectedRoom, expandedSlot);
                                       }
-                                      closeModal();
                                     }}
                                   />
                                 ),
