@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import api from "@/lib/apiClient";
 import { isWeekend, isHoliday } from "@/lib/utils";
 
@@ -32,8 +32,42 @@ export default function SleepReservationForm({
   const [meetingList, setMeetingList] = useState([]);
   const [companyList, setCompanyList] = useState([]);
   const [userList, setUserList] = useState([]);
+  const [allReservations, setAllReservations] = useState([]);
 
-  const getStartOptions = () => {
+  // 특정 좌석이 특정 시간에 예약되었는지 확인하는 함수
+  const isRoomReserved = (roomNumId, time) => {
+    if (!allReservations?.length) return false;
+    
+    return allReservations.some(reservation => {
+      // 수정모드일 때는 현재 수정 중인 예약은 제외
+      if (isEdit && initialData?.id && reservation.id === initialData.id) {
+        return false;
+      }
+      
+      return reservation.roomNumberId === roomNumId && 
+             reservation.reserveTime === time;
+    });
+  };
+
+  // 특정 시간이 선택된 좌석에 예약되었는지 확인하는 함수
+  const isTimeReserved = (time) => {
+    if (!roomDetailId || !allReservations?.length) return false;
+    
+    const selectedRoom = meetingList?.infoList?.find(room => room.id === Number(roomDetailId));
+    if (!selectedRoom) return false;
+    
+    return allReservations.some(reservation => {
+      // 수정모드일 때는 현재 수정 중인 예약은 제외
+      if (isEdit && initialData?.id && reservation.id === initialData.id) {
+        return false;
+      }
+      
+      return reservation.roomNumberId === selectedRoom.roomNumId && 
+             reservation.reserveTime === time;
+    });
+  };
+
+  const getStartOptions = useMemo(() => {
     const options = [];
     const todayStr = getToday();
     let startHour = 9;
@@ -47,22 +81,38 @@ export default function SleepReservationForm({
     startHour = Math.min(startHour, 17);
     
     for (let hour = startHour; hour <= 17; hour++) {
-      options.push(`${String(hour).padStart(2, "0")}:00:00`);
+      const timeStr = `${String(hour).padStart(2, "0")}:00:00`;
+      const isReserved = roomDetailId && isTimeReserved(timeStr);
+      
+      options.push({
+        value: timeStr,
+        disabled: isReserved,
+        label: `${timeStr.slice(0, 5)}${isReserved ? " (예약됨)" : ""}`
+      });
     }
     
     // 수정모드에서 현재 설정된 시간이 옵션에 없으면 추가
-    if (isEdit && resveStartTime && !options.includes(resveStartTime)) {
-      options.push(resveStartTime);
-      options.sort(); // 시간순으로 정렬
+    if (isEdit && resveStartTime && !options.some(opt => opt.value === resveStartTime)) {
+      const isReserved = roomDetailId && isTimeReserved(resveStartTime);
+      options.push({
+        value: resveStartTime,
+        disabled: isReserved,
+        label: `${resveStartTime.slice(0, 5)}${isReserved ? " (예약됨)" : ""}`
+      });
+      options.sort((a, b) => a.value.localeCompare(b.value)); // 시간순으로 정렬
     }
     
     // 옵션이 비어있으면 최소한 9시는 포함
     if (options.length === 0) {
-      options.push("09:00:00");
+      options.push({
+        value: "09:00:00",
+        disabled: false,
+        label: "09:00"
+      });
     }
     
     return options;
-  };
+  }, [roomDetailId, allReservations, resveDate, resveStartTime, isEdit, meetingList]);
 
   const endOptions = () => {
     const [hour, min] = resveStartTime.split(":");
@@ -81,6 +131,40 @@ export default function SleepReservationForm({
       `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}:00`;
 
     return [formatTime(oneHourLater)];
+  };
+
+  // 특정 날짜의 모든 예약 정보를 조회하는 함수
+  const fetchAllReservations = async (roomId, date) => {
+    if (!roomId || !date) return;
+    
+    try {
+      const reservations = [];
+      
+      // 9시부터 17시까지 모든 시간대에 대해 예약 정보 조회
+      for (let hour = 9; hour <= 17; hour++) {
+        const timeStr = `${String(hour).padStart(2, "0")}:00:00`;
+        
+        try {
+          const res = await api.get(`/api/v1/sleep/reserve/list/detail`, {
+            params: {
+              roomId,
+              reserveDt: date,
+              reserveTime: timeStr,
+            },
+          });
+          
+          if (res.data.success && res.data.data) {
+            reservations.push(...res.data.data);
+          }
+        } catch (err) {
+          console.error(`${timeStr} 예약 정보 조회 실패:`, err);
+        }
+      }
+      
+      setAllReservations(reservations);
+    } catch (err) {
+      console.error("전체 예약 정보 조회 실패:", err);
+    }
   };
 
   useEffect(() => {
@@ -121,6 +205,13 @@ export default function SleepReservationForm({
     };
     fetchRoomDetail();
   }, [companyId]);
+
+  // roomId와 resveDate가 변경될 때마다 예약 정보 조회
+  useEffect(() => {
+    if (roomId && resveDate) {
+      fetchAllReservations(roomId, resveDate);
+    }
+  }, [roomId, resveDate]);
 
   // 수정모드일 때 즉시 설정 가능한 값들을 설정
   useEffect(() => {
@@ -215,6 +306,32 @@ export default function SleepReservationForm({
       }
     }
   }, [realUser, userList, meetingList]);
+
+  // 좌석이 변경되었을 때 선택된 시간이 해당 좌석에 예약되어 있으면 시간 초기화
+  useEffect(() => {
+    if (roomDetailId && resveStartTime && allReservations?.length > 0) {
+      const selectedRoom = meetingList?.infoList?.find(room => room.id === Number(roomDetailId));
+      if (selectedRoom && isTimeReserved(resveStartTime)) {
+        // 수정모드가 아닐 때만 초기화
+        if (!isEdit) {
+          setResveStartTime("09:00:00"); // 기본 시간으로 초기화
+        }
+      }
+    }
+  }, [roomDetailId, allReservations, meetingList]);
+
+  // 시간이 변경되었을 때 선택된 좌석이 해당 시간에 예약되어 있으면 좌석 초기화
+  useEffect(() => {
+    if (roomDetailId && resveStartTime && allReservations?.length > 0) {
+      const selectedRoom = meetingList?.infoList?.find(room => room.id === Number(roomDetailId));
+      if (selectedRoom && isRoomReserved(selectedRoom.roomNumId, resveStartTime)) {
+        // 수정모드가 아닐 때만 초기화
+        if (!isEdit) {
+          setRoomDetailId(""); // 좌석 선택 초기화
+        }
+      }
+    }
+  }, [resveStartTime, allReservations, meetingList]);
 
   const handleSubmit = async () => {
     const payload = {
@@ -312,13 +429,22 @@ export default function SleepReservationForm({
           <option value="">좌석을 선택해 주세요</option>
           {meetingList?.infoList
             ?.slice(0, meetingList.gender === "M" ? 8 : meetingList.gender === "W" ? 7 : 7)
-            .map((room) => (
-              room?.useYn === "Y" && (
-                <option key={room.id} value={room.id}>
-                  {room.roomNumId}호
+            .map((room) => {
+              if (room?.useYn !== "Y") return null;
+              
+              const isReserved = resveStartTime && isRoomReserved(room.roomNumId, resveStartTime);
+              
+              return (
+                <option 
+                  key={room.id} 
+                  value={room.id}
+                  disabled={isReserved}
+                  className={isReserved ? "text-gray-400" : ""}
+                >
+                  {room.roomNumId}호{isReserved ? " (예약됨)" : ""}
                 </option>
-              )
-            ))}
+              );
+            })}
         </select>
       </div>
 
@@ -346,9 +472,14 @@ export default function SleepReservationForm({
             onChange={(e) => setResveStartTime(e.target.value)}
             className="rounded border px-2 py-1"
           >
-            {getStartOptions().map((time) => (
-              <option key={time} value={time}>
-                {time.slice(0, 5)}
+            {getStartOptions.map((option) => (
+              <option 
+                key={option.value} 
+                value={option.value}
+                disabled={option.disabled}
+                className={option.disabled ? "text-gray-400" : ""}
+              >
+                {option.label}
               </option>
             ))}
           </select>
