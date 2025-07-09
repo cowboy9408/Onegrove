@@ -216,8 +216,8 @@ const StoriesRegistForm = forwardRef(
           })
           .filter(Boolean); // null 제거
 
-        if (activeImages.length < 3) {
-          onError?.("스와이프 이미지는 최소 3개 이상 등록해주세요.");
+        if (activeImages.length > 0 && activeImages.length < 3) {
+          onError?.("스와이프 이미지는 3개 이상 등록해주세요.");
           return null;
         }
 

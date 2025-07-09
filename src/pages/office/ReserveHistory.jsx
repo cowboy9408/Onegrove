@@ -23,7 +23,7 @@ export default function Visit() {
 
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [data, setData] = useState([]);
-  const [total, setTotal] = useState(0);
+  const [setTotal] = useState(0);
   const [visitList, setVisitList] = useState([]);
   const [searchFilter, setSearchFilter] = useState({
     meetingRoom: "",
@@ -35,8 +35,8 @@ export default function Visit() {
 
   const [activeFilter, setActiveFilter] = useState(searchFilter);
   const [companyList, setCompanyList] = useState([]);
-  const [buildingList, setBuildingList] = useState([]);
-  const [statusList, setStatusList] = useState([]);
+  const [setBuildingList] = useState([]);
+  const [setStatusList] = useState([]);
 
   const size = 30;
 
