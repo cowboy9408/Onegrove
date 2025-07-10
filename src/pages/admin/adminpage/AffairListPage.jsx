@@ -69,7 +69,6 @@ export default function AffairListPage() {
       try {
         const res = await api.get("/api/v1/user/company");
         if (res.data.success) {
-          // companyId 기준으로 대표 companyName 하나만 매핑
           const uniqueMap = new Map();
           res.data.data.forEach((item) => {
             if (!uniqueMap.has(item.companyId)) {

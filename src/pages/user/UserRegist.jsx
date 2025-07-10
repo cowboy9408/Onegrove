@@ -17,6 +17,7 @@ export default function AdminRegist() {
     confirmPassword: "",
     phone: "",
     email: "",
+    company: "",
   });
   const navigate = useNavigate();
   const { showModal } = useModal();

@@ -6,6 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from "@/lib/apiClient";
 import Select from "@/components/common/Select";
 import useModal from "@/hooks/useModal";
+import { useAuthStore } from "@/store/authStore";
 
 export default function UserDetailPage() {
   const { id } = useParams();
@@ -30,6 +31,7 @@ export default function UserDetailPage() {
     email: "",
     company: false,
   });
+  const { permission, companyId, companyName } = useAuthStore();
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -250,6 +252,7 @@ export default function UserDetailPage() {
               onChange={(e) => handleChange("company", Number(e.target.value))}
               className="w-full max-w-[735px]"
               required
+              disabled
             >
               <option value="">선택하세요</option>
               {companyOptions.map((item) => (
