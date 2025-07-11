@@ -154,7 +154,6 @@ export default function MeetingDetail() {
   const onSubmit = async (form) => {
     if (
       !form.name ||
-      !form.roomNumber ||
       !form.location ||
       !form.capacity ||
       !form.timeRange?.startDate ||
@@ -279,7 +278,7 @@ export default function MeetingDetail() {
 
           <div className="grid grid-cols-2 gap-4">
             {/* 호실 입력란 */}
-            <Input label="호실" {...methods.register("roomNumber")} required />
+            <Input label="호실" {...methods.register("roomNumber")} />
 
             {/* 위치 선택란 */}
             <div>
