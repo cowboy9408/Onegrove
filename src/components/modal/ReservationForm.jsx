@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import api from "@/lib/apiClient";
 import { isWeekend, isHoliday, extractErrorMessage, extractSuccessMessage } from "@/lib/utils";
-import dayjs from "dayjs";
 
 export default function ReservationForm({
   locationOptions = [],
@@ -152,21 +151,58 @@ export default function ReservationForm({
 
   // resveStartTime 변경 시 resveEndTime 자동 업데이트
   useEffect(() => {
-    if (resveStartTime && (!resveEndTime || resveEndTime === "10:00:00")) {
-      const startHour = parseInt(resveStartTime.split(':')[0]);
-      const endHour = startHour + 1;
-      if (endHour <= 18) {
-        const newEndTime = `${String(endHour).padStart(2, "0")}:00:00`;
-        setResveEndTime(newEndTime);
-      }
-    }
+    if (resveStartTime && resveDate) {
+      // 사용 가능한 종료 시간 옵션을 가져와서 첫 번째 값으로 설정
+      const timeoutId = setTimeout(() => {
+        try {
+          const reserved = getReservedTimes;
+          const proposedStartTime = new Date(`${resveDate}T${resveStartTime}`);
+          
+          if (!isNaN(proposedStartTime.getTime())) {
+            // 가능한 종료 시간 중 첫 번째 옵션 찾기
+            for (let hour = proposedStartTime.getHours() + 1; hour <= 18; hour++) {
+              const endTimeStr = `${String(hour).padStart(2, "0")}:00:00`;
+              const proposedEndTime = new Date(`${resveDate}T${endTimeStr}`);
+              
+              if (!isNaN(proposedEndTime.getTime())) {
+                const overlaps = reserved.some(({ start, end }) => {
+                  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                    return false;
+                  }
+                  
+                  // 제안된 예약과 기존 예약 사이에 1시간 버퍼가 있는지 확인
+                  const hasOverlap = !(
+                    // 제안된 예약이 기존 예약 시작 1시간 전에 끝남
+                    proposedEndTime <= new Date(start.getTime() - 60 * 60 * 1000) ||
+                    // 제안된 예약이 기존 예약 종료 1시간 후에 시작됨
+                    proposedStartTime >= new Date(end.getTime() + 60 * 60 * 1000)
+                  );
 
-    if (resveStartTime) {
-      const threeDaysAgo = dayjs().add(3, "day");
-      const resveDate = dayjs(resveStartTime);
-      const _isAfterThreeDaysAgo = resveDate.isAfter(threeDaysAgo);
+                  return hasOverlap;
+                });
+
+                if (!overlaps) {
+                  setResveEndTime(endTimeStr);
+                  break;
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error("자동 종료시간 설정 에러:", error);
+          // 에러 발생 시 기본적으로 +1시간으로 설정
+          const startHour = parseInt(resveStartTime.split(':')[0]);
+          const endHour = startHour + 1;
+          if (endHour <= 18) {
+            const newEndTime = `${String(endHour).padStart(2, "0")}:00:00`;
+            setResveEndTime(newEndTime);
+          }
+        }
+      }, 100); // 약간의 지연을 주어 상태 업데이트 완료 후 실행
+
+      return () => clearTimeout(timeoutId);
     }
-  }, [resveStartTime, resveEndTime]);
+  }, [resveStartTime, resveDate, roomId, currentReservations]);
 
   // 잔여 시간 조회 API 호출
   useEffect(() => {
