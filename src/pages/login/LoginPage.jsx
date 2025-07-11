@@ -18,6 +18,7 @@ export default function LoginPage() {
   const [saveId, setSaveId] = useState(false);
   const { showModal } = useModal();
   const setName = useAuthStore((state) => state.setName);
+  const setCompanyId = useAuthStore((state) => state.setCompanyId);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -30,6 +31,7 @@ export default function LoginPage() {
       setAccessToken(res.accessToken);
       setRefreshToken(res.refreshToken);
       setName(res.name);
+      setCompanyId(res.companyId);
 
       localStorage.setItem("accessToken", res.accessToken);
       localStorage.setItem("refreshToken", res.refreshToken);

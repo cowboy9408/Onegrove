@@ -35,17 +35,17 @@ const NewInput = forwardRef(function NewInput(
 
   return (
     <div className={`${className}`}>
-      <div className="relative flex items-center gap-2">
+      <div className={`flex w-full items-center gap-2 ${className}`}>
         {label && (
           <label
             htmlFor={id}
-            className="min-w-[100px] text-sm font-medium text-gray-800 dark:text-gray-100"
+            className="w-[60px] text-sm font-medium whitespace-nowrap text-gray-800"
           >
             {label}
             {required && <span className="ml-0.5 text-red-500">*</span>}
           </label>
         )}
-        <div className={`relative ${width}`}>
+        <div className="relative flex-1">
           <input
             id={id}
             ref={ref}
@@ -56,34 +56,23 @@ const NewInput = forwardRef(function NewInput(
             disabled={disabled}
             placeholder={placeholder}
             maxLength={maxLength}
-            className={`peer w-full border px-4 pr-10 text-sm focus:ring-2 focus:outline-none ${height} rounded-none ${error ? "border-red-500 focus:ring-red-500" : "border-black focus:ring-black"} ${
-              disabled || rest.readOnly
-                ? "cursor-not-allowed bg-gray-100 text-gray-500"
-                : ""
-            } ${className} `}
+            className={`peer w-full rounded border px-3 py-2 text-sm ${
+              error
+                ? "border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:ring-black"
+            } ${disabled || rest.readOnly ? "bg-gray-100 text-gray-500" : ""}`}
             {...rest}
           />
+          {/* 아이콘 영역 유지 */}
           <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-1">
             {isPassword && value && (
-              <button
-                type="button"
-                onClick={togglePasswordVisibility}
-                className="text-gray-400 hover:text-black dark:hover:text-white"
-              >
-                {showPassword ? (
-                  <EyeOffIcon size={16} />
-                ) : (
-                  <EyeIcon size={16} />
-                )}
+              <button type="button" onClick={togglePasswordVisibility}>
+                👁
               </button>
             )}
             {value && onClear && (
-              <button
-                type="button"
-                onClick={onClear}
-                className="text-gray-400 hover:text-black dark:hover:text-white"
-              >
-                <XIcon size={16} />
+              <button type="button" onClick={onClear}>
+                ❌
               </button>
             )}
           </div>

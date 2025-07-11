@@ -131,11 +131,24 @@ export default function Visit() {
       (activeFilter.cardNumber.length >= 3 &&
         item.accessCard?.includes(activeFilter.cardNumber));
 
-    const matchesDate =
-      !activeFilter.dateRange.startDate ||
-      !activeFilter.dateRange.endDate ||
-      (new Date(item.createDatetime) >= activeFilter.dateRange.startDate &&
-        new Date(item.createDatetime) <= activeFilter.dateRange.endDate);
+    const matchesDate = (() => {
+      const visitDate = new Date(item.visitDate);
+      const start = activeFilter.dateRange.startDate
+        ? new Date(activeFilter.dateRange.startDate)
+        : null;
+      const end = activeFilter.dateRange.endDate
+        ? new Date(activeFilter.dateRange.endDate)
+        : null;
+
+      if (start) start.setHours(0, 0, 0, 0);
+      if (end) end.setHours(23, 59, 59, 999);
+
+      if (start && end) return visitDate >= start && visitDate <= end;
+      if (start) return visitDate >= start;
+      if (end) return visitDate <= end;
+
+      return true; // 날짜 선택 안 했을 경우
+    })();
 
     return (
       matchesCompany &&
