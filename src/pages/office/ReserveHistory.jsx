@@ -329,7 +329,7 @@ export default function Visit() {
             { key: "companyName", label: "입주사" },
             { key: "paymentType", label: "결제 유형" },
             { key: "resvDatetime", label: "예약 일정" },
-            { key: "freeStackTime", label: "누적 무료 시간" },
+            { key: "paidStackTimeFree", label: "누적 무료 시간" },
             { key: "paidStackTime", label: "누적 유료 시간" },
             { key: "status", label: "예약 상태" },
             { key: "createDatetime", label: "등록일시" },

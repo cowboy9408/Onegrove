@@ -320,16 +320,16 @@ export default function UserListPage() {
         <ResultSummary total={total} />
 
         <div className="flex gap-2">
-          {permission !== "OFFICE_SECRETARY_ADMIN" && (
-            <Button
-              className="bg-black text-white hover:bg-gray-800"
-              onClick={() => {
-                navigate("/user/regist");
-              }}
-            >
-              등록
-            </Button>
-          )}
+          {/* {permission !== "OFFICE_SECRETARY_ADMIN" && ( */}
+          <Button
+            className="bg-black text-white hover:bg-gray-800"
+            onClick={() => {
+              navigate("/user/regist");
+            }}
+          >
+            등록
+          </Button>
+          {/* // )} */}
           <Button
             className="bg-black text-white hover:bg-gray-800"
             onClick={async () => {

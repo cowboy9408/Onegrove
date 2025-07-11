@@ -62,7 +62,6 @@ export default function MeetingSetting() {
   const onSubmit = async (form) => {
     if (
       !form.name ||
-      !form.roomNumber ||
       !form.location ||
       !form.capacity ||
       !form.timeRange?.startDate ||
@@ -178,7 +177,7 @@ export default function MeetingSetting() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Input label="호실" {...methods.register("roomNumber")} required />
+            <Input label="호실" {...methods.register("roomNumber")} />
             <Controller
               control={control}
               name="location"

@@ -9,6 +9,8 @@ import { LogoutIcon } from "../ui/logout";
 import { PanelLeftCloseIcon } from "../ui/panel-left-close";
 import { PanelLeftOpenIcon } from "../ui/panel-left-open";
 import Menu from "./Menu";
+import useModal from "@/hooks/useModal";
+import UserDetailModal from "../modal/UserDetailModal";
 
 export default function Sidebar() {
   const { pathname } = useLocation();
@@ -20,6 +22,7 @@ export default function Sidebar() {
   const sidebarRef = useRef(null);
   const { isExpanded, setIsExpanded, toggleSidebar } = useSidebar();
   const name = useAuthStore((state) => state.name);
+  const { showModal } = useModal();
 
   const sidebarItems = useMemo(
     () => extractSidebarItems(routeMeta[0].children, permission),
@@ -57,6 +60,82 @@ export default function Sidebar() {
     },
     [sidebarItems]
   );
+
+  const handleUserClick = async () => {
+    if (permission === "OFFICE_SECRETARY_ADMIN") {
+      const companyId = useAuthStore.getState().companyId;
+      const token = useAuthStore.getState().accessToken;
+      const lang = "KO";
+
+      if (!companyId || !token) {
+        alert("회사 정보가 없습니다.");
+        return;
+      }
+
+      const API_BASE = import.meta.env.VITE_API_BASE_URL;
+      const companyUrl = `${API_BASE}/api/v1/company/detail/${companyId}/${lang}`;
+      const officeCodeUrl = `${API_BASE}/api/v1/company/office/list`;
+
+      try {
+        const [companyRes, codeRes] = await Promise.all([
+          fetch(companyUrl, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(officeCodeUrl, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
+        if (!companyRes.ok || !codeRes.ok) {
+          console.error("API 응답 실패");
+          return;
+        }
+
+        const companyResult = await companyRes.json();
+        const codeResult = await codeRes.json();
+
+        if (!companyResult.success || !codeResult.success) {
+          alert("회사 정보 또는 코드 정보를 불러오지 못했습니다.");
+          return;
+        }
+
+        const company = companyResult.data;
+        const officeCodeList = codeResult.data || [];
+
+        const office = company.officeList?.[0] || {};
+        const officeCode = office.office;
+
+        const officeName =
+          officeCodeList.find((item) => item.code === officeCode)?.value ||
+          officeCode;
+
+        const userData = {
+          companyId: company.id,
+          companyName: company.name || company.mainName || "",
+          isActive: company.useYn === "Y",
+          office: officeName,
+          floor: office.floor || "",
+          representativeName: company.mainName || "",
+          phoneNumber: company.tel || "",
+          email: company.email || "",
+          imageUrl: company.mainImg?.path || "",
+          secretaries: company.chargerList || [],
+          freeAmenityHours: Number(company.freeHour || 0),
+          thisMonthUsage: 0,
+          freeUsedHours: 0,
+          paidUsedHours: 0,
+        };
+
+        showModal({
+          title: "입주사 정보 확인",
+          children: <UserDetailModal userData={userData} />,
+        });
+      } catch (error) {
+        console.error("API 호출 오류:", error);
+        alert("입주사 정보 조회 중 오류가 발생했습니다.");
+      }
+    }
+  };
 
   useEffect(() => {
     const matchedItem = findMenuByPath(groupPath, sidebarItems);
@@ -180,7 +259,12 @@ export default function Sidebar() {
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
               {name && name.substring(0, 1)}
             </div>
-            <span className="truncate">{name}님</span>
+            <span
+              className={`truncate ${permission === "OFFICE_SECRETARY_ADMIN" ? "cursor-pointer hover:underline" : ""}`}
+              onClick={handleUserClick}
+            >
+              {name}님
+            </span>
             <div
               className="ml-auto hover:bg-gray-100 dark:hover:bg-gray-800"
               onClick={handleLogout}

@@ -13,6 +13,8 @@ export const useAuthStore = create(
       permission: null,
       name: null,
       companyId: null,
+      companyName: null,
+
       setAccessToken: (token) => {
         if (!token) return;
 
@@ -22,7 +24,20 @@ export const useAuthStore = create(
         const id = decode.id || null;
         const companyId =
           decode.companyId ?? decode.company_id ?? decode.company?.id ?? null;
-        set({ accessToken: token, permission: role, id, companyId });
+
+        const companyName =
+          decode.companyName ??
+          decode.company_name ??
+          decode.company?.name ??
+          null;
+
+        set({
+          accessToken: token,
+          permission: role,
+          id,
+          companyId,
+          companyName,
+        });
 
         console.log("Decoded Token:", decode);
 
@@ -54,6 +69,7 @@ export const useAuthStore = create(
       setName: (name) => {
         set({ name });
       },
+      setCompanyId: (companyId) => set({ companyId }),
     }),
     {
       name: "auth-storage",
