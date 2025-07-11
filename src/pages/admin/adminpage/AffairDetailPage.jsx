@@ -435,6 +435,7 @@ export default function AffairDetailPage() {
                   id: Number(id),
                   username: form.username,
                   email: form.email,
+                  role: "OFFICE_SECRETARY_ADMIN",
                 };
 
                 const res = await api.post("/api/v1/user/unlock", payload);
@@ -474,12 +475,24 @@ export default function AffairDetailPage() {
         <Button
           className="bg-black-100"
           onClick={async () => {
+            if (!form.email || !form.email.includes("@")) {
+              showModal({
+                title: "이메일 오류",
+                message: "올바른 이메일을 입력해주세요.",
+                showCancel: false,
+              });
+              return;
+            }
+
             try {
               const payload = {
                 id: Number(id),
                 username: form.username,
                 email: form.email,
+                role: "OFFICE_SECRETARY_ADMIN",
               };
+
+              console.log("payload", payload); // 요청값 확인용
 
               const res = await api.post("/api/v1/user/temp-password", payload);
 
@@ -499,9 +512,14 @@ export default function AffairDetailPage() {
               }
             } catch (error) {
               console.error("임시 비밀번호 발급 실패:", error);
+
+              const errorMessage =
+                error?.response?.data?.message ||
+                "서버 오류로 인해 발급에 실패했습니다.";
+
               showModal({
-                title: "서버 오류",
-                message: "서버 오류로 인해 발급에 실패했습니다.",
+                title: "오류",
+                message: "등록된 이메일을 찾을수 없습니다.",
                 showCancel: false,
               });
             }

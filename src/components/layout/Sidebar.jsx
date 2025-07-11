@@ -9,6 +9,8 @@ import { LogoutIcon } from "../ui/logout";
 import { PanelLeftCloseIcon } from "../ui/panel-left-close";
 import { PanelLeftOpenIcon } from "../ui/panel-left-open";
 import Menu from "./Menu";
+import useModal from "@/hooks/useModal";
+import UserDetailModal from "../modal/UserDetailModal";
 
 export default function Sidebar() {
   const { pathname } = useLocation();
@@ -20,6 +22,7 @@ export default function Sidebar() {
   const sidebarRef = useRef(null);
   const { isExpanded, setIsExpanded, toggleSidebar } = useSidebar();
   const name = useAuthStore((state) => state.name);
+  const { showModal } = useModal();
 
   const sidebarItems = useMemo(
     () => extractSidebarItems(routeMeta[0].children, permission),
@@ -57,6 +60,15 @@ export default function Sidebar() {
     },
     [sidebarItems]
   );
+
+  const handleUserClick = () => {
+    if (permission === "OFFICE_SECRETARY_ADMIN") {
+      showModal({
+        title: "입주사 정보 확인",
+        children: <UserDetailModal />,
+      });
+    }
+  };
 
   useEffect(() => {
     const matchedItem = findMenuByPath(groupPath, sidebarItems);
@@ -180,7 +192,12 @@ export default function Sidebar() {
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
               {name && name.substring(0, 1)}
             </div>
-            <span className="truncate">{name}님</span>
+            <span
+              className={`truncate ${permission === "OFFICE_SECRETARY_ADMIN" ? "cursor-pointer hover:underline" : ""}`}
+              onClick={handleUserClick}
+            >
+              {name}님
+            </span>
             <div
               className="ml-auto hover:bg-gray-100 dark:hover:bg-gray-800"
               onClick={handleLogout}

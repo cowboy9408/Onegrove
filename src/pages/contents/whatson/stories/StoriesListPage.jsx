@@ -168,8 +168,9 @@ export default function StoriesListPage() {
     <div>
       <SearchSection>
         <Box>
-          <Row className="pb-4">
-            <Col>
+          {/* 1행: 카테고리 + 게시글 등록일 */}
+          <Row className="mb-6 gap-1">
+            <Col className="w-1/2">
               <Input
                 id={nameCategory}
                 label={"카테고리"}
@@ -186,10 +187,12 @@ export default function StoriesListPage() {
                     handleSearch();
                   }
                 }}
+                className="w-[465px]"
               />
             </Col>
-            <Col className="flex flex-col items-start gap-4">
-              <p className="text-sm font-medium">게시글 등록일</p>
+
+            <Col className="flex flex-1 flex-col gap-2">
+              <span className="text-sm font-medium">게시글 등록일</span>
               <DateRangePicker
                 startDate={searchFilter.dateRange.startDate}
                 endDate={searchFilter.dateRange.endDate}
@@ -202,8 +205,10 @@ export default function StoriesListPage() {
               />
             </Col>
           </Row>
-          <Row>
-            <Col>
+
+          {/* 2행: 타이틀 + 노출 여부 + 버튼 */}
+          <Row className="items-end gap-6">
+            <Col className="w-1/2">
               <Input
                 id={nameId}
                 label={"타이틀"}
@@ -221,11 +226,9 @@ export default function StoriesListPage() {
               />
             </Col>
 
-            <Col className="flex flex-col items-start gap-4">
-              <span className="flex items-center text-sm font-medium whitespace-nowrap text-gray-800">
-                노출 여부
-              </span>
-              <div className="flex flex-row items-start gap-4">
+            <Col className="flex flex-col gap-2">
+              <span className="text-sm font-medium">노출 여부</span>
+              <div className="flex gap-4">
                 <Radio
                   id="visible"
                   name="visibility"
@@ -255,9 +258,8 @@ export default function StoriesListPage() {
               </div>
             </Col>
 
-            <Col className="flex justify-center gap-2 self-end">
+            <Col className="flex justify-end gap-2">
               <Button onClick={handleSearch}>검색</Button>
-
               <Button
                 variant="outline"
                 onClick={() => {
@@ -273,6 +275,7 @@ export default function StoriesListPage() {
           </Row>
         </Box>
       </SearchSection>
+
       <div className="mb-4 flex items-center justify-between">
         <ResultSummary total={total} />
 
