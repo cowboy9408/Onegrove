@@ -8,6 +8,7 @@ import useModal from "@/hooks/useModal";
 import PasswordResetModal from "@/components/modal/PasswordResetModal";
 import { getUserInfo } from "@/api/user";
 import { jwtDecode } from "jwt-decode";
+import { extractErrorMessage } from "@/lib/utils";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -40,7 +41,7 @@ export default function LoginPage() {
 
       showModal({
         title: "로그인 실패",
-        message: err?.response?.data?.message,
+        message: extractErrorMessage(err, "로그인에 실패했습니다. 다시 시도해주세요."),
         showCancel: true,
       });
     }

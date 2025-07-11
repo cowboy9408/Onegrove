@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
-import { isWeekend, isHoliday } from "@/lib/utils";
+import { isWeekend, isHoliday, extractErrorMessage, extractSuccessMessage } from "@/lib/utils";
 
 export default function VisitForm({
   existingReservations = [],
@@ -54,7 +54,7 @@ export default function VisitForm({
       }
     } catch (err) {
       console.error("입주사 조회 실패:", err);
-      alert(err?.response?.data?.message || err?.data?.message || "입주사 조회가 실패되었습니다. 다시시도 해주세요.");
+      alert(extractErrorMessage(err, "입주사 조회가 실패되었습니다. 다시시도 해주세요."));
     }
   };
 
@@ -134,13 +134,15 @@ export default function VisitForm({
         payload
       );
       if (res.data?.success) {
-        alert(isEdit ? "수정 완료" : "등록 완료");
+        alert(extractSuccessMessage(res, isEdit ? "수정 완료" : "등록 완료"));
         onSubmit?.(payload);
         closeModal?.();
-      } else alert("처리 실패");
+      } else {
+        alert(extractErrorMessage(res, "처리 실패"));
+      }
     } catch (err) {
       console.error("예약 처리 실패:", err);
-      alert(err?.response?.data?.message || err?.data?.message || "예약이 실패되었습니다. 다시시도 해주세요.");
+      alert(extractErrorMessage(err, "예약이 실패되었습니다. 다시시도 해주세요."));
     }
   };
 
