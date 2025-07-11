@@ -4,6 +4,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { ModalContext } from "@/context/ModalContext";
 import SleepReservationForm from "./SleepReservationForm";
 import api from "@/lib/apiClient";
+import { extractErrorMessage } from "@/lib/utils";
 
 export default function SleepReservationDetail({ 
   reservationId, 
@@ -31,7 +32,7 @@ export default function SleepReservationDetail({
       }
     } catch (error) {
       console.error("예약 상세 조회 실패:", error);
-      alert(error?.response?.data?.message || error?.data?.message || "예약 상세 조회가 실패되었습니다. 다시시도 해주세요.");
+      alert(extractErrorMessage(error, "예약 상세 조회가 실패되었습니다. 다시시도 해주세요."));
     } finally {
       setLoading(false);
     }

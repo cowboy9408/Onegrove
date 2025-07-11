@@ -1,6 +1,5 @@
 import api from "@/lib/apiClient";
-import { cn } from "@/lib/utils";
-import { id } from "date-fns/locale";
+import { cn, extractErrorMessage } from "@/lib/utils";
 import { Info, UploadIcon, XIcon } from "lucide-react";
 import { useMemo } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -189,7 +188,7 @@ export default function Upload({
       } else {
         showModal({
           title: "업로드 실패",
-          message: "파일 업로드 중 문제가 발생했습니다. 다시 시도해주세요.",
+          message: extractErrorMessage(err, "파일 업로드 중 문제가 발생했습니다. 다시 시도해주세요."),
           showCancel: false,
         });
       }

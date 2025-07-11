@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useMemo, useRef } from "react";
 import CommonCalendar from "@/components/common/Calendar";
 import Select from "@/components/common/Select";
 import Button from "@/components/common/Button";
@@ -12,6 +12,18 @@ export default function Meeting() {
   const [selectedOffice, setSelectedOffice] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const { showModal } = useContext(ModalContext);
+  
+  // 모달 닫기를 위한 ref
+  const currentModalCloseRef = useRef(null);
+  
+  // 현재 상태를 항상 최신으로 유지하는 ref
+  const currentStateRef = useRef({ selectedOffice, selectedRoom });
+  
+  // 상태가 변경될 때마다 ref 업데이트
+  useEffect(() => {
+    currentStateRef.current = { selectedOffice, selectedRoom };
+  }, [selectedOffice, selectedRoom]);
+  
   const [meetingOptions, setMeetingOptions] = useState({});
   const [locationOptions, setLocationOptions] = useState([]);
   const [officeOptions, setOfficeOptions] = useState([]);
@@ -30,7 +42,7 @@ export default function Meeting() {
     try {
       let apiUrl = `/api/v1/meeting?roomId=${selectedRoom}&isVip=Y&lang=ko`;
 
-      console.log(permission, userId);
+
       
       const res = await api.get(apiUrl);
       if (res.data?.success && Array.isArray(res.data.data)) {
@@ -57,33 +69,27 @@ export default function Meeting() {
 
   const selectedData = officeOptions.find(i => i.id === selectedRoom) || null;
 
-  // API에서 가져온 settingOptions를 기반으로 capacity 매핑
-  const mappedRoomOptions = locationOptions.map(room => {
-    // settingOptions에서 해당 룸의 capacity 찾기 (id로 매칭)
-    const settingRoom = settingOptions.find(setting => 
-      setting.id === room.id
-    );
+  // API에서 가져온 settingOptions를 기반으로 capacity 매핑 (useMemo로 최적화)
+  const mappedRoomOptions = useMemo(() => {
+    if (locationOptions.length === 0) return [];
     
-    return {
-      ...room,
-      capacity: settingRoom?.capacity || 4, // API에서 capacity 가져오거나 기본값 4
-    };
-  });
+    const mapped = locationOptions.map(room => {
+      // settingOptions에서 해당 룸의 capacity 찾기 (id로 매칭)
+      const settingRoom = settingOptions.find(setting => 
+        setting.id === room.id
+      );
+      
+      return {
+        ...room,
+        capacity: settingRoom?.capacity || 4, // API에서 capacity 가져오거나 기본값 4
+      };
+    });
+    
+    return mapped;
+  }, [locationOptions, settingOptions]);
   
-  // 디버깅용 로그
-  useEffect(() => {
-    if (locationOptions.length > 0 && settingOptions.length > 0) {
-      console.log("Viproom.jsx - 회의실 목록:", mappedRoomOptions.map(r => ({ 
-        name: r.roomName, 
-        capacity: r.capacity,
-        location: selectedOffice
-      })));
-    }
-  }, [locationOptions, settingOptions, selectedOffice]);
-
   useEffect(() => {
     if(selectedRoom) {
-      console.log(selectedRoom);
       fetchSchedules();
     }
   }, [selectedRoom]);
@@ -116,8 +122,10 @@ export default function Meeting() {
         const settingRes = await api.get(`/api/v1/meeting/room-list?isVip=Y&location=${selectedOffice}`);
         if (settingRes.data.success) {
           setLocationOptions(settingRes.data.data);
+          
           if (settingRes.data.data.length > 0) {
-            setSelectedRoom(settingRes.data.data[0].id);
+            const newRoomId = settingRes.data.data[0].id;
+            setSelectedRoom(newRoomId);
           }
         }
       } catch (err) {
@@ -131,7 +139,6 @@ export default function Meeting() {
     const fetchMeetingOptions = async () => {
       try {
         const categoryRes = await api.get(`/api/v1/meeting/office-list?lang=ko`);
-        console.log('meetingOptions API 응답:', categoryRes);
         if (categoryRes.data.success) setMeetingOptions(categoryRes.data.data);
       } catch (err) {
         console.error("입주사 정보 조회 실패:", err);
@@ -198,6 +205,7 @@ export default function Meeting() {
                 <tr><th className="p-2 border">전화번호</th><td className="p-2 border">{detail.reserverTel}</td></tr>
                 <tr><th className="p-2 border">이메일</th><td className="p-2 border">{detail.reserverEmail}</td></tr>
                 <tr><th className="p-2 border">비고</th><td className="p-2 border break-all">{detail.note}</td></tr>
+                <tr><th className="p-2 border">예약 등록 일시</th><td className="p-2 border break-all">{detail.createDatetime}</td></tr>
               </tbody>
             </table>
 
@@ -259,26 +267,42 @@ export default function Meeting() {
                         size: "lg",
                         customButton: true,
                         showCancel: true,
-                        children: ({ closeModal }) => (
-                          <ReservationForm
-                            locationOptions={officeOptions}
-                            roomOptions={mappedRoomOptions}
-                            selectedLocation={selectedOffice}
-                            selectedRoom={selectedRoom}
-                            setSelectedLocation={setSelectedOffice}
-                            setSelectedRoom={setSelectedRoom}
-                            selectData={selectedData}
-                            meetingOptions={meetingOptions}
-                            existingReservations={scheduleList}
-                            initialData={detail}
-                            isEdit={true}
-                            closeModal={closeModal}
-                            onSubmit={() => {
-                              fetchSchedules();
-                              closeModal();
-                            }}
-                          />
-                        ),
+                        children: ({ closeModal }) => {
+                          // 모달 닫기 함수를 ref에 저장
+                          currentModalCloseRef.current = closeModal;
+                          
+                          // 현재 상태값을 모달 생성 시점에 캡처
+                          const currentOffice = selectedOffice;
+                          const currentRoom = selectedRoom;
+                          const modalKey = `edit-${detail.id}-${currentOffice}-${currentRoom}-${Date.now()}`;
+                          
+                          return (
+                            <ReservationForm
+                              key={modalKey}
+                              locationOptions={officeOptions}
+                              roomOptions={mappedRoomOptions}
+                              selectedLocation={currentOffice}
+                              selectedRoom={currentRoom}
+                              setSelectedLocation={setSelectedOffice}
+                              setSelectedRoom={setSelectedRoom}
+                              selectData={selectedData}
+                              meetingOptions={meetingOptions}
+                              existingReservations={scheduleList}
+                              initialData={detail}
+                              isEdit={true}
+                              isVip="Y"
+                              closeModal={() => {
+                                currentModalCloseRef.current = null;
+                                closeModal();
+                              }}
+                              onSubmit={() => {
+                                fetchSchedules();
+                                currentModalCloseRef.current = null;
+                                closeModal();
+                              }}
+                            />
+                          );
+                        },
                       });
                     }}
                   >수정</Button>
@@ -303,7 +327,20 @@ export default function Meeting() {
             label="오피스 선택"
             value={selectedOffice}
             onChange={(e) => {
-              setSelectedOffice(e.target.value);
+              const newOffice = e.target.value;
+              
+              // 현재 열린 모달이 있다면 닫기
+              if (currentModalCloseRef.current) {
+                currentModalCloseRef.current();
+                currentModalCloseRef.current = null;
+                
+                // 약간의 지연 후 오피스 변경 (모달이 완전히 닫힌 후)
+                setTimeout(() => {
+                  setSelectedOffice(newOffice);
+                }, 100);
+              } else {
+                setSelectedOffice(newOffice);
+              }
             }}
             className="w-[8em]"
           >
@@ -332,30 +369,43 @@ export default function Meeting() {
 
         <Button
           onClick={() => {
+            const modalKey = `${selectedOffice}-${selectedRoom}-${Date.now()}-new`;
+            
             showModal({
               title: "회의실 예약",
               size: "lg",
               customButton: true,
               showCancel: true,
-              children: ({ closeModal }) => (
-                <ReservationForm
-                  locationOptions={officeOptions}
-                  roomOptions={mappedRoomOptions}
-                  selectedLocation={selectedOffice}
-                  selectedRoom={selectedRoom}
-                  setSelectedLocation={setSelectedOffice}
-                  setSelectedRoom={setSelectedRoom}
-                  selectData={selectedData}
-                  meetingOptions={meetingOptions}
-                  existingReservations={scheduleList}
-                  initialData={{ resveDate, resveStartTime, content, realUser, numberVisitors, companyId }}
-                  closeModal={closeModal}
-                  onSubmit={() => {
-                    fetchSchedules();
-                    closeModal();
-                  }}
-                />
-              ),
+              children: ({ closeModal }) => {
+                // 모달 닫기 함수를 ref에 저장
+                currentModalCloseRef.current = closeModal;
+                
+                return (
+                  <ReservationForm
+                    key={modalKey}
+                    locationOptions={officeOptions}
+                    roomOptions={mappedRoomOptions}
+                    selectedLocation={selectedOffice}
+                    selectedRoom={selectedRoom}
+                    setSelectedLocation={setSelectedOffice}
+                    setSelectedRoom={setSelectedRoom}
+                    selectData={selectedData}
+                    meetingOptions={meetingOptions}
+                    existingReservations={scheduleList}
+                    initialData={{ resveDate, resveStartTime, content, realUser, numberVisitors, companyId }}
+                    isVip="Y"
+                    closeModal={() => {
+                      currentModalCloseRef.current = null;
+                      closeModal();
+                    }}
+                    onSubmit={() => {
+                      fetchSchedules();
+                      currentModalCloseRef.current = null;
+                      closeModal();
+                    }}
+                  />
+                );
+              },
             });
           }}
         >예약하기</Button>
@@ -378,25 +428,36 @@ export default function Meeting() {
               size: "lg",
               customButton: true,
               showCancel: true,
-              children: ({ closeModal }) => (
-                <ReservationForm
-                  locationOptions={officeOptions}
-                  roomOptions={mappedRoomOptions}
-                  selectedLocation={selectedOffice}
-                  selectedRoom={selectedRoom}
-                  setSelectedLocation={setSelectedOffice}
-                  setSelectedRoom={setSelectedRoom}
-                  selectData={selectedData}
-                  meetingOptions={meetingOptions}
-                  existingReservations={scheduleList}
-                  initialData={{ resveDate }}
-                  closeModal={closeModal}
-                  onSubmit={() => {
-                    fetchSchedules();
-                    closeModal();
-                  }}
-                />
-              ),
+              children: ({ closeModal }) => {
+                // 모달 닫기 함수를 ref에 저장
+                currentModalCloseRef.current = closeModal;
+                
+                return (
+                  <ReservationForm
+                    key={`${selectedOffice}-${selectedRoom}-slot`}
+                    locationOptions={officeOptions}
+                    roomOptions={mappedRoomOptions}
+                    selectedLocation={selectedOffice}
+                    selectedRoom={selectedRoom}
+                    setSelectedLocation={setSelectedOffice}
+                    setSelectedRoom={setSelectedRoom}
+                    selectData={selectedData}
+                    meetingOptions={meetingOptions}
+                    existingReservations={scheduleList}
+                    initialData={{ resveDate }}
+                    isVip="Y"
+                    closeModal={() => {
+                      currentModalCloseRef.current = null;
+                      closeModal();
+                    }}
+                    onSubmit={() => {
+                      fetchSchedules();
+                      currentModalCloseRef.current = null;
+                      closeModal();
+                    }}
+                  />
+                );
+              },
             });
           }}
         />

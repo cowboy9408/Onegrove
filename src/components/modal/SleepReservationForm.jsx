@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import api from "@/lib/apiClient";
-import { isWeekend, isHoliday } from "@/lib/utils";
+import { isWeekend, isHoliday, extractErrorMessage, extractSuccessMessage } from "@/lib/utils";
 
 export default function SleepReservationForm({
   room,
@@ -350,10 +350,12 @@ export default function SleepReservationForm({
         payload
       );
       if (res.data?.success) {
-        alert(isEdit ? "수정 완료" : "등록 완료");
+        alert(extractSuccessMessage(res, isEdit ? "수정 완료" : "등록 완료"));
         onSubmit?.(payload);
         closeModal?.();
-      } else alert("처리 실패");
+      } else {
+        alert(extractErrorMessage(res, "처리 실패"));
+      }
     } catch (err) {
       console.error("예약 처리 실패:", err);
 
@@ -365,8 +367,9 @@ export default function SleepReservationForm({
         alert("Relax Room은 1일 1회만 예약 가능합니다.");
       } else if(err?.response?.data?.message === "400 BAD_REQUEST \"해당 수면실은 이미 예약된 수면실 입니다.\"") {
         alert("해당 수면실은 이미 예약된 수면실 입니다.");
+      } else {
+        alert(extractErrorMessage(err, "예약이 실패되었습니다. 다시시도 해주세요."));
       }
-      else alert(err?.response?.data?.message || err?.data?.message || "예약이 실패되었습니다. 다시시도 해주세요.");
     }
   };
 
@@ -378,13 +381,15 @@ export default function SleepReservationForm({
     try {
       const res = await api.get(`/api/v1/sleep/reserve/delete?id=${initialData.id}`);
       if (res.data?.success) {
-        alert("삭제 완료");
+        alert(extractSuccessMessage(res, "삭제 완료"));
         onSubmit?.();
         closeModal?.();
-      } else alert("삭제 실패");
+      } else {
+        alert(extractErrorMessage(res, "삭제 실패"));
+      }
     } catch (err) {
       console.error("삭제 실패:", err);
-      alert(err?.response?.data?.message || err?.data?.message || "삭제가 실패되었습니다. 다시시도 해주세요.");
+      alert(extractErrorMessage(err, "삭제가 실패되었습니다. 다시시도 해주세요."));
     }
   };
 
