@@ -155,7 +155,7 @@ export default function UserDetailModal({ userData }) {
         </div>
 
         <div className="mt-2 font-medium text-gray-800">
-          무료 사용 시간: {freeUsedHours}시간 / 유료 사용 시간: {paidUsedHours}
+          무료 사용 시간: {freeUsedHours}시간 | 유료 사용 시간: {paidUsedHours}
           시간
         </div>
       </div>
