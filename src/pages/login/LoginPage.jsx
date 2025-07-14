@@ -43,7 +43,10 @@ export default function LoginPage() {
 
       showModal({
         title: "로그인 실패",
-        message: extractErrorMessage(err, "로그인에 실패했습니다. 다시 시도해주세요."),
+        message: extractErrorMessage(
+          err,
+          "로그인에 실패했습니다. 다시 시도해주세요."
+        ),
         showCancel: true,
       });
     }
