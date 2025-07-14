@@ -39,7 +39,7 @@ const NewInput = forwardRef(function NewInput(
         {label && (
           <label
             htmlFor={id}
-            className="w-[60px] text-sm font-medium whitespace-nowrap text-gray-800"
+            className="w-[80px] text-sm font-medium whitespace-nowrap text-gray-800"
           >
             {label}
             {required && <span className="ml-0.5 text-red-500">*</span>}
@@ -56,7 +56,7 @@ const NewInput = forwardRef(function NewInput(
             disabled={disabled}
             placeholder={placeholder}
             maxLength={maxLength}
-            className={`peer w-full rounded border px-3 py-2 text-sm ${
+            className={`peer ${width} rounded border px-3 py-2 text-sm ${
               error
                 ? "border-red-500 focus:ring-red-500"
                 : "border-gray-300 focus:ring-black"
