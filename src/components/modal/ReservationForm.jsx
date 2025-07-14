@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import api from "@/lib/apiClient";
-import { isWeekend, isHoliday } from "@/lib/utils";
-import dayjs from "dayjs";
+import { isWeekend, isHoliday, extractErrorMessage, extractSuccessMessage } from "@/lib/utils";
 
 export default function ReservationForm({
   locationOptions = [],
@@ -14,11 +13,18 @@ export default function ReservationForm({
   existingReservations = [],
   initialData = {},
   isEdit = false,
+  isVip = "N", // VIP 룸 여부 (기본값: N)
   onSubmit,
   closeModal,
 }) {
-  const [selectedLocation, setSelectedLocation] = useState(propSelectedLocation || (locationOptions[0]?.code ?? ""));
-  const [roomId, setRoomId] = useState(initialData.roomId || propSelectedRoom || (roomOptions[0]?.id ?? ""));
+  const [selectedLocation, setSelectedLocation] = useState(() => {
+    return propSelectedLocation || (locationOptions[0]?.code ?? "");
+  });
+  
+  const [roomId, setRoomId] = useState(() => {
+    return initialData.roomId || propSelectedRoom || (roomOptions[0]?.id ?? "");
+  });
+
   const [companyId, setCompanyId] = useState(isEdit ? initialData.companyId || "" : "");
   const [numberVisitors, setNumberVisitors] = useState(isEdit ? initialData.numberVisitors || "" : "");
   const [paymentType, setPaymentType] = useState(isEdit ? (initialData.paymentType === "유료 예약") ? "paid" : "free" : "free");
@@ -31,9 +37,9 @@ export default function ReservationForm({
   const [status] = useState(initialData.status || "gs0101");
   const [remainingTime, setRemainingTime] = useState(null);
 
-
-
-  
+  // 예약 데이터 및 로딩 상태
+  const [currentReservations, setCurrentReservations] = useState(existingReservations);
+  const [isLoadingReservations, setIsLoadingReservations] = useState(false);
 
   const getToday = () => {
     const today = new Date();
@@ -52,67 +58,82 @@ export default function ReservationForm({
     return `${yyyy}-${mm}-${dd}`;
   };
 
-  // 이전 selectedLocation 추적을 위한 ref
-  const [prevSelectedLocation, setPrevSelectedLocation] = useState(selectedLocation);
-
-  useEffect(() => {
-    if (roomOptions.length > 0) {
-      // 오피스/지점이 실제로 변경되었거나 신규 등록인 경우에만 첫 번째 룸으로 자동 설정
-      const locationChanged = prevSelectedLocation !== selectedLocation;
-      const shouldUpdateRoom = !isEdit || locationChanged;
+  // 특정 룸의 예약 데이터를 API로 직접 가져오는 함수
+  const fetchReservationsForRoom = async (roomIdToFetch) => {
+    if (!roomIdToFetch) return;
+    
+    try {
+      setIsLoadingReservations(true);
+      const apiUrl = `/api/v1/meeting?roomId=${roomIdToFetch}&isVip=${isVip}&lang=ko`;
       
-      if (shouldUpdateRoom) {
-        setRoomId(roomOptions[0].id);
-        if (propSetSelectedRoom) propSetSelectedRoom(roomOptions[0].id);
+      const res = await api.get(apiUrl);
+      if (res.data?.success && Array.isArray(res.data.data)) {
+        const mapped = res.data.data.map((item) => ({
+          id: item.id,
+          title: `${item.paymentType}예약 ${item.resveStartTime} ~ ${item.resveEndTime} ${item.reserver} (${item.companyName})`,
+          start: new Date(`${item.resveDate}T${item.resveStartTime}`),
+          end: new Date(`${item.resveDate}T${item.resveEndTime}`),
+          resource: item,
+        }));
+        
+        setCurrentReservations(mapped);
       }
-      console.log("selectedLocation", selectedLocation);
+    } catch (err) {
+      console.error("예약 데이터 조회 실패:", err);
+    } finally {
+      setIsLoadingReservations(false);
+    }
+  };
+
+  // 오피스 변경에 따른 룸 옵션 업데이트 및 API 호출
+  const fetchRoomOptionsAndReservations = async (officeCode) => {
+    try {
+      setIsLoadingReservations(true);
       
-      // 현재 selectedLocation을 이전 값으로 저장
-      setPrevSelectedLocation(selectedLocation);
-    }
-  }, [selectedLocation, roomOptions]);
-
-  useEffect(() => {
-    if (!isEdit && locationOptions.length > 0 && !selectedLocation) {
-      setSelectedLocation(locationOptions[0].code);
-      if (propSetSelectedLocation) propSetSelectedLocation(locationOptions[0].code);
-    }
-  }, [locationOptions]);
-
-  useEffect(() => {
-    if (propSelectedLocation) setSelectedLocation(propSelectedLocation);
-  }, [propSelectedLocation]);
-  useEffect(() => {
-    if (propSelectedRoom) {
-      setRoomId(propSelectedRoom);
-    }
-  }, [propSelectedRoom]);
-
-  useEffect(() => {
-    if (meetingOptions) {
-      console.log(meetingOptions);
-    }
-  }, [meetingOptions]);
-
-  // resveStartTime 변경 시 resveEndTime 자동 업데이트
-  useEffect(() => {
-    if (resveStartTime && (!resveEndTime || resveEndTime === "10:00:00")) {
-      const startHour = parseInt(resveStartTime.split(':')[0]);
-      const endHour = startHour + 1;
-      if (endHour <= 18) {
-        const newEndTime = `${String(endHour).padStart(2, "0")}:00:00`;
-        setResveEndTime(newEndTime);
+      // 1. 해당 오피스의 룸 목록 가져오기
+      const roomRes = await api.get(`/api/v1/meeting/room-list?isVip=${isVip}&location=${officeCode}`);
+      if (roomRes.data?.success && roomRes.data.data.length > 0) {
+        const newRooms = roomRes.data.data;
+        const firstRoomId = newRooms[0].id;
+        
+        // 2. 룸 ID 업데이트
+        setRoomId(firstRoomId);
+        
+        // 3. 부모에게도 알림
+        if (propSetSelectedRoom) {
+          propSetSelectedRoom(firstRoomId);
+        }
+        
+        // 4. 새 룸의 예약 데이터 가져오기
+        await fetchReservationsForRoom(firstRoomId);
       }
+    } catch (err) {
+      console.error("오피스 변경 처리 실패:", err);
+      setIsLoadingReservations(false);
     }
+  };
 
-    if (resveStartTime) {
-      const threeDaysAgo = dayjs().add(3, "day");
-      const resveDate = dayjs(resveStartTime);
-      const _isAfterThreeDaysAgo = resveDate.isAfter(threeDaysAgo);
-      // setIsThreeDay(_isAfterThreeDaysAgo);
+  // 초기 설정
+  useEffect(() => {
+    if (roomOptions.length > 0 && !roomId) {
+      const firstRoomId = roomOptions[0].id;
+      setRoomId(firstRoomId);
     }
-  }, [resveStartTime, resveEndTime]);
+  }, [roomOptions]);
 
+  // roomId 또는 resveDate 변경 시 예약 데이터 새로고침
+  useEffect(() => {
+    if (roomId && resveDate) {
+      fetchReservationsForRoom(roomId);
+    }
+  }, [roomId, resveDate, isVip]);
+
+  // 초기 데이터 설정
+  useEffect(() => {
+    setCurrentReservations(existingReservations);
+  }, [existingReservations]);
+
+  // 초기 데이터 설정
   useEffect(() => {
     if (initialData.resveDate) setResveDate(initialData.resveDate);
     if (initialData.resveStartTime) setResveStartTime(initialData.resveStartTime + ":00");
@@ -127,6 +148,61 @@ export default function ReservationForm({
     if (initialData.companyId) setCompanyId(initialData.companyId);
     if (initialData.note) setNote(initialData.note);
   }, [initialData]);
+
+  // resveStartTime 변경 시 resveEndTime 자동 업데이트
+  useEffect(() => {
+    if (resveStartTime && resveDate) {
+      // 사용 가능한 종료 시간 옵션을 가져와서 첫 번째 값으로 설정
+      const timeoutId = setTimeout(() => {
+        try {
+          const reserved = getReservedTimes;
+          const proposedStartTime = new Date(`${resveDate}T${resveStartTime}`);
+          
+          if (!isNaN(proposedStartTime.getTime())) {
+            // 가능한 종료 시간 중 첫 번째 옵션 찾기
+            for (let hour = proposedStartTime.getHours() + 1; hour <= 18; hour++) {
+              const endTimeStr = `${String(hour).padStart(2, "0")}:00:00`;
+              const proposedEndTime = new Date(`${resveDate}T${endTimeStr}`);
+              
+              if (!isNaN(proposedEndTime.getTime())) {
+                const overlaps = reserved.some(({ start, end }) => {
+                  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                    return false;
+                  }
+                  
+                  // 제안된 예약과 기존 예약 사이에 1시간 버퍼가 있는지 확인
+                  const hasOverlap = !(
+                    // 제안된 예약이 기존 예약 시작 1시간 전에 끝남
+                    proposedEndTime <= new Date(start.getTime() - 60 * 60 * 1000) ||
+                    // 제안된 예약이 기존 예약 종료 1시간 후에 시작됨
+                    proposedStartTime >= new Date(end.getTime() + 60 * 60 * 1000)
+                  );
+
+                  return hasOverlap;
+                });
+
+                if (!overlaps) {
+                  setResveEndTime(endTimeStr);
+                  break;
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error("자동 종료시간 설정 에러:", error);
+          // 에러 발생 시 기본적으로 +1시간으로 설정
+          const startHour = parseInt(resveStartTime.split(':')[0]);
+          const endHour = startHour + 1;
+          if (endHour <= 18) {
+            const newEndTime = `${String(endHour).padStart(2, "0")}:00:00`;
+            setResveEndTime(newEndTime);
+          }
+        }
+      }, 100); // 약간의 지연을 주어 상태 업데이트 완료 후 실행
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [resveStartTime, resveDate, roomId, currentReservations]);
 
   // 잔여 시간 조회 API 호출
   useEffect(() => {
@@ -176,7 +252,7 @@ export default function ReservationForm({
       ...(isEdit && { id: initialData.id }),
       ...(!isEdit && { status }),
     };
-    console.log(payload)
+
 
     try {
       const res = await api.post(
@@ -184,19 +260,17 @@ export default function ReservationForm({
         payload
       );
       if (res.data?.success) {
-        if(res.data?.message) {
-          alert(res.data?.message);
-        } else {
-          alert(isEdit ? "수정 완료" : "등록 완료");
-        }
+        const successMessage = res.data?.message 
+          ? extractSuccessMessage(res, isEdit ? "수정 완료" : "등록 완료")
+          : isEdit ? "수정 완료" : "등록 완료";
+        alert(successMessage);
         onSubmit?.(payload);
         closeModal?.();
       } else {
-        if(res.data?.message) {
-          alert(res.data?.message);
-        } else {
-          alert("처리 실패");
-        }
+        const errorMessage = res.data?.message 
+          ? extractErrorMessage(res, "처리 실패")
+          : "처리 실패";
+        alert(errorMessage);
       }
     } catch (err) {
       console.error("예약 처리 실패:", err.response?.data?.message );
@@ -207,7 +281,7 @@ export default function ReservationForm({
         alert("해당 날짜와 시간으로는 예약을 등록할 수 없습니다.");
         return;
       } else {
-        alert(err?.response?.data?.message || err?.data?.message || "예약이 실패되었습니다. 다시시도 해주세요.");
+        alert(extractErrorMessage(err, "예약이 실패되었습니다. 다시시도 해주세요."));
       }
     }
   };
@@ -219,69 +293,153 @@ export default function ReservationForm({
     });
   };
 
-  const getReservedTimes = () => {
-    return existingReservations
-      .filter((r) => 
-        r.resource.resveDate === resveDate &&
-        (!isEdit || r.resource.id !== initialData.id) // 본인 예약은 제외
-      )
-      .map((r) => ({
-        start: new Date(`${r.resource.resveDate}T${r.resource.resveStartTime}`),
-        end: new Date(`${r.resource.resveDate}T${r.resource.resveEndTime}`),
-      }));
-  };
+  const getReservedTimes = useMemo(() => {
+    if (!resveDate || !roomId) {
+      return [];
+    }
+    
+    const filtered = currentReservations
+      .filter((r) => {
+        const dateMatch = r.resource.resveDate === resveDate;
+        const roomMatch = r.resource.roomId === Number(roomId);
+        const isCurrentEdit = isEdit && r.resource.id === initialData.id;
+        const editExclude = !isCurrentEdit;
+        
+        return dateMatch && roomMatch && editExclude;
+      })
+      .map((r) => {
+        try {
+          const startDateTime = `${r.resource.resveDate}T${r.resource.resveStartTime}`;
+          const endDateTime = `${r.resource.resveDate}T${r.resource.resveEndTime}`;
+          
+          const [startDate, startTime] = startDateTime.split('T');
+          const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
+          const startTimeParts = startTime.split(':').map(Number);
+          const startHour = startTimeParts[0] || 0;
+          const startMin = startTimeParts[1] || 0;
+          const startSec = startTimeParts[2] || 0;
+          
+          const [endDate, endTime] = endDateTime.split('T');
+          const [endYear, endMonth, endDay] = endDate.split('-').map(Number);
+          const endTimeParts = endTime.split(':').map(Number);
+          const endHour = endTimeParts[0] || 0;
+          const endMin = endTimeParts[1] || 0;
+          const endSec = endTimeParts[2] || 0;
+          
+          const start = new Date(startYear, startMonth - 1, startDay, startHour, startMin, startSec);
+          const end = new Date(endYear, endMonth - 1, endDay, endHour, endMin, endSec);
+          
+          if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            return null;
+          }
+          
+          return { start, end };
+        } catch (error) {
+          console.error("예약 시간 변환 에러:", error);
+          return null;
+        }
+      })
+      .filter(Boolean);
+    
+    return filtered;
+  }, [resveDate, roomId, currentReservations, isEdit, initialData.id]);
 
   const isTimeAvailable = (timeStr) => {
-    const timeDate = new Date(`${resveDate}T${timeStr}`);
-    const reserved = getReservedTimes();
+    if (isLoadingReservations || !resveDate) return false;
+    
+    try {
+      const timeDateTime = `${resveDate}T${timeStr}`;
+      const [checkDate, checkTime] = timeDateTime.split('T');
+      const [checkYear, checkMonth, checkDay] = checkDate.split('-').map(Number);
+      const [checkHour, checkMin, checkSec] = checkTime.split(':').map(Number);
+      
+      const proposedStartTime = new Date(checkYear, checkMonth - 1, checkDay, checkHour, checkMin, checkSec);
+      
+      if (isNaN(proposedStartTime.getTime())) {
+        return false;
+      }
+      
+      // 제안된 예약 시간 (최소 1시간)
+      const proposedEndTime = new Date(proposedStartTime);
+      proposedEndTime.setHours(proposedEndTime.getHours() + 1);
+      
+      const reserved = getReservedTimes;
 
-    return reserved.every(({ start, end }) => {
-      const beforeStart = new Date(start);
+      const isAvailable = reserved.every(({ start, end }) => {
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          return true;
+        }
+        
+        // 제안된 예약과 기존 예약 사이에 1시간 버퍼가 있는지 확인
+        const noOverlap = (
+          // 제안된 예약이 기존 예약 시작 1시간 전에 끝남
+          proposedEndTime <= new Date(start.getTime() - 60 * 60 * 1000) ||
+          // 제안된 예약이 기존 예약 종료 1시간 후에 시작됨
+          proposedStartTime >= new Date(end.getTime() + 60 * 60 * 1000)
+        );
 
-      beforeStart.setHours(beforeStart.getHours() - 1);
+        return noOverlap;
+      });
 
-      const afterEnd = new Date(end);
-      afterEnd.setHours(afterEnd.getHours() + 1);
-
-      // console.log("startcheck", beforeStart, afterEnd);
-      return timeDate < beforeStart || timeDate > afterEnd - 1;
-    });
+      return isAvailable;
+    } catch (error) {
+      console.error("시간 체크 에러:", error);
+      return false;
+    }
   };
 
   const getEndOptions = () => {
     if (!resveDate || !resveStartTime) return [];
 
-    const reserved = getReservedTimes();
-    const baseStart = new Date(`${resveDate}T${resveStartTime}`);
+    try {
+      const reserved = getReservedTimes;
+      const proposedStartTime = new Date(`${resveDate}T${resveStartTime}`);
+      
+      if (isNaN(proposedStartTime.getTime())) {
+        return [];
+      }
 
-    const options = [];
+      const options = [];
 
-    for (let hour = baseStart.getHours() + 1; hour <= 18; hour++) {
-      const endTimeStr = `${String(hour).padStart(2, "0")}:00:00`;
-      const endTime = new Date(`${resveDate}T${endTimeStr}`);
+      for (let hour = proposedStartTime.getHours() + 1; hour <= 18; hour++) {
+        const endTimeStr = `${String(hour).padStart(2, "0")}:00:00`;
+        const proposedEndTime = new Date(`${resveDate}T${endTimeStr}`);
+        
+        if (isNaN(proposedEndTime.getTime())) {
+          continue;
+        }
 
-      // 회의 종료 후 1시간 버퍼까지 포함한 시간
-      const bufferEnd = new Date(endTime);
-      bufferEnd.setHours(bufferEnd.getHours() + 1);
 
-      // 예약된 구간과 겹치는지 확인 (버퍼 시간 포함)
-      const overlaps = reserved.some(({ start, end }) => {
-        return (
-          (baseStart >= start && baseStart < end) || // 시작이 중간에 겹침
-          (bufferEnd > start && baseStart < end) || // 종료 + 1시간이 다른 예약과 겹침
-          (baseStart <= start && bufferEnd > start) // 전체 덮는 경우
-        );
-      });
 
-      if (overlaps) break;
+        const overlaps = reserved.some(({ start, end }) => {
+          if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            return false;
+          }
+          
+          // 제안된 예약과 기존 예약 사이에 1시간 버퍼가 있는지 확인
+          const hasOverlap = !(
+            // 제안된 예약이 기존 예약 시작 1시간 전에 끝남
+            proposedEndTime <= new Date(start.getTime() - 60 * 60 * 1000) ||
+            // 제안된 예약이 기존 예약 종료 1시간 후에 시작됨
+            proposedStartTime >= new Date(end.getTime() + 60 * 60 * 1000)
+          );
 
-      options.push({
-        value: endTimeStr,
-        disabled: false,
-      });
+          return hasOverlap;
+        });
+
+        if (overlaps) break;
+
+        options.push({
+          value: endTimeStr,
+          disabled: false,
+        });
+      }
+
+      return options;
+    } catch (error) {
+      console.error("종료시간 옵션 에러:", error);
+      return [];
     }
-
-    return options;
   };
 
   // 현재 선택된 회의실의 최대 수용인원 구하기
@@ -289,18 +447,12 @@ export default function ReservationForm({
   
   // roomId 변경 시 maxCapacity 업데이트
   useEffect(() => {
-    console.log("roomId 변경 감지:", { roomId, roomOptionsLength: roomOptions.length });
-    
     if (roomOptions.length > 0 && roomId) {
       const selectedRoomObj = roomOptions.find(r => String(r.id) === String(roomId));
-      console.log("선택된 룸 객체:", selectedRoomObj);
-      
       const newMaxCapacity = selectedRoomObj?.capacity || 64;
-      console.log("새로운 maxCapacity:", newMaxCapacity);
-      
       setMaxCapacity(newMaxCapacity);
     }
-  }, [roomId, roomOptions]); // numberVisitors 의존성 제거
+  }, [roomId, roomOptions]);
 
   // numberVisitors 변경 시 maxCapacity 체크
   useEffect(() => {
@@ -330,9 +482,18 @@ export default function ReservationForm({
         </label>
         <select
           value={selectedLocation}
-          onChange={e => {
-            setSelectedLocation(e.target.value);
-            if (propSetSelectedLocation) propSetSelectedLocation(e.target.value);
+          onChange={async (e) => {
+            const newLocation = e.target.value;
+            
+            setSelectedLocation(newLocation);
+            
+            // 부모에게 변경사항 알림
+            if (propSetSelectedLocation) {
+              propSetSelectedLocation(newLocation);
+            }
+            
+            // 새 오피스의 룸 목록과 예약 데이터를 직접 가져오기
+            await fetchRoomOptionsAndReservations(newLocation);
           }}
           className="w-full rounded border px-2 py-1"
         >
@@ -341,15 +502,25 @@ export default function ReservationForm({
           ))}
         </select>
       </div>
+      
       <div>
         <label className="mb-1 block">
           Meeting Room <span className="text-red-500">*</span>
         </label>
         <select
-          value={roomId}
-          onChange={e => {
-            setRoomId(e.target.value);
-            if (propSetSelectedRoom) propSetSelectedRoom(e.target.value);
+          value={roomId || ""}
+          onChange={async (e) => {
+            const newRoomId = e.target.value;
+            
+            setRoomId(newRoomId);
+            if (propSetSelectedRoom) {
+              propSetSelectedRoom(Number(newRoomId));
+            }
+            
+            // 새 룸의 예약 데이터 가져오기
+            if (newRoomId && resveDate) {
+              await fetchReservationsForRoom(newRoomId);
+            }
           }}
           className="w-full rounded border px-2 py-1"
         >
@@ -357,9 +528,6 @@ export default function ReservationForm({
             <option key={r.id} value={r.id}>{r.roomName}</option>
           ))}
         </select>
-
-        
-        
       </div>
 
       <div>
@@ -393,7 +561,6 @@ export default function ReservationForm({
         </div>
       </div>
       
-
       <div>
         <label className="mb-1 block">
           예약 일정 <span className="text-red-500">*</span>
@@ -404,13 +571,20 @@ export default function ReservationForm({
             value={resveDate}
             min={getToday()}
             max={getMaxDate()}
-            onChange={(e) => {
+            onChange={async (e) => {
               const val = e.target.value;
+              
               if (isWeekend(val) || isHoliday(val)) {
                 alert("주말 및 공휴일은 선택할 수 없습니다.");
                 return;
               }
+              
               setResveDate(val);
+              
+              // 날짜 변경 시에도 예약 데이터 새로고침
+              if (roomId && val) {
+                await fetchReservationsForRoom(roomId);
+              }
             }}
             className="rounded border px-2 py-1"
           />
@@ -426,11 +600,9 @@ export default function ReservationForm({
             ))}
           </select>
           <span>~</span>
-          {/* {console.log("resveEndTime selectbox 렌더링:", { resveEndTime, getEndOptions: getEndOptions().length })} */}
           <select
             value={resveEndTime}
             onChange={(e) => {
-              console.log("resveEndTime 수동 변경:", e.target.value);
               setResveEndTime(e.target.value);
             }}
             className="rounded border px-2 py-1"
@@ -455,7 +627,6 @@ export default function ReservationForm({
         <p className="text-sm text-gray-600 mt-1">
           * 주말 및 공휴일은 선택할 수 없습니다.
         </p>
-        {/* {(!isThreeDay && paymentType === "paid") && (<p>유료 예약 시 오늘 기준 영업일 3일 이내<br />수정 및 삭제 불가하며 별도의 수수료가 발생됩니다.</p>)} */}
       </div>
 
       <div>
@@ -528,8 +699,6 @@ export default function ReservationForm({
           className="w-full rounded border px-2 py-1"
         />
       </div>
-
-      
 
       <div>
         <label className="mb-1 block">비고</label>

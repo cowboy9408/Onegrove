@@ -37,3 +37,45 @@ export function getBusinessDaysDiff(from, to) {
   }
   return count;
 }
+
+/**
+ * 에러 응답에서 메시지를 안전하게 추출합니다.
+ * "400 BAD_REQUEST \"메시지\"" 형식에서 따옴표 안의 메시지만 추출합니다.
+ * @param {Object} error - 에러 객체 (axios 에러 또는 일반 에러)
+ * @param {string} defaultMessage - 기본 메시지
+ * @returns {string} 추출된 에러 메시지
+ */
+export const extractErrorMessage = (error, defaultMessage = "오류가 발생했습니다. 다시 시도해주세요.") => {
+  // 여러 경로에서 메시지 찾기 (크로스체크)
+  const rawMessage = 
+    error?.response?.data?.message ||
+    error?.data?.message ||
+    error?.message ||
+    defaultMessage;
+  
+  // "400 BAD_REQUEST \"실제 메시지\"" 형식에서 따옴표 안의 메시지 추출
+  const quotedMatch = rawMessage.match(/[""]([^"""]*)[""]/);
+  if (quotedMatch && quotedMatch[1]) {
+    return quotedMatch[1].trim();
+  }
+  
+  // HTTP 상태 코드와 상태 텍스트 제거 (예: "400 BAD_REQUEST 메시지" -> "메시지")
+  const cleanMessage = rawMessage.replace(/^\d+\s+[A-Z_]+\s+/, '').trim();
+  
+  return cleanMessage || defaultMessage;
+};
+
+/**
+ * 성공 응답에서 메시지를 안전하게 추출합니다.
+ * @param {Object} response - 응답 객체
+ * @param {string} defaultMessage - 기본 메시지
+ * @returns {string} 추출된 메시지
+ */
+export const extractSuccessMessage = (response, defaultMessage = "작업이 완료되었습니다.") => {
+  const message = 
+    response?.data?.message ||
+    response?.message ||
+    defaultMessage;
+  
+  return message.trim();
+};
