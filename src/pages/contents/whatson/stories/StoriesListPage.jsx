@@ -167,8 +167,8 @@ export default function StoriesListPage() {
   return (
     <div>
       <SearchSection>
-        <Box className="space-y-4">
-          <div className="flex w-full flex-col gap-1">
+        <Box className="space-y-8">
+          <div className="flex w-full flex-col gap-6">
             {/* 라벨 줄 */}
             <div className="flex gap-4">
               <div className="w-[560px]">
