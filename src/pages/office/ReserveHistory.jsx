@@ -147,11 +147,20 @@ export default function Visit() {
     const matchesStatus =
       !activeFilter.status || item.status === activeFilter.status;
 
-    const matchesDate =
-      !activeFilter.dateRange.startDate ||
-      !activeFilter.dateRange.endDate ||
-      (new Date(item.createDatetime) >= activeFilter.dateRange.startDate &&
-        new Date(item.createDatetime) <= activeFilter.dateRange.endDate);
+    const matchesDate = (() => {
+      const [startStr] = item.resvDatetime.split(" - ");
+      const itemDate = new Date(startStr);
+      const { startDate, endDate } = activeFilter.dateRange;
+
+      if (startDate && endDate) {
+        return itemDate >= startDate && itemDate <= endDate;
+      } else if (startDate) {
+        return itemDate >= startDate;
+      } else if (endDate) {
+        return itemDate <= endDate;
+      }
+      return true;
+    })();
 
     return (
       matchesRoom &&
