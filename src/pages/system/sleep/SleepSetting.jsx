@@ -134,10 +134,9 @@ export default function SleepListPage() {
               value={roomName}
               onChange={(e) => setRoomName(e.target.value)}
               required
-              className="w-[400px]"
             />
           </div>
-          <div className="w-[400px]">
+          <div className="flex-1">
             <p className="mb-2 text-sm font-medium">사용 여부</p>
             <div className="flex gap-4">
               <Radio
@@ -159,8 +158,8 @@ export default function SleepListPage() {
         </div>
 
         {/* 성별 + 운영 시간 */}
-        <div className="flex items-end gap-90">
-          <div>
+        <div className="flex gap-6">
+          <div className="flex-1">
             <p className="mb-2 text-sm font-medium">성별</p>
             <div className="flex gap-4">
               <Radio
@@ -179,25 +178,21 @@ export default function SleepListPage() {
               />
             </div>
           </div>
-          <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium">
+          <div className="flex-1">
+            <p className="mb-2 text-sm font-medium">
               운영 시간<span className="text-red-500">*</span>
             </p>
             <div className="flex gap-4">
               <Datepicker
                 mode="time-only"
                 selectedDate={startDate}
-                onSingleChange={(date) => {
-                  setStartDate(date);
-                }}
+                onSingleChange={(date) => setStartDate(date)}
               />
               <span className="mt-2">~</span>
               <Datepicker
                 mode="time-only"
                 selectedDate={endDate}
-                onSingleChange={(date) => {
-                  setEndDate(date);
-                }}
+                onSingleChange={(date) => setEndDate(date)}
               />
             </div>
           </div>
