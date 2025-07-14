@@ -402,14 +402,13 @@ const StoriesRegistForm = forwardRef(
             </div>
           </div>
 
-          <div className="flex items-end justify-between">
-            <div className="w-1/2">
+          <div className="flex items-start gap-4">
+            {/* 노출 기간 */}
+            <div className="w-[50%]">
               <p className="mb-1 block pb-2 pl-1 text-sm font-medium text-gray-800">
                 노출 기간<span className="ml-1 text-red-500">*</span>
               </p>
-              {/* 시작 날짜 + 시간 */}
-              <div className="flex items-center gap-4">
-                {/* 시작 날짜 + 시간 */}
+              <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
                   <Datepicker
                     mode="single"
@@ -428,7 +427,6 @@ const StoriesRegistForm = forwardRef(
                     disabled={readOnly}
                   />
                 </div>
-
                 <div className="flex items-center gap-2">
                   <span className="font-bold">~</span>
                   <Datepicker
@@ -453,11 +451,13 @@ const StoriesRegistForm = forwardRef(
                 </div>
               </div>
             </div>
-            <div className="flex w-1/2 items-center justify-end gap-4">
-              <p className="text-sm font-medium whitespace-nowrap text-gray-800">
+
+            {/* 노출 여부 */}
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-medium text-gray-800">
                 노출 여부<span className="ml-1 text-red-500">*</span>
               </p>
-              <div className="flex gap-4">
+              <div className="flex gap-2">
                 <Radio
                   name="status"
                   value="active"
