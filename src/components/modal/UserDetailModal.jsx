@@ -151,7 +151,7 @@ export default function UserDetailModal({ userData }) {
           어메니티 예약 무료 시간: {data.freeAmenityHours}시간
         </div>
         <div className="mt-4 text-base font-medium text-gray-800">
-          이번 달 어메니티 예약 사용 시간
+          ※ 이번 달 어메니티 예약 사용 시간
         </div>
 
         <div className="mt-2 font-medium text-gray-800">
