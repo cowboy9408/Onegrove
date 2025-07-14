@@ -114,15 +114,15 @@ export default function UserDetailModal({ userData }) {
       <NewInput id="email" label="대표 이메일" value={data.email} readOnly />
 
       {/* 대표 이미지 */}
-      <div>
-        <span className="mb-1 block text-sm font-medium text-gray-800">
+      <div className="flex items-center gap-4">
+        <span className="min-w-[100px] text-sm font-medium text-gray-800">
           대표 이미지
         </span>
         {data.imageUrl ? (
           <img
             src={data.imageUrl}
             alt="대표 이미지"
-            className="h-24 w-24 rounded border"
+            className="h-40 w-40 rounded border" // 160px x 160px
           />
         ) : (
           <div className="text-sm text-gray-400">이미지가 없습니다</div>
@@ -150,9 +150,10 @@ export default function UserDetailModal({ userData }) {
         <div className="font-medium text-gray-800">
           어메니티 예약 무료 시간: {data.freeAmenityHours}시간
         </div>
-        <div className="font-medium text-gray-800">
+        <div className="mt-4 text-base font-medium text-gray-800">
           이번 달 어메니티 예약 사용 시간
         </div>
+
         <div className="mt-2 font-medium text-gray-800">
           무료 사용 시간: {freeUsedHours}시간 / 유료 사용 시간: {paidUsedHours}
           시간
