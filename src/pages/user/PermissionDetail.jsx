@@ -8,7 +8,7 @@ import Select from "@/components/common/Select";
 import useModal from "@/hooks/useModal";
 import { useAuthStore } from "@/store/authStore";
 
-export default function UserDetailPage() {
+export default function PermissionDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { showModal } = useModal();
@@ -216,7 +216,7 @@ export default function UserDetailPage() {
               title: "수정 완료",
               message: "수정이 완료되었습니다.",
               showCancel: false,
-              onConfirm: () => navigate("/user/list"),
+              onConfirm: () => navigate("/user"),
             });
           } else {
             showModal({
@@ -476,7 +476,7 @@ export default function UserDetailPage() {
               message:
                 "목록으로 돌아가면 입력한 정보가 사라집니다. 이동하시겠습니까?",
               showCancel: true,
-              onConfirm: () => navigate("/user/list"),
+              onConfirm: () => navigate("/user"),
             })
           }
         >

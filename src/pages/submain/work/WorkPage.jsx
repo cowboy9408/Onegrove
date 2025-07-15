@@ -6,6 +6,7 @@ import api from "@/lib/apiClient";
 import Button from "@/components/common/Button";
 import WorkForm from "./components/WorkForm";
 import useModal from "@/hooks/useModal";
+import CompanyList from "@/pages/submain/work/components/CompanyList";
 
 export default function WorkPage() {
   const { showModal } = useModal();
@@ -172,6 +173,7 @@ export default function WorkPage() {
               setWorkContents((prev) => ({ ...prev, ko: newVal }))
             }
           />
+          <CompanyList />
         </TabPanel>
 
         <TabPanel>
@@ -191,6 +193,7 @@ export default function WorkPage() {
               setWorkContents((prev) => ({ ...prev, en: newVal }))
             }
           />
+          <CompanyList />
         </TabPanel>
       </Tabs>
       <div className="mt-8 flex justify-end">

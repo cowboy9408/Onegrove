@@ -217,7 +217,7 @@ export default function AdminRegist() {
             title: "등록 완료",
             message: "계정이 성공적으로 등록되었습니다.",
             showCancel: false,
-            onConfirm: () => navigate("/user"),
+            onConfirm: () => navigate("/user/list"),
           });
         } catch (error) {
           const message = error?.response?.data?.message || "";
@@ -406,7 +406,7 @@ export default function AdminRegist() {
               message:
                 "목록으로 돌아가면 입력한 정보가 사라집니다. 이동하시겠습니까?",
               showCancel: true,
-              onConfirm: () => navigate("/user"),
+              onConfirm: () => navigate("/user/list"),
             })
           }
         >

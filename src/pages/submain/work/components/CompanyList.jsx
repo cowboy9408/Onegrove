@@ -1,7 +1,8 @@
 import { useState } from "react";
-import CompanySelectModal from "./CompanySelectModal";
+import CompanySelectModal from "@/components/modal/CompanySelectModal";
 import Button from "@/components/common/Button";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import Title from "@/components/layout/Title";
 
 export default function CompanyList() {
   const [showModal, setShowModal] = useState(false);

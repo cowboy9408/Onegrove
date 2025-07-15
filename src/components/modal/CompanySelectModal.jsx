@@ -3,6 +3,7 @@ import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import DataTable from "@/components/common/DataTable";
 import api from "@/lib/apiClient";
+import { XIcon } from "@/components/ui/x"; // 기존 모달에서 사용하던 아이콘
 
 export default function CompanySelectModal({
   selected = [],
@@ -50,6 +51,9 @@ export default function CompanySelectModal({
 
   return (
     <div>
+      <div className="mb-2 flex justify-end">
+        <XIcon onClick={closeModal} size={15} />
+      </div>
       {/* 검색 영역 */}
       <div className="mb-4 flex gap-2">
         <Input

@@ -70,6 +70,9 @@ import MeetingDetail from "@/pages/system/meeting/MeetinDetail";
 import VisitDetail from "@/pages/office/visit/VisitDetail";
 import SettingLayout from "@/pages/office/setting/SettingLayout";
 import ReserveHistory from "@/pages/office/ReserveHistory";
+import UserLayout from "@/pages/user/UserLayout";
+import PermissionList from "@/pages/user/PermissionList";
+import PermissionDetail from "@/pages/user/PermissionDetail";
 
 export const routeMeta = [
   {
@@ -147,34 +150,80 @@ export const routeMeta = [
       },
 
       {
-        uuid: "0c3eb744-5f42-4e6e-8107-43644c68647c",
+        uuid: "34d48fee-cfe7-4793-ab5e-ce779b244ea7",
         path: "/user",
-        group: "/user",
-        element: <UserListPage />,
+        element: <UserLayout />,
         title: "임직원 관리",
         icon: <UsersIcon size={18} />,
         hidden: false,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_SECRETARY_ADMIN"],
-      },
-      {
-        uuid: "b269e884-b419-4961-9b85-144d20ff3b4d",
-        path: "/user/regist",
-        group: "/user",
-        element: <UserRegist />,
-        title: "임직원 등록",
-        icon: <UsersIcon size={18} />,
-        hidden: true,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_SECRETARY_ADMIN"],
-      },
-      {
-        uuid: "aeab286e-bb23-471f-a050-7b812fecf13a",
-        path: "/user/detail/:id",
-        group: "/user",
-        element: <UserDetailPage />,
-        title: "임직원 상세",
-        icon: <UsersIcon size={18} />,
-        hidden: true,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_SECRETARY_ADMIN"],
+        permissions: ["SUPER_ADMIN", "OFFICE_SECRETARY_ADMIN", "NORMAL_ADMIN"],
+        children: [
+          {
+            uuid: "0c3eb744-5f42-4e6e-8107-43644c68647c",
+            path: "/user/list",
+            element: <UserListPage />,
+            title: "임직원 관리",
+            icon: <UsersIcon size={18} />,
+            hidden: false,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "OFFICE_SECRETARY_ADMIN",
+            ],
+          },
+          {
+            uuid: "b269e884-b419-4961-9b85-144d20ff3b4d",
+            path: "/user/regist",
+            element: <UserRegist />,
+            title: "임직원 등록",
+            icon: <UsersIcon size={18} />,
+            hidden: true,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "OFFICE_SECRETARY_ADMIN",
+            ],
+          },
+          {
+            uuid: "aeab286e-bb23-471f-a050-7b812fecf13a",
+            path: "/user/detail/:id",
+            element: <UserDetailPage />,
+            title: "임직원 상세",
+            icon: <UsersIcon size={18} />,
+            hidden: true,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "OFFICE_SECRETARY_ADMIN",
+            ],
+          },
+          {
+            uuid: "411e07ef-82a9-4150-9ffd-55ef677819d2",
+            path: "/user/permission",
+            element: <PermissionList />,
+            title: "계정 승인 대기",
+            icon: <UsersIcon size={18} />,
+            hidden: false,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "OFFICE_SECRETARY_ADMIN",
+            ],
+          },
+          {
+            uuid: "8ee32057-ff9a-41a6-a28c-3adff95977f9",
+            path: "/user/permission/detail/:id",
+            element: <PermissionDetail />,
+            title: "승인 정보 상세",
+            icon: <UsersIcon size={18} />,
+            hidden: true,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "OFFICE_SECRETARY_ADMIN",
+            ],
+          },
+        ],
       },
 
       {
