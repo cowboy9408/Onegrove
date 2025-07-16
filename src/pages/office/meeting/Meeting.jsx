@@ -271,6 +271,8 @@ export default function Meeting() {
                               selectedRoom={selectedRoom}
                               setSelectedLocation={setSelectedOffice}
                               setSelectedRoom={setSelectedRoom}
+                              setRoomOptions={setLocationOptions}
+                              settingOptions={settingOptions}
                               selectData={selectedData}
                               meetingOptions={meetingOptions}
                               existingReservations={scheduleList}
@@ -368,6 +370,8 @@ export default function Meeting() {
                     selectedRoom={selectedRoom}
                     setSelectedLocation={setSelectedOffice}
                     setSelectedRoom={setSelectedRoom}
+                    setRoomOptions={setLocationOptions}
+                    settingOptions={settingOptions}
                     selectData={selectedData}
                     meetingOptions={meetingOptions}
                     existingReservations={scheduleList}
@@ -420,6 +424,8 @@ export default function Meeting() {
                     selectedRoom={selectedRoom}
                     setSelectedLocation={setSelectedOffice}
                     setSelectedRoom={setSelectedRoom}
+                    setRoomOptions={setLocationOptions}
+                    settingOptions={settingOptions}
                     selectData={selectedData}
                     meetingOptions={meetingOptions}
                     existingReservations={scheduleList}
