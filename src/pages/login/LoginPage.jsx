@@ -19,6 +19,7 @@ export default function LoginPage() {
   const [saveId, setSaveId] = useState(false);
   const { showModal } = useModal();
   const setName = useAuthStore((state) => state.setName);
+  const setCompanyId = useAuthStore((state) => state.setCompanyId);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -31,6 +32,7 @@ export default function LoginPage() {
       setAccessToken(res.accessToken);
       setRefreshToken(res.refreshToken);
       setName(res.name);
+      setCompanyId(res.companyId);
 
       localStorage.setItem("accessToken", res.accessToken);
       localStorage.setItem("refreshToken", res.refreshToken);
@@ -41,7 +43,10 @@ export default function LoginPage() {
 
       showModal({
         title: "로그인 실패",
-        message: extractErrorMessage(err, "로그인에 실패했습니다. 다시 시도해주세요."),
+        message: extractErrorMessage(
+          err,
+          "로그인에 실패했습니다. 다시 시도해주세요."
+        ),
         showCancel: true,
       });
     }

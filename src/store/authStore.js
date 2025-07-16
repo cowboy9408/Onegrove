@@ -69,6 +69,7 @@ export const useAuthStore = create(
       setName: (name) => {
         set({ name });
       },
+      setCompanyId: (companyId) => set({ companyId }),
     }),
     {
       name: "auth-storage",

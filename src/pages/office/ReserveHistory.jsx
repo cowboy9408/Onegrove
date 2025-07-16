@@ -147,11 +147,20 @@ export default function Visit() {
     const matchesStatus =
       !activeFilter.status || item.status === activeFilter.status;
 
-    const matchesDate =
-      !activeFilter.dateRange.startDate ||
-      !activeFilter.dateRange.endDate ||
-      (new Date(item.createDatetime) >= activeFilter.dateRange.startDate &&
-        new Date(item.createDatetime) <= activeFilter.dateRange.endDate);
+    const matchesDate = (() => {
+      const [startStr] = item.resvDatetime.split(" - ");
+      const itemDate = new Date(startStr);
+      const { startDate, endDate } = activeFilter.dateRange;
+
+      if (startDate && endDate) {
+        return itemDate >= startDate && itemDate <= endDate;
+      } else if (startDate) {
+        return itemDate >= startDate;
+      } else if (endDate) {
+        return itemDate <= endDate;
+      }
+      return true;
+    })();
 
     return (
       matchesRoom &&
@@ -176,8 +185,8 @@ export default function Visit() {
         <Box>
           <div className="flex flex-col gap-6">
             {/* 1줄: Meeting Room, 입주사, 예약 종류 */}
-            <div className="flex items-end gap-6">
-              <div className="min-w-[200px] flex-1">
+            <div className="flex items-end gap-12">
+              <div className="w-full max-w-[400px] flex-1">
                 <Select
                   label="Meeting Room"
                   value={searchFilter.meetingRoom}
@@ -197,7 +206,7 @@ export default function Visit() {
                 </Select>
               </div>
 
-              <div className="min-w-[200px] flex-1">
+              <div className="w-full max-w-[400px] flex-1">
                 <Select
                   label="입주사"
                   value={searchFilter.companyName}
@@ -244,11 +253,12 @@ export default function Visit() {
             </div>
 
             {/* 2줄: 예약 일정, 예약 상태 */}
-            <div className="flex items-end gap-6">
-              <div className="min-w-[300px] flex-1">
-                <p className="mb-1 block pb-2 pl-1 text-sm font-medium text-gray-800 dark:text-gray-100">
+            <div className="flex items-start gap-12">
+              {/* 예약 일정 */}
+              <div className="w-full max-w-[400px]">
+                <label className="mb-1 block text-sm font-medium text-gray-800 dark:text-gray-100">
                   예약 일정
-                </p>
+                </label>
                 <DateRangePicker
                   startDate={searchFilter.dateRange.startDate}
                   endDate={searchFilter.dateRange.endDate}
@@ -261,11 +271,12 @@ export default function Visit() {
                 />
               </div>
 
+              {/* 예약 상태 */}
               <div className="flex flex-col">
                 <label className="mb-1 text-sm font-medium text-gray-800 dark:text-gray-100">
                   예약 상태
                 </label>
-                <div className="flex gap-4">
+                <div className="mt-3 flex gap-3">
                   {["", "가예약", "예약 확정", "예약 취소"].map((status) => (
                     <label key={status} className="flex items-center gap-1">
                       <input

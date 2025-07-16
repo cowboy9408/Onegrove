@@ -1,5 +1,7 @@
 import NewInput from "@/components/common/NewInput";
 import Radio from "@/components/common/Radio";
+import { useEffect, useState } from "react";
+import api from "@/lib/apiClient";
 
 export default function UserDetailModal({ userData }) {
   const data = userData || {
@@ -18,8 +20,39 @@ export default function UserDetailModal({ userData }) {
     paidUsedHours: 0,
   };
 
+  const [freeUsedHours, setFreeUsedHours] = useState(0);
+  const [paidUsedHours, setPaidUsedHours] = useState(0);
+
+  useEffect(() => {
+    const companyId = data.companyId; // 또는 props로 넘겨주신 값
+
+    const fetchUsageTime = async () => {
+      try {
+        const [resFree, resPaid] = await Promise.all([
+          api.get(
+            `/api/v1/company/detail/time?companyId=${companyId}&type=free`
+          ),
+          api.get(
+            `/api/v1/company/detail/time?companyId=${companyId}&type=paid`
+          ),
+        ]);
+
+        setFreeUsedHours(resFree.data?.data ?? 0);
+        setPaidUsedHours(resPaid.data?.data ?? 0);
+      } catch (err) {
+        console.error("월별 어메니티 시간 조회 실패:", err);
+        setFreeUsedHours(0);
+        setPaidUsedHours(0);
+      }
+    };
+
+    if (companyId) {
+      fetchUsageTime();
+    }
+  }, [data.companyId]);
+
   return (
-    <div className="space-y-4 text-left">
+    <div className="space-y-5 text-left">
       <h2 className="text-lg font-bold"></h2>
 
       {/* 입주사 명 */}
@@ -56,9 +89,13 @@ export default function UserDetailModal({ userData }) {
       </div>
 
       {/* 오피스 / 층수 */}
-      <div className="flex gap-4">
-        <NewInput id="office" label="오피스" value={data.office} readOnly />
-        <NewInput id="floor" label="층" value={data.floor} readOnly />
+      <div className="flex w-full flex-wrap gap-4">
+        <div className="min-w-[100px] flex-1">
+          <NewInput id="office" label="오피스" value={data.office} readOnly />
+        </div>
+        <div className="w-[180px]">
+          <NewInput id="floor" label="층" value={data.floor} readOnly />
+        </div>
       </div>
 
       {/* 대표명 / 전화번호 / 이메일 */}
@@ -77,15 +114,15 @@ export default function UserDetailModal({ userData }) {
       <NewInput id="email" label="대표 이메일" value={data.email} readOnly />
 
       {/* 대표 이미지 */}
-      <div>
-        <span className="mb-1 block text-sm font-medium text-gray-800">
+      <div className="flex items-center gap-4">
+        <span className="min-w-[100px] text-sm font-medium text-gray-800">
           대표 이미지
         </span>
         {data.imageUrl ? (
           <img
             src={data.imageUrl}
             alt="대표 이미지"
-            className="h-24 w-24 rounded border"
+            className="h-40 w-40 rounded border" // 160px x 160px
           />
         ) : (
           <div className="text-sm text-gray-400">이미지가 없습니다</div>
@@ -113,12 +150,13 @@ export default function UserDetailModal({ userData }) {
         <div className="font-medium text-gray-800">
           어메니티 예약 무료 시간: {data.freeAmenityHours}시간
         </div>
-        <div className="font-medium text-gray-800">
-          이번 달 어메니티 예약 사용 시간
+        <div className="mt-4 text-base font-medium text-gray-800">
+          ※ 이번 달 어메니티 예약 사용 시간
         </div>
+
         <div className="mt-2 font-medium text-gray-800">
-          무료 사용 시간: {data.freeUsedHours}시간 / 유료 사용 시간:{" "}
-          {data.paidUsedHours}시간
+          무료 사용 시간: {freeUsedHours}시간 | 유료 사용 시간: {paidUsedHours}
+          시간
         </div>
       </div>
     </div>

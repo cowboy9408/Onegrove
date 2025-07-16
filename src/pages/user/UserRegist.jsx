@@ -6,8 +6,11 @@ import { useNavigate } from "react-router-dom";
 import api from "@/lib/apiClient";
 import Select from "@/components/common/Select";
 import useModal from "@/hooks/useModal";
+import { useAuthStore } from "@/store/authStore";
 
 export default function AdminRegist() {
+  const { permission, companyId } = useAuthStore();
+  const isSecretary = permission === "OFFICE_SECRETARY_ADMIN";
   const [form, setForm] = useState({
     status: "active",
     name: "",
@@ -17,7 +20,7 @@ export default function AdminRegist() {
     confirmPassword: "",
     phone: "",
     email: "",
-    company: "",
+    ompany: "",
   });
   const navigate = useNavigate();
   const { showModal } = useModal();
@@ -30,6 +33,20 @@ export default function AdminRegist() {
     email: "",
     company: false,
   });
+
+  useEffect(() => {
+    if (isSecretary && companyOptions.length > 0) {
+      const matched = companyOptions.find(
+        (item) => String(item.companyId) === String(companyId)
+      );
+      if (matched) {
+        setForm((prev) => ({
+          ...prev,
+          company: matched.companyId,
+        }));
+      }
+    }
+  }, [isSecretary, companyId, companyOptions]);
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -233,19 +250,28 @@ export default function AdminRegist() {
             label="입주사"
             value={form.company}
             onChange={(e) => {
-              handleChange("company", Number(e.target.value));
-              if (e.target.value) setCompanyError(false); // 값 선택 시 에러 해제
+              if (!isSecretary) {
+                handleChange("company", Number(e.target.value));
+              }
             }}
+            disabled={isSecretary}
             className="w-[735px]"
             required
           >
-            <option value="">선택하세요</option>
-            {companyOptions.map((item) => (
-              <option key={item.companyId} value={item.companyId}>
-                {item.companyName}
-              </option>
-            ))}
+            {!isSecretary && <option value="">선택하세요</option>}{" "}
+            {companyOptions
+              .filter((item) =>
+                isSecretary
+                  ? String(item.companyId) === String(companyId)
+                  : true
+              )
+              .map((item) => (
+                <option key={item.companyId} value={item.companyId}>
+                  {item.companyName}
+                </option>
+              ))}
           </Select>
+
           {companyError && (
             <p className="mt-1 text-sm text-red-500">입주사를 선택해주세요.</p>
           )}

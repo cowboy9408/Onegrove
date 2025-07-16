@@ -217,7 +217,7 @@ export default function PressListPage() {
     <div>
       <SearchSection>
         <Box className="space-y-4">
-          <div className="flex w-full flex-col gap-1">
+          <div className="flex w-full flex-col gap-6">
             {/* 라벨 줄 */}
             <div className="flex gap-4">
               {/* 카테고리 라벨 */}

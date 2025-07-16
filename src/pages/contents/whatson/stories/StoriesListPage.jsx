@@ -167,98 +167,105 @@ export default function StoriesListPage() {
   return (
     <div>
       <SearchSection>
-        <Box>
-          {/* 1행: 카테고리 + 게시글 등록일 */}
-          <Row className="mb-6 gap-1">
-            <Col className="w-1/2">
-              <Input
-                id={nameCategory}
-                label={"카테고리"}
-                value={searchFilter.category}
-                onChange={(e) =>
-                  setSearchFilter({ ...searchFilter, category: e.target.value })
-                }
-                onClear={() =>
-                  setSearchFilter({ ...searchFilter, category: "" })
-                }
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleSearch();
-                  }
-                }}
-                className="w-[465px]"
-              />
-            </Col>
+        <Box className="space-y-8">
+          <div className="flex w-full flex-col gap-6">
+            {/* 라벨 줄 */}
+            <div className="flex gap-4">
+              <div className="w-[560px]">
+                <span className="text-sm font-medium">카테고리</span>
+              </div>
+              <div className="flex-1">
+                <span className="text-sm font-medium">게시글 등록일</span>
+              </div>
+            </div>
 
-            <Col className="flex flex-1 flex-col gap-2">
-              <span className="text-sm font-medium">게시글 등록일</span>
-              <DateRangePicker
-                startDate={searchFilter.dateRange.startDate}
-                endDate={searchFilter.dateRange.endDate}
-                onRangeChange={({ startDate, endDate }) =>
-                  setSearchFilter({
-                    ...searchFilter,
-                    dateRange: { startDate, endDate },
-                  })
-                }
-              />
-            </Col>
-          </Row>
-
-          {/* 2행: 타이틀 + 노출 여부 + 버튼 */}
-          <Row className="items-end gap-6">
-            <Col className="w-1/2">
-              <Input
-                id={nameId}
-                label={"타이틀"}
-                value={searchFilter.name}
-                onChange={(e) =>
-                  setSearchFilter({ ...searchFilter, name: e.target.value })
-                }
-                onClear={() => setSearchFilter({ ...searchFilter, name: "" })}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleSearch();
-                  }
-                }}
-              />
-            </Col>
-
-            <Col className="flex flex-col gap-2">
-              <span className="text-sm font-medium">노출 여부</span>
-              <div className="flex gap-4">
-                <Radio
-                  id="visible"
-                  name="visibility"
-                  value="Y"
-                  checked={searchFilter.visibility === "Y"}
+            {/* 입력 줄 */}
+            <div className="flex gap-16">
+              {/* 카테고리 Input -> Select 로 바꾸는 것도 고려 */}
+              <div className="w-[505px]">
+                <Input
+                  id={nameCategory}
+                  value={searchFilter.category}
                   onChange={(e) =>
                     setSearchFilter({
                       ...searchFilter,
-                      visibility: e.target.value,
+                      category: e.target.value,
                     })
                   }
-                  label="노출"
-                />
-                <Radio
-                  id="hidden"
-                  name="visibility"
-                  value="N"
-                  checked={searchFilter.visibility === "N"}
-                  onChange={(e) =>
-                    setSearchFilter({
-                      ...searchFilter,
-                      visibility: e.target.value,
-                    })
+                  onClear={() =>
+                    setSearchFilter({ ...searchFilter, category: "" })
                   }
-                  label="미노출"
                 />
               </div>
-            </Col>
+              <div className="flex-1">
+                <DateRangePicker
+                  startDate={searchFilter.dateRange.startDate}
+                  endDate={searchFilter.dateRange.endDate}
+                  onRangeChange={({ startDate, endDate }) =>
+                    setSearchFilter({
+                      ...searchFilter,
+                      dateRange: { startDate, endDate },
+                    })
+                  }
+                />
+              </div>
+            </div>
+          </div>
 
-            <Col className="flex justify-end gap-2">
+          {/* 타이틀, 노출 여부, 버튼 */}
+          <Row className="flex w-full flex-wrap items-end gap-4">
+            <Row className="flex w-full gap-20">
+              <div className="flex w-[500px] flex-col">
+                <span className="mb-1 text-sm font-medium">타이틀</span>
+                <Input
+                  id={nameId}
+                  value={searchFilter.name}
+                  onChange={(e) =>
+                    setSearchFilter({ ...searchFilter, name: e.target.value })
+                  }
+                  onClear={() => setSearchFilter({ ...searchFilter, name: "" })}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleSearch();
+                    }
+                  }}
+                />
+              </div>
+
+              <div className="flex min-w-[240px] flex-col">
+                <span className="mb-1 text-sm font-medium">노출 여부</span>
+                <div className="mt-[15px] flex gap-4">
+                  <Radio
+                    id="visible"
+                    name="visibility"
+                    value="Y"
+                    checked={searchFilter.visibility === "Y"}
+                    onChange={(e) =>
+                      setSearchFilter({
+                        ...searchFilter,
+                        visibility: e.target.value,
+                      })
+                    }
+                    label="노출"
+                  />
+                  <Radio
+                    id="hidden"
+                    name="visibility"
+                    value="N"
+                    checked={searchFilter.visibility === "N"}
+                    onChange={(e) =>
+                      setSearchFilter({
+                        ...searchFilter,
+                        visibility: e.target.value,
+                      })
+                    }
+                    label="미노출"
+                  />
+                </div>
+              </div>
+            </Row>
+            <Col className="flex w-1/4 justify-end gap-2">
               <Button onClick={handleSearch}>검색</Button>
               <Button
                 variant="outline"
