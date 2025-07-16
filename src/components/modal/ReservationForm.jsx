@@ -9,6 +9,8 @@ export default function ReservationForm({
   selectedRoom: propSelectedRoom,
   setSelectedLocation: propSetSelectedLocation,
   setSelectedRoom: propSetSelectedRoom,
+  setRoomOptions: propSetRoomOptions, // 룸 옵션 업데이트를 위한 새로운 prop
+  settingOptions = [], // capacity 정보를 위한 prop
   meetingOptions,
   existingReservations = [],
   initialData = {},
@@ -96,16 +98,47 @@ export default function ReservationForm({
         const newRooms = roomRes.data.data;
         const firstRoomId = newRooms[0].id;
         
-        // 2. 룸 ID 업데이트
+        // 2. 부모 컴포넌트의 roomOptions 업데이트 (capacity 정보와 함께)
+        if (propSetRoomOptions) {
+          // capacity 정보를 포함하여 roomOptions 매핑
+          const mappedRooms = newRooms.map(room => {
+            const settingRoom = settingOptions.find(setting => setting.id === room.id);
+            return {
+              ...room,
+              capacity: settingRoom?.capacity || (isVip === "Y" ? 4 : 64), // VIP룸 기본값 4, 일반룸 기본값 64
+            };
+          });
+          propSetRoomOptions(mappedRooms);
+        }
+        
+        // 3. 룸 ID 업데이트
         setRoomId(firstRoomId);
         
-        // 3. 부모에게도 알림
+        // 4. 부모에게도 알림
         if (propSetSelectedRoom) {
           propSetSelectedRoom(firstRoomId);
         }
         
-        // 4. 새 룸의 예약 데이터 가져오기
+        // 5. 새 룸의 예약 데이터 가져오기
         await fetchReservationsForRoom(firstRoomId);
+        
+        // 6. 오피스 변경 시 현재 선택된 시간이 유효하지 않으면 초기화
+        setTimeout(() => {
+          if (resveStartTime && resveDate) {
+            const isCurrentTimeValid = isTimeAvailable(resveStartTime);
+            if (!isCurrentTimeValid) {
+              // 사용 가능한 첫 번째 시간 찾기
+              const availableTime = generateTimeOptions(9, 17).find(time => isTimeAvailable(time));
+              if (availableTime) {
+                setResveStartTime(availableTime);
+              } else {
+                // 사용 가능한 시간이 없으면 초기화
+                setResveStartTime("09:00:00");
+                setResveEndTime("");
+              }
+            }
+          }
+        }, 200); // 예약 데이터 로딩 완료 후 시간 검증
       }
     } catch (err) {
       console.error("오피스 변경 처리 실패:", err);
@@ -132,6 +165,28 @@ export default function ReservationForm({
   useEffect(() => {
     setCurrentReservations(existingReservations);
   }, [existingReservations]);
+
+  // 예약 데이터 변경 시 현재 선택된 시간 유효성 검증
+  useEffect(() => {
+    if (!isLoadingReservations && resveStartTime && resveDate && roomId) {
+      const timeoutId = setTimeout(() => {
+        const isCurrentTimeValid = isTimeAvailable(resveStartTime);
+        if (!isCurrentTimeValid) {
+          // 사용 가능한 첫 번째 시간 찾기
+          const availableTime = generateTimeOptions(9, 17).find(time => isTimeAvailable(time));
+          if (availableTime) {
+            setResveStartTime(availableTime);
+          } else {
+            // 사용 가능한 시간이 없으면 기본값으로 설정하되 종료시간은 초기화
+            setResveStartTime("09:00:00");
+            setResveEndTime("");
+          }
+        }
+      }, 100); // 상태 업데이트 완료 후 검증
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [currentReservations, isLoadingReservations, resveDate, roomId]);
 
   // 초기 데이터 설정
   useEffect(() => {
@@ -160,6 +215,8 @@ export default function ReservationForm({
           
           if (!isNaN(proposedStartTime.getTime())) {
             // 가능한 종료 시간 중 첫 번째 옵션 찾기
+            let foundValidEndTime = false;
+            
             for (let hour = proposedStartTime.getHours() + 1; hour <= 18; hour++) {
               const endTimeStr = `${String(hour).padStart(2, "0")}:00:00`;
               const proposedEndTime = new Date(`${resveDate}T${endTimeStr}`);
@@ -181,28 +238,54 @@ export default function ReservationForm({
                   return hasOverlap;
                 });
 
-                if (!overlaps) {
+                // 시작시간이 사용 가능한지도 확인 (중요: 이 부분이 추가됨)
+                const isStartTimeValid = isTimeAvailable(resveStartTime);
+                
+                if (!overlaps && isStartTimeValid) {
                   setResveEndTime(endTimeStr);
+                  foundValidEndTime = true;
                   break;
                 }
+              }
+            }
+            
+            // 유효한 종료시간을 찾지 못한 경우 기존 로직 사용
+            if (!foundValidEndTime) {
+              // 기본적으로 +1시간으로 설정하되, 시작시간이 유효한 경우에만
+              const isStartTimeValid = isTimeAvailable(resveStartTime);
+              if (isStartTimeValid) {
+                const startHour = parseInt(resveStartTime.split(':')[0]);
+                const endHour = startHour + 1;
+                if (endHour <= 18) {
+                  const newEndTime = `${String(endHour).padStart(2, "0")}:00:00`;
+                  setResveEndTime(newEndTime);
+                }
+              } else {
+                // 시작시간이 유효하지 않으면 종료시간도 초기화
+                setResveEndTime("");
               }
             }
           }
         } catch (error) {
           console.error("자동 종료시간 설정 에러:", error);
-          // 에러 발생 시 기본적으로 +1시간으로 설정
-          const startHour = parseInt(resveStartTime.split(':')[0]);
-          const endHour = startHour + 1;
-          if (endHour <= 18) {
-            const newEndTime = `${String(endHour).padStart(2, "0")}:00:00`;
-            setResveEndTime(newEndTime);
+          // 에러 발생 시에도 시작시간 유효성 확인 후 설정
+          const isStartTimeValid = isTimeAvailable(resveStartTime);
+          if (isStartTimeValid) {
+            const startHour = parseInt(resveStartTime.split(':')[0]);
+            const endHour = startHour + 1;
+            if (endHour <= 18) {
+              const newEndTime = `${String(endHour).padStart(2, "0")}:00:00`;
+              setResveEndTime(newEndTime);
+            }
+          } else {
+            setResveEndTime("");
           }
         }
       }, 100); // 약간의 지연을 주어 상태 업데이트 완료 후 실행
 
       return () => clearTimeout(timeoutId);
     }
-  }, [resveStartTime, resveDate, roomId, currentReservations]);
+  }, [resveStartTime, resveDate, roomId, currentReservations, isLoadingReservations]);
 
   // 잔여 시간 조회 API 호출
   useEffect(() => {
@@ -520,6 +603,24 @@ export default function ReservationForm({
             // 새 룸의 예약 데이터 가져오기
             if (newRoomId && resveDate) {
               await fetchReservationsForRoom(newRoomId);
+              
+              // 룸 변경 시 현재 선택된 시간이 유효하지 않으면 초기화
+              setTimeout(() => {
+                if (resveStartTime && resveDate) {
+                  const isCurrentTimeValid = isTimeAvailable(resveStartTime);
+                  if (!isCurrentTimeValid) {
+                    // 사용 가능한 첫 번째 시간 찾기
+                    const availableTime = generateTimeOptions(9, 17).find(time => isTimeAvailable(time));
+                    if (availableTime) {
+                      setResveStartTime(availableTime);
+                    } else {
+                      // 사용 가능한 시간이 없으면 초기화
+                      setResveStartTime("09:00:00");
+                      setResveEndTime("");
+                    }
+                  }
+                }
+              }, 200); // 예약 데이터 로딩 완료 후 시간 검증
             }
           }}
           className="w-full rounded border px-2 py-1"
@@ -584,6 +685,24 @@ export default function ReservationForm({
               // 날짜 변경 시에도 예약 데이터 새로고침
               if (roomId && val) {
                 await fetchReservationsForRoom(roomId);
+                
+                // 날짜 변경 시 현재 선택된 시간이 유효하지 않으면 초기화
+                setTimeout(() => {
+                  if (resveStartTime) {
+                    const isCurrentTimeValid = isTimeAvailable(resveStartTime);
+                    if (!isCurrentTimeValid) {
+                      // 사용 가능한 첫 번째 시간 찾기
+                      const availableTime = generateTimeOptions(9, 17).find(time => isTimeAvailable(time));
+                      if (availableTime) {
+                        setResveStartTime(availableTime);
+                      } else {
+                        // 사용 가능한 시간이 없으면 초기화
+                        setResveStartTime("09:00:00");
+                        setResveEndTime("");
+                      }
+                    }
+                  }
+                }, 200); // 예약 데이터 로딩 완료 후 시간 검증
               }
             }}
             className="rounded border px-2 py-1"
