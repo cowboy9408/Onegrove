@@ -73,6 +73,11 @@ import ReserveHistory from "@/pages/office/ReserveHistory";
 import UserLayout from "@/pages/user/UserLayout";
 import PermissionList from "@/pages/user/PermissionList";
 import PermissionDetail from "@/pages/user/PermissionDetail";
+import MeetingRule from "@/pages/system/meeting/MeetingRule";
+import ExecutiveRule from "@/pages/system/meeting/ExecutiveRule";
+import SleepRule from "@/pages/system/sleep/SleepRule";
+import VisitRule from "@/pages/system/sleep/VisitRule";
+import PopupDetail from "@/pages/popup/PopupDetail";
 
 export const routeMeta = [
   {
@@ -293,7 +298,7 @@ export const routeMeta = [
         element: <PopupListPage />,
         title: "팝업 관리",
         icon: <BellIcon size={18} />,
-        hidden: true,
+        hidden: false,
         permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN"],
       },
       {
@@ -301,6 +306,14 @@ export const routeMeta = [
         path: "/popup/regist",
         element: <PopupRegist />,
         title: "팝업 등록",
+        hidden: true,
+        permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN"],
+      },
+      {
+        uuid: "1c99c30d-0280-4fa3-bdd4-618b925f29c6",
+        path: "/popup/detail/:id",
+        element: <PopupDetail />,
+        title: "팝업 상세",
         hidden: true,
         permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN"],
       },
@@ -743,6 +756,22 @@ export const routeMeta = [
             hidden: true,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
+          {
+            uuid: "bcc094ad-023a-4f4e-bd6f-6e31250f5888",
+            path: "/system/meeting/meetingrule",
+            element: <MeetingRule />,
+            title: "Meeting Room 예약 규정",
+            hidden: false,
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+          },
+          {
+            uuid: "67e79db4-b8d8-4c7f-a490-401b450da611",
+            path: "/system/meeting/executiverule",
+            element: <ExecutiveRule />,
+            title: "Executive Room 예약 규정",
+            hidden: false,
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+          },
 
           {
             uuid: "4bd3ba77-798a-4466-bc3e-48fec787592a",
@@ -766,6 +795,22 @@ export const routeMeta = [
             element: <SleepDetail />,
             title: "Relax Room 상세",
             hidden: true,
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+          },
+          {
+            uuid: "faa9a8e5-14f7-4b33-8c42-b36ad3484f56",
+            path: "/system/sleep/sleeprule",
+            element: <SleepRule />,
+            title: "Relax Room 예약 규정",
+            hidden: false,
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+          },
+          {
+            uuid: "aee65b6e-563e-448a-8f7d-b69dc0633d24",
+            path: "/system/sleep/visitrule",
+            element: <VisitRule />,
+            title: "방문 예약 규정",
+            hidden: false,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
 
