@@ -351,7 +351,7 @@ export default function VisitForm({
           </label>
           <input
             value={email}
-            maxLength={20}
+            maxLength={50}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full rounded border px-2 py-1"
           />
