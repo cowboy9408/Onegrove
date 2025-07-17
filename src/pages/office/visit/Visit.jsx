@@ -14,15 +14,13 @@ import { ModalContext } from "@/context/ModalContext";
 import DateRangePicker from "@/components/common/Datepicker";
 import VisitForm from "@/components/modal/VisitForm";
 import api from "@/lib/apiClient";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 export default function Visit() {
   const { showModal } = useContext(ModalContext);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
-  const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [visitList, setVisitList] = useState([]);
   const [searchFilter, setSearchFilter] = useState({
