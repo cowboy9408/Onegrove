@@ -244,7 +244,7 @@ export default function AdminRegist() {
   return (
     <div className="max-w mx-auto space-y-6 rounded-lg bg-white p-6 shadow-md">
       {/* 라디오 그룹: 계정 유형 & 사용 여부 */}
-      <div className="flex flex-wrap gap-8">
+      <div className="flex flex-wrap gap-10">
         <div>
           <Select
             label="입주사"
@@ -255,7 +255,7 @@ export default function AdminRegist() {
               }
             }}
             disabled={isSecretary}
-            className="w-[735px]"
+            className="w-[725px]"
             required
           >
             {!isSecretary && <option value="">선택하세요</option>}{" "}
@@ -299,7 +299,7 @@ export default function AdminRegist() {
       </div>
 
       {/* 입력 필드 및 성별 라디오 */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
         <div>
           <Input
             label="이름"

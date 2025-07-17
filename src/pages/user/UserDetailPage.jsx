@@ -243,16 +243,16 @@ export default function UserDetailPage() {
         임직원 상세 정보
       </div>
       <div className="max-w mx-auto space-y-6 rounded-lg bg-white p-6 shadow-md">
-        <div className="flex flex-wrap gap-8">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
+          {/* 입주사 Select */}
           <div>
             <Select
               label="입주사"
               value={form.company}
-              re
               onChange={(e) => handleChange("company", Number(e.target.value))}
-              className="w-full max-w-[735px]"
               required
               disabled
+              className="w-full"
             >
               <option value="">선택하세요</option>
               {companyOptions.map((item) => (
@@ -263,30 +263,38 @@ export default function UserDetailPage() {
             </Select>
           </div>
 
-          <div>
-            <p className="mb-2 text-sm font-medium text-gray-800">사용 여부</p>
-            <div className="flex gap-4">
-              <Radio
-                name="status"
-                label="사용"
-                value="active"
-                checked={form.status === "active"}
-                onChange={() => handleChange("status", "active")}
-              />
-              <Radio
-                name="status"
-                label="미사용"
-                value="inactive"
-                checked={form.status === "inactive"}
-                onChange={() => handleChange("status", "inactive")}
-              />
+          {/* 사용 여부 + 계정 상태 묶기 */}
+          <div className="flex items-center gap-x-6">
+            {/* 사용 여부 라디오 */}
+            <div>
+              <p className="mb-2 text-sm font-medium text-gray-800">
+                사용 여부
+              </p>
+              <div className="flex gap-4">
+                <Radio
+                  name="status"
+                  label="사용"
+                  value="active"
+                  checked={form.status === "active"}
+                  onChange={() => handleChange("status", "active")}
+                />
+                <Radio
+                  name="status"
+                  label="미사용"
+                  value="inactive"
+                  checked={form.status === "inactive"}
+                  onChange={() => handleChange("status", "inactive")}
+                />
+              </div>
             </div>
-          </div>
-          <div className="mt-6 text-sm font-semibold text-gray-700">
-            계정 상태:{" "}
-            <span className={isLocked ? "text-red-600" : "text-black-600"}>
-              {isLocked ? "잠금" : "활성화"}
-            </span>
+
+            {/* 계정 상태 텍스트 */}
+            <div className="mt-[-30px] text-sm font-semibold text-gray-700">
+              계정 상태:{" "}
+              <span className={isLocked ? "text-red-600" : "text-black-600"}>
+                {isLocked ? "잠금" : "활성화"}
+              </span>
+            </div>
           </div>
         </div>
 
