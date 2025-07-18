@@ -3,6 +3,7 @@ import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import DataTable from "@/components/common/DataTable";
 import api from "@/lib/apiClient";
+import { XIcon } from "@/components/ui/x"; // 기존 모달에서 사용하던 아이콘
 
 export default function CompanySelectModal({
   selected = [],
@@ -12,7 +13,9 @@ export default function CompanySelectModal({
   const [companies, setCompanies] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [keyword, setKeyword] = useState("");
-  const [checked, setChecked] = useState(() => selected.map(String));
+  const [checked, setChecked] = useState(() =>
+    selected.map((c) => String(c.companyId ?? c.id))
+  );
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -21,8 +24,12 @@ export default function CompanySelectModal({
         const raw = res?.data?.data || [];
 
         const mapped = raw.map((item) => ({
-          _id: String(item.id), // 체크박스에서 쓰기 위해 문자열 변환
+          _id: String(item.id),
+          id: item.id,
+          companyId: item.id,
           companyName: item.name,
+          sort: 0,
+          delYn: "N",
         }));
 
         setCompanies(mapped);
@@ -50,6 +57,9 @@ export default function CompanySelectModal({
 
   return (
     <div>
+      <div className="mb-2 flex justify-end">
+        <XIcon onClick={closeModal} size={15} />
+      </div>
       {/* 검색 영역 */}
       <div className="mb-4 flex gap-2">
         <Input
@@ -80,10 +90,18 @@ export default function CompanySelectModal({
         </Button>
         <Button
           onClick={() => {
-            const selectedData = companies.filter((c) =>
-              checked.includes(c._id)
-            );
+            const selectedData = companies
+              .filter((c) => checked.includes(c._id))
+              .map((c, idx) => ({
+                companyId: c.companyId ?? c.id,
+                id: c.id ?? undefined, // id가 있는 경우만 포함
+                companyName: c.companyName ?? "",
+                sort: idx + 1,
+                delYn: "N",
+              }));
+
             onConfirm(selectedData);
+
             closeModal();
           }}
         >

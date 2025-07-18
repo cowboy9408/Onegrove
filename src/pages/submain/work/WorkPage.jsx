@@ -6,6 +6,7 @@ import api from "@/lib/apiClient";
 import Button from "@/components/common/Button";
 import WorkForm from "./components/WorkForm";
 import useModal from "@/hooks/useModal";
+import CompanyList from "@/pages/submain/work/components/CompanyList";
 
 export default function WorkPage() {
   const { showModal } = useModal();
@@ -25,6 +26,10 @@ export default function WorkPage() {
   const workKRRef = useRef();
   const workENRef = useRef();
   const [workContents, setWorkContents] = useState({
+    ko: [],
+    en: [],
+  });
+  const [companyList, setCompanyList] = useState({
     ko: [],
     en: [],
   });
@@ -71,6 +76,8 @@ export default function WorkPage() {
           file2: v.moImg ?? null,
         }));
 
+        await fetchCompanyNames(item, lang);
+
         setKeyVisuals((prev) => ({ ...prev, [lang]: mergedKV }));
         setWorkContents((prev) => ({ ...prev, [lang]: mergedWork }));
         setIds((prev) => ({ ...prev, [lang]: item.id || null }));
@@ -84,6 +91,29 @@ export default function WorkPage() {
 
     fetchData();
   }, [currentLang]);
+
+  const fetchCompanyNames = async (item, lang) => {
+    try {
+      const res = await api.get("/api/v1/work/companyList?lang=KO");
+      const nameMap = {};
+      res?.data?.data?.forEach((c) => {
+        nameMap[c.id] = c.name;
+      });
+
+      const mergedCompany = (item.companyList || []).map((v) => ({
+        id: v.id ?? null,
+        companyId: v.companyId,
+        companyName: nameMap[v.companyId] ?? "", // 이름 복원
+        sort: v.sort ?? 0,
+        delYn: v.delYn ?? "N",
+      }));
+
+      setCompanyList((prev) => ({ ...prev, [lang]: mergedCompany }));
+    } catch (err) {
+      console.error("입주사 이름 매핑 실패:", err);
+      setCompanyList((prev) => ({ ...prev, [lang]: [] }));
+    }
+  };
 
   const handleSave = async () => {
     const lang = currentLang === 0 ? "ko" : "en";
@@ -114,6 +144,12 @@ export default function WorkPage() {
         lang: lang.toUpperCase(),
         keyVisualList: kvResult.keyVisualList,
         contentList: contentList,
+        companyList: (companyList[lang] || []).map((c, index) => ({
+          id: c.id ?? undefined,
+          companyId: c.companyId ?? c.id,
+          sort: String(c.sort ?? index + 1),
+          delYn: c.delYn ?? "N",
+        })),
       };
 
       const res = await api.post("/api/v1/work/update", payload);
@@ -172,6 +208,15 @@ export default function WorkPage() {
               setWorkContents((prev) => ({ ...prev, ko: newVal }))
             }
           />
+          <CompanyList
+            data={Array.isArray(companyList.ko) ? companyList.ko : []}
+            setData={(newVal) =>
+              setCompanyList((prev) => ({
+                ...prev,
+                ko: Array.isArray(newVal) ? newVal : [],
+              }))
+            }
+          />
         </TabPanel>
 
         <TabPanel>
@@ -189,6 +234,15 @@ export default function WorkPage() {
             data={workContents.en}
             setData={(newVal) =>
               setWorkContents((prev) => ({ ...prev, en: newVal }))
+            }
+          />
+          <CompanyList
+            data={Array.isArray(companyList.en) ? companyList.en : []}
+            setData={(newVal) =>
+              setCompanyList((prev) => ({
+                ...prev,
+                en: Array.isArray(newVal) ? newVal : [],
+              }))
             }
           />
         </TabPanel>
