@@ -235,13 +235,7 @@ const EventRegistForm = forwardRef(
           onError?.("제목을 입력해주세요.");
           return null;
         }
-        if (
-          !values.imgPc ||
-          !values.imgMo ||
-          !values.thumbImg ||
-          !values.imgBodyPc ||
-          !values.imgBodyMo
-        ) {
+        if (!values.thumbImg || !values.imgBodyPc || !values.imgBodyMo) {
           onError?.("이미지를 모두 등록해주세요.");
           return null;
         }
@@ -268,14 +262,14 @@ const EventRegistForm = forwardRef(
           return null;
         }
 
-        if (brands.length === 0) {
-          onError?.("브랜드를 선택해주세요.");
-          return null;
-        }
-        if (!description || description.trim() === "") {
-          onError?.("디스크립션을 입력해주세요.");
-          return null;
-        }
+        // if (brands.length === 0) {
+        //   onError?.("브랜드를 선택해주세요.");
+        //   return null;
+        // }
+        // if (!description || description.trim() === "") {
+        //   onError?.("디스크립션을 입력해주세요.");
+        //   return null;
+        // }
 
         if (
           !values.title?.trim() ||
@@ -285,12 +279,7 @@ const EventRegistForm = forwardRef(
           (values.manualEndInput && !values.endInput?.trim()) ||
           !values.thumbImg ||
           !values.imgBodyPc ||
-          !values.imgBodyMo ||
-          !values.imgPc ||
-          !values.imgMo ||
-          !content?.trim() ||
-          //        // !description?.trim() ||
-          brands.length === 0
+          !values.imgBodyMo
         ) {
           alert("모든 필수 항목을 입력해주세요.");
           return null;
@@ -616,7 +605,6 @@ const EventRegistForm = forwardRef(
               <Input
                 label="노출 브랜드"
                 readOnly
-                required
                 value={
                   Array.isArray(brands)
                     ? brands.map((e) => e.brand).join(", ")
@@ -681,7 +669,6 @@ const EventRegistForm = forwardRef(
             key={`imgPc-upload`}
             name="imgPc"
             label="하단배너 PC 이미지"
-            required
             classification="event-promotion"
             readOnly={readOnly}
             value={watch("imgPc")}
@@ -694,7 +681,6 @@ const EventRegistForm = forwardRef(
             name="imgMo"
             label="하단배너 모바일 이미지"
             classification="event-promotion"
-            required
             readOnly={readOnly}
             value={watch("imgMo")}
             onChange={(file) => setValue("imgMo", file)}
@@ -710,7 +696,6 @@ const EventRegistForm = forwardRef(
             label="하단배너 디스크립션"
             value={watch("description")}
             onChange={(e) => setValue("description", e.target.value)}
-            required
             maxLength={250}
           />
         </form>
