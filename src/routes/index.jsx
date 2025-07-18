@@ -298,7 +298,7 @@ export const routeMeta = [
         element: <PopupListPage />,
         title: "팝업 관리",
         icon: <BellIcon size={18} />,
-        hidden: false,
+        hidden: true,
         permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN"],
       },
       {
@@ -761,7 +761,7 @@ export const routeMeta = [
             path: "/system/meeting/meetingrule",
             element: <MeetingRule />,
             title: "Meeting Room 예약 규정",
-            hidden: false,
+            hidden: true,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
           {
@@ -769,7 +769,7 @@ export const routeMeta = [
             path: "/system/meeting/executiverule",
             element: <ExecutiveRule />,
             title: "Executive Room 예약 규정",
-            hidden: false,
+            hidden: true,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
 
@@ -802,7 +802,7 @@ export const routeMeta = [
             path: "/system/sleep/sleeprule",
             element: <SleepRule />,
             title: "Relax Room 예약 규정",
-            hidden: false,
+            hidden: true,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
           {
@@ -810,7 +810,7 @@ export const routeMeta = [
             path: "/system/sleep/visitrule",
             element: <VisitRule />,
             title: "방문 예약 규정",
-            hidden: false,
+            hidden: true,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
 
