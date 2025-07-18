@@ -1,14 +1,19 @@
-import { useState, useImperativeHandle, forwardRef } from "react";
+import { useState, useImperativeHandle, forwardRef, useEffect } from "react";
 import Input from "@/components/common/Input";
 import Radio from "@/components/common/Radio";
-import Select from "@/components/common/Select";
 import Datepicker from "@/components/common/Datepicker";
 import Upload from "@/components/common/Upload";
 import Button from "@/components/common/Button";
 import { useForm, FormProvider } from "react-hook-form";
 
 const PopupRegistForm = forwardRef(({ data, lang }, ref) => {
-  const methods = useForm();
+  const methods = useForm({
+    mode: "onChange",
+    defaultValues: {
+      isVisible: "Y",
+    },
+  });
+  const { register, setValue, watch, getValues } = methods;
 
   const [form, setForm] = useState({
     title: "",
@@ -16,11 +21,9 @@ const PopupRegistForm = forwardRef(({ data, lang }, ref) => {
     menu: "",
     language: "ko",
     period: { startDate: null, endDate: null },
-    image: null,
+    pcImg: null,
+    moImg: null,
     url: "",
-    buttonLabel: "",
-    buttonTextColor: "",
-    buttonBgColor: "",
   });
 
   const handleChange = (key, value) => {
@@ -29,6 +32,20 @@ const PopupRegistForm = forwardRef(({ data, lang }, ref) => {
       [key]: value,
     }));
   };
+
+  useEffect(() => {
+    if (data) {
+      setValue("title", data.title || "");
+      setValue("isVisible", data.useYn || "Y"); // 핵심
+      setValue("url", data.landingUrl || "");
+      setValue("period", {
+        startDate: data.startDt ? new Date(data.startDt) : null,
+        endDate: data.endDt ? new Date(data.endDt) : null,
+      });
+      setValue("pcImg", data.pcImg || null);
+      setValue("moImg", data.moImg || null);
+    }
+  }, [data, setValue]);
 
   useImperativeHandle(ref, () => ({
     submit: (onError) => {
@@ -66,23 +83,22 @@ const PopupRegistForm = forwardRef(({ data, lang }, ref) => {
         endDt: form.period.endDate.toISOString().split("T")[0],
         landingUrl: form.url,
         useYn: form.isVisible,
-        pcImg: toImageMeta(form.image),
-        moImg: toImageMeta(form.image),
+        pcImg: toImageMeta(form.pcImg),
+        moImg: toImageMeta(form.moImg),
       };
     },
   }));
 
   return (
     <FormProvider {...methods}>
-      <div className="mx-auto max-w-4xl space-y-6 rounded-lg bg-white p-6 shadow-md">
+      <div className="mx-auto max-w-4xl space-y-6 rounded-lg">
         <div className="mx-auto max-w-3xl space-y-6 p-6">
           <div className="flex items-start gap-6">
             {/* 타이틀 */}
             <div className="flex-1">
               <Input
                 label="타이틀"
-                value={form.title}
-                onChange={(e) => handleChange("title", e.target.value)}
+                {...register("title", { required: true })}
                 required
               />
             </div>
@@ -94,40 +110,22 @@ const PopupRegistForm = forwardRef(({ data, lang }, ref) => {
                 <Radio
                   name="isVisible"
                   value="Y"
-                  checked={form.isVisible === "Y"}
-                  onChange={(e) => handleChange("isVisible", e.target.value)}
                   label="노출"
+                  checked={watch("isVisible") === "Y"}
+                  onChange={() => setValue("isVisible", "Y")}
                 />
                 <Radio
                   name="isVisible"
                   value="N"
-                  checked={form.isVisible === "N"}
-                  onChange={(e) => handleChange("isVisible", e.target.value)}
                   label="미노출"
+                  checked={watch("isVisible") === "N"}
+                  onChange={() => setValue("isVisible", "N")}
                 />
               </div>
             </div>
           </div>
 
           {/* 메뉴 선택 */}
-          <div className="flex items-start gap-6">
-            {/* 메뉴 */}
-            <div className="flex-1">
-              <Select
-                label="메뉴 선택"
-                value={form.menu}
-                onChange={(e) => handleChange("menu", e.target.value)}
-                required
-              >
-                <option value="">선택</option>
-                <option value="home">홈</option>
-                <option value="event">이벤트</option>
-                <option value="notice">공지사항</option>
-              </Select>
-            </div>
-
-            {/* 언어 */}
-          </div>
 
           {/* 노출 기간 */}
           <div>
@@ -136,33 +134,32 @@ const PopupRegistForm = forwardRef(({ data, lang }, ref) => {
             </p>
             <Datepicker
               mode="range"
-              startDate={form.period.startDate}
-              endDate={form.period.endDate}
-              onRangeChange={(range) => handleChange("period", range)}
+              startDate={watch("period")?.startDate}
+              endDate={watch("period")?.endDate}
+              onRangeChange={(range) => setValue("period", range)}
             />
           </div>
 
           {/* 팝업 이미지 업로드 */}
           <Upload
             name="ImgPc"
-            label="팝업 이미지 업로드"
+            label="PC 팝업 이미지"
+            value={watch("pcImg")}
+            onChange={(file) => setValue("pcImg", file)}
             required
-            defaultValue={form.image}
-            onChange={(val) => handleChange("image", val)}
           />
           <Upload
             name="ImgMo"
-            label="팝업 이미지 업로드"
+            label="모바일 팝업 이미지"
+            value={watch("moImg")}
+            onChange={(file) => setValue("moImg", file)}
             required
-            defaultValue={form.image}
-            onChange={(val) => handleChange("image", val)}
           />
 
           {/* URL, 버튼 텍스트, 색상 */}
           <Input
             label="랜딩 URL"
-            value={form.url}
-            onChange={(e) => handleChange("url", e.target.value)}
+            {...register("url", { required: true })}
             placeholder="https://example.com"
             required
           />

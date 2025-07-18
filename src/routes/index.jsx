@@ -70,6 +70,14 @@ import MeetingDetail from "@/pages/system/meeting/MeetinDetail";
 import VisitDetail from "@/pages/office/visit/VisitDetail";
 import SettingLayout from "@/pages/office/setting/SettingLayout";
 import ReserveHistory from "@/pages/office/ReserveHistory";
+import UserLayout from "@/pages/user/UserLayout";
+import PermissionList from "@/pages/user/PermissionList";
+import PermissionDetail from "@/pages/user/PermissionDetail";
+import MeetingRule from "@/pages/system/meeting/MeetingRule";
+import ExecutiveRule from "@/pages/system/meeting/ExecutiveRule";
+import SleepRule from "@/pages/system/sleep/SleepRule";
+import VisitRule from "@/pages/system/sleep/VisitRule";
+import PopupDetail from "@/pages/popup/PopupDetail";
 
 export const routeMeta = [
   {
@@ -147,34 +155,80 @@ export const routeMeta = [
       },
 
       {
-        uuid: "0c3eb744-5f42-4e6e-8107-43644c68647c",
+        uuid: "34d48fee-cfe7-4793-ab5e-ce779b244ea7",
         path: "/user",
-        group: "/user",
-        element: <UserListPage />,
+        element: <UserLayout />,
         title: "임직원 관리",
         icon: <UsersIcon size={18} />,
         hidden: false,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_SECRETARY_ADMIN"],
-      },
-      {
-        uuid: "b269e884-b419-4961-9b85-144d20ff3b4d",
-        path: "/user/regist",
-        group: "/user",
-        element: <UserRegist />,
-        title: "임직원 등록",
-        icon: <UsersIcon size={18} />,
-        hidden: true,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_SECRETARY_ADMIN"],
-      },
-      {
-        uuid: "aeab286e-bb23-471f-a050-7b812fecf13a",
-        path: "/user/detail/:id",
-        group: "/user",
-        element: <UserDetailPage />,
-        title: "임직원 상세",
-        icon: <UsersIcon size={18} />,
-        hidden: true,
-        permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_SECRETARY_ADMIN"],
+        permissions: ["SUPER_ADMIN", "OFFICE_SECRETARY_ADMIN", "NORMAL_ADMIN"],
+        children: [
+          {
+            uuid: "0c3eb744-5f42-4e6e-8107-43644c68647c",
+            path: "/user/list",
+            element: <UserListPage />,
+            title: "임직원 관리",
+            icon: <UsersIcon size={18} />,
+            hidden: false,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "OFFICE_SECRETARY_ADMIN",
+            ],
+          },
+          {
+            uuid: "b269e884-b419-4961-9b85-144d20ff3b4d",
+            path: "/user/regist",
+            element: <UserRegist />,
+            title: "임직원 등록",
+            icon: <UsersIcon size={18} />,
+            hidden: true,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "OFFICE_SECRETARY_ADMIN",
+            ],
+          },
+          {
+            uuid: "aeab286e-bb23-471f-a050-7b812fecf13a",
+            path: "/user/detail/:id",
+            element: <UserDetailPage />,
+            title: "임직원 상세",
+            icon: <UsersIcon size={18} />,
+            hidden: true,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "OFFICE_SECRETARY_ADMIN",
+            ],
+          },
+          {
+            uuid: "411e07ef-82a9-4150-9ffd-55ef677819d2",
+            path: "/user/permission",
+            element: <PermissionList />,
+            title: "계정 승인 대기",
+            icon: <UsersIcon size={18} />,
+            hidden: false,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "OFFICE_SECRETARY_ADMIN",
+            ],
+          },
+          {
+            uuid: "8ee32057-ff9a-41a6-a28c-3adff95977f9",
+            path: "/user/permission/detail/:id",
+            element: <PermissionDetail />,
+            title: "승인 정보 상세",
+            icon: <UsersIcon size={18} />,
+            hidden: true,
+            permissions: [
+              "SUPER_ADMIN",
+              "NORMAL_ADMIN",
+              "OFFICE_SECRETARY_ADMIN",
+            ],
+          },
+        ],
       },
 
       {
@@ -252,6 +306,14 @@ export const routeMeta = [
         path: "/popup/regist",
         element: <PopupRegist />,
         title: "팝업 등록",
+        hidden: true,
+        permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN"],
+      },
+      {
+        uuid: "1c99c30d-0280-4fa3-bdd4-618b925f29c6",
+        path: "/popup/detail/:id",
+        element: <PopupDetail />,
+        title: "팝업 상세",
         hidden: true,
         permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN"],
       },
@@ -694,6 +756,22 @@ export const routeMeta = [
             hidden: true,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
+          {
+            uuid: "bcc094ad-023a-4f4e-bd6f-6e31250f5888",
+            path: "/system/meeting/meetingrule",
+            element: <MeetingRule />,
+            title: "Meeting Room 예약 규정",
+            hidden: true,
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+          },
+          {
+            uuid: "67e79db4-b8d8-4c7f-a490-401b450da611",
+            path: "/system/meeting/executiverule",
+            element: <ExecutiveRule />,
+            title: "Executive Room 예약 규정",
+            hidden: true,
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+          },
 
           {
             uuid: "4bd3ba77-798a-4466-bc3e-48fec787592a",
@@ -716,6 +794,22 @@ export const routeMeta = [
             path: "/system/sleep/detail/:id",
             element: <SleepDetail />,
             title: "Relax Room 상세",
+            hidden: true,
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+          },
+          {
+            uuid: "faa9a8e5-14f7-4b33-8c42-b36ad3484f56",
+            path: "/system/sleep/sleeprule",
+            element: <SleepRule />,
+            title: "Relax Room 예약 규정",
+            hidden: true,
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+          },
+          {
+            uuid: "aee65b6e-563e-448a-8f7d-b69dc0633d24",
+            path: "/system/sleep/visitrule",
+            element: <VisitRule />,
+            title: "방문 예약 규정",
             hidden: true,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
