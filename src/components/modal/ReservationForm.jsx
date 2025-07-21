@@ -37,7 +37,9 @@ export default function ReservationForm({
   const [realUser, setRealUser] = useState(initialData.realUser || "");
   const [note, setNote] = useState(initialData.note || "");
   const [status] = useState(initialData.status || "gs0101");
-  const [remainingTime, setRemainingTime] = useState(null);
+  const [remainingTime, setRemainingTime] = useState(null);// 현재 선택된 회의실의 최대 수용인원 구하기
+  const [maxCapacity, setMaxCapacity] = useState(64);
+  const [displayCapacity, setDisplayCapacity] = useState(64);
 
   // 예약 데이터 및 로딩 상태
   const [currentReservations, setCurrentReservations] = useState(existingReservations);
@@ -427,6 +429,7 @@ export default function ReservationForm({
     return filtered;
   }, [resveDate, roomId, currentReservations, isEdit, initialData.id]);
 
+
   const isTimeAvailable = (timeStr) => {
     if (isLoadingReservations || !resveDate) return false;
     
@@ -525,8 +528,7 @@ export default function ReservationForm({
     }
   };
 
-  // 현재 선택된 회의실의 최대 수용인원 구하기
-  const [maxCapacity, setMaxCapacity] = useState(64);
+  
   
   // roomId 변경 시 maxCapacity 업데이트
   useEffect(() => {
@@ -534,6 +536,11 @@ export default function ReservationForm({
       const selectedRoomObj = roomOptions.find(r => String(r.id) === String(roomId));
       const newMaxCapacity = selectedRoomObj?.capacity || 64;
       setMaxCapacity(newMaxCapacity);
+      if (selectedRoomObj?.roomName === "Meeting Room 2") {
+        setDisplayCapacity(14);
+      } else {
+        setDisplayCapacity(newMaxCapacity);
+      }
     }
   }, [roomId, roomOptions]);
 
@@ -781,7 +788,7 @@ export default function ReservationForm({
 
       <div>
         <label className="mb-1 block">
-          참석인원 (최대 수용인원: {maxCapacity}명) <span className="text-red-500">*</span>
+          참석인원 (최대 수용인원: {displayCapacity}명) <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
