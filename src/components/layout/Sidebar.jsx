@@ -255,19 +255,24 @@ export default function Sidebar() {
         className={`mt-30 flex justify-center rounded-md border-t border-gray-200 pt-2 align-middle dark:border-gray-700 ${isExpanded ? "md:border-2 md:p-2" : ""}`}
       >
         {isExpanded ? (
-          <div className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-gray-800 dark:text-gray-100">
+          <div
+            className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-gray-800 hover:underline dark:text-gray-100"
+            onClick={
+              permission === "OFFICE_SECRETARY_ADMIN"
+                ? handleUserClick
+                : undefined
+            }
+          >
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
               {name && name.substring(0, 1)}
             </div>
-            <span
-              className={`truncate ${permission === "OFFICE_SECRETARY_ADMIN" ? "cursor-pointer hover:underline" : ""}`}
-              onClick={handleUserClick}
-            >
-              {name}님
-            </span>
+            <span className="truncate">{name}님</span>
             <div
               className="ml-auto hover:bg-gray-100 dark:hover:bg-gray-800"
-              onClick={handleLogout}
+              onClick={(e) => {
+                e.stopPropagation(); // 로그아웃 버튼 클릭 시 상세보기 클릭 방지
+                handleLogout();
+              }}
             >
               <LogoutIcon size={18} />
             </div>
