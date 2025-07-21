@@ -230,7 +230,7 @@ export default function PopupListPage() {
                   <button
                     className={`text-black-600 truncate p-2 text-left ${row.ko_title !== "-" ? "underline" : ""}`}
                     onClick={() =>
-                      navigate(`/popup/regist/${row.pmId}?lang=ko`)
+                      navigate(`/popup/detail/${row.pmId}?lang=ko`)
                     }
                   >
                     {row.ko_title}
@@ -238,7 +238,7 @@ export default function PopupListPage() {
                   <button
                     className={`text-black-600 truncate p-2 text-left ${row.en_title !== "-" ? "underline" : ""}`}
                     onClick={() =>
-                      navigate(`/popup/regist/${row.pmId}?lang=en`)
+                      navigate(`/popup/detail/${row.pmId}?lang=en`)
                     }
                   >
                     {row.en_title}

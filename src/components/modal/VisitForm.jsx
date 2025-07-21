@@ -107,7 +107,6 @@ export default function VisitForm({
       !companyId ||
       !email ||
       !name ||
-      !card ||
       !visitNumber
     ) {
       alert("모든 필수 입력 항목을 작성해 주세요.");
