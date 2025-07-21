@@ -1,20 +1,24 @@
 import { useState } from "react";
-import CompanySelectModal from "./CompanySelectModal";
+import CompanySelectModal from "@/components/modal/CompanySelectModal";
 import Button from "@/components/common/Button";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import Title from "@/components/layout/Title";
 
-export default function CompanyList() {
+export default function CompanyList({ data, setData }) {
   const [showModal, setShowModal] = useState(false);
-  const [selectedCompanies, setSelectedCompanies] = useState([]);
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
-
-    const newList = Array.from(selectedCompanies);
+    const newList = Array.from(data);
     const [movedItem] = newList.splice(result.source.index, 1);
     newList.splice(result.destination.index, 0, movedItem);
 
-    setSelectedCompanies(newList);
+    const reSorted = newList.map((item, index) => ({
+      ...item,
+      sort: index + 1,
+    }));
+
+    setData(reSorted);
   };
 
   return (
@@ -27,9 +31,9 @@ export default function CompanyList() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-[700px] rounded-lg bg-white p-6 shadow-lg">
             <CompanySelectModal
-              selected={selectedCompanies}
+              selected={data}
               onConfirm={(selected) => {
-                setSelectedCompanies(selected);
+                setData(selected);
                 setShowModal(false);
               }}
               closeModal={() => setShowModal(false)}
@@ -47,8 +51,12 @@ export default function CompanyList() {
               ref={provided.innerRef}
               className="mt-4 space-y-2"
             >
-              {selectedCompanies.map((item, index) => (
-                <Draggable key={item._id} draggableId={item._id} index={index}>
+              {data.map((item, index) => (
+                <Draggable
+                  key={item.id}
+                  draggableId={item.id.toString()}
+                  index={index}
+                >
                   {(provided) => (
                     <li
                       ref={provided.innerRef}
@@ -58,18 +66,26 @@ export default function CompanyList() {
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-gray-500">{index + 1}.</span>
-                        <span className="font-medium">{item.companyName}</span>
+                        <span className="font-medium">
+                          {item.name ??
+                            item.companyName ??
+                            `ID: ${item.companyId}`}
+                        </span>
                       </div>
 
                       {/* 삭제 버튼 */}
                       <button
-                        onClick={() =>
-                          setSelectedCompanies((prev) =>
-                            prev.filter((c) => c._id !== item._id)
-                          )
-                        }
-                        className="px-2 text-lg font-bold text-red-500 hover:text-red-700"
-                        title="삭제"
+                        onClick={() => {
+                          const deleteTargetId = Number(item.id);
+                          const next = data.filter(
+                            (c) => Number(c.id) !== deleteTargetId
+                          );
+
+                          console.log("삭제 대상 ID:", deleteTargetId);
+                          console.log("삭제 후 남은 데이터:", next);
+
+                          setData(next);
+                        }}
                       >
                         &minus;
                       </button>
