@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-import strip from '@rollup/plugin-strip';
+import strip from "@rollup/plugin-strip";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -11,8 +11,8 @@ export default defineConfig({
     react(),
     tailwindcss(),
     strip({
-      include: '**/*.(js|ts|jsx|tsx)', // 제거 대상
-      functions: ['console.*', 'assert.*', 'debug', 'alert'], // 제거할 함수들
+      include: ['**/*.js', '**/*.ts', '**/*.jsx', '**/*.tsx'],
+      functions: ['console.*', 'assert.*', 'debug', 'alert'],
     }),
   ],
   resolve: {
