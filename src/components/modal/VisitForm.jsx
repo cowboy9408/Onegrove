@@ -9,6 +9,30 @@ export default function VisitForm({
   onSubmit,
   closeModal,
 }) {
+
+  const [isComposing, setIsComposing] = useState(false);
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    if (isComposing) {
+      // 조합 중에는 그대로 입력
+      setName(value);
+    } else {
+      // 조합이 끝난 후에만 필터 적용
+      setName(value.replace(/[^가-힣a-zA-Z0-9\s]/g, ""));
+    }
+  };
+
+  const handleChangeEmail = (e) => {
+    const value = e.target.value;
+    if (isComposing) {
+      // 조합 중에는 그대로 입력
+      setEmail(value);
+    } else {
+      // 조합이 끝난 후에만 필터 적용
+      setEmail(value.replace(/[^가-힣a-zA-Z0-9@._-]/g, ""));
+    }
+  };
   const [companyId, setCompanyId] = useState(
     isEdit ? initialData.companyId || "" : ""
   );
@@ -316,7 +340,14 @@ export default function VisitForm({
           <input
             value={name}
             maxLength={50}
-            onChange={(e) => setName(e.target.value)}
+            // onChange={(e) => setName(e.target.value)}
+            onChange={handleChange}
+            onCompositionStart={() => setIsComposing(true)}
+            onCompositionEnd={(e) => {
+              setIsComposing(false);
+              // 조합 끝난 값도 정제
+              setName(e.target.value.replace(/[^가-힣a-zA-Z0-9\s]/g, ""))
+            }}
             className="w-full rounded border px-2 py-1"
           />
         </div>
@@ -351,7 +382,14 @@ export default function VisitForm({
           <input
             value={email}
             maxLength={50}
-            onChange={(e) => setEmail(e.target.value)}
+            // onChange={(e) => setEmail(e.target.value)}
+            onChange={handleChangeEmail}
+            onCompositionStart={() => setIsComposing(true)}
+            onCompositionEnd={(e) => {  
+              setIsComposing(false);
+              // 조합 끝난 값도 정제
+              setEmail(e.target.value.replace(/[^가-힣a-zA-Z0-9@._-]/g, ""))
+            }}
             className="w-full rounded border px-2 py-1"
           />
         </div>
