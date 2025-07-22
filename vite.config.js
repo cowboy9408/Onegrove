@@ -10,10 +10,10 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    strip({
-      include: ['**/*.js', '**/*.ts', '**/*.jsx', '**/*.tsx'],
-      functions: ['console.*', 'assert.*', 'debug', 'alert'],
-    }),
+    // strip({
+    //   include: ['**/*.js', '**/*.ts', '**/*.jsx', '**/*.tsx'],
+    //   functions: ['console.*', 'assert.*', 'debug', 'alert'],
+    // }),
   ],
   resolve: {
     alias: {
