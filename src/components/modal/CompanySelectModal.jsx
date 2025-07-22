@@ -90,18 +90,23 @@ export default function CompanySelectModal({
         </Button>
         <Button
           onClick={() => {
-            const selectedData = companies
-              .filter((c) => checked.includes(c._id))
-              .map((c, idx) => ({
-                companyId: c.companyId ?? c.id,
-                id: c.id ?? undefined, // id가 있는 경우만 포함
-                companyName: c.companyName ?? "",
-                sort: idx + 1,
+            // checked: 현재 체크된 companyId (string 배열)
+            // companies: 전체 API에서 불러온 회사 목록
+
+            const selectedSet = new Set(checked);
+
+            const newSelected = companies
+              .filter((c) => selectedSet.has(String(c._id)))
+              .map((c) => ({
+                companyId: c.companyId,
+                id: c.id,
+                companyName: c.companyName,
+                sort: 0,
                 delYn: "N",
               }));
 
-            onConfirm(selectedData);
-
+            // 체크된 항목으로만 덮어씀! 기존 selected 사용 안 함!
+            onConfirm(newSelected);
             closeModal();
           }}
         >
