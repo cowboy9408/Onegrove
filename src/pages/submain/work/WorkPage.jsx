@@ -100,13 +100,15 @@ export default function WorkPage() {
         nameMap[c.id] = c.name;
       });
 
-      const mergedCompany = (item.companyList || []).map((v) => ({
-        id: v.id ?? null,
-        companyId: v.companyId,
-        companyName: nameMap[v.companyId] ?? "", // 이름 복원
-        sort: v.sort ?? 0,
-        delYn: v.delYn ?? "N",
-      }));
+      const mergedCompany = (item.companyList || [])
+        .sort((a, b) => Number(a.sort) - Number(b.sort)) // ← 여기가 핵심
+        .map((v) => ({
+          id: v.id ?? null,
+          companyId: v.companyId,
+          companyName: nameMap[v.companyId] ?? "",
+          sort: v.sort ?? 0,
+          delYn: v.delYn ?? "N",
+        }));
 
       setCompanyList((prev) => ({ ...prev, [lang]: mergedCompany }));
     } catch (err) {
@@ -122,34 +124,64 @@ export default function WorkPage() {
 
     try {
       const kvResult = await kvRef.current.submit((err) =>
-        showModal({
-          title: "필수 항목 누락",
-          message: err,
-          showCancel: false,
-        })
+        showModal({ title: "필수 항목 누락", message: err, showCancel: false })
       );
 
       const contentList = await workRef.current.submit((err) =>
-        showModal({
-          title: "필수 항목 누락",
-          message: err,
-          showCancel: false,
-        })
+        showModal({ title: "필수 항목 누락", message: err, showCancel: false })
       );
 
       if (!kvResult || !contentList) return;
+
+      const originalList = companyList[lang] || [];
+
+      // 1. delYn이 "N"인 항목들만 추림
+      const visibleList = originalList.filter((c) => c.delYn !== "Y");
+
+      const companyMap = new Map();
+
+      // reverse()로 뒤에서부터 보기 때문에, 모달에서 선택한 새 항목이 우선됨
+      [...visibleList].reverse().forEach((item) => {
+        const key = String(item.companyId);
+        if (!companyMap.has(key)) {
+          companyMap.set(key, item);
+        }
+      });
+      const uniqueVisibleList = Array.from(companyMap.values()).reverse();
+
+      const visibleCompanyIds = new Set(
+        uniqueVisibleList.map((c) => c.companyId)
+      );
+      const removedList = originalList.filter(
+        (c) => !visibleCompanyIds.has(c.companyId)
+      );
+
+      let sortIndex = 1;
+
+      const companyListPayload = [
+        ...uniqueVisibleList.map((c) => {
+          const isNew = !c.id || c.id === c.companyId;
+          return {
+            id: isNew ? undefined : c.id,
+            companyId: c.companyId,
+            sort: (sortIndex++).toString(),
+            delYn: "N",
+          };
+        }),
+        ...removedList.map((c) => ({
+          id: c.id,
+          companyId: c.companyId,
+          sort: "0",
+          delYn: "Y",
+        })),
+      ];
 
       const payload = {
         id: kvResult.mainId || null,
         lang: lang.toUpperCase(),
         keyVisualList: kvResult.keyVisualList,
         contentList: contentList,
-        companyList: (companyList[lang] || []).map((c, index) => ({
-          id: c.id ?? undefined,
-          companyId: c.companyId ?? c.id,
-          sort: String(c.sort ?? index + 1),
-          delYn: c.delYn ?? "N",
-        })),
+        companyList: companyListPayload,
       };
 
       const res = await api.post("/api/v1/work/update", payload);
