@@ -336,6 +336,8 @@ export default function ReservationForm({
     }
   }, [roomId, resveDate, companyId]);
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 이메일 형식 검사
+
   const handleSubmit = async () => {
     if (
       !resveDate ||
@@ -593,6 +595,8 @@ export default function ReservationForm({
     resveDate &&
     resveStartTime &&
     resveEndTime &&
+    emailRegex.test(email) &&
+    phone.length === 13 &&
     content.trim() !== "" &&
     realUser.trim() !== "" &&
     Number(numberVisitors) > 0 &&
