@@ -9,6 +9,8 @@ export default function ReservationForm({
   selectedRoom: propSelectedRoom,
   setSelectedLocation: propSetSelectedLocation,
   setSelectedRoom: propSetSelectedRoom,
+  setRoomOptions: propSetRoomOptions, // 룸 옵션 업데이트를 위한 새로운 prop
+  settingOptions = [], // capacity 정보를 위한 prop
   meetingOptions,
   existingReservations = [],
   initialData = {},
@@ -33,13 +35,40 @@ export default function ReservationForm({
   const [resveEndTime, setResveEndTime] = useState("");
   const [content, setContent] = useState(initialData.content || "");
   const [realUser, setRealUser] = useState(initialData.realUser || "");
+  const [phone, setPhone] = useState(initialData.reserverTel || "");
+  const [email, setEmail] = useState(initialData.reserverEmail || "");
   const [note, setNote] = useState(initialData.note || "");
   const [status] = useState(initialData.status || "gs0101");
-  const [remainingTime, setRemainingTime] = useState(null);
+  const [remainingTime, setRemainingTime] = useState(null);// 현재 선택된 회의실의 최대 수용인원 구하기
+  const [maxCapacity, setMaxCapacity] = useState(64);
+  const [displayCapacity, setDisplayCapacity] = useState(64);
 
   // 예약 데이터 및 로딩 상태
   const [currentReservations, setCurrentReservations] = useState(existingReservations);
   const [isLoadingReservations, setIsLoadingReservations] = useState(false);
+  const [isComposing, setIsComposing] = useState(false);
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    if (isComposing) {
+      // 조합 중에는 그대로 입력
+      setRealUser(value);
+    } else {
+      // 조합이 끝난 후에만 필터 적용
+      setRealUser(value.replace(/[^가-힣a-zA-Z0-9\s]/g, ""));
+    }
+  };
+
+  const handleChangeEmail = (e) => {
+    const value = e.target.value;
+    if (isComposing) {
+      // 조합 중에는 그대로 입력
+      setEmail(value);
+    } else {
+      // 조합이 끝난 후에만 필터 적용
+      setEmail(value.replace(/[^가-힣a-zA-Z0-9@._-]/g, ""));
+    }
+  };
 
   const getToday = () => {
     const today = new Date();
@@ -96,16 +125,47 @@ export default function ReservationForm({
         const newRooms = roomRes.data.data;
         const firstRoomId = newRooms[0].id;
         
-        // 2. 룸 ID 업데이트
+        // 2. 부모 컴포넌트의 roomOptions 업데이트 (capacity 정보와 함께)
+        if (propSetRoomOptions) {
+          // capacity 정보를 포함하여 roomOptions 매핑
+          const mappedRooms = newRooms.map(room => {
+            const settingRoom = settingOptions.find(setting => setting.id === room.id);
+            return {
+              ...room,
+              capacity: settingRoom?.capacity || (isVip === "Y" ? 4 : 64), // VIP룸 기본값 4, 일반룸 기본값 64
+            };
+          });
+          propSetRoomOptions(mappedRooms);
+        }
+        
+        // 3. 룸 ID 업데이트
         setRoomId(firstRoomId);
         
-        // 3. 부모에게도 알림
+        // 4. 부모에게도 알림
         if (propSetSelectedRoom) {
           propSetSelectedRoom(firstRoomId);
         }
         
-        // 4. 새 룸의 예약 데이터 가져오기
+        // 5. 새 룸의 예약 데이터 가져오기
         await fetchReservationsForRoom(firstRoomId);
+        
+        // 6. 오피스 변경 시 현재 선택된 시간이 유효하지 않으면 초기화
+        setTimeout(() => {
+          if (resveStartTime && resveDate) {
+            const isCurrentTimeValid = isTimeAvailable(resveStartTime);
+            if (!isCurrentTimeValid) {
+              // 사용 가능한 첫 번째 시간 찾기
+              const availableTime = generateTimeOptions(9, 17).find(time => isTimeAvailable(time));
+              if (availableTime) {
+                setResveStartTime(availableTime);
+              } else {
+                // 사용 가능한 시간이 없으면 초기화
+                setResveStartTime("09:00:00");
+                setResveEndTime("");
+              }
+            }
+          }
+        }, 200); // 예약 데이터 로딩 완료 후 시간 검증
       }
     } catch (err) {
       console.error("오피스 변경 처리 실패:", err);
@@ -133,6 +193,28 @@ export default function ReservationForm({
     setCurrentReservations(existingReservations);
   }, [existingReservations]);
 
+  // 예약 데이터 변경 시 현재 선택된 시간 유효성 검증
+  useEffect(() => {
+    if (!isLoadingReservations && resveStartTime && resveDate && roomId) {
+      const timeoutId = setTimeout(() => {
+        const isCurrentTimeValid = isTimeAvailable(resveStartTime);
+        if (!isCurrentTimeValid) {
+          // 사용 가능한 첫 번째 시간 찾기
+          const availableTime = generateTimeOptions(9, 17).find(time => isTimeAvailable(time));
+          if (availableTime) {
+            setResveStartTime(availableTime);
+          } else {
+            // 사용 가능한 시간이 없으면 기본값으로 설정하되 종료시간은 초기화
+            setResveStartTime("09:00:00");
+            setResveEndTime("");
+          }
+        }
+      }, 100); // 상태 업데이트 완료 후 검증
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [currentReservations, isLoadingReservations, resveDate, roomId]);
+
   // 초기 데이터 설정
   useEffect(() => {
     if (initialData.resveDate) setResveDate(initialData.resveDate);
@@ -144,6 +226,8 @@ export default function ReservationForm({
     }
     if (initialData.content) setContent(initialData.content);
     if (initialData.realUser) setRealUser(initialData.realUser);
+    if (initialData.reserverTel) setPhone(initialData.reserverTel);
+    if (initialData.reserverEmail) setEmail(initialData.reserverEmail);
     if (initialData.numberVisitors) setNumberVisitors(initialData.numberVisitors);
     if (initialData.companyId) setCompanyId(initialData.companyId);
     if (initialData.note) setNote(initialData.note);
@@ -160,6 +244,8 @@ export default function ReservationForm({
           
           if (!isNaN(proposedStartTime.getTime())) {
             // 가능한 종료 시간 중 첫 번째 옵션 찾기
+            let foundValidEndTime = false;
+            
             for (let hour = proposedStartTime.getHours() + 1; hour <= 18; hour++) {
               const endTimeStr = `${String(hour).padStart(2, "0")}:00:00`;
               const proposedEndTime = new Date(`${resveDate}T${endTimeStr}`);
@@ -181,28 +267,54 @@ export default function ReservationForm({
                   return hasOverlap;
                 });
 
-                if (!overlaps) {
+                // 시작시간이 사용 가능한지도 확인 (중요: 이 부분이 추가됨)
+                const isStartTimeValid = isTimeAvailable(resveStartTime);
+                
+                if (!overlaps && isStartTimeValid) {
                   setResveEndTime(endTimeStr);
+                  foundValidEndTime = true;
                   break;
                 }
+              }
+            }
+            
+            // 유효한 종료시간을 찾지 못한 경우 기존 로직 사용
+            if (!foundValidEndTime) {
+              // 기본적으로 +1시간으로 설정하되, 시작시간이 유효한 경우에만
+              const isStartTimeValid = isTimeAvailable(resveStartTime);
+              if (isStartTimeValid) {
+                const startHour = parseInt(resveStartTime.split(':')[0]);
+                const endHour = startHour + 1;
+                if (endHour <= 18) {
+                  const newEndTime = `${String(endHour).padStart(2, "0")}:00:00`;
+                  setResveEndTime(newEndTime);
+                }
+              } else {
+                // 시작시간이 유효하지 않으면 종료시간도 초기화
+                setResveEndTime("");
               }
             }
           }
         } catch (error) {
           console.error("자동 종료시간 설정 에러:", error);
-          // 에러 발생 시 기본적으로 +1시간으로 설정
-          const startHour = parseInt(resveStartTime.split(':')[0]);
-          const endHour = startHour + 1;
-          if (endHour <= 18) {
-            const newEndTime = `${String(endHour).padStart(2, "0")}:00:00`;
-            setResveEndTime(newEndTime);
+          // 에러 발생 시에도 시작시간 유효성 확인 후 설정
+          const isStartTimeValid = isTimeAvailable(resveStartTime);
+          if (isStartTimeValid) {
+            const startHour = parseInt(resveStartTime.split(':')[0]);
+            const endHour = startHour + 1;
+            if (endHour <= 18) {
+              const newEndTime = `${String(endHour).padStart(2, "0")}:00:00`;
+              setResveEndTime(newEndTime);
+            }
+          } else {
+            setResveEndTime("");
           }
         }
       }, 100); // 약간의 지연을 주어 상태 업데이트 완료 후 실행
 
       return () => clearTimeout(timeoutId);
     }
-  }, [resveStartTime, resveDate, roomId, currentReservations]);
+  }, [resveStartTime, resveDate, roomId, currentReservations, isLoadingReservations]);
 
   // 잔여 시간 조회 API 호출
   useEffect(() => {
@@ -224,6 +336,8 @@ export default function ReservationForm({
     }
   }, [roomId, resveDate, companyId]);
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 이메일 형식 검사
+
   const handleSubmit = async () => {
     if (
       !resveDate ||
@@ -231,6 +345,8 @@ export default function ReservationForm({
       !resveEndTime ||
       !content ||
       !realUser ||
+      !phone ||
+      !email ||
       !numberVisitors ||
       !companyId
     ) {
@@ -247,6 +363,8 @@ export default function ReservationForm({
       resveEndTime,
       content,
       realUser,
+      realUserTel: phone,
+      realUserEmail: email,
       numberVisitors: Number(numberVisitors),
       note,
       ...(isEdit && { id: initialData.id }),
@@ -279,6 +397,9 @@ export default function ReservationForm({
         return;
       } else if(err.response?.data?.message === "400 BAD_REQUEST \"예약을 등록할 수 없습니다.\"") {
         alert("해당 날짜와 시간으로는 예약을 등록할 수 없습니다.");
+        return;
+      } else if(err.response?.data?.message === "400 BAD_REQUEST \"예약일 3일 전부터는 변경할 수 없습니다.\"") {
+        alert("예약일 3일 전부터는 변경할 수 없습니다.");
         return;
       } else {
         alert(extractErrorMessage(err, "예약이 실패되었습니다. 다시시도 해주세요."));
@@ -343,6 +464,7 @@ export default function ReservationForm({
     
     return filtered;
   }, [resveDate, roomId, currentReservations, isEdit, initialData.id]);
+
 
   const isTimeAvailable = (timeStr) => {
     if (isLoadingReservations || !resveDate) return false;
@@ -442,8 +564,7 @@ export default function ReservationForm({
     }
   };
 
-  // 현재 선택된 회의실의 최대 수용인원 구하기
-  const [maxCapacity, setMaxCapacity] = useState(64);
+  
   
   // roomId 변경 시 maxCapacity 업데이트
   useEffect(() => {
@@ -451,6 +572,11 @@ export default function ReservationForm({
       const selectedRoomObj = roomOptions.find(r => String(r.id) === String(roomId));
       const newMaxCapacity = selectedRoomObj?.capacity || 64;
       setMaxCapacity(newMaxCapacity);
+      if (selectedRoomObj?.roomName === "Meeting Room 2") {
+        setDisplayCapacity(14);
+      } else {
+        setDisplayCapacity(newMaxCapacity);
+      }
     }
   }, [roomId, roomOptions]);
 
@@ -469,6 +595,8 @@ export default function ReservationForm({
     resveDate &&
     resveStartTime &&
     resveEndTime &&
+    emailRegex.test(email) &&
+    phone.length === 13 &&
     content.trim() !== "" &&
     realUser.trim() !== "" &&
     Number(numberVisitors) > 0 &&
@@ -513,13 +641,31 @@ export default function ReservationForm({
             const newRoomId = e.target.value;
             
             setRoomId(newRoomId);
-            if (propSetSelectedRoom) {
+            if (propSetSelectedRoom) {a
               propSetSelectedRoom(Number(newRoomId));
             }
             
             // 새 룸의 예약 데이터 가져오기
             if (newRoomId && resveDate) {
               await fetchReservationsForRoom(newRoomId);
+              
+              // 룸 변경 시 현재 선택된 시간이 유효하지 않으면 초기화
+              setTimeout(() => {
+                if (resveStartTime && resveDate) {
+                  const isCurrentTimeValid = isTimeAvailable(resveStartTime);
+                  if (!isCurrentTimeValid) {
+                    // 사용 가능한 첫 번째 시간 찾기
+                    const availableTime = generateTimeOptions(9, 17).find(time => isTimeAvailable(time));
+                    if (availableTime) {
+                      setResveStartTime(availableTime);
+                    } else {
+                      // 사용 가능한 시간이 없으면 초기화
+                      setResveStartTime("09:00:00");
+                      setResveEndTime("");
+                    }
+                  }
+                }
+              }, 200); // 예약 데이터 로딩 완료 후 시간 검증
             }
           }}
           className="w-full rounded border px-2 py-1"
@@ -584,6 +730,24 @@ export default function ReservationForm({
               // 날짜 변경 시에도 예약 데이터 새로고침
               if (roomId && val) {
                 await fetchReservationsForRoom(roomId);
+                
+                // 날짜 변경 시 현재 선택된 시간이 유효하지 않으면 초기화
+                setTimeout(() => {
+                  if (resveStartTime) {
+                    const isCurrentTimeValid = isTimeAvailable(resveStartTime);
+                    if (!isCurrentTimeValid) {
+                      // 사용 가능한 첫 번째 시간 찾기
+                      const availableTime = generateTimeOptions(9, 17).find(time => isTimeAvailable(time));
+                      if (availableTime) {
+                        setResveStartTime(availableTime);
+                      } else {
+                        // 사용 가능한 시간이 없으면 초기화
+                        setResveStartTime("09:00:00");
+                        setResveEndTime("");
+                      }
+                    }
+                  }
+                }, 200); // 예약 데이터 로딩 완료 후 시간 검증
               }
             }}
             className="rounded border px-2 py-1"
@@ -662,7 +826,7 @@ export default function ReservationForm({
 
       <div>
         <label className="mb-1 block">
-          참석인원 (최대 수용인원: {maxCapacity}명) <span className="text-red-500">*</span>
+          참석인원 (최대 수용인원: {displayCapacity}명) <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
@@ -695,7 +859,42 @@ export default function ReservationForm({
         <input
           value={realUser}
           maxLength={20}
-          onChange={(e) => setRealUser(e.target.value)}
+          onChange={handleChange}
+          onCompositionStart={() => setIsComposing(true)}
+          onCompositionEnd={(e) => {
+            setIsComposing(false);
+            // 조합 끝난 값도 정제
+            setRealUser(e.target.value.replace(/[^가-힣a-zA-Z0-9\s]/g, ""))
+          }}
+          className="w-full rounded border px-2 py-1"
+        />
+      </div>
+
+      <div>
+        <label className="mb-1 block">
+          전화번호 <span className="text-red-500">*</span>
+        </label>
+        <input
+          value={phone}
+          maxLength={20}
+          onChange={(e) => setPhone(e.target.value)}
+          className="w-full rounded border px-2 py-1"
+        />
+      </div>
+
+      <div>
+        <label className="mb-1 block">
+          이메일 <span className="text-red-500">*</span>
+        </label>
+        <input
+          value={email}
+          maxLength={50}
+          onChange={handleChangeEmail}
+          onCompositionStart={() => setIsComposing(true)}
+          onCompositionEnd={(e) => {
+            setIsComposing(false);
+            setEmail(e.target.value.replace(/[^가-힣a-zA-Z0-9@._-]/g, "").replace(/\s/g, ""));
+          }}
           className="w-full rounded border px-2 py-1"
         />
       </div>

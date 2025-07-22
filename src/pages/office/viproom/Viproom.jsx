@@ -175,12 +175,12 @@ export default function Meeting() {
         const reservationDate = dayjs(detail.resveDate);
         const today = dayjs();
         
-        if (detail.paymentType === '유료예약' && permission === 'OFFICE_SECRETARY_ADMIN') {
+        if (detail.paymentType === '유료 예약' && permission === 'OFFICE_SECRETARY_ADMIN') {
           // 유료예약: 예약일이 당일이 아닌 경우에만 수정/삭제 가능 (하루 전부터 가능)
-          return reservationDate.diff(today, 'day') >= 1;
+          return reservationDate.diff(today, 'day') <= 3;
         } else if ( permission === 'OFFICE_SECRETARY_ADMIN') {
           // 무료예약: 예약일이 당일인 경우에만 수정/삭제 가능
-          return reservationDate.diff(today, 'day') === 0;
+          return reservationDate.diff(today, 'day') <= 1;
         }
       };
 
@@ -246,7 +246,12 @@ export default function Meeting() {
                           } else alert("취소 실패");
                         } catch (err) {
                           console.error("취소 오류:", err);
-                          alert(err?.response?.data?.message || err?.data?.message || "예약 취소가 실패되었습니다. 다시시도 해주세요.");
+                          if(err.response?.data?.message === "400 BAD_REQUEST \"예약을 취소할 수 없습니다.\"") {
+                            alert("해당 예약일 3일 전부터는 취소할 수 없습니다.");
+                            return;
+                          } else {
+                            alert(err?.response?.data?.message || err?.data?.message || "예약 취소가 실패되었습니다. 다시시도 해주세요.");
+                          }
                         }
                       }
                     }}
@@ -285,6 +290,8 @@ export default function Meeting() {
                               selectedRoom={currentRoom}
                               setSelectedLocation={setSelectedOffice}
                               setSelectedRoom={setSelectedRoom}
+                              setRoomOptions={setLocationOptions}
+                              settingOptions={settingOptions}
                               selectData={selectedData}
                               meetingOptions={meetingOptions}
                               existingReservations={scheduleList}
@@ -389,6 +396,8 @@ export default function Meeting() {
                     selectedRoom={selectedRoom}
                     setSelectedLocation={setSelectedOffice}
                     setSelectedRoom={setSelectedRoom}
+                    setRoomOptions={setLocationOptions}
+                    settingOptions={settingOptions}
                     selectData={selectedData}
                     meetingOptions={meetingOptions}
                     existingReservations={scheduleList}
@@ -441,6 +450,8 @@ export default function Meeting() {
                     selectedRoom={selectedRoom}
                     setSelectedLocation={setSelectedOffice}
                     setSelectedRoom={setSelectedRoom}
+                    setRoomOptions={setLocationOptions}
+                    settingOptions={settingOptions}
                     selectData={selectedData}
                     meetingOptions={meetingOptions}
                     existingReservations={scheduleList}
