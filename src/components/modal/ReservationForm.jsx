@@ -35,6 +35,8 @@ export default function ReservationForm({
   const [resveEndTime, setResveEndTime] = useState("");
   const [content, setContent] = useState(initialData.content || "");
   const [realUser, setRealUser] = useState(initialData.realUser || "");
+  const [phone, setPhone] = useState(initialData.reserverTel || "");
+  const [email, setEmail] = useState(initialData.reserverEmail || "");
   const [note, setNote] = useState(initialData.note || "");
   const [status] = useState(initialData.status || "gs0101");
   const [remainingTime, setRemainingTime] = useState(null);// 현재 선택된 회의실의 최대 수용인원 구하기
@@ -44,6 +46,29 @@ export default function ReservationForm({
   // 예약 데이터 및 로딩 상태
   const [currentReservations, setCurrentReservations] = useState(existingReservations);
   const [isLoadingReservations, setIsLoadingReservations] = useState(false);
+  const [isComposing, setIsComposing] = useState(false);
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    if (isComposing) {
+      // 조합 중에는 그대로 입력
+      setRealUser(value);
+    } else {
+      // 조합이 끝난 후에만 필터 적용
+      setRealUser(value.replace(/[^가-힣a-zA-Z0-9\s]/g, ""));
+    }
+  };
+
+  const handleChangeEmail = (e) => {
+    const value = e.target.value;
+    if (isComposing) {
+      // 조합 중에는 그대로 입력
+      setEmail(value);
+    } else {
+      // 조합이 끝난 후에만 필터 적용
+      setEmail(value.replace(/[^가-힣a-zA-Z0-9@._-]/g, ""));
+    }
+  };
 
   const getToday = () => {
     const today = new Date();
@@ -201,6 +226,8 @@ export default function ReservationForm({
     }
     if (initialData.content) setContent(initialData.content);
     if (initialData.realUser) setRealUser(initialData.realUser);
+    if (initialData.reserverTel) setPhone(initialData.reserverTel);
+    if (initialData.reserverEmail) setEmail(initialData.reserverEmail);
     if (initialData.numberVisitors) setNumberVisitors(initialData.numberVisitors);
     if (initialData.companyId) setCompanyId(initialData.companyId);
     if (initialData.note) setNote(initialData.note);
@@ -316,6 +343,8 @@ export default function ReservationForm({
       !resveEndTime ||
       !content ||
       !realUser ||
+      !phone ||
+      !email ||
       !numberVisitors ||
       !companyId
     ) {
@@ -332,6 +361,8 @@ export default function ReservationForm({
       resveEndTime,
       content,
       realUser,
+      realUserTel: phone,
+      realUserEmail: email,
       numberVisitors: Number(numberVisitors),
       note,
       ...(isEdit && { id: initialData.id }),
@@ -364,6 +395,9 @@ export default function ReservationForm({
         return;
       } else if(err.response?.data?.message === "400 BAD_REQUEST \"예약을 등록할 수 없습니다.\"") {
         alert("해당 날짜와 시간으로는 예약을 등록할 수 없습니다.");
+        return;
+      } else if(err.response?.data?.message === "400 BAD_REQUEST \"예약일 3일 전부터는 변경할 수 없습니다.\"") {
+        alert("예약일 3일 전부터는 변경할 수 없습니다.");
         return;
       } else {
         alert(extractErrorMessage(err, "예약이 실패되었습니다. 다시시도 해주세요."));
@@ -603,7 +637,7 @@ export default function ReservationForm({
             const newRoomId = e.target.value;
             
             setRoomId(newRoomId);
-            if (propSetSelectedRoom) {
+            if (propSetSelectedRoom) {a
               propSetSelectedRoom(Number(newRoomId));
             }
             
@@ -821,7 +855,42 @@ export default function ReservationForm({
         <input
           value={realUser}
           maxLength={20}
-          onChange={(e) => setRealUser(e.target.value)}
+          onChange={handleChange}
+          onCompositionStart={() => setIsComposing(true)}
+          onCompositionEnd={(e) => {
+            setIsComposing(false);
+            // 조합 끝난 값도 정제
+            setRealUser(e.target.value.replace(/[^가-힣a-zA-Z0-9\s]/g, ""))
+          }}
+          className="w-full rounded border px-2 py-1"
+        />
+      </div>
+
+      <div>
+        <label className="mb-1 block">
+          전화번호 <span className="text-red-500">*</span>
+        </label>
+        <input
+          value={phone}
+          maxLength={20}
+          onChange={(e) => setPhone(e.target.value)}
+          className="w-full rounded border px-2 py-1"
+        />
+      </div>
+
+      <div>
+        <label className="mb-1 block">
+          이메일 <span className="text-red-500">*</span>
+        </label>
+        <input
+          value={email}
+          maxLength={50}
+          onChange={handleChangeEmail}
+          onCompositionStart={() => setIsComposing(true)}
+          onCompositionEnd={(e) => {
+            setIsComposing(false);
+            setEmail(e.target.value.replace(/[^가-힣a-zA-Z0-9@._-]/g, "").replace(/\s/g, ""));
+          }}
           className="w-full rounded border px-2 py-1"
         />
       </div>

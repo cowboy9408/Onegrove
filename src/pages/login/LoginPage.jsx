@@ -20,6 +20,18 @@ export default function LoginPage() {
   const { showModal } = useModal();
   const setName = useAuthStore((state) => state.setName);
   const setCompanyId = useAuthStore((state) => state.setCompanyId);
+  const [isComposing, setIsComposing] = useState(false);
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    if (isComposing) {
+      // 조합 중에는 그대로 입력
+      setUsername(value.trim());
+    } else {
+      // 조합이 끝난 후에만 필터 적용
+      setUsername(value.replace(/[^가-힣a-zA-Z0-9\s]/g, "")).replace(/\s/g, "").trim();
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -71,8 +83,15 @@ export default function LoginPage() {
             id={useId()}
             label={""}
             placeholder={"ID"}
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={username.trim()}
+            // onChange={(e) => setUsername(e.target.value)}
+            onChange={handleChange}
+            onCompositionStart={() => setIsComposing(true)}
+            onCompositionEnd={(e) => {
+              setIsComposing(false);
+              // 조합 끝난 값도 정제
+              setUsername(e.target.value.replace(/[^가-힣a-zA-Z0-9\s]/g, "").replace(/\s/g, "").trim())
+            }}
           />
           <Input
             id={useId()}
