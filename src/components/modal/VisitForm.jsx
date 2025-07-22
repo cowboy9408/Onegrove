@@ -203,13 +203,17 @@ export default function VisitForm({
     });
   };
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 이메일 형식 검사
+
   const isFormValid =
     companyId &&
     resveDate &&
     resveTime &&
     building &&
     email.trim() !== "" &&
+    emailRegex.test(email) &&
     tel.trim() !== "" &&
+    tel.length === 13 &&
     visitPurpose.trim() !== "" &&
     name.trim() !== "" &&
     visitNumber;
@@ -400,7 +404,7 @@ export default function VisitForm({
           </label>
           <input
             value={tel}
-            maxLength={20}
+            maxLength={13}
             onChange={(e) => setTel(e.target.value)}
             className="w-full rounded border px-2 py-1"
           />
