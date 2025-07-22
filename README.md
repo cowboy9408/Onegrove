@@ -33,7 +33,8 @@ react를 이용하여 개발한 원그로브몰 CMS 입니다. 🙂 <br/>
 ### ⚙️ TOOLS
 <div style= "display: flex">
   <img src ="https://img.shields.io/badge/-Git-F05032?&style=for-the-badge&logo=Git&logoColor=white" style= "height: auto; margin-left: 10px; margin-right : 10px"/>
-    <img src ="https://img.shields.io/badge/-Visual Studio Code-007ACC?&style=for-the-badge&logo=Visual Studio Code&logoColor=white" style= "height: auto; margin-left: 10px; margin-right : 10px"/>
+  <img src="https://img.shields.io/badge/-GitLab-FC6D26?&style=for-the-badge&logo=GitLab&logoColor=white" style="height: auto; margin-left: 10px; margin-right: 10px"/>
+   <img src="https://img.shields.io/badge/-VSCode-007ACC?&style=for-the-badge&logo=VisualStudioCode&logoColor=white" style="height: auto; margin-left: 10px; margin-right: 10px"/>
   <img src="https://img.shields.io/badge/-Postman-FF6C37?&style=for-the-badge&logo=Postman&logoColor=white" style="height: auto; margin-left: 10px; margin-right: 10px"/>
 <img src="https://img.shields.io/badge/-Figma-F24E1E?&style=for-the-badge&logo=Figma&logoColor=white" style="height: auto; margin-left: 10px; margin-right: 10px"/>
 </div>
