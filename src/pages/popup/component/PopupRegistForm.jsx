@@ -4,7 +4,7 @@ import Radio from "@/components/common/Radio";
 import Datepicker from "@/components/common/Datepicker";
 import Upload from "@/components/common/Upload";
 import Button from "@/components/common/Button";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, Controller } from "react-hook-form";
 
 const PopupRegistForm = forwardRef(({ data, lang }, ref) => {
   const methods = useForm({
@@ -13,53 +13,57 @@ const PopupRegistForm = forwardRef(({ data, lang }, ref) => {
       isVisible: "Y",
     },
   });
-  const { register, setValue, watch, getValues } = methods;
-
-  const [form, setForm] = useState({
-    title: "",
-    isVisible: "Y",
-    menu: "",
-    language: "ko",
-    period: { startDate: null, endDate: null },
-    pcImg: null,
-    moImg: null,
-    url: "",
-  });
-
-  const handleChange = (key, value) => {
-    setForm((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
+  const { register, setValue, watch, getValues, reset } = methods;
 
   useEffect(() => {
     if (data) {
-      setValue("title", data.title || "");
-      setValue("isVisible", data.useYn || "Y"); // 핵심
-      setValue("url", data.landingUrl || "");
-      setValue("period", {
-        startDate: data.startDt ? new Date(data.startDt) : null,
-        endDate: data.endDt ? new Date(data.endDt) : null,
+      reset({
+        title: data.title || "",
+        isVisible: String(data.useYn ?? "Y"),
+        url: data.landingUrl || "",
+        period: {
+          startDate: data.startDt ? new Date(data.startDt) : null,
+          endDate: data.endDt ? new Date(data.endDt) : null,
+        },
+        pcImg: data.pcImg ? { ...data.pcImg, status: "R" } : null,
+        moImg: data.moImg ? { ...data.moImg, status: "R" } : null,
       });
-      setValue("pcImg", data.pcImg || null);
-      setValue("moImg", data.moImg || null);
     }
-  }, [data, setValue]);
+  }, [data, reset]);
+
+  const handleImageChange = (field, newFile) => {
+    const prevFile = getValues(field);
+    let status = "C"; // 기본값: 신규 등록
+
+    if (prevFile && prevFile.id && newFile.id === prevFile.id) {
+      status = "R"; // 기존 이미지와 동일
+    } else if (prevFile && prevFile.id && newFile.id !== prevFile.id) {
+      status = "E"; // 기존 이미지에서 수정됨
+    }
+
+    const updatedFile = {
+      ...newFile,
+      status,
+    };
+
+    setValue(field, updatedFile);
+  };
 
   useImperativeHandle(ref, () => ({
     submit: (onError) => {
-      if (!form.title) {
+      const values = getValues();
+
+      if (!values.title) {
         onError?.("타이틀을 입력해주세요.");
         return null;
       }
 
-      if (!form.period.startDate || !form.period.endDate) {
+      if (!values.period?.startDate || !values.period?.endDate) {
         onError?.("노출 기간을 선택해주세요.");
         return null;
       }
 
-      if (!form.image) {
+      if (!values.pcImg || !values.moImg) {
         onError?.("이미지를 등록해주세요.");
         return null;
       }
@@ -76,15 +80,18 @@ const PopupRegistForm = forwardRef(({ data, lang }, ref) => {
         status: file.status ?? "C",
       });
 
+      const formatDate = (date) =>
+        `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} 00:00:00`;
+
       return {
         lang: lang?.toUpperCase() || "KO",
-        title: form.title,
-        startDt: form.period.startDate.toISOString().split("T")[0],
-        endDt: form.period.endDate.toISOString().split("T")[0],
-        landingUrl: form.url,
-        useYn: form.isVisible,
-        pcImg: toImageMeta(form.pcImg),
-        moImg: toImageMeta(form.moImg),
+        title: values.title,
+        startDt: formatDate(values.period.startDate),
+        endDt: formatDate(values.period.endDate),
+        landingUrl: values.url,
+        useYn: values.isVisible,
+        pcImg: toImageMeta(values.pcImg),
+        moImg: toImageMeta(values.moImg),
       };
     },
   }));
@@ -107,20 +114,28 @@ const PopupRegistForm = forwardRef(({ data, lang }, ref) => {
             <div className="flex-1">
               <p className="mb-2 text-sm font-medium">노출 여부</p>
               <div className="flex gap-4">
-                <Radio
-                  name="isVisible"
-                  value="Y"
-                  label="노출"
-                  checked={watch("isVisible") === "Y"}
-                  onChange={() => setValue("isVisible", "Y")}
-                />
-                <Radio
-                  name="isVisible"
-                  value="N"
-                  label="미노출"
-                  checked={watch("isVisible") === "N"}
-                  onChange={() => setValue("isVisible", "N")}
-                />
+                <div className="flex gap-4">
+                  <Controller
+                    name="isVisible"
+                    control={methods.control}
+                    render={({ field }) => (
+                      <div className="flex gap-4">
+                        <Radio
+                          value="Y"
+                          label="노출"
+                          checked={field.value === "Y"}
+                          onChange={() => field.onChange("Y")}
+                        />
+                        <Radio
+                          value="N"
+                          label="미노출"
+                          checked={field.value === "N"}
+                          onChange={() => field.onChange("N")}
+                        />
+                      </div>
+                    )}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -145,14 +160,14 @@ const PopupRegistForm = forwardRef(({ data, lang }, ref) => {
             name="ImgPc"
             label="PC 팝업 이미지"
             value={watch("pcImg")}
-            onChange={(file) => setValue("pcImg", file)}
+            onChange={(file) => handleImageChange("pcImg", file)}
             required
           />
           <Upload
             name="ImgMo"
             label="모바일 팝업 이미지"
             value={watch("moImg")}
-            onChange={(file) => setValue("moImg", file)}
+            onChange={(file) => handleImageChange("moImg", file)}
             required
           />
 
