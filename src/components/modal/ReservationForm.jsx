@@ -391,7 +391,7 @@ export default function ReservationForm({
         alert(errorMessage);
       }
     } catch (err) {
-      console.error("예약 처리 실패:", err.response?.data?.message );
+      console.log("예약 처리 실패:", err.response?.data?.message );
       if(err.response?.data?.message === "400 BAD_REQUEST \"예약을 수정할 수 없습니다.\"") {
         alert("해당 날짜와 시간으로는 예약을 수정할 수 없습니다.");
         return;
