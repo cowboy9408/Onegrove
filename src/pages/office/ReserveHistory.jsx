@@ -147,17 +147,23 @@ export default function Visit() {
     const matchesStatus =
       !activeFilter.status || item.status === activeFilter.status;
 
+    const normalizeDate = (date) =>
+      new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
     const matchesDate = (() => {
       const [startStr] = item.resvDatetime.split(" - ");
-      const itemDate = new Date(startStr);
+      const itemDate = normalizeDate(new Date(startStr));
       const { startDate, endDate } = activeFilter.dateRange;
 
       if (startDate && endDate) {
-        return itemDate >= startDate && itemDate <= endDate;
+        return (
+          itemDate >= normalizeDate(startDate) &&
+          itemDate <= normalizeDate(endDate)
+        );
       } else if (startDate) {
-        return itemDate >= startDate;
+        return itemDate >= normalizeDate(startDate);
       } else if (endDate) {
-        return itemDate <= endDate;
+        return itemDate <= normalizeDate(endDate);
       }
       return true;
     })();
