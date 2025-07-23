@@ -414,8 +414,6 @@ export default function AdminDetailPage() {
                 role: form.role,
               };
 
-              console.log("payload", payload); // 요청값 확인용
-
               const res = await api.post("/api/v1/user/temp-password", payload);
 
               if (res.data.success) {
