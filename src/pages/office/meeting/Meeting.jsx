@@ -359,7 +359,7 @@ export default function Meeting() {
         <Button
           onClick={() => {
             showModal({
-              title: "회의실 예약",
+              title: "Meeting Room 예약",
               size: "lg",
               customButton: true,
               showCancel: true,
