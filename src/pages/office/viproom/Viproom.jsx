@@ -379,7 +379,7 @@ export default function Meeting() {
             const modalKey = `${selectedOffice}-${selectedRoom}-${Date.now()}-new`;
             
             showModal({
-              title: "회의실 예약",
+              title: "Executive Room 예약",
               size: "lg",
               customButton: true,
               showCancel: true,

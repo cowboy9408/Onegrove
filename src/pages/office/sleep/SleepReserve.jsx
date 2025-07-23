@@ -193,7 +193,7 @@ export default function SleepReserve() {
         <Button
           onClick={() => {
             showModal({
-              title: "수면실 예약",
+              title: "Relax Room 예약",
               size: "lg",
               customButton: true,
               showCancel: true,
