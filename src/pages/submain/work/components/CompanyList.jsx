@@ -38,29 +38,39 @@ export default function CompanyList({ data, setData }) {
                   originalMap.set(String(item.companyId), item);
                 });
 
-                const merged = selected.map((item) => {
+                const selectedMap = new Map();
+                selected.forEach((item) => {
+                  selectedMap.set(String(item.companyId), item);
+                });
+
+                const merged = [];
+
+                // 기존 항목 중 선택 해제된 것은 delYn: "Y"
+                originalMap.forEach((item, companyId) => {
+                  if (!selectedMap.has(companyId)) {
+                    merged.push({ ...item, delYn: "Y" });
+                  }
+                });
+
+                // 새로 선택된 항목은 delYn: "N"
+                selected.forEach((item) => {
                   const origin = originalMap.get(String(item.companyId));
-
-                  return {
-                    ...origin, // 기존 값 유지 (id 포함)
-                    ...item, // 새로운 값으로 덮어쓰기 (companyId, name 등)
-                    id: origin?.id ?? item.id, // id 보존 (중복 방지)
-                    delYn: "N", // 복구
-                  };
+                  merged.push({
+                    ...origin,
+                    ...item,
+                    id: origin?.id ?? item.id,
+                    delYn: "N",
+                  });
                 });
 
-                // 중복 없는 전체 리스트
-                const mergedMap = new Map();
-                merged.forEach((item) => {
-                  mergedMap.set(String(item.companyId), item);
-                });
-
-                const reSorted = Array.from(mergedMap.values()).map(
-                  (item, idx) => ({
+                // delYn: "N"만 정렬 순서 지정, 삭제된 항목은 맨 뒤로 둠
+                const reSorted = merged
+                  .filter((item) => item.delYn !== "Y")
+                  .map((item, idx) => ({
                     ...item,
                     sort: (idx + 1).toString(),
-                  })
-                );
+                  }))
+                  .concat(merged.filter((item) => item.delYn === "Y"));
 
                 setData(reSorted);
                 setShowModal(false);
@@ -82,6 +92,7 @@ export default function CompanyList({ data, setData }) {
             >
               {data
                 .filter((item) => item.delYn !== "Y") // 삭제 안 된 것만 출력
+                .slice(0, 20)
                 .map((item, index) => (
                   <Draggable
                     key={item.id}

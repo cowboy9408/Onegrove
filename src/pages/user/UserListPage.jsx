@@ -20,11 +20,6 @@ export default function UserListPage() {
   const navigate = useNavigate();
   const { permission, companyId } = useAuthStore(); // 로그인된 사용자의 역할(role) 가져오기
 
-  useEffect(() => {
-    console.log("내 권한:", permission);
-    console.log("내 companyId:", companyId);
-  }, []);
-
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
@@ -73,10 +68,7 @@ export default function UserListPage() {
         if (res.success) {
           let allData = res.data;
 
-          console.log(
-            "총무 계정 임직원 목록:",
-            allData.map((v) => v.companyName)
-          );
+          console.log(allData.map((v) => v.companyName));
 
           if (permission === "OFFICE_SECRETARY_ADMIN") {
             const myCompanyName = allData[0]?.companyName;
@@ -120,10 +112,7 @@ export default function UserListPage() {
         if (res.success) {
           let allData = res.data;
 
-          console.log(
-            "item.isUse 실제 값들:",
-            allData.map((item) => item.isUse)
-          );
+          console.log(allData.map((item) => item.isUse));
 
           let filtered = allData;
 
