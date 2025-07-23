@@ -40,8 +40,8 @@ export default function ReservationForm({
   const [note, setNote] = useState(initialData.note || "");
   const [status] = useState(initialData.status || "gs0101");
   const [remainingTime, setRemainingTime] = useState(null);// 현재 선택된 회의실의 최대 수용인원 구하기
-  const [maxCapacity, setMaxCapacity] = useState(64);
-  const [displayCapacity, setDisplayCapacity] = useState(64);
+  const [maxCapacity, setMaxCapacity] = useState(isVip === "Y" ? 4 : 64);
+  const [displayCapacity, setDisplayCapacity] = useState(isVip === "Y" ? 4 : 64);
 
   // 예약 데이터 및 로딩 상태
   const [currentReservations, setCurrentReservations] = useState(existingReservations);
@@ -570,7 +570,8 @@ export default function ReservationForm({
   useEffect(() => {
     if (roomOptions.length > 0 && roomId) {
       const selectedRoomObj = roomOptions.find(r => String(r.id) === String(roomId));
-      const newMaxCapacity = selectedRoomObj?.capacity || 64;
+      const newMaxCapacity = selectedRoomObj?.capacity || (isVip === "Y" ? 4 : 64);
+      // console.log(roomOptions, propSetRoomOptions, roomId, selectedRoomObj);
       setMaxCapacity(newMaxCapacity);
       if (selectedRoomObj?.roomName === "Meeting Room 2") {
         setDisplayCapacity(14);
@@ -578,7 +579,7 @@ export default function ReservationForm({
         setDisplayCapacity(newMaxCapacity);
       }
     }
-  }, [roomId, roomOptions]);
+  }, [roomId, roomOptions, propSetRoomOptions]);
 
   // numberVisitors 변경 시 maxCapacity 체크
   useEffect(() => {
@@ -641,7 +642,7 @@ export default function ReservationForm({
             const newRoomId = e.target.value;
             
             setRoomId(newRoomId);
-            if (propSetSelectedRoom) {a
+            if (propSetSelectedRoom) {
               propSetSelectedRoom(Number(newRoomId));
             }
             

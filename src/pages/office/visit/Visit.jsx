@@ -310,7 +310,7 @@ export default function Visit() {
 
   const showInput = (detail) => {
     showModal({
-      title: "방문 예약 수정",
+      title: "방문 예약 등록",
       size: "2xl",
       customButton: true,
       showCancel: true,
