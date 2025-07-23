@@ -12,7 +12,7 @@ export default function Meeting() {
   const [selectedOffice, setSelectedOffice] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const { showModal } = useContext(ModalContext);
-  
+
   // 모달 닫기를 위한 ref
   const currentModalCloseRef = useRef(null);
   const [meetingOptions, setMeetingOptions] = useState({});
@@ -33,17 +33,18 @@ export default function Meeting() {
     try {
       let apiUrl = `/api/v1/meeting?roomId=${selectedRoom}&isVip=N&lang=ko`;
 
-
-      
       const res = await api.get(apiUrl);
       if (res.data?.success && Array.isArray(res.data.data)) {
         const mapped = res.data.data.map((item) => {
           // OFFICE_SECRETARY_ADMIN 계정일 때 본인이 예약한 것만 상세 정보 표시
-          const isOwnReservation = permission === 'OFFICE_SECRETARY_ADMIN' ? item.userId === userId : true;
-          
+          const isOwnReservation =
+            permission === "OFFICE_SECRETARY_ADMIN"
+              ? item.userId === userId
+              : true;
+
           return {
             id: item.id,
-            title: isOwnReservation 
+            title: isOwnReservation
               ? `${item.paymentType}예약 ${item.resveStartTime} ~ ${item.resveEndTime} ${item.reserver} (${item.companyName})`
               : `${item.resveStartTime} ~ ${item.resveEndTime} 예약됨`,
             start: new Date(`${item.resveDate}T${item.resveStartTime}`),
@@ -58,29 +59,29 @@ export default function Meeting() {
     }
   };
 
-  const selectedData = officeOptions.find(i => i.id === selectedRoom) || null;
+  const selectedData = officeOptions.find((i) => i.id === selectedRoom) || null;
 
   // API에서 가져온 settingOptions를 기반으로 capacity 매핑 (useMemo로 최적화)
   const mappedRoomOptions = useMemo(() => {
     if (locationOptions.length === 0) return [];
-    
-    const mapped = locationOptions.map(room => {
+
+    const mapped = locationOptions.map((room) => {
       // settingOptions에서 해당 룸의 capacity 찾기 (id로 매칭)
-      const settingRoom = settingOptions.find(setting => 
-        setting.id === room.id
+      const settingRoom = settingOptions.find(
+        (setting) => setting.id === room.id
       );
-      
+
       return {
         ...room,
         capacity: settingRoom?.capacity || 64, // API에서 capacity 가져오거나 기본값 64
       };
     });
-    
+
     return mapped;
   }, [locationOptions, settingOptions]);
-  
+
   useEffect(() => {
-    if(selectedRoom) {
+    if (selectedRoom) {
       fetchSchedules();
     }
   }, [selectedRoom]);
@@ -110,10 +111,12 @@ export default function Meeting() {
   useEffect(() => {
     const fetchOffice = async () => {
       try {
-        const settingRes = await api.get(`/api/v1/meeting/room-list?isVip=N&location=${selectedOffice}`);
+        const settingRes = await api.get(
+          `/api/v1/meeting/room-list?isVip=N&location=${selectedOffice}`
+        );
         if (settingRes.data.success) {
           setLocationOptions(settingRes.data.data);
-          
+
           if (settingRes.data.data.length > 0) {
             const newRoomId = settingRes.data.data[0].id;
             setSelectedRoom(newRoomId);
@@ -123,13 +126,15 @@ export default function Meeting() {
         console.error("메타 정보 조회 실패:", err);
       }
     };
-    if(selectedOffice) fetchOffice();
+    if (selectedOffice) fetchOffice();
   }, [selectedOffice]);
 
   useEffect(() => {
     const fetchMeetingOptions = async () => {
       try {
-        const categoryRes = await api.get(`/api/v1/meeting/office-list?lang=ko`);
+        const categoryRes = await api.get(
+          `/api/v1/meeting/office-list?lang=ko`
+        );
         if (categoryRes.data.success) setMeetingOptions(categoryRes.data.data);
       } catch (err) {
         console.error("입주사 정보 조회 실패:", err);
@@ -140,17 +145,22 @@ export default function Meeting() {
 
   useEffect(() => {
     if (initialData.resveDate) setResveDate(initialData.resveDate);
-    if (initialData.resveStartTime) setResveStartTime(initialData.resveStartTime + ":00");
+    if (initialData.resveStartTime)
+      setResveStartTime(initialData.resveStartTime + ":00");
     if (initialData.content) setContent(initialData.content);
     if (initialData.realUser) setRealUser(initialData.realUser);
-    if (initialData.numberVisitors) setNumberVisitors(initialData.numberVisitors);
+    if (initialData.numberVisitors)
+      setNumberVisitors(initialData.numberVisitors);
     if (initialData.companyId) setCompanyId(initialData.companyId);
   }, [initialData]);
 
   const handleEventClick = async (event) => {
     try {
       // OFFICE_SECRETARY_ADMIN 계정일 때 본인 예약이 아니면 클릭 불가능
-      if (permission === 'OFFICE_SECRETARY_ADMIN' && !event.resource.isOwnReservation) {
+      if (
+        permission === "OFFICE_SECRETARY_ADMIN" &&
+        !event.resource.isOwnReservation
+      ) {
         return;
       }
 
@@ -166,13 +176,16 @@ export default function Meeting() {
         const reservationDate = dayjs(detail.resveDate);
         const today = dayjs();
         // console.log("aa", detail.paymentType, permission, reservationDate.diff(today, 'day')<= 3);
-        
-        if (detail.paymentType === '유료 예약' && permission === 'OFFICE_SECRETARY_ADMIN') {
+
+        if (
+          detail.paymentType === "유료 예약" &&
+          permission === "OFFICE_SECRETARY_ADMIN"
+        ) {
           // 유료예약: 예약일이 당일이 아닌 경우에만 수정/삭제 가능 (하루 전부터 가능)
-          return reservationDate.diff(today, 'day') <= 3;
-        } else if ( permission === 'OFFICE_SECRETARY_ADMIN') {
+          return reservationDate.diff(today, "day") <= 3;
+        } else if (permission === "OFFICE_SECRETARY_ADMIN") {
           // 무료예약: 예약일이 당일인 경우에만 수정/삭제 가능
-          return reservationDate.diff(today, 'day') <= 1;
+          return reservationDate.diff(today, "day") <= 1;
         }
       };
 
@@ -185,52 +198,110 @@ export default function Meeting() {
           <div className="space-y-5 text-sm text-gray-700">
             <table className="w-full border text-left">
               <tbody>
-                <tr><th className="p-2 border min-w-[80px]">회의실</th><td className="p-2 border">{detail.roomName} ({detail.location})</td></tr>
-                <tr><th className="p-2 border">예약 종류</th><td className="p-2 border">{detail.paymentType}</td></tr>
-                <tr><th className="p-2 border">일정</th><td className="p-2 border">{detail.resveDate} {detail.resveStartTime} ~ {detail.resveEndTime}</td></tr>
-                <tr><th className="p-2 border">상태</th><td className="p-2 border">{detail.status}</td></tr>
-                <tr><th className="p-2 border">내용</th><td className="p-2 border break-all">{detail.content}</td></tr>
-                <tr><th className="p-2 border">사용자</th><td className="p-2 border">{detail.realUser}</td></tr>
-                <tr><th className="p-2 border">참석인원</th><td className="p-2 border">{detail.numberVisitors}</td></tr>
-                <tr><th className="p-2 border">입주사</th><td className="p-2 border">{detail.companyName}</td></tr>
-                <tr><th className="p-2 border">예약자</th><td className="p-2 border">{detail.reserver}</td></tr>
-                <tr><th className="p-2 border">전화번호</th><td className="p-2 border">{detail.reserverTel}</td></tr>
-                <tr><th className="p-2 border">이메일</th><td className="p-2 border">{detail.reserverEmail}</td></tr>
-                <tr><th className="p-2 border">비고</th><td className="p-2 border break-all">{detail.note}</td></tr>
-                <tr><th className="p-2 border">예약 등록 일시</th><td className="p-2 border break-all">{detail.createDatetime}</td></tr>
+                <tr>
+                  <th className="min-w-[80px] border p-2">회의실</th>
+                  <td className="border p-2">
+                    {detail.roomName} ({detail.location})
+                  </td>
+                </tr>
+                <tr>
+                  <th className="border p-2">예약 종류</th>
+                  <td className="border p-2">{detail.paymentType}</td>
+                </tr>
+                <tr>
+                  <th className="border p-2">일정</th>
+                  <td className="border p-2">
+                    {detail.resveDate} {detail.resveStartTime} ~{" "}
+                    {detail.resveEndTime}
+                  </td>
+                </tr>
+                <tr>
+                  <th className="border p-2">상태</th>
+                  <td className="border p-2">{detail.status}</td>
+                </tr>
+                <tr>
+                  <th className="border p-2">내용</th>
+                  <td className="border p-2 break-all">{detail.content}</td>
+                </tr>
+                <tr>
+                  <th className="border p-2">사용자</th>
+                  <td className="border p-2">{detail.realUser}</td>
+                </tr>
+                <tr>
+                  <th className="border p-2">참석인원</th>
+                  <td className="border p-2">{detail.numberVisitors}</td>
+                </tr>
+                <tr>
+                  <th className="border p-2">입주사</th>
+                  <td className="border p-2">{detail.companyName}</td>
+                </tr>
+                <tr>
+                  <th className="border p-2">예약자</th>
+                  <td className="border p-2">{detail.reserver}</td>
+                </tr>
+                <tr>
+                  <th className="border p-2">전화번호</th>
+                  <td className="border p-2">{detail.reserverTel}</td>
+                </tr>
+                <tr>
+                  <th className="border p-2">이메일</th>
+                  <td className="border p-2">{detail.reserverEmail}</td>
+                </tr>
+                <tr>
+                  <th className="border p-2">비고</th>
+                  <td className="border p-2 break-all">{detail.note}</td>
+                </tr>
+                <tr>
+                  <th className="border p-2">예약 등록 일시</th>
+                  <td className="border p-2 break-all">
+                    {detail.createDatetime}
+                  </td>
+                </tr>
               </tbody>
             </table>
 
             <div className="flex justify-between gap-3">
               <div className="flex gap-3">
-                {(detail.status === '가예약' && permission !== 'OFFICE_SECRETARY_ADMIN') && (
-                  <Button
-                    theme="danger"
-                    onClick={async () => {
-                      if (confirm("예약을 확정하겠습니까?")) {
-                        try {
-                          const res = await api.post("/api/v1/meeting/confirm", { id: detail.id });
-                          if (res.data?.success) {
-                            alert("예약 확정 완료");
-                            fetchSchedules();
-                            closeModal();
-                          } else alert("예약 확정 실패");
-                        } catch (err) {
-                          console.error("예약 확정 오류:", err);
-                          alert(err?.response?.data?.message || err?.data?.message || "예약 확정이 실패되었습니다. 다시시도 해주세요.");
+                {detail.status === "가예약" &&
+                  permission !== "OFFICE_SECRETARY_ADMIN" && (
+                    <Button
+                      theme="danger"
+                      onClick={async () => {
+                        if (confirm("예약을 확정하겠습니까?")) {
+                          try {
+                            const res = await api.post(
+                              "/api/v1/meeting/confirm",
+                              { id: detail.id }
+                            );
+                            if (res.data?.success) {
+                              alert("예약 확정 완료");
+                              fetchSchedules();
+                              closeModal();
+                            } else alert("예약 확정 실패");
+                          } catch (err) {
+                            console.error("예약 확정 오류:", err);
+                            alert(
+                              err?.response?.data?.message ||
+                                err?.data?.message ||
+                                "예약 확정이 실패되었습니다. 다시시도 해주세요."
+                            );
+                          }
                         }
-                      }
-                    }}
-                  >예약 확정</Button>
-                )}
-                
+                      }}
+                    >
+                      예약 확정
+                    </Button>
+                  )}
+
                 {!isModifiable() && (
                   <Button
                     theme="danger"
                     onClick={async () => {
                       if (confirm("예약을 취소하겠습니까?")) {
                         try {
-                          const res = await api.post("/api/v1/meeting/cancel", { id: detail.id });
+                          const res = await api.post("/api/v1/meeting/cancel", {
+                            id: detail.id,
+                          });
                           if (res.data?.success) {
                             alert("취소 완료");
                             fetchSchedules();
@@ -238,16 +309,27 @@ export default function Meeting() {
                           } else alert("취소 실패");
                         } catch (err) {
                           console.error("취소 오류:", err);
-                          if(err.response?.data?.message === "400 BAD_REQUEST \"예약을 취소할 수 없습니다.\"") {
-                            alert("해당 예약일 3일 전부터는 취소할 수 없습니다.");
+                          if (
+                            err.response?.data?.message ===
+                            '400 BAD_REQUEST "예약을 취소할 수 없습니다."'
+                          ) {
+                            alert(
+                              "해당 예약일 3일 전부터는 취소할 수 없습니다."
+                            );
                             return;
                           } else {
-                            alert(err?.response?.data?.message || err?.data?.message || "예약 취소가 실패되었습니다. 다시시도 해주세요.");
+                            alert(
+                              err?.response?.data?.message ||
+                                err?.data?.message ||
+                                "예약 취소가 실패되었습니다. 다시시도 해주세요."
+                            );
                           }
                         }
                       }
                     }}
-                  >예약 취소</Button>
+                  >
+                    예약 취소
+                  </Button>
                 )}
               </div>
               <div>
@@ -267,7 +349,7 @@ export default function Meeting() {
                         children: ({ closeModal }) => {
                           // 모달 닫기 함수를 ref에 저장
                           currentModalCloseRef.current = closeModal;
-                          
+
                           return (
                             <ReservationForm
                               key={`${selectedOffice}-${selectedRoom}-edit-${detail.id}`}
@@ -299,7 +381,9 @@ export default function Meeting() {
                         },
                       });
                     }}
-                  >수정</Button>
+                  >
+                    수정
+                  </Button>
                 )}
               </div>
             </div>
@@ -315,20 +399,20 @@ export default function Meeting() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <div className="flex gap-2">
           <Select
             label="오피스 선택"
             value={selectedOffice}
             onChange={(e) => {
               const newOffice = e.target.value;
-              
+
               // 현재 열린 모달이 있다면 닫기
               if (currentModalCloseRef.current) {
                 currentModalCloseRef.current();
                 currentModalCloseRef.current = null;
               }
-              
+
               setSelectedOffice(newOffice);
             }}
             className="w-[8em]"
@@ -354,7 +438,6 @@ export default function Meeting() {
             ))}
           </Select>
         </div>
-        
 
         <Button
           onClick={() => {
@@ -366,7 +449,7 @@ export default function Meeting() {
               children: ({ closeModal }) => {
                 // 모달 닫기 함수를 ref에 저장
                 currentModalCloseRef.current = closeModal;
-                
+
                 return (
                   <ReservationForm
                     key={`${selectedOffice}-${selectedRoom}-new`}
@@ -381,7 +464,14 @@ export default function Meeting() {
                     selectData={selectedData}
                     meetingOptions={meetingOptions}
                     existingReservations={scheduleList}
-                    initialData={{ resveDate, resveStartTime, content, realUser, numberVisitors, companyId }}
+                    initialData={{
+                      resveDate,
+                      resveStartTime,
+                      content,
+                      realUser,
+                      numberVisitors,
+                      companyId,
+                    }}
                     isVip="N"
                     closeModal={() => {
                       currentModalCloseRef.current = null;
@@ -397,14 +487,22 @@ export default function Meeting() {
               },
             });
           }}
-        >예약하기</Button>
+        >
+          예약하기
+        </Button>
       </div>
 
-      <div className="relative overflow-hidden bg-white p-4 rounded-xl shadow-md space-y-4">
+      <div className="relative space-y-4 overflow-hidden rounded-xl bg-white p-4 shadow-md">
         <div className="absolute top-6 right-6">
           <ul className="flex gap-2">
-            <li className="flex items-center gap-1"><span className="inline-block w-4 h-4 rounded-2xl bg-[#4CAF50]"></span> 가예약</li>
-            <li className="flex items-center gap-1"><span className="inline-block w-4 h-4 rounded-2xl bg-[#00AAFF]"></span> 예약 확정</li>
+            <li className="flex items-center gap-1">
+              <span className="inline-block h-4 w-4 rounded-2xl bg-[#4CAF50]"></span>{" "}
+              가예약
+            </li>
+            <li className="flex items-center gap-1">
+              <span className="inline-block h-4 w-4 rounded-2xl bg-[#00AAFF]"></span>{" "}
+              예약 확정
+            </li>
           </ul>
         </div>
         <CommonCalendar
@@ -420,7 +518,7 @@ export default function Meeting() {
               children: ({ closeModal }) => {
                 // 모달 닫기 함수를 ref에 저장
                 currentModalCloseRef.current = closeModal;
-                
+
                 return (
                   <ReservationForm
                     key={`${selectedOffice}-${selectedRoom}-slot`}

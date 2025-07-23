@@ -15,6 +15,7 @@ import DateRangePicker from "@/components/common/Datepicker";
 import VisitForm from "@/components/modal/VisitForm";
 import api from "@/lib/apiClient";
 import { useSearchParams } from "react-router-dom";
+import DataTable from "@/components/common/DataTable";
 
 export default function Visit() {
   const { showModal } = useContext(ModalContext);
@@ -35,6 +36,7 @@ export default function Visit() {
   const [companyList, setCompanyList] = useState([]);
   const [buildingList, setBuildingList] = useState([]);
   const [statusList, setStatusList] = useState([]);
+  const [checkedIds, setCheckedIds] = useState([]);
 
   const size = 30;
 
@@ -62,6 +64,16 @@ export default function Visit() {
     setPage(1);
     setSearchParams({ page: 1 });
     setActiveFilter(searchFilter);
+  };
+
+  const handleCheck = (id, checked) => {
+    setCheckedIds((prev) => {
+      if (checked) {
+        return [...prev, id];
+      } else {
+        return prev.filter((i) => i !== id);
+      }
+    });
   };
 
   const fetchVisitCategoryData = async () => {
@@ -95,8 +107,12 @@ export default function Visit() {
       const res = await api.get("/api/v1/visit");
 
       if (res.data?.success && Array.isArray(res.data.data)) {
-        setVisitList(res.data.data); // 전체 데이터 저장
-        setTotal(res.data.data.length);
+        const withId = res.data.data.map((row) => ({
+          ...row,
+          _id: row.id,
+        }));
+        setVisitList(withId);
+        setTotal(withId.length);
       }
     } catch (err) {
       console.error("목록 불러오기 실패:", err);
@@ -511,6 +527,55 @@ export default function Visit() {
 
         <div className="flex gap-2">
           <Button
+            onClick={async () => {
+              // 체크된 row 추출
+              const selectedRows = visitList.filter((item) =>
+                checkedIds.includes(item.id)
+              );
+
+              if (selectedRows.length === 0) {
+                alert("선택된 예약이 없습니다.");
+                return;
+              }
+
+              // 가예약 상태만 있는지 검사
+              const allTentative = selectedRows.every(
+                (item) => item.status === "가예약"
+              );
+
+              if (!allTentative) {
+                alert(
+                  "가예약 상태인 항목만 확정할 수 있습니다. 상태를 확인해주세요."
+                );
+                return;
+              }
+
+              // 사용자 확인
+              const confirmOk = confirm("선택된 예약을 확정하시겠습니까?");
+              if (!confirmOk) return;
+
+              try {
+                const res = await api.post("/api/v1/visit/confirm", {
+                  checkArr: selectedRows.map((item) => item.id),
+                });
+
+                if (res.data?.success) {
+                  alert("예약이 확정되었습니다.");
+                  setCheckedIds([]); // 선택 초기화
+                  fetchList(); // 목록 새로고침
+                } else {
+                  alert("예약 확정에 실패했습니다.");
+                }
+              } catch (err) {
+                console.error("예약 확정 오류:", err);
+                alert("서버 오류로 예약 확정에 실패했습니다.");
+              }
+            }}
+          >
+            예약 확정
+          </Button>
+
+          <Button
             className="bg-black text-white hover:bg-gray-800"
             onClick={() => {
               showInput({
@@ -531,13 +596,13 @@ export default function Visit() {
               });
             }}
           >
-            방문객 추가
+            예약 등록
           </Button>
         </div>
       </div>
 
       <ResultSection>
-        <DataTableSimple
+        <DataTable
           columns={[
             { key: "rownum", label: "번호" },
             { key: "companyName", label: "입주사" },
@@ -571,6 +636,8 @@ export default function Visit() {
           data={filteredList.slice((page - 1) * size, page * size)}
           rowKey="id"
           checkable={true}
+          checkedIds={checkedIds}
+          onCheck={handleCheck}
         />
 
         <Pagination
