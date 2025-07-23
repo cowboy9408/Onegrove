@@ -37,6 +37,7 @@ export default function Visit() {
   const [buildingList, setBuildingList] = useState([]);
   const [statusList, setStatusList] = useState([]);
   const [checkedIds, setCheckedIds] = useState([]);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
   const size = 30;
 
@@ -56,14 +57,33 @@ export default function Visit() {
   };
 
   const handleSearch = () => {
-    console.log("API 검색 파라미터:", {
-      companyName: getCompanyNameById(searchFilter.companyId),
-      visitBuilding: getBuildingNameByCode(searchFilter.building),
-      status: searchFilter.status,
-    });
+    const params = {
+      page: 1,
+      companyId: searchFilter.companyId || "",
+      status: searchFilter.status || "",
+      building: searchFilter.building || "",
+      cardNumber: searchFilter.cardNumber || "",
+      visitorName: searchFilter.visitorName || "",
+      startDate: searchFilter.dateRange.startDate || "",
+      endDate: searchFilter.dateRange.endDate || "",
+    };
+
     setPage(1);
-    setSearchParams({ page: 1 });
+    setSearchParams(params);
     setActiveFilter(searchFilter);
+  };
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return {
+          key,
+          direction: prev.direction === "asc" ? "desc" : "asc",
+        };
+      } else {
+        return { key, direction: "asc" };
+      }
+    });
   };
 
   const handleCheck = (id, checked) => {
@@ -123,6 +143,31 @@ export default function Visit() {
     fetchVisitCategoryData(); // 하나로 통합된 호출
   }, []);
 
+  useEffect(() => {
+    const companyId = searchParams.get("companyId") || "";
+    const status = searchParams.get("status") || "";
+    const building = searchParams.get("building") || "";
+    const cardNumber = searchParams.get("cardNumber") || "";
+    const visitorName = searchParams.get("visitorName") || "";
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
+
+    const restoredFilter = {
+      companyId,
+      status,
+      building,
+      cardNumber,
+      visitorName,
+      dateRange: {
+        startDate: startDate || null,
+        endDate: endDate || null,
+      },
+    };
+
+    setSearchFilter(restoredFilter);
+    setActiveFilter(restoredFilter);
+  }, []);
+
   const filteredList = visitList.filter((item) => {
     const matchesCompany =
       !activeFilter.companyId ||
@@ -177,6 +222,31 @@ export default function Visit() {
   useEffect(() => {
     fetchList();
   }, [activeFilter]);
+
+  const sortedList = [...filteredList].sort((a, b) => {
+    const { key, direction } = sortConfig;
+    if (!key) return 0;
+
+    let primaryA = a[key];
+    let primaryB = b[key];
+
+    // 날짜 정렬을 위해 Date로 변환
+    if (key === "visitDate" || key === "createDatetime") {
+      primaryA = new Date(primaryA);
+      primaryB = new Date(primaryB);
+    }
+
+    if (primaryA < primaryB) return direction === "asc" ? -1 : 1;
+    if (primaryA > primaryB) return direction === "asc" ? 1 : -1;
+
+    // 동일할 경우 보조 정렬: 등록일시
+    const secondaryA = new Date(a.createDatetime);
+    const secondaryB = new Date(b.createDatetime);
+    if (secondaryA < secondaryB) return direction === "asc" ? -1 : 1;
+    if (secondaryA > secondaryB) return direction === "asc" ? 1 : -1;
+
+    return 0;
+  });
 
   const handleEventClick = async (event) => {
     try {
@@ -511,7 +581,7 @@ export default function Visit() {
                   setSearchFilter(defaultFilter);
                   setActiveFilter(defaultFilter);
                   setPage(1);
-                  setSearchParams({ page: 1 });
+                  setSearchParams({ page: 1 }); // 기존 조건 제거
                   fetchList();
                 }}
               >
@@ -625,15 +695,35 @@ export default function Visit() {
                 </div>
               ),
             },
-            { key: "visitDate", label: "방문 신청일" },
-            { key: "visitTime", label: "방문 시간" },
+            {
+              key: "visitDate",
+              label: (
+                <button
+                  onClick={() => handleSort("visitDate")}
+                  className="text-black-600 underline"
+                >
+                  방문 신청일
+                </button>
+              ),
+            },
+            {
+              key: "visitTime",
+              label: (
+                <button
+                  onClick={() => handleSort("visitTime")}
+                  className="text-black-600 underline"
+                >
+                  방문 시간
+                </button>
+              ),
+            },
             { key: "visitNumber", label: "방문 인원" },
             { key: "visitBuilding", label: "방문동" },
             { key: "accessCard", label: "카드번호" },
             { key: "createDatetime", label: "등록일시" },
             { key: "status", label: "상태" },
           ]}
-          data={filteredList.slice((page - 1) * size, page * size)}
+          data={sortedList.slice((page - 1) * size, page * size)}
           rowKey="id"
           checkable={true}
           checkedIds={checkedIds}
