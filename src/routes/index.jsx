@@ -208,7 +208,7 @@ export const routeMeta = [
             element: <PermissionList />,
             title: "계정 승인 대기",
             icon: <UsersIcon size={18} />,
-            hidden: false,
+            hidden: true,
             permissions: [
               "SUPER_ADMIN",
               "NORMAL_ADMIN",
