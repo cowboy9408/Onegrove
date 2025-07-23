@@ -23,7 +23,7 @@ export default function Visit() {
 
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [data, setData] = useState([]);
-  const [setTotal] = useState(0);
+  const [total, setTotal] = useState(0);
   const [visitList, setVisitList] = useState([]);
   const [searchFilter, setSearchFilter] = useState({
     meetingRoom: "",
@@ -35,8 +35,8 @@ export default function Visit() {
 
   const [activeFilter, setActiveFilter] = useState(searchFilter);
   const [companyList, setCompanyList] = useState([]);
-  const [setBuildingList] = useState([]);
-  const [setStatusList] = useState([]);
+  // const [setBuildingList] = useState([]);
+  // const [setStatusList] = useState([]);
 
   const size = 30;
 
@@ -46,31 +46,31 @@ export default function Visit() {
     setActiveFilter(searchFilter);
   };
 
-  const fetchVisitCategoryData = async () => {
-    try {
-      const res = await api.get("/api/v1/visit/category");
+  // const fetchVisitCategoryData = async () => {
+  //   try {
+  //     const res = await api.get("/api/v1/visit/category");
 
-      if (res.data?.success) {
-        const {
-          visitCompanyListRes,
-          visitStatusListRes,
-          visitBuildingListRes,
-        } = res.data.data;
+  //     if (res.data?.success) {
+  //       const {
+  //         visitCompanyListRes,
+  //         visitStatusListRes,
+  //         visitBuildingListRes,
+  //       } = res.data.data;
 
-        if (Array.isArray(visitCompanyListRes)) {
-          setCompanyList(visitCompanyListRes);
-        }
-        if (Array.isArray(visitStatusListRes)) {
-          setStatusList(visitStatusListRes);
-        }
-        if (Array.isArray(visitBuildingListRes)) {
-          setBuildingList(visitBuildingListRes);
-        }
-      }
-    } catch (err) {
-      console.error("방문 카테고리 데이터 불러오기 실패:", err);
-    }
-  };
+  //       if (Array.isArray(visitCompanyListRes)) {
+  //         setCompanyList(visitCompanyListRes);
+  //       }
+  //       if (Array.isArray(visitStatusListRes)) {
+  //         setStatusList(visitStatusListRes);
+  //       }
+  //       if (Array.isArray(visitBuildingListRes)) {
+  //         setBuildingList(visitBuildingListRes);
+  //       }
+  //     }
+  //   } catch (err) {
+  //     console.error("방문 카테고리 데이터 불러오기 실패:", err);
+  //   }
+  // };
 
   const fetchList = async () => {
     try {
@@ -127,9 +127,9 @@ export default function Visit() {
     }
   };
 
-  useEffect(() => {
-    fetchVisitCategoryData(); // 하나로 통합된 호출
-  }, []);
+  // useEffect(() => {
+  //   fetchVisitCategoryData(); // 하나로 통합된 호출
+  // }, []);
 
   const filteredList = visitList.filter((item) => {
     const matchesRoom =
@@ -349,6 +349,9 @@ export default function Visit() {
             { key: "paidStackTimeFree", label: "누적 무료 시간" },
             { key: "paidStackTime", label: "누적 유료 시간" },
             { key: "status", label: "예약 상태" },
+            { key: "realUser", label: "실제 예약자" },
+            { key: "realUserTel", label: "연락처" },
+            { key: "realUserEmail", label: "이메일" },
             { key: "createDatetime", label: "등록일시" },
             { key: "createUser", label: "등록자" },
           ]}
