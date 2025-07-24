@@ -40,25 +40,6 @@ export default function PermissionList() {
 
   const size = 30;
 
-  // const mapRoleToLabel = (role) => {
-  //   switch (role) {
-  //     case "SUPER_ADMIN":
-  //       return "슈퍼관리자";
-  //     case "NORMAL_ADMIN":
-  //       return "일반 관리자";
-  //     case "RETAIL_ADMIN":
-  //       return "리테일 관리자";
-  //     case "OFFICE_ADMIN":
-  //       return "오피스 관리자";
-  //     case "OFFICE_SECRETARY_ADMIN":
-  //       return "입주사총무팀";
-  //     case "MEMBER":
-  //       return "회원";
-  //     default:
-  //       return "알 수 없음";
-  //   }
-  // };
-
   useEffect(() => {
     const fetchData = async () => {
       try {

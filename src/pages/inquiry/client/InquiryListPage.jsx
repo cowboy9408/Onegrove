@@ -9,11 +9,11 @@ import Col from "@/components/layout/Col";
 import ResultSection from "@/components/layout/ResultSection";
 import Row from "@/components/layout/Row";
 import SearchSection from "@/components/layout/SearchSection";
-import { faker } from "@faker-js/faker";
+
 import { useEffect, useId, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import DateRangePicker from "@/components/common/Datepicker";
-import SelectInput from "@/components/common/SelectInput";
+
 import Radio from "@/components/common/Radio";
 
 export default function InquiryListPage() {
@@ -40,51 +40,33 @@ export default function InquiryListPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // TODO: faker 삭제
-      const generateFakePagedUsers = ({ page = 1, size = 10 }) => {
-        const totalElements = 23;
-        const totalPages = Math.ceil(totalElements / size);
-        const start = (page - 1) * size;
-
-        const data = Array.from({ length: size }, (_, i) => {
-          const index = start + i + 1;
-          return {
-            no: index,
-            type: faker.helpers.arrayElement(["관리자", "일반", "외부"]),
-            occupancy: faker.company.name(),
-            name: faker.person.lastName() + faker.person.firstName(),
-            username: faker.internet.userName(),
-            email: faker.internet.email(),
-            status: faker.helpers.arrayElement(["활성", "비활성"]),
-            created_user: faker.person.fullName(),
-            created_at: faker.date
-              .recent({ days: 30 })
-              .toISOString()
-              .split("T")[0],
-          };
-        });
-
-        return {
-          pageable: {
-            totalPages,
-            totalElements,
-            currentPage: page,
-            pageSize: size,
-          },
-          data: data.slice(0, totalElements - start), // 마지막 페이지 size 조정
-        };
-      };
       // END TODO faker 삭제
-
-      // TODO: FETCH DATA
-      const res = generateFakePagedUsers(page);
-
-      setData(res.data);
-      setTotal(res.pageable.totalElements);
     };
 
     fetchData();
   }, [page]);
+
+  const handleSearch = () => {
+    setPage(1);
+    setActiveFilter(searchFilter);
+    const params = {
+      name: searchFilter.name,
+      category: searchFilter.category,
+      visibility: searchFilter.visibility,
+      page: 1,
+    };
+    if (searchFilter.dateRange.startDate) {
+      params.startDate = searchFilter.dateRange.startDate
+        .toISOString()
+        .split("T")[0];
+    }
+    if (searchFilter.dateRange.endDate) {
+      params.endDate = searchFilter.dateRange.endDate
+        .toISOString()
+        .split("T")[0];
+    }
+    setSearchParams(params);
+  };
 
   return (
     <div>
@@ -92,14 +74,21 @@ export default function InquiryListPage() {
         <Box>
           <Row>
             <Col>
-              <Select label={"상태"}>
+              <Select label={"담당 부서"}>
                 <option value="">전체</option>
                 <option value="">상태1</option>
                 <option value="">상태2</option>
               </Select>
             </Col>
             <Col>
-              <Select label={"답변여부"}>
+              <Select label={"문의 유형"}>
+                <option value="">전체</option>
+                <option value="">답변1</option>
+                <option value="">답변2</option>
+              </Select>
+            </Col>
+            <Col>
+              <Select label={"답변상태"}>
                 <option value="">전체</option>
                 <option value="">답변1</option>
                 <option value="">답변2</option>
@@ -150,7 +139,7 @@ export default function InquiryListPage() {
             </Row>
             <Row>
               <Col>
-                <SelectInput
+                <Input
                   label="키워드 검색"
                   selectOptions={["전체", "아이디", "이름"]}
                   selectValue={statusType}
@@ -161,16 +150,21 @@ export default function InquiryListPage() {
                 />
               </Col>
             </Row>
-            <Col className="flex self-end gap-2">
+            <div className="flex w-full justify-end gap-2">
+              <Button onClick={handleSearch}>검색</Button>
+
               <Button
-                className={"h-12 w-full"}
+                variant="outline"
                 onClick={() => {
-                  setSearchParams({ name, email, page });
+                  setSearchFilter(defaultFilter);
+                  setActiveFilter(defaultFilter);
+                  setPage(1);
+                  setSearchParams({ page: 1 });
                 }}
               >
-                검색
+                초기화
               </Button>
-            </Col>
+            </div>
           </Row>
         </Box>
       </SearchSection>
