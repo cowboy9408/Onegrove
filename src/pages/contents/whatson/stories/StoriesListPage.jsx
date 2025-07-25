@@ -298,6 +298,14 @@ export default function StoriesListPage() {
           <Button
             className="bg-black text-white hover:bg-gray-800"
             onClick={() => {
+              if (checkedIds.length === 0) {
+                showModal({
+                  title: "알림",
+                  message: "삭제할 항목을 선택해주세요.",
+                  confirmButton: "확인",
+                });
+                return;
+              }
               if (checkedIds.length === 0) return;
               showModal({
                 title: "스토리 삭제 확인",
