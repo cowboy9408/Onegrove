@@ -14,10 +14,12 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import Radio from "@/components/common/Radio";
 import DateRangePicker from "@/components/common/Datepicker";
 import api from "@/lib/apiClient";
+import useModal from "@/hooks/useModal";
 
 export default function EventListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { showModal } = useModal();
   const [checkedIds, setCheckedIds] = useState([]);
   const [dateRange, setDateRange] = useState({
     startDate: null,
@@ -369,39 +371,59 @@ export default function EventListPage() {
           </Button>
           <Button
             className="bg-black text-white hover:bg-gray-800"
-            onClick={async () => {
+            onClick={() => {
               if (checkedIds.length === 0) {
-                alert("삭제할 항목을 선택해주세요.");
+                showModal({
+                  title: "알림",
+                  message: "삭제할 항목을 선택해주세요.",
+                  confirmButton: "확인",
+                });
                 return;
               }
 
-              const confirm =
-                window.confirm("선택한 콘텐츠를 삭제하시겠습니까?");
-              if (!confirm) return;
+              showModal({
+                title: "삭제 확인",
+                message: "선택한 콘텐츠를 삭제하시겠습니까?",
+                showCancel: true,
+                confirmButton: "삭제",
+                onConfirm: async () => {
+                  const idsToDelete = checkedIds.map((id) => Number(id));
 
-              const idsToDelete = checkedIds.map((id) => Number(id));
+                  try {
+                    const res = await api.post(
+                      "/api/v1/event-promotion/item/delete",
+                      {
+                        checkArr: idsToDelete,
+                      }
+                    );
 
-              try {
-                const res = await api.post(
-                  "/api/v1/event-promotion/item/delete",
-                  {
-                    checkArr: idsToDelete,
+                    if (res.status === 200) {
+                      showModal({
+                        title: "완료",
+                        message: "삭제가 완료되었습니다.",
+                        confirmButton: "확인",
+                      });
+                      setCheckedIds([]);
+                      setPage(1);
+                      setSearchParams({ name, category, visibility, page: 1 });
+                      setRefreshKey((prev) => prev + 1);
+                    } else {
+                      showModal({
+                        title: "오류",
+                        message: "삭제 실패: 서버 오류",
+                        confirmButton: "확인",
+                      });
+                    }
+                  } catch (err) {
+                    console.error("삭제 요청 실패:", err);
+                    showModal({
+                      title: "에러",
+                      message: "삭제 중 오류가 발생했습니다.",
+                      confirmButton: "확인",
+                    });
                   }
-                );
-
-                if (res.status === 200) {
-                  alert("삭제가 완료되었습니다.");
-                  setCheckedIds([]);
-                  setPage(1);
-                  setSearchParams({ name, category, visibility, page: 1 });
-                  setRefreshKey((prev) => prev + 1); // 목록 새로고침
-                } else {
-                  alert("삭제 실패: 서버 오류");
-                }
-              } catch (err) {
-                console.error("삭제 요청 실패:", err);
-                alert("삭제 중 오류가 발생했습니다.");
-              }
+                },
+              });
             }}
           >
             삭제
