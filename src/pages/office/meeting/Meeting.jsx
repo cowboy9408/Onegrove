@@ -191,11 +191,13 @@ export default function Meeting() {
                 <tr><th className="p-2 border">상태</th><td className="p-2 border">{detail.status}</td></tr>
                 <tr><th className="p-2 border">내용</th><td className="p-2 border break-all">{detail.content}</td></tr>
                 <tr><th className="p-2 border">사용자</th><td className="p-2 border">{detail.realUser}</td></tr>
+                <tr><th className="p-2 border">사용자 전화번호</th><td className="p-2 border">{detail.realUserTel || '-'}</td></tr>
+                <tr><th className="p-2 border">사용자 이메일</th><td className="p-2 border">{detail.realUserEmail || '-'}</td></tr>
                 <tr><th className="p-2 border">참석인원</th><td className="p-2 border">{detail.numberVisitors}</td></tr>
                 <tr><th className="p-2 border">입주사</th><td className="p-2 border">{detail.companyName}</td></tr>
                 <tr><th className="p-2 border">예약자</th><td className="p-2 border">{detail.reserver}</td></tr>
-                <tr><th className="p-2 border">전화번호</th><td className="p-2 border">{detail.reserverTel}</td></tr>
-                <tr><th className="p-2 border">이메일</th><td className="p-2 border">{detail.reserverEmail}</td></tr>
+                <tr><th className="p-2 border">예약자 전화번호</th><td className="p-2 border">{detail.reserverTel || '-'}</td></tr>
+                <tr><th className="p-2 border">예약자이메일</th><td className="p-2 border">{detail.reserverEmail || '-'}</td></tr>
                 <tr><th className="p-2 border">비고</th><td className="p-2 border break-all">{detail.note}</td></tr>
                 <tr><th className="p-2 border">예약 등록 일시</th><td className="p-2 border break-all">{detail.createDatetime}</td></tr>
               </tbody>
