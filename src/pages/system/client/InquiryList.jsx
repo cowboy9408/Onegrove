@@ -5,14 +5,11 @@ import Pagination from "@/components/common/Pagination";
 import ResultSummary from "@/components/common/ResultSummary";
 import Select from "@/components/common/Select";
 import Box from "@/components/layout/Box";
-import Col from "@/components/layout/Col";
 import ResultSection from "@/components/layout/ResultSection";
-import Row from "@/components/layout/Row";
 import SearchSection from "@/components/layout/SearchSection";
 import { useEffect, useId, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import Radio from "@/components/common/Radio";
-import DateRangePicker from "@/components/common/Datepicker";
+
 import api from "@/lib/apiClient";
 
 export default function InquiryList() {
