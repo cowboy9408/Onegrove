@@ -649,7 +649,7 @@ export const routeMeta = [
             element: <SettingLayout />,
             title: "어메니티 설정",
             hidden: true,
-            permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN"],
+            permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN", "OFFICE_ADMIN"],
             children: [
               {
                 uuid: "e59c7075-0b1c-4607-b548-c38fa7566532",
@@ -726,7 +726,7 @@ export const routeMeta = [
         title: "어메니티 설정",
         icon: <SettingsGearIcon size={18} />,
         hidden: false,
-        permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN"],
+        permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN", "OFFICE_ADMIN"],
         children: [
           {
             uuid: "e59c7075-0b1c-4607-b548-c38fa7566532",
@@ -822,7 +822,7 @@ export const routeMeta = [
             element: <InquiryList />,
             title: "고객 문의 담당",
             hidden: true,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
           {
             uuid: "d20941fe-3206-4195-bb58-766237edfd03",
@@ -830,7 +830,7 @@ export const routeMeta = [
             element: <Regist />,
             title: "고객 문의 담당",
             hidden: true,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
           {
             uuid: "9ee92f5b-ca58-44fc-a871-5491ca515400",
@@ -838,7 +838,7 @@ export const routeMeta = [
             element: <Regist />,
             title: "고객 문의 담당",
             hidden: true,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
         ],
       },
