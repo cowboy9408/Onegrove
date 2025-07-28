@@ -70,6 +70,8 @@ export default function Visit() {
     setPage(1);
     setSearchParams(params);
     setActiveFilter(searchFilter);
+
+    fetchList();
   };
 
   const handleSort = (key) => {
