@@ -36,12 +36,7 @@ export default function Select({
         >
           {children}
         </select>
-        <label
-          htmlFor={id}
-          className="pointer-events-none absolute -top-2 left-3 z-10 bg-white px-1 text-xs text-gray-300 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-gray-800 dark:bg-transparent dark:text-gray-100 dark:peer-placeholder-shown:text-gray-500 dark:peer-focus:text-gray-100"
-        >
-          {label}
-        </label>
+
         <div className="pointer-events-none absolute top-1/3 right-4 -translate-y-1/2 text-gray-400 dark:text-gray-300">
           <div className="relative h-5 w-5">
             <div
