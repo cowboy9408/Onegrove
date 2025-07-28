@@ -22,7 +22,6 @@ export default function Visit() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
-  const [total, setTotal] = useState(0);
   const [visitList, setVisitList] = useState([]);
   const [searchFilter, setSearchFilter] = useState({
     companyId: "",
@@ -132,7 +131,6 @@ export default function Visit() {
           _id: row.id,
         }));
         setVisitList(withId);
-        setTotal(withId.length);
       }
     } catch (err) {
       console.error("목록 불러오기 실패:", err);
@@ -334,7 +332,7 @@ export default function Visit() {
                           alert(
                             err?.response?.data?.message ||
                               err?.data?.message ||
-                              "예약 확정이 실패되었습니다. 다시시도 해주세요."
+                              "예약 확정이 실패되었습니다. 다시 시도 해주세요."
                           );
                         }
                       }
@@ -598,48 +596,71 @@ export default function Visit() {
         <div className="flex gap-2">
           <Button
             onClick={async () => {
-              // 체크된 row 추출
               const selectedRows = visitList.filter((item) =>
                 checkedIds.includes(item.id)
               );
 
               if (selectedRows.length === 0) {
-                alert("선택된 예약이 없습니다.");
+                showModal({
+                  title: "알림",
+                  message: "선택된 예약이 없습니다.",
+                  confirmButton: "확인",
+                });
                 return;
               }
 
-              // 가예약 상태만 있는지 검사
               const allTentative = selectedRows.every(
                 (item) => item.status === "가예약"
               );
 
               if (!allTentative) {
-                alert(
-                  "가예약 상태인 항목만 확정할 수 있습니다. 상태를 확인해주세요."
-                );
+                showModal({
+                  title: "예약 상태 확인",
+                  message: "가예약 상태인 항목만 확정할 수 있습니다.",
+                  confirmButton: "확인",
+                });
                 return;
               }
 
-              // 사용자 확인
-              const confirmOk = confirm("선택된 예약을 확정하시겠습니까?");
-              if (!confirmOk) return;
+              showModal({
+                title: "예약 확정",
+                message: "선택된 예약을 확정하시겠습니까?",
+                showCancel: true,
+                confirmButton: "확정",
+                onConfirm: async () => {
+                  try {
+                    const res = await api.post("/api/v1/visit/confirm", {
+                      checkArr: selectedRows.map((item) => item.id),
+                    });
 
-              try {
-                const res = await api.post("/api/v1/visit/confirm", {
-                  checkArr: selectedRows.map((item) => item.id),
-                });
-
-                if (res.data?.success) {
-                  alert("예약이 확정되었습니다.");
-                  setCheckedIds([]); // 선택 초기화
-                  fetchList(); // 목록 새로고침
-                } else {
-                  alert("예약 확정에 실패했습니다.");
-                }
-              } catch (err) {
-                console.error("예약 확정 오류:", err);
-                alert("서버 오류로 예약 확정에 실패했습니다.");
-              }
+                    if (res.data?.success) {
+                      showModal({
+                        title: "완료",
+                        message: "예약이 확정되었습니다.",
+                        confirmButton: "확인",
+                      });
+                      setCheckedIds([]);
+                      fetchList();
+                    } else {
+                      showModal({
+                        title: "오류",
+                        message: "예약 확정에 실패했습니다.",
+                        confirmButton: "확인",
+                      });
+                    }
+                  } catch (err) {
+                    console.error("예약 확정 오류:", err);
+                    showModal({
+                      title: "에러",
+                      message:
+                        err?.response?.data?.message ||
+                        err?.data?.message ||
+                        "예약 확정 중 오류가 발생했습니다.",
+                      confirmButton: "확인",
+                    });
+                  }
+                },
+              });
             }}
           >
             예약 확정
