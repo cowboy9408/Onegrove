@@ -35,6 +35,7 @@ export default function Visit() {
 
   const [activeFilter, setActiveFilter] = useState(searchFilter);
   const [companyList, setCompanyList] = useState([]);
+
   // const [setBuildingList] = useState([]);
   // const [setStatusList] = useState([]);
 
@@ -46,31 +47,16 @@ export default function Visit() {
     setActiveFilter(searchFilter);
   };
 
-  // const fetchVisitCategoryData = async () => {
-  //   try {
-  //     const res = await api.get("/api/v1/visit/category");
-
-  //     if (res.data?.success) {
-  //       const {
-  //         visitCompanyListRes,
-  //         visitStatusListRes,
-  //         visitBuildingListRes,
-  //       } = res.data.data;
-
-  //       if (Array.isArray(visitCompanyListRes)) {
-  //         setCompanyList(visitCompanyListRes);
-  //       }
-  //       if (Array.isArray(visitStatusListRes)) {
-  //         setStatusList(visitStatusListRes);
-  //       }
-  //       if (Array.isArray(visitBuildingListRes)) {
-  //         setBuildingList(visitBuildingListRes);
-  //       }
-  //     }
-  //   } catch (err) {
-  //     console.error("방문 카테고리 데이터 불러오기 실패:", err);
-  //   }
-  // };
+  const fetchCompanyList = async () => {
+    try {
+      const res = await api.get("/api/v1/meeting/office-list?lang=ko");
+      if (res.data?.success && Array.isArray(res.data.data)) {
+        setCompanyList(res.data.data);
+      }
+    } catch (err) {
+      console.error("입주사 목록 불러오기 실패:", err);
+    }
+  };
 
   const fetchList = async () => {
     try {
@@ -179,6 +165,7 @@ export default function Visit() {
 
   useEffect(() => {
     fetchList();
+    fetchCompanyList();
   }, [activeFilter]);
 
   const meetingRoomList = [
