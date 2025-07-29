@@ -35,8 +35,8 @@ export default function ReservationForm({
   const [resveEndTime, setResveEndTime] = useState("");
   const [content, setContent] = useState(initialData.content || "");
   const [realUser, setRealUser] = useState(initialData.realUser || "");
-  const [phone, setPhone] = useState(initialData.reserverTel || "");
-  const [email, setEmail] = useState(initialData.reserverEmail || "");
+  const [phone, setPhone] = useState(initialData.realUserTel || "");
+  const [email, setEmail] = useState(initialData.realUserEmail || "");
   const [note, setNote] = useState(initialData.note || "");
   const [status] = useState(initialData.status || "gs0101");
   const [remainingTime, setRemainingTime] = useState(null);// 현재 선택된 회의실의 최대 수용인원 구하기
@@ -226,8 +226,8 @@ export default function ReservationForm({
     }
     if (initialData.content) setContent(initialData.content);
     if (initialData.realUser) setRealUser(initialData.realUser);
-    if (initialData.reserverTel) setPhone(initialData.reserverTel);
-    if (initialData.reserverEmail) setEmail(initialData.reserverEmail);
+    if (initialData.reserverTel) setPhone(initialData.realUserTel);
+    if (initialData.reserverEmail) setEmail(initialData.realUserEmail);
     if (initialData.numberVisitors) setNumberVisitors(initialData.numberVisitors);
     if (initialData.companyId) setCompanyId(initialData.companyId);
     if (initialData.note) setNote(initialData.note);
@@ -873,7 +873,7 @@ export default function ReservationForm({
 
       <div>
         <label className="mb-1 block">
-          전화번호 <span className="text-red-500">*</span>
+          사용자 전화번호 <span className="text-red-500">*</span>
         </label>
         <input
           value={phone}
@@ -885,7 +885,7 @@ export default function ReservationForm({
 
       <div>
         <label className="mb-1 block">
-          이메일 <span className="text-red-500">*</span>
+          사용자 이메일 <span className="text-red-500">*</span>
         </label>
         <input
           value={email}
