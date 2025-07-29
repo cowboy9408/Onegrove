@@ -14,16 +14,13 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import Radio from "@/components/common/Radio";
 import api from "@/lib/apiClient";
 import { useAuthStore } from "@/store/authStore";
+import useModal from "@/hooks/useModal";
 
 export default function UserListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { permission, companyId } = useAuthStore(); // 로그인된 사용자의 역할(role) 가져오기
-
-  useEffect(() => {
-    console.log("내 권한:", permission);
-    console.log("내 companyId:", companyId);
-  }, []);
+  const { showModal } = useModal();
 
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [data, setData] = useState([]);
@@ -45,25 +42,6 @@ export default function UserListPage() {
 
   const size = 30;
 
-  // const mapRoleToLabel = (role) => {
-  //   switch (role) {
-  //     case "SUPER_ADMIN":
-  //       return "슈퍼관리자";
-  //     case "NORMAL_ADMIN":
-  //       return "일반 관리자";
-  //     case "RETAIL_ADMIN":
-  //       return "리테일 관리자";
-  //     case "OFFICE_ADMIN":
-  //       return "오피스 관리자";
-  //     case "OFFICE_SECRETARY_ADMIN":
-  //       return "입주사총무팀";
-  //     case "MEMBER":
-  //       return "회원";
-  //     default:
-  //       return "알 수 없음";
-  //   }
-  // };
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -73,10 +51,7 @@ export default function UserListPage() {
         if (res.success) {
           let allData = res.data;
 
-          console.log(
-            "총무 계정 임직원 목록:",
-            allData.map((v) => v.companyName)
-          );
+          console.log(allData.map((v) => v.companyName));
 
           if (permission === "OFFICE_SECRETARY_ADMIN") {
             const myCompanyName = allData[0]?.companyName;
@@ -120,10 +95,7 @@ export default function UserListPage() {
         if (res.success) {
           let allData = res.data;
 
-          console.log(
-            "item.isUse 실제 값들:",
-            allData.map((item) => item.isUse)
-          );
+          console.log(allData.map((item) => item.isUse));
 
           let filtered = allData;
 
@@ -332,33 +304,53 @@ export default function UserListPage() {
           )}
           <Button
             className="bg-black text-white hover:bg-gray-800"
-            onClick={async () => {
+            onClick={() => {
               if (checkedIds.length === 0) {
-                alert("삭제할 항목을 선택해주세요.");
+                showModal({
+                  title: "알림",
+                  message: "삭제할 항목을 선택해주세요.",
+                  confirmButton: "확인",
+                });
                 return;
               }
 
-              const confirmed =
-                window.confirm("선택한 회원을 삭제하시겠습니까?");
-              if (!confirmed) return;
+              showModal({
+                title: "회원 삭제 확인",
+                message: "선택한 회원을 삭제하시겠습니까?",
+                showCancel: true,
+                confirmButton: "삭제",
+                onConfirm: async () => {
+                  try {
+                    const res = await api.post("/api/v1/user/member/delete", {
+                      checkArr: checkedIds,
+                    });
 
-              try {
-                const res = await api.post("/api/v1/user/member/delete", {
-                  checkArr: checkedIds,
-                });
-
-                if (res.status === 200 || res.data.success) {
-                  alert("삭제가 완료되었습니다.");
-                  setCheckedIds([]);
-                  setPage(1);
-                  setRefreshKey((prev) => prev + 1);
-                } else {
-                  alert("삭제 실패: 서버 오류");
-                }
-              } catch (err) {
-                console.error("삭제 요청 실패:", err);
-                alert("삭제 중 오류가 발생했습니다.");
-              }
+                    if (res.status === 200 || res.data.success) {
+                      showModal({
+                        title: "완료",
+                        message: "삭제가 완료되었습니다.",
+                        confirmButton: "확인",
+                      });
+                      setCheckedIds([]);
+                      setPage(1);
+                      setRefreshKey((prev) => prev + 1);
+                    } else {
+                      showModal({
+                        title: "오류",
+                        message: "삭제 실패: 서버 오류",
+                        confirmButton: "확인",
+                      });
+                    }
+                  } catch (err) {
+                    console.error("삭제 요청 실패:", err);
+                    showModal({
+                      title: "에러",
+                      message: "삭제 중 오류가 발생했습니다.",
+                      confirmButton: "확인",
+                    });
+                  }
+                },
+              });
             }}
           >
             삭제

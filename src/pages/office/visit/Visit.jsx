@@ -15,13 +15,13 @@ import DateRangePicker from "@/components/common/Datepicker";
 import VisitForm from "@/components/modal/VisitForm";
 import api from "@/lib/apiClient";
 import { useSearchParams } from "react-router-dom";
+import DataTable from "@/components/common/DataTable";
 
 export default function Visit() {
   const { showModal } = useContext(ModalContext);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
-  const [total, setTotal] = useState(0);
   const [visitList, setVisitList] = useState([]);
   const [searchFilter, setSearchFilter] = useState({
     companyId: "",
@@ -35,6 +35,8 @@ export default function Visit() {
   const [companyList, setCompanyList] = useState([]);
   const [buildingList, setBuildingList] = useState([]);
   const [statusList, setStatusList] = useState([]);
+  const [checkedIds, setCheckedIds] = useState([]);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
   const size = 30;
 
@@ -54,14 +56,45 @@ export default function Visit() {
   };
 
   const handleSearch = () => {
-    console.log("API 검색 파라미터:", {
-      companyName: getCompanyNameById(searchFilter.companyId),
-      visitBuilding: getBuildingNameByCode(searchFilter.building),
-      status: searchFilter.status,
-    });
+    const params = {
+      page: 1,
+      companyId: searchFilter.companyId || "",
+      status: searchFilter.status || "",
+      building: searchFilter.building || "",
+      cardNumber: searchFilter.cardNumber || "",
+      visitorName: searchFilter.visitorName || "",
+      startDate: searchFilter.dateRange.startDate || "",
+      endDate: searchFilter.dateRange.endDate || "",
+    };
+
     setPage(1);
-    setSearchParams({ page: 1 });
+    setSearchParams(params);
     setActiveFilter(searchFilter);
+
+    fetchList();
+  };
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return {
+          key,
+          direction: prev.direction === "asc" ? "desc" : "asc",
+        };
+      } else {
+        return { key, direction: "asc" };
+      }
+    });
+  };
+
+  const handleCheck = (id, checked) => {
+    setCheckedIds((prev) => {
+      if (checked) {
+        return [...prev, id];
+      } else {
+        return prev.filter((i) => i !== id);
+      }
+    });
   };
 
   const fetchVisitCategoryData = async () => {
@@ -95,8 +128,11 @@ export default function Visit() {
       const res = await api.get("/api/v1/visit");
 
       if (res.data?.success && Array.isArray(res.data.data)) {
-        setVisitList(res.data.data); // 전체 데이터 저장
-        setTotal(res.data.data.length);
+        const withId = res.data.data.map((row) => ({
+          ...row,
+          _id: row.id,
+        }));
+        setVisitList(withId);
       }
     } catch (err) {
       console.error("목록 불러오기 실패:", err);
@@ -105,6 +141,31 @@ export default function Visit() {
 
   useEffect(() => {
     fetchVisitCategoryData(); // 하나로 통합된 호출
+  }, []);
+
+  useEffect(() => {
+    const companyId = searchParams.get("companyId") || "";
+    const status = searchParams.get("status") || "";
+    const building = searchParams.get("building") || "";
+    const cardNumber = searchParams.get("cardNumber") || "";
+    const visitorName = searchParams.get("visitorName") || "";
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
+
+    const restoredFilter = {
+      companyId,
+      status,
+      building,
+      cardNumber,
+      visitorName,
+      dateRange: {
+        startDate: startDate || null,
+        endDate: endDate || null,
+      },
+    };
+
+    setSearchFilter(restoredFilter);
+    setActiveFilter(restoredFilter);
   }, []);
 
   const filteredList = visitList.filter((item) => {
@@ -161,6 +222,31 @@ export default function Visit() {
   useEffect(() => {
     fetchList();
   }, [activeFilter]);
+
+  const sortedList = [...filteredList].sort((a, b) => {
+    const { key, direction } = sortConfig;
+    if (!key) return 0;
+
+    let primaryA = a[key];
+    let primaryB = b[key];
+
+    // 날짜 정렬을 위해 Date로 변환
+    if (key === "visitDate" || key === "createDatetime") {
+      primaryA = new Date(primaryA);
+      primaryB = new Date(primaryB);
+    }
+
+    if (primaryA < primaryB) return direction === "asc" ? -1 : 1;
+    if (primaryA > primaryB) return direction === "asc" ? 1 : -1;
+
+    // 동일할 경우 보조 정렬: 등록일시
+    const secondaryA = new Date(a.createDatetime);
+    const secondaryB = new Date(b.createDatetime);
+    if (secondaryA < secondaryB) return direction === "asc" ? -1 : 1;
+    if (secondaryA > secondaryB) return direction === "asc" ? 1 : -1;
+
+    return 0;
+  });
 
   const handleEventClick = async (event) => {
     try {
@@ -248,7 +334,7 @@ export default function Visit() {
                           alert(
                             err?.response?.data?.message ||
                               err?.data?.message ||
-                              "예약 확정이 실패되었습니다. 다시시도 해주세요."
+                              "예약 확정이 실패되었습니다. 다시 시도 해주세요."
                           );
                         }
                       }
@@ -495,7 +581,7 @@ export default function Visit() {
                   setSearchFilter(defaultFilter);
                   setActiveFilter(defaultFilter);
                   setPage(1);
-                  setSearchParams({ page: 1 });
+                  setSearchParams({ page: 1 }); // 기존 조건 제거
                   fetchList();
                 }}
               >
@@ -510,6 +596,78 @@ export default function Visit() {
         <ResultSummary total={filteredList.length} />
 
         <div className="flex gap-2">
+          <Button
+            onClick={async () => {
+              const selectedRows = visitList.filter((item) =>
+                checkedIds.includes(item.id)
+              );
+
+              if (selectedRows.length === 0) {
+                showModal({
+                  title: "알림",
+                  message: "선택된 예약이 없습니다.",
+                  confirmButton: "확인",
+                });
+                return;
+              }
+
+              const allTentative = selectedRows.every(
+                (item) => item.status === "가예약"
+              );
+
+              if (!allTentative) {
+                showModal({
+                  title: "예약 상태 확인",
+                  message: "가예약 상태인 항목만 확정할 수 있습니다.",
+                  confirmButton: "확인",
+                });
+                return;
+              }
+
+              showModal({
+                title: "예약 확정",
+                message: "선택된 예약을 확정하시겠습니까?",
+                showCancel: true,
+                confirmButton: "확정",
+                onConfirm: async () => {
+                  try {
+                    const res = await api.post("/api/v1/visit/confirm", {
+                      checkArr: selectedRows.map((item) => item.id),
+                    });
+
+                    if (res.data?.success) {
+                      showModal({
+                        title: "완료",
+                        message: "예약이 확정되었습니다.",
+                        confirmButton: "확인",
+                      });
+                      setCheckedIds([]);
+                      fetchList();
+                    } else {
+                      showModal({
+                        title: "오류",
+                        message: "예약 확정에 실패했습니다.",
+                        confirmButton: "확인",
+                      });
+                    }
+                  } catch (err) {
+                    console.error("예약 확정 오류:", err);
+                    showModal({
+                      title: "에러",
+                      message:
+                        err?.response?.data?.message ||
+                        err?.data?.message ||
+                        "예약 확정 중 오류가 발생했습니다.",
+                      confirmButton: "확인",
+                    });
+                  }
+                },
+              });
+            }}
+          >
+            예약 확정
+          </Button>
+
           <Button
             className="bg-black text-white hover:bg-gray-800"
             onClick={() => {
@@ -531,13 +689,13 @@ export default function Visit() {
               });
             }}
           >
-            방문객 추가
+            예약 등록
           </Button>
         </div>
       </div>
 
       <ResultSection>
-        <DataTableSimple
+        <DataTable
           columns={[
             { key: "rownum", label: "번호" },
             { key: "companyName", label: "입주사" },
@@ -560,17 +718,39 @@ export default function Visit() {
                 </div>
               ),
             },
-            { key: "visitDate", label: "방문 신청일" },
-            { key: "visitTime", label: "방문 시간" },
+            {
+              key: "visitDate",
+              label: (
+                <button
+                  onClick={() => handleSort("visitDate")}
+                  className="text-black-600 underline"
+                >
+                  방문 신청일
+                </button>
+              ),
+            },
+            {
+              key: "visitTime",
+              label: (
+                <button
+                  onClick={() => handleSort("visitTime")}
+                  className="text-black-600 underline"
+                >
+                  방문 시간
+                </button>
+              ),
+            },
             { key: "visitNumber", label: "방문 인원" },
             { key: "visitBuilding", label: "방문동" },
             { key: "accessCard", label: "카드번호" },
             { key: "createDatetime", label: "등록일시" },
             { key: "status", label: "상태" },
           ]}
-          data={filteredList.slice((page - 1) * size, page * size)}
+          data={sortedList.slice((page - 1) * size, page * size)}
           rowKey="id"
           checkable={true}
+          checkedIds={checkedIds}
+          onCheck={handleCheck}
         />
 
         <Pagination

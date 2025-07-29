@@ -101,7 +101,7 @@ export default function WorkPage() {
       });
 
       const mergedCompany = (item.companyList || [])
-        .sort((a, b) => Number(a.sort) - Number(b.sort)) // ← 여기가 핵심
+        .sort((a, b) => Number(a.sort) - Number(b.sort))
         .map((v) => ({
           id: v.id ?? null,
           companyId: v.companyId,

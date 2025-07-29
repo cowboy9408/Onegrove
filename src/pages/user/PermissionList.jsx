@@ -20,11 +20,6 @@ export default function PermissionList() {
   const navigate = useNavigate();
   const { permission, companyId } = useAuthStore(); // 로그인된 사용자의 역할(role) 가져오기
 
-  useEffect(() => {
-    console.log("내 권한:", permission);
-    console.log("내 companyId:", companyId);
-  }, []);
-
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
@@ -45,25 +40,6 @@ export default function PermissionList() {
 
   const size = 30;
 
-  // const mapRoleToLabel = (role) => {
-  //   switch (role) {
-  //     case "SUPER_ADMIN":
-  //       return "슈퍼관리자";
-  //     case "NORMAL_ADMIN":
-  //       return "일반 관리자";
-  //     case "RETAIL_ADMIN":
-  //       return "리테일 관리자";
-  //     case "OFFICE_ADMIN":
-  //       return "오피스 관리자";
-  //     case "OFFICE_SECRETARY_ADMIN":
-  //       return "입주사총무팀";
-  //     case "MEMBER":
-  //       return "회원";
-  //     default:
-  //       return "알 수 없음";
-  //   }
-  // };
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -73,10 +49,7 @@ export default function PermissionList() {
         if (res.success) {
           let allData = res.data;
 
-          console.log(
-            "총무 계정 임직원 목록:",
-            allData.map((v) => v.companyName)
-          );
+          console.log(allData.map((v) => v.companyName));
 
           if (permission === "OFFICE_SECRETARY_ADMIN") {
             const myCompanyName = allData[0]?.companyName;
@@ -120,10 +93,7 @@ export default function PermissionList() {
         if (res.success) {
           let allData = res.data;
 
-          console.log(
-            "item.isUse 실제 값들:",
-            allData.map((item) => item.isUse)
-          );
+          console.log(allData.map((item) => item.isUse));
 
           let filtered = allData;
 

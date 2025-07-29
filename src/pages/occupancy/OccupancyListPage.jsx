@@ -9,6 +9,7 @@ import Col from "@/components/layout/Col";
 import ResultSection from "@/components/layout/ResultSection";
 import Row from "@/components/layout/Row";
 import SearchSection from "@/components/layout/SearchSection";
+import useModal from "@/hooks/useModal";
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -18,6 +19,8 @@ import api from "@/lib/apiClient";
 export default function OccupancyListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { showModal } = useModal();
+
   const [checkedIds, setCheckedIds] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
   const [page, setPage] = useState(searchParams.get("page") || 1);
@@ -268,34 +271,54 @@ export default function OccupancyListPage() {
           </Button>
           <Button
             className="bg-black text-white hover:bg-gray-800"
-            onClick={async () => {
+            onClick={() => {
               if (checkedIds.length === 0) {
-                alert("삭제할 항목을 선택해주세요.");
+                showModal({
+                  title: "알림",
+                  message: "삭제할 항목을 선택해주세요.",
+                  confirmButton: "확인",
+                });
                 return;
               }
 
-              const confirmed =
-                window.confirm("선택한 입주사를 삭제하시겠습니까?");
-              if (!confirmed) return;
+              showModal({
+                title: "입주사 삭제 확인",
+                message: "선택한 입주사를 삭제하시겠습니까?",
+                showCancel: true,
+                confirmButton: "삭제",
+                onConfirm: async () => {
+                  try {
+                    const res = await api.post(
+                      "/api/v1/company/delete",
+                      checkedIds
+                    );
 
-              try {
-                const res = await api.post(
-                  "/api/v1/company/delete",
-                  checkedIds
-                );
-
-                if (res.status === 200) {
-                  alert("삭제가 완료되었습니다.");
-                  setCheckedIds([]);
-                  setPage(1); // 첫 페이지로 이동
-                  setRefreshKey((prev) => prev + 1);
-                } else {
-                  alert("삭제 실패: 서버 오류");
-                }
-              } catch (err) {
-                console.error("삭제 요청 실패:", err);
-                alert("삭제 중 오류가 발생했습니다.");
-              }
+                    if (res.status === 200) {
+                      showModal({
+                        title: "완료",
+                        message: "삭제가 완료되었습니다.",
+                        confirmButton: "확인",
+                      });
+                      setCheckedIds([]);
+                      setPage(1);
+                      setRefreshKey((prev) => prev + 1);
+                    } else {
+                      showModal({
+                        title: "오류",
+                        message: "삭제 실패: 서버 오류",
+                        confirmButton: "확인",
+                      });
+                    }
+                  } catch (err) {
+                    console.error("삭제 요청 실패:", err);
+                    showModal({
+                      title: "에러",
+                      message: "삭제 중 오류가 발생했습니다.",
+                      confirmButton: "확인",
+                    });
+                  }
+                },
+              });
             }}
           >
             삭제

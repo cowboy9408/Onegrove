@@ -78,6 +78,8 @@ import ExecutiveRule from "@/pages/system/meeting/ExecutiveRule";
 import SleepRule from "@/pages/system/sleep/SleepRule";
 import VisitRule from "@/pages/system/sleep/VisitRule";
 import PopupDetail from "@/pages/popup/PopupDetail";
+import InquiryList from "@/pages/system/client/InquiryList";
+import Regist from "@/pages/system/client/Regist";
 
 export const routeMeta = [
   {
@@ -647,7 +649,7 @@ export const routeMeta = [
             element: <SettingLayout />,
             title: "어메니티 설정",
             hidden: true,
-            permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN"],
+            permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN", "OFFICE_ADMIN"],
             children: [
               {
                 uuid: "e59c7075-0b1c-4607-b548-c38fa7566532",
@@ -724,7 +726,7 @@ export const routeMeta = [
         title: "어메니티 설정",
         icon: <SettingsGearIcon size={18} />,
         hidden: false,
-        permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN"],
+        permissions: ["SUPER_ADMIN", "CONTENTS_ADMIN", "OFFICE_ADMIN"],
         children: [
           {
             uuid: "e59c7075-0b1c-4607-b548-c38fa7566532",
@@ -815,12 +817,28 @@ export const routeMeta = [
           },
 
           {
-            uuid: "bc71031e-1a66-410a-84ea-5db89fa8822f",
+            uuid: "a79ae817-2fa1-4c77-aa51-f97a5c4d8e14",
             path: "/system/client",
-            element: <></>,
-            title: "고객 문의 설정",
+            element: <InquiryList />,
+            title: "고객 문의 담당",
             hidden: true,
-            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN"],
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+          },
+          {
+            uuid: "d20941fe-3206-4195-bb58-766237edfd03",
+            path: "/system/client/regist",
+            element: <Regist />,
+            title: "고객 문의 담당",
+            hidden: true,
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
+          },
+          {
+            uuid: "9ee92f5b-ca58-44fc-a871-5491ca515400",
+            path: "/system/client/detail/:id",
+            element: <Regist />,
+            title: "고객 문의 담당",
+            hidden: true,
+            permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
         ],
       },
