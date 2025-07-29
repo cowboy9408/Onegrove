@@ -16,6 +16,7 @@ import VisitForm from "@/components/modal/VisitForm";
 import api from "@/lib/apiClient";
 import { useSearchParams } from "react-router-dom";
 import DataTable from "@/components/common/DataTable";
+import { useAuthStore } from "@/store/authStore";
 
 export default function Visit() {
   const { showModal } = useContext(ModalContext);
@@ -37,6 +38,7 @@ export default function Visit() {
   const [statusList, setStatusList] = useState([]);
   const [checkedIds, setCheckedIds] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const { permission } = useAuthStore();
 
   const size = 30;
 
@@ -376,14 +378,17 @@ export default function Visit() {
                 )}
               </div>
               <div>
-                <Button
-                  onClick={() => {
-                    closeModal();
-                    showModify(detail);
-                  }}
-                >
-                  수정
-                </Button>
+                {!(permission === "OFFICE_SECRETARY_ADMIN" && detail.status === "예약 확정") && (
+                  <Button
+                    onClick={() => {
+                      closeModal();
+                      showModify(detail);
+                    }}
+                  >
+                    수정
+                  </Button>
+                )}
+                
               </div>
             </div>
           </div>
