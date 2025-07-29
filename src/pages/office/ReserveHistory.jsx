@@ -6,9 +6,9 @@ import Pagination from "@/components/common/Pagination";
 import ResultSummary from "@/components/common/ResultSummary";
 import Select from "@/components/common/Select";
 import Box from "@/components/layout/Box";
-import Col from "@/components/layout/Col";
+
 import ResultSection from "@/components/layout/ResultSection";
-import Row from "@/components/layout/Row";
+
 import SearchSection from "@/components/layout/SearchSection";
 import { ModalContext } from "@/context/ModalContext";
 import DateRangePicker from "@/components/common/Datepicker";
