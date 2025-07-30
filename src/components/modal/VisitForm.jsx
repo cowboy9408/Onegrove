@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import api from "@/lib/apiClient";
-import { isWeekend, isHoliday, extractErrorMessage, extractSuccessMessage } from "@/lib/utils";
+import {
+  isWeekend,
+  isHoliday,
+  extractErrorMessage,
+  extractSuccessMessage,
+} from "@/lib/utils";
+import { useAuthStore } from "@/store/authStore";
 
 export default function VisitForm({
   existingReservations = [],
@@ -9,57 +15,58 @@ export default function VisitForm({
   onSubmit,
   closeModal,
 }) {
-
+  const { permission, companyId: userCompanyId } = useAuthStore();
+  const isSecretary = permission === "OFFICE_SECRETARY_ADMIN";
   const [isComposing, setIsComposing] = useState(false);
 
   // 전화번호 입력 핸들러
   const handleTelChange = (e) => {
     const value = e.target.value;
-    
+
     // 빈 값이거나 010만 남은 경우 (백스페이스로 모두 지운 경우)
-    if (!value || value === '010') {
-      if (prevTelRef.current !== '010-') {
-        setTel('010-');
-        prevTelRef.current = '010-';
+    if (!value || value === "010") {
+      if (prevTelRef.current !== "010-") {
+        setTel("010-");
+        prevTelRef.current = "010-";
       }
       return;
     }
-    
+
     // 010-로 시작하지 않으면 숫자만 추출
-    if (!value.startsWith('010-')) {
-      const numbers = value.replace(/[^0-9]/g, '');
+    if (!value.startsWith("010-")) {
+      const numbers = value.replace(/[^0-9]/g, "");
       const limitedNumbers = numbers.slice(0, 8);
-      
+
       let newTel;
       if (limitedNumbers.length === 0) {
-        newTel = '010-';
+        newTel = "010-";
       } else if (limitedNumbers.length > 4) {
         newTel = `010-${limitedNumbers.slice(0, 4)}-${limitedNumbers.slice(4, 8)}`;
       } else {
         newTel = `010-${limitedNumbers}`;
       }
-      
+
       if (prevTelRef.current !== newTel) {
         setTel(newTel);
         prevTelRef.current = newTel;
       }
       return;
     }
-    
+
     // 010-로 시작하는 경우
     const afterPrefix = value.substring(4);
-    const numbers = afterPrefix.replace(/[^0-9]/g, '');
+    const numbers = afterPrefix.replace(/[^0-9]/g, "");
     const limitedNumbers = numbers.slice(0, 8);
-    
+
     let newTel;
     if (limitedNumbers.length === 0) {
-      newTel = '010-';
+      newTel = "010-";
     } else if (limitedNumbers.length > 4) {
       newTel = `010-${limitedNumbers.slice(0, 4)}-${limitedNumbers.slice(4, 8)}`;
     } else {
       newTel = `010-${limitedNumbers}`;
     }
-    
+
     if (prevTelRef.current !== newTel) {
       setTel(newTel);
       prevTelRef.current = newTel;
@@ -88,8 +95,13 @@ export default function VisitForm({
     }
   };
   const [companyId, setCompanyId] = useState(
-    isEdit ? initialData.companyId || "" : ""
+    isSecretary
+      ? String(userCompanyId)
+      : isEdit
+        ? initialData.companyId || ""
+        : ""
   );
+
   const [visitNumber, setVisitNumber] = useState(
     isEdit ? initialData.visitNumber || "" : ""
   );
@@ -108,7 +120,7 @@ export default function VisitForm({
 
   const [tel, setTel] = useState(initialData.tel || "010-");
   const prevTelRef = useRef(tel);
-  
+
   // tel 상태 변경 시 prevTelRef 업데이트
   useEffect(() => {
     prevTelRef.current = tel;
@@ -133,12 +145,24 @@ export default function VisitForm({
     try {
       const res = await api.get(`/api/v1/sleep/reserve/company`);
       if (res.data?.success) {
-        // console.log(res.data?.data);
-        setCompanyList(res.data?.data);
+        let data = res.data?.data;
+
+        if (isSecretary) {
+          data = data.filter(
+            (item) => String(item.companyId) === String(userCompanyId)
+          );
+        }
+
+        setCompanyList(data);
       }
     } catch (err) {
       console.error("입주사 조회 실패:", err);
-      alert(extractErrorMessage(err, "입주사 조회가 실패되었습니다. 다시시도 해주세요."));
+      alert(
+        extractErrorMessage(
+          err,
+          "입주사 조회가 실패되었습니다. 다시시도 해주세요."
+        )
+      );
     }
   };
 
@@ -151,7 +175,11 @@ export default function VisitForm({
       }
     } catch (err) {
       console.error("동 조회 실패:", err);
-      alert(err?.response?.data?.message || err?.data?.message || "건물 조회가 실패되었습니다. 다시시도 해주세요.");
+      alert(
+        err?.response?.data?.message ||
+          err?.data?.message ||
+          "건물 조회가 실패되었습니다. 다시시도 해주세요."
+      );
     }
   };
 
@@ -168,7 +196,9 @@ export default function VisitForm({
 
   useEffect(() => {
     if (initialData.visitBuilding && buildingList.length > 0) {
-      const found = buildingList.find(b => b.value === initialData.visitBuilding);
+      const found = buildingList.find(
+        (b) => b.value === initialData.visitBuilding
+      );
       if (found) setBuilding(found.code);
       else setBuilding("");
     }
@@ -178,11 +208,11 @@ export default function VisitForm({
     if (initialData.tel) {
       // 기존 전화번호가 010- 형식이 아닌 경우 포맷팅
       const telValue = initialData.tel;
-      if (telValue.startsWith('010-')) {
+      if (telValue.startsWith("010-")) {
         setTel(telValue);
       } else {
         // 숫자만 추출하여 010- 형식으로 포맷팅
-        const numbers = telValue.replace(/[^0-9]/g, '');
+        const numbers = telValue.replace(/[^0-9]/g, "");
         if (numbers.length > 0) {
           const limitedNumbers = numbers.slice(0, 8);
           // 4자리 이상일 때 대시 추가
@@ -251,7 +281,9 @@ export default function VisitForm({
       }
     } catch (err) {
       console.error("예약 처리 실패:", err);
-      alert(extractErrorMessage(err, "예약이 실패되었습니다. 다시시도 해주세요."));
+      alert(
+        extractErrorMessage(err, "예약이 실패되었습니다. 다시시도 해주세요.")
+      );
     }
   };
 
@@ -299,7 +331,9 @@ export default function VisitForm({
     email.trim() !== "" &&
     emailRegex.test(email) &&
     tel.trim() !== "" &&
-    tel.length === 13 && tel.startsWith('010-') && tel.includes('-', 4) &&
+    tel.length === 13 &&
+    tel.startsWith("010-") &&
+    tel.includes("-", 4) &&
     visitPurpose.trim() !== "" &&
     name.trim() !== "" &&
     visitNumber;
@@ -379,10 +413,20 @@ export default function VisitForm({
           </label>
           <select
             value={companyId}
-            onChange={(e) => setCompanyId(e.target.value)}
+            onChange={(e) => {
+              if (!isSecretary) {
+                setCompanyId(e.target.value);
+              }
+            }}
+            disabled={isSecretary}
             className="w-full rounded border px-2 py-1"
+            style={{
+              backgroundColor: isSecretary ? "#f3f4f6" : "white",
+              color: isSecretary ? "#6b7280" : "black",
+              cursor: isSecretary ? "not-allowed" : "pointer",
+            }}
           >
-            <option value="">입주사를 선택하세요</option>
+            {!isSecretary && <option value="">입주사를 선택하세요</option>}
             {companyList.map((r) => (
               <option key={r.companyId} value={r.companyId}>
                 {r.name}
@@ -436,7 +480,7 @@ export default function VisitForm({
             onCompositionEnd={(e) => {
               setIsComposing(false);
               // 조합 끝난 값도 정제
-              setName(e.target.value.replace(/[^가-힣a-zA-Z0-9\s]/g, ""))
+              setName(e.target.value.replace(/[^가-힣a-zA-Z0-9\s]/g, ""));
             }}
             className="w-full rounded border px-2 py-1"
           />
@@ -475,10 +519,10 @@ export default function VisitForm({
             // onChange={(e) => setEmail(e.target.value)}
             onChange={handleChangeEmail}
             onCompositionStart={() => setIsComposing(true)}
-            onCompositionEnd={(e) => {  
+            onCompositionEnd={(e) => {
               setIsComposing(false);
               // 조합 끝난 값도 정제
-              setEmail(e.target.value.replace(/[^가-힣a-zA-Z0-9@._-]/g, ""))
+              setEmail(e.target.value.replace(/[^가-힣a-zA-Z0-9@._-]/g, ""));
             }}
             className="w-full rounded border px-2 py-1"
           />
@@ -494,7 +538,7 @@ export default function VisitForm({
             onChange={handleTelChange}
             onKeyDown={(e) => {
               // 010-에서 백스페이스 방지
-              if (e.key === 'Backspace' && tel === '010-') {
+              if (e.key === "Backspace" && tel === "010-") {
                 e.preventDefault();
                 return;
               }
