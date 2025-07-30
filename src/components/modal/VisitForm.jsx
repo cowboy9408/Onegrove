@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import api from "@/lib/apiClient";
 import { isWeekend, isHoliday, extractErrorMessage, extractSuccessMessage } from "@/lib/utils";
 
@@ -11,6 +11,60 @@ export default function VisitForm({
 }) {
 
   const [isComposing, setIsComposing] = useState(false);
+
+  // 전화번호 입력 핸들러
+  const handleTelChange = (e) => {
+    const value = e.target.value;
+    
+    // 빈 값이거나 010만 남은 경우 (백스페이스로 모두 지운 경우)
+    if (!value || value === '010') {
+      if (prevTelRef.current !== '010-') {
+        setTel('010-');
+        prevTelRef.current = '010-';
+      }
+      return;
+    }
+    
+    // 010-로 시작하지 않으면 숫자만 추출
+    if (!value.startsWith('010-')) {
+      const numbers = value.replace(/[^0-9]/g, '');
+      const limitedNumbers = numbers.slice(0, 8);
+      
+      let newTel;
+      if (limitedNumbers.length === 0) {
+        newTel = '010-';
+      } else if (limitedNumbers.length > 4) {
+        newTel = `010-${limitedNumbers.slice(0, 4)}-${limitedNumbers.slice(4, 8)}`;
+      } else {
+        newTel = `010-${limitedNumbers}`;
+      }
+      
+      if (prevTelRef.current !== newTel) {
+        setTel(newTel);
+        prevTelRef.current = newTel;
+      }
+      return;
+    }
+    
+    // 010-로 시작하는 경우
+    const afterPrefix = value.substring(4);
+    const numbers = afterPrefix.replace(/[^0-9]/g, '');
+    const limitedNumbers = numbers.slice(0, 8);
+    
+    let newTel;
+    if (limitedNumbers.length === 0) {
+      newTel = '010-';
+    } else if (limitedNumbers.length > 4) {
+      newTel = `010-${limitedNumbers.slice(0, 4)}-${limitedNumbers.slice(4, 8)}`;
+    } else {
+      newTel = `010-${limitedNumbers}`;
+    }
+    
+    if (prevTelRef.current !== newTel) {
+      setTel(newTel);
+      prevTelRef.current = newTel;
+    }
+  };
 
   const handleChange = (e) => {
     const value = e.target.value;
@@ -52,7 +106,13 @@ export default function VisitForm({
   );
   const [name, setName] = useState(initialData.name || "");
 
-  const [tel, setTel] = useState(initialData.tel || "");
+  const [tel, setTel] = useState(initialData.tel || "010-");
+  const prevTelRef = useRef(tel);
+  
+  // tel 상태 변경 시 prevTelRef 업데이트
+  useEffect(() => {
+    prevTelRef.current = tel;
+  }, [tel]);
   const [card, setCard] = useState(initialData.accessCard || "");
   const [email, setEmail] = useState(initialData.email || "");
   const [building, setBuilding] = useState(initialData.visitBuilding || "");
@@ -73,7 +133,7 @@ export default function VisitForm({
     try {
       const res = await api.get(`/api/v1/sleep/reserve/company`);
       if (res.data?.success) {
-        console.log(res.data?.data);
+        // console.log(res.data?.data);
         setCompanyList(res.data?.data);
       }
     } catch (err) {
@@ -86,7 +146,7 @@ export default function VisitForm({
     try {
       const res = await api.get(`/api/v1/visit/building-list`);
       if (res.data?.success) {
-        console.log(res.data?.data);
+        // console.log(res.data?.data);
         setBuildingList(res.data?.data);
       }
     } catch (err) {
@@ -113,6 +173,32 @@ export default function VisitForm({
       else setBuilding("");
     }
   }, [initialData.visitBuilding, buildingList]);
+
+  useEffect(() => {
+    if (initialData.tel) {
+      // 기존 전화번호가 010- 형식이 아닌 경우 포맷팅
+      const telValue = initialData.tel;
+      if (telValue.startsWith('010-')) {
+        setTel(telValue);
+      } else {
+        // 숫자만 추출하여 010- 형식으로 포맷팅
+        const numbers = telValue.replace(/[^0-9]/g, '');
+        if (numbers.length > 0) {
+          const limitedNumbers = numbers.slice(0, 8);
+          // 4자리 이상일 때 대시 추가
+          if (limitedNumbers.length > 4) {
+            const firstPart = limitedNumbers.slice(0, 4);
+            const secondPart = limitedNumbers.slice(4, 8);
+            setTel(`010-${firstPart}-${secondPart}`);
+          } else {
+            setTel(`010-${limitedNumbers}`);
+          }
+        } else {
+          setTel("010-");
+        }
+      }
+    }
+  }, [initialData.tel]);
 
   const getToday = () => {
     const today = new Date();
@@ -213,7 +299,7 @@ export default function VisitForm({
     email.trim() !== "" &&
     emailRegex.test(email) &&
     tel.trim() !== "" &&
-    tel.length === 13 &&
+    tel.length === 13 && tel.startsWith('010-') && tel.includes('-', 4) &&
     visitPurpose.trim() !== "" &&
     name.trim() !== "" &&
     visitNumber;
@@ -405,7 +491,15 @@ export default function VisitForm({
           <input
             value={tel}
             maxLength={13}
-            onChange={(e) => setTel(e.target.value)}
+            onChange={handleTelChange}
+            onKeyDown={(e) => {
+              // 010-에서 백스페이스 방지
+              if (e.key === 'Backspace' && tel === '010-') {
+                e.preventDefault();
+                return;
+              }
+            }}
+            placeholder="010 뒤 8자리를 입력해 주세요."
             className="w-full rounded border px-2 py-1"
           />
         </div>
