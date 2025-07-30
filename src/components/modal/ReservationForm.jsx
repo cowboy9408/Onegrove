@@ -149,23 +149,25 @@ export default function ReservationForm({
         // 5. 새 룸의 예약 데이터 가져오기
         await fetchReservationsForRoom(firstRoomId);
         
-        // 6. 오피스 변경 시 현재 선택된 시간이 유효하지 않으면 초기화
-        setTimeout(() => {
-          if (resveStartTime && resveDate) {
-            const isCurrentTimeValid = isTimeAvailable(resveStartTime);
-            if (!isCurrentTimeValid) {
-              // 사용 가능한 첫 번째 시간 찾기
-              const availableTime = generateTimeOptions(9, 17).find(time => isTimeAvailable(time));
-              if (availableTime) {
-                setResveStartTime(availableTime);
-              } else {
-                // 사용 가능한 시간이 없으면 초기화
-                setResveStartTime("09:00:00");
-                setResveEndTime("");
+        // 6. 오피스 변경 시 현재 선택된 시간이 유효하지 않으면 초기화 (수정 모드가 아닐 때만)
+        if (!isEdit) {
+          setTimeout(() => {
+            if (resveStartTime && resveDate) {
+              const isCurrentTimeValid = isTimeAvailable(resveStartTime);
+              if (!isCurrentTimeValid) {
+                // 사용 가능한 첫 번째 시간 찾기
+                const availableTime = generateTimeOptions(9, 17).find(time => isTimeAvailable(time));
+                if (availableTime) {
+                  setResveStartTime(availableTime);
+                } else {
+                  // 사용 가능한 시간이 없으면 초기화
+                  setResveStartTime("09:00:00");
+                  setResveEndTime("");
+                }
               }
             }
-          }
-        }, 200); // 예약 데이터 로딩 완료 후 시간 검증
+          }, 200); // 예약 데이터 로딩 완료 후 시간 검증
+        }
       }
     } catch (err) {
       console.error("오피스 변경 처리 실패:", err);
@@ -233,9 +235,9 @@ export default function ReservationForm({
     if (initialData.note) setNote(initialData.note);
   }, [initialData]);
 
-  // resveStartTime 변경 시 resveEndTime 자동 업데이트
+  // resveStartTime 변경 시 resveEndTime 자동 업데이트 (수정 모드가 아닐 때만)
   useEffect(() => {
-    if (resveStartTime && resveDate) {
+    if (resveStartTime && resveDate && !isEdit) {
       // 사용 가능한 종료 시간 옵션을 가져와서 첫 번째 값으로 설정
       const timeoutId = setTimeout(() => {
         try {
@@ -314,7 +316,7 @@ export default function ReservationForm({
 
       return () => clearTimeout(timeoutId);
     }
-  }, [resveStartTime, resveDate, roomId, currentReservations, isLoadingReservations]);
+  }, [resveStartTime, resveDate, roomId, currentReservations, isLoadingReservations, isEdit]);
 
   // 잔여 시간 조회 API 호출
   useEffect(() => {
@@ -650,23 +652,25 @@ export default function ReservationForm({
             if (newRoomId && resveDate) {
               await fetchReservationsForRoom(newRoomId);
               
-              // 룸 변경 시 현재 선택된 시간이 유효하지 않으면 초기화
-              setTimeout(() => {
-                if (resveStartTime && resveDate) {
-                  const isCurrentTimeValid = isTimeAvailable(resveStartTime);
-                  if (!isCurrentTimeValid) {
-                    // 사용 가능한 첫 번째 시간 찾기
-                    const availableTime = generateTimeOptions(9, 17).find(time => isTimeAvailable(time));
-                    if (availableTime) {
-                      setResveStartTime(availableTime);
-                    } else {
-                      // 사용 가능한 시간이 없으면 초기화
-                      setResveStartTime("09:00:00");
-                      setResveEndTime("");
+              // 룸 변경 시 현재 선택된 시간이 유효하지 않으면 초기화 (수정 모드가 아닐 때만)
+              if (!isEdit) {
+                setTimeout(() => {
+                  if (resveStartTime && resveDate) {
+                    const isCurrentTimeValid = isTimeAvailable(resveStartTime);
+                    if (!isCurrentTimeValid) {
+                      // 사용 가능한 첫 번째 시간 찾기
+                      const availableTime = generateTimeOptions(9, 17).find(time => isTimeAvailable(time));
+                      if (availableTime) {
+                        setResveStartTime(availableTime);
+                      } else {
+                        // 사용 가능한 시간이 없으면 초기화
+                        setResveStartTime("09:00:00");
+                        setResveEndTime("");
+                      }
                     }
                   }
-                }
-              }, 200); // 예약 데이터 로딩 완료 후 시간 검증
+                }, 200); // 예약 데이터 로딩 완료 후 시간 검증
+              }
             }
           }}
           className="w-full rounded border px-2 py-1"
@@ -732,7 +736,8 @@ export default function ReservationForm({
               if (roomId && val) {
                 await fetchReservationsForRoom(roomId);
                 
-                // 날짜 변경 시 현재 선택된 시간이 유효하지 않으면 초기화
+                              // 날짜 변경 시 현재 선택된 시간이 유효하지 않으면 초기화 (수정 모드가 아닐 때만)
+              if (!isEdit) {
                 setTimeout(() => {
                   if (resveStartTime) {
                     const isCurrentTimeValid = isTimeAvailable(resveStartTime);
@@ -749,6 +754,7 @@ export default function ReservationForm({
                     }
                   }
                 }, 200); // 예약 데이터 로딩 완료 후 시간 검증
+              }
               }
             }}
             className="rounded border px-2 py-1"
