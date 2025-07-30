@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import api from "@/lib/apiClient";
-import { isWeekend, isHoliday, extractErrorMessage, extractSuccessMessage } from "@/lib/utils";
+import {
+  isWeekend,
+  isHoliday,
+  extractErrorMessage,
+  extractSuccessMessage,
+} from "@/lib/utils";
+import { useAuthStore } from "@/store/authStore";
 
 export default function VisitForm({
   existingReservations = [],
@@ -9,7 +15,8 @@ export default function VisitForm({
   onSubmit,
   closeModal,
 }) {
-
+  const { permission, companyId: userCompanyId } = useAuthStore();
+  const isSecretary = permission === "OFFICE_SECRETARY_ADMIN";
   const [isComposing, setIsComposing] = useState(false);
 
   const handleChange = (e) => {
@@ -34,8 +41,13 @@ export default function VisitForm({
     }
   };
   const [companyId, setCompanyId] = useState(
-    isEdit ? initialData.companyId || "" : ""
+    isSecretary
+      ? String(userCompanyId)
+      : isEdit
+        ? initialData.companyId || ""
+        : ""
   );
+
   const [visitNumber, setVisitNumber] = useState(
     isEdit ? initialData.visitNumber || "" : ""
   );
@@ -73,12 +85,24 @@ export default function VisitForm({
     try {
       const res = await api.get(`/api/v1/sleep/reserve/company`);
       if (res.data?.success) {
-        console.log(res.data?.data);
-        setCompanyList(res.data?.data);
+        let data = res.data?.data;
+
+        if (isSecretary) {
+          data = data.filter(
+            (item) => String(item.companyId) === String(userCompanyId)
+          );
+        }
+
+        setCompanyList(data);
       }
     } catch (err) {
       console.error("입주사 조회 실패:", err);
-      alert(extractErrorMessage(err, "입주사 조회가 실패되었습니다. 다시시도 해주세요."));
+      alert(
+        extractErrorMessage(
+          err,
+          "입주사 조회가 실패되었습니다. 다시시도 해주세요."
+        )
+      );
     }
   };
 
@@ -91,7 +115,11 @@ export default function VisitForm({
       }
     } catch (err) {
       console.error("동 조회 실패:", err);
-      alert(err?.response?.data?.message || err?.data?.message || "건물 조회가 실패되었습니다. 다시시도 해주세요.");
+      alert(
+        err?.response?.data?.message ||
+          err?.data?.message ||
+          "건물 조회가 실패되었습니다. 다시시도 해주세요."
+      );
     }
   };
 
@@ -108,7 +136,9 @@ export default function VisitForm({
 
   useEffect(() => {
     if (initialData.visitBuilding && buildingList.length > 0) {
-      const found = buildingList.find(b => b.value === initialData.visitBuilding);
+      const found = buildingList.find(
+        (b) => b.value === initialData.visitBuilding
+      );
       if (found) setBuilding(found.code);
       else setBuilding("");
     }
@@ -165,7 +195,9 @@ export default function VisitForm({
       }
     } catch (err) {
       console.error("예약 처리 실패:", err);
-      alert(extractErrorMessage(err, "예약이 실패되었습니다. 다시시도 해주세요."));
+      alert(
+        extractErrorMessage(err, "예약이 실패되었습니다. 다시시도 해주세요.")
+      );
     }
   };
 
@@ -293,10 +325,20 @@ export default function VisitForm({
           </label>
           <select
             value={companyId}
-            onChange={(e) => setCompanyId(e.target.value)}
+            onChange={(e) => {
+              if (!isSecretary) {
+                setCompanyId(e.target.value);
+              }
+            }}
+            disabled={isSecretary}
             className="w-full rounded border px-2 py-1"
+            style={{
+              backgroundColor: isSecretary ? "#f3f4f6" : "white",
+              color: isSecretary ? "#6b7280" : "black",
+              cursor: isSecretary ? "not-allowed" : "pointer",
+            }}
           >
-            <option value="">입주사를 선택하세요</option>
+            {!isSecretary && <option value="">입주사를 선택하세요</option>}
             {companyList.map((r) => (
               <option key={r.companyId} value={r.companyId}>
                 {r.name}
@@ -350,7 +392,7 @@ export default function VisitForm({
             onCompositionEnd={(e) => {
               setIsComposing(false);
               // 조합 끝난 값도 정제
-              setName(e.target.value.replace(/[^가-힣a-zA-Z0-9\s]/g, ""))
+              setName(e.target.value.replace(/[^가-힣a-zA-Z0-9\s]/g, ""));
             }}
             className="w-full rounded border px-2 py-1"
           />
@@ -389,10 +431,10 @@ export default function VisitForm({
             // onChange={(e) => setEmail(e.target.value)}
             onChange={handleChangeEmail}
             onCompositionStart={() => setIsComposing(true)}
-            onCompositionEnd={(e) => {  
+            onCompositionEnd={(e) => {
               setIsComposing(false);
               // 조합 끝난 값도 정제
-              setEmail(e.target.value.replace(/[^가-힣a-zA-Z0-9@._-]/g, ""))
+              setEmail(e.target.value.replace(/[^가-힣a-zA-Z0-9@._-]/g, ""));
             }}
             className="w-full rounded border px-2 py-1"
           />
