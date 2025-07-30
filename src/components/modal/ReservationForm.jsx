@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import api from "@/lib/apiClient";
 import { isWeekend, isHoliday, extractErrorMessage, extractSuccessMessage } from "@/lib/utils";
 
@@ -35,7 +35,7 @@ export default function ReservationForm({
   const [resveEndTime, setResveEndTime] = useState("");
   const [content, setContent] = useState(initialData.content || "");
   const [realUser, setRealUser] = useState(initialData.realUser || "");
-  const [phone, setPhone] = useState(initialData.realUserTel || "");
+  const [phone, setPhone] = useState(initialData.realUserTel || "010-");
   const [email, setEmail] = useState(initialData.realUserEmail || "");
   const [note, setNote] = useState(initialData.note || "");
   const [status] = useState(initialData.status || "gs0101");
@@ -47,6 +47,12 @@ export default function ReservationForm({
   const [currentReservations, setCurrentReservations] = useState(existingReservations);
   const [isLoadingReservations, setIsLoadingReservations] = useState(false);
   const [isComposing, setIsComposing] = useState(false);
+  const prevPhoneRef = useRef(phone);
+  
+  // phone 상태 변경 시 prevPhoneRef 업데이트
+  useEffect(() => {
+    prevPhoneRef.current = phone;
+  }, [phone]);
 
   const handleChange = (e) => {
     const value = e.target.value;
@@ -228,8 +234,30 @@ export default function ReservationForm({
     }
     if (initialData.content) setContent(initialData.content);
     if (initialData.realUser) setRealUser(initialData.realUser);
-    if (initialData.reserverTel) setPhone(initialData.realUserTel);
-    if (initialData.reserverEmail) setEmail(initialData.realUserEmail);
+    if (initialData.realUserTel) {
+      // 기존 전화번호가 010- 형식이 아닌 경우 포맷팅
+      const phoneValue = initialData.realUserTel;
+      if (phoneValue.startsWith('010-')) {
+        setPhone(phoneValue);
+      } else {
+        // 숫자만 추출하여 010- 형식으로 포맷팅
+        const numbers = phoneValue.replace(/[^0-9]/g, '');
+        if (numbers.length > 0) {
+          const limitedNumbers = numbers.slice(0, 8);
+          // 4자리 이상일 때 대시 추가
+          if (limitedNumbers.length >= 4) {
+            const firstPart = limitedNumbers.slice(0, 4);
+            const secondPart = limitedNumbers.slice(4, 8);
+            setPhone(`010-${firstPart}-${secondPart}`);
+          } else {
+            setPhone(`010-${limitedNumbers}`);
+          }
+        } else {
+          setPhone("010-");
+        }
+      }
+    }
+    if (initialData.realUserEmail) setEmail(initialData.realUserEmail);
     if (initialData.numberVisitors) setNumberVisitors(initialData.numberVisitors);
     if (initialData.companyId) setCompanyId(initialData.companyId);
     if (initialData.note) setNote(initialData.note);
@@ -599,11 +627,67 @@ export default function ReservationForm({
     resveStartTime &&
     resveEndTime &&
     emailRegex.test(email) &&
-    phone.length === 13 &&
+    phone.length === 13 && phone.startsWith('010-') && phone.includes('-', 4) &&
     content.trim() !== "" &&
     realUser.trim() !== "" &&
     Number(numberVisitors) > 0 &&
     Number(numberVisitors) <= 99;
+
+  // 전화번호 입력 핸들러
+  const handlePhoneChange = (e) => {
+    const value = e.target.value;
+
+    // console.log(prevPhoneRef.current, phone, value);
+    
+    // 빈 값이거나 010만 남은 경우 (백스페이스로 모두 지운 경우)
+    if (!value || value === '010') {
+      if (prevPhoneRef.current !== '010-') {
+        setPhone('010-');
+        prevPhoneRef.current = '010-';
+      }
+      return;
+    }
+    
+    // 010-로 시작하지 않으면 숫자만 추출
+    if (!value.startsWith('010-')) {
+      const numbers = value.replace(/[^0-9]/g, '');
+      const limitedNumbers = numbers.slice(0, 8);
+      
+      let newPhone;
+      if (limitedNumbers.length === 0) {
+        newPhone = '010-';
+      } else if (limitedNumbers.length > 4) {
+        newPhone = `010-${limitedNumbers.slice(0, 4)}-${limitedNumbers.slice(4, 8)}`;
+      } else {
+        newPhone = `010-${limitedNumbers}`;
+      }
+      
+      if (prevPhoneRef.current !== newPhone) {
+        setPhone(newPhone);
+        prevPhoneRef.current = newPhone;
+      }
+      return;
+    }
+    
+    // 010-로 시작하는 경우
+    const afterPrefix = value.substring(4);
+    const numbers = afterPrefix.replace(/[^0-9]/g, '');
+    const limitedNumbers = numbers.slice(0, 8);
+    
+    let newPhone;
+    if (limitedNumbers.length === 0) {
+      newPhone = '010-';
+    } else if (limitedNumbers.length > 4) {
+      newPhone = `010-${limitedNumbers.slice(0, 4)}-${limitedNumbers.slice(4, 8)}`;
+    } else {
+      newPhone = `010-${limitedNumbers}`;
+    }
+    
+    if (prevPhoneRef.current !== newPhone) {
+      setPhone(newPhone);
+      prevPhoneRef.current = newPhone;
+    }
+  };
 
   return (
     <div className="space-y-5 text-left">
@@ -881,10 +965,18 @@ export default function ReservationForm({
         <label className="mb-1 block">
           사용자 전화번호 <span className="text-red-500">*</span>
         </label>
-        <input
+                          <input
           value={phone}
-          maxLength={20}
-          onChange={(e) => setPhone(e.target.value)}
+          maxLength={13}
+          onChange={handlePhoneChange}
+          onKeyDown={(e) => {
+            // 010-에서 백스페이스 방지
+            if (e.key === 'Backspace' && phone === '010-') {
+              e.preventDefault();
+              return;
+            }
+          }}
+          placeholder="010 뒤 8자리를 입력해 주세요."
           className="w-full rounded border px-2 py-1"
         />
       </div>
