@@ -378,7 +378,10 @@ export default function Visit() {
                 )}
               </div>
               <div>
-                {!(permission === "OFFICE_SECRETARY_ADMIN" && detail.status === "예약 확정") && (
+                {!(
+                  permission === "OFFICE_SECRETARY_ADMIN" &&
+                  detail.status === "예약 확정"
+                ) && (
                   <Button
                     onClick={() => {
                       closeModal();
@@ -388,7 +391,6 @@ export default function Visit() {
                     수정
                   </Button>
                 )}
-                
               </div>
             </div>
           </div>
