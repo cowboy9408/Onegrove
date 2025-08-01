@@ -763,7 +763,7 @@ export const routeMeta = [
             path: "/system/meeting/meetingrule",
             element: <MeetingRule />,
             title: "Meeting Room 예약 규정",
-            hidden: true,
+            hidden: false,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
           {
