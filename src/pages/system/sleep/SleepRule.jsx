@@ -1,12 +1,12 @@
 import Section from "@/components/layout/Section";
 import Tabs, { TabPanel } from "@/components/layout/Tabs";
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import RuleForm from "./component/RuleForm";
 import api from "@/lib/apiClient";
 import Button from "@/components/common/Button";
 import useModal from "@/hooks/useModal";
 
-export default function SleepRule() {
+export default function MeetingRule() {
   const koRef = useRef();
   const enRef = useRef();
 
@@ -14,14 +14,15 @@ export default function SleepRule() {
   const [enData, setEnData] = useState({});
   const [currentLang, setCurrentLang] = useState(0);
   const { showModal } = useModal();
-  const MENU_CODE = "bn0105";
+  const CATEGORY_CODE = "op0102"; // 운영 규정 구분 코드
 
-  const fetchBannerData = async (langCode) => {
-    const menuCode = MENU_CODE;
+  const fetchOperatingData = async (langCode) => {
     const lang = langCode === "ko" ? "KO" : "EN";
 
     try {
-      const res = await api.get(`/api/v1/banner/${menuCode}/${lang}`);
+      const res = await api.get(
+        `/api/v1/room/operating/${CATEGORY_CODE}/${lang}`
+      );
       const data = res.data?.data;
 
       if (!data) return;
@@ -30,8 +31,6 @@ export default function SleepRule() {
         id: data.id,
         title: data.title,
         content: data.content,
-        showYn: data.showYn,
-        type: data.type,
       };
 
       if (langCode === "ko") {
@@ -40,13 +39,13 @@ export default function SleepRule() {
         setEnData(mapped);
       }
     } catch (error) {
-      console.error("데이터 불러오기 실패", error);
+      console.error("운영 규정 조회 실패", error);
     }
   };
 
   useEffect(() => {
     const lang = currentLang === 0 ? "ko" : "en";
-    fetchBannerData(lang);
+    fetchOperatingData(lang);
   }, [currentLang]);
 
   const handleClickSave = async () => {
@@ -73,15 +72,28 @@ export default function SleepRule() {
 
   const handleSave = async (payload) => {
     const isUpdate = !!payload.id;
-    const apiUrl = isUpdate ? "/api/v1/banner/update" : "/api/v1/banner/insert";
+    const apiUrl = isUpdate
+      ? "/api/v1/room/operating/update"
+      : "/api/v1/room/operating/insert";
+
+    const body = isUpdate
+      ? {
+          id: payload.id,
+          title: payload.title,
+          content: payload.content,
+        }
+      : payload;
 
     try {
-      await api.post(apiUrl, payload);
+      await api.post(apiUrl, body);
       showModal({
         title: "완료",
         message: isUpdate ? "수정이 완료되었습니다." : "등록이 완료되었습니다.",
         showCancel: false,
       });
+
+      const langCode = payload.lang === "KO" ? "ko" : "en";
+      fetchOperatingData(langCode);
     } catch (error) {
       console.error("저장 실패", error);
       showModal({
@@ -89,31 +101,6 @@ export default function SleepRule() {
         message: "저장 중 오류가 발생했습니다.",
         showCancel: false,
       });
-      return;
-    }
-
-    const langCode = payload.lang;
-
-    try {
-      const res = await api.get(`/api/v1/banner/${MENU_CODE}/${langCode}`);
-      const data = res.data?.data;
-      if (!data) return;
-
-      const mapped = {
-        id: data.id,
-        title: data.title,
-        content: data.content,
-        showYn: data.showYn,
-        type: data.type,
-      };
-
-      if (langCode === "KO") {
-        setKoData(mapped);
-      } else {
-        setEnData(mapped);
-      }
-    } catch (error) {
-      console.error("조회 실패", error);
     }
   };
 
@@ -133,7 +120,7 @@ export default function SleepRule() {
             data={koData}
             setData={setKoData}
             lang="ko"
-            menu={MENU_CODE}
+            category={CATEGORY_CODE}
           />
         </TabPanel>
 
@@ -143,7 +130,7 @@ export default function SleepRule() {
             data={enData}
             setData={setEnData}
             lang="en"
-            menu={MENU_CODE}
+            category={CATEGORY_CODE}
           />
         </TabPanel>
       </Tabs>

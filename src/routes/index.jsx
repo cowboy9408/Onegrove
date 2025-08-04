@@ -804,7 +804,7 @@ export const routeMeta = [
             path: "/system/sleep/sleeprule",
             element: <SleepRule />,
             title: "Relax Room 예약 규정",
-            hidden: true,
+            hidden: false,
             permissions: ["SUPER_ADMIN", "NORMAL_ADMIN", "OFFICE_ADMIN"],
           },
           {
