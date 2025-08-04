@@ -1,14 +1,21 @@
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+  useEffect,
+} from "react";
 import Textarea from "@/components/common/Textarea";
 import Editor from "@/components/common/Editor";
 
 const RuleForm = forwardRef(function RuleForm(
-  { data, setData, lang, menu },
+  { data, setData, lang, category },
   ref
 ) {
   const editorRef = useRef();
 
   const [formData, setFormData] = useState({
+    id: data?.id || null,
     title: data?.title || "",
     content: data?.content || "",
   });
@@ -28,16 +35,22 @@ const RuleForm = forwardRef(function RuleForm(
       }
 
       return {
-        id: data?.id || null,
+        id: formData.id || null,
         lang: lang.toUpperCase(),
-        menuCode: menu,
         title: formData.title,
         content,
-        showYn: "Y", // 고정값 예시
-        type: "BASIC", // 고정값 예시
+        category,
       };
     },
   }));
+
+  useEffect(() => {
+    setFormData({
+      id: data?.id || null,
+      title: data?.title || "",
+      content: data?.content || "",
+    });
+  }, [data]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
