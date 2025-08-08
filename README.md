@@ -1,10 +1,4 @@
-<<<<<<< HEAD
-readme 
-가이드 마크다운 예정
-=======
-<<<<<<< HEAD
-가이드 마크다운 예정
-=======
+
 
 # Ongrove Admin CMS 구축 프로젝트
 
@@ -410,6 +404,3 @@ import { cn } from "@/lib/utils";
 - [GPT 활용 가이드: gptonline.ai/ko](https://gptonline.ai/ko)
 
 ---
-
-> > > > > > > byeongjun
->>>>>>> develop
