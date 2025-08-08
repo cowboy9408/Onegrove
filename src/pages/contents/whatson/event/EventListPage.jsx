@@ -192,9 +192,25 @@ export default function EventListPage() {
           }
 
           const sorted = filtered.sort((a, b) => {
-            const dateA = parseValidDate(a.created_at_ko || a.created_at_en);
-            const dateB = parseValidDate(b.created_at_ko || b.created_at_en);
-            return dateB - dateA; // 최신순 (최근 날짜가 먼저)
+            const dateA = parseValidDate(
+              a.created_at_ko !== "-" ? a.created_at_ko : a.created_at_en
+            );
+            const dateB = parseValidDate(
+              b.created_at_ko !== "-" ? b.created_at_ko : b.created_at_en
+            );
+
+            const dateAFallback = parseValidDate(
+              a.created_at_en !== "-" ? a.created_at_en : a.created_at_ko
+            );
+            const dateBFallback = parseValidDate(
+              b.created_at_en !== "-" ? b.created_at_en : b.created_at_ko
+            );
+
+            // 국문 또는 영문 중 더 최신 날짜를 사용
+            const finalDateA = dateA > dateAFallback ? dateA : dateAFallback;
+            const finalDateB = dateB > dateBFallback ? dateB : dateBFallback;
+
+            return finalDateB - finalDateA;
           });
 
           const start = (page - 1) * size;
