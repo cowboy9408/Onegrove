@@ -16,13 +16,13 @@ import VisitForm from "@/components/modal/VisitForm";
 import api from "@/lib/apiClient";
 import { useSearchParams } from "react-router-dom";
 import DataTable from "@/components/common/DataTable";
-import { useAuthStore } from "@/store/authStore";
 
 export default function Visit() {
   const { showModal } = useContext(ModalContext);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
+  const [total, setTotal] = useState(0);
   const [visitList, setVisitList] = useState([]);
   const [searchFilter, setSearchFilter] = useState({
     companyId: "",
@@ -38,7 +38,6 @@ export default function Visit() {
   const [statusList, setStatusList] = useState([]);
   const [checkedIds, setCheckedIds] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
-  const { permission } = useAuthStore();
 
   const size = 30;
 
@@ -72,8 +71,6 @@ export default function Visit() {
     setPage(1);
     setSearchParams(params);
     setActiveFilter(searchFilter);
-
-    fetchList();
   };
 
   const handleSort = (key) => {
@@ -135,6 +132,7 @@ export default function Visit() {
           _id: row.id,
         }));
         setVisitList(withId);
+        setTotal(withId.length);
       }
     } catch (err) {
       console.error("목록 불러오기 실패:", err);
@@ -255,7 +253,7 @@ export default function Visit() {
       const res = await api.get(`/api/v1/visit/detail/${event}`);
       if (!res.data.success) return;
       const detail = res.data.data;
-      // console.log("상세 데이터:", detail);
+      console.log("상세 데이터:", detail);
 
       showModal({
         title: "방문 예약 상세",
@@ -336,7 +334,7 @@ export default function Visit() {
                           alert(
                             err?.response?.data?.message ||
                               err?.data?.message ||
-                              "예약 확정이 실패되었습니다. 다시 시도 해주세요."
+                              "예약 확정이 실패되었습니다. 다시시도 해주세요."
                           );
                         }
                       }
@@ -378,19 +376,14 @@ export default function Visit() {
                 )}
               </div>
               <div>
-                {!(
-                  permission === "OFFICE_SECRETARY_ADMIN" &&
-                  detail.status === "예약 확정"
-                ) && (
-                  <Button
-                    onClick={() => {
-                      closeModal();
-                      showModify(detail);
-                    }}
-                  >
-                    수정
-                  </Button>
-                )}
+                <Button
+                  onClick={() => {
+                    closeModal();
+                    showModify(detail);
+                  }}
+                >
+                  수정
+                </Button>
               </div>
             </div>
           </div>
