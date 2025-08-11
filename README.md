@@ -94,8 +94,8 @@ yarn build
 ## 디렉토리 구조
 
 
+```plaintext
 components/common/
-.
 ├── Button.jsx #
 ├── Calendar.jsx
 ├── CalendarToolbar.jsx #
@@ -123,6 +123,7 @@ components/common/
 ├── Textarea.jsx
 ├── Tooltip.jsx
 └── Upload.jsx
+```
 
 ## 컴포넌트 상세 설명
 
