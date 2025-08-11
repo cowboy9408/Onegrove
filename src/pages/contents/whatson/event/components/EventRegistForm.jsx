@@ -160,7 +160,10 @@ const EventRegistForm = forwardRef(
         // 나머지 필드 세팅
         setValue("title", data.title || "");
         setValue("status", data.showYn === "Y" ? "active" : "inactive");
-        setValue("order", data.sort || 1);
+        setValue(
+          "order",
+          data?.sort === 0 || data?.sort == null ? "" : data.sort
+        );
         setValue("thumbImg", data.thumbImg || null);
         setValue("imgBodyPc", data.imgBodyPc || null);
         setValue("imgBodyMo", data.imgBodyMo || null);
@@ -310,7 +313,9 @@ const EventRegistForm = forwardRef(
           eventId: data?.id ?? null,
           lang,
           showYn: values.status === "active" ? "Y" : "N",
-          sort: Number(values.order) || 1,
+          ...(values.order === "" || values.order == null
+            ? {}
+            : { sort: Number(values.order) }),
           category: values.category,
           title: values.title || "",
           thumbImg: toImageMeta(values.thumbImg),
