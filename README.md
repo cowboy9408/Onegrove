@@ -92,8 +92,8 @@ yarn build
 ---
 
 ## 디렉토리 구조
-'''bash
-.
+
+
 components/common/
 .
 ├── Button.jsx #
