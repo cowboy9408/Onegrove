@@ -247,7 +247,7 @@ export default function EventDetail() {
           imgPc: toImageMeta(data.imgPc, original.imgPc),
           imgMo: toImageMeta(data.imgMo, original.imgMo),
           showYn: data.showYn,
-          sort: data.sort,
+          ...(data.sort === "" || data.sort == null ? {} : { sort: data.sort }),
           progressYn: data.progressYn,
           content: data.content,
           description: data.description || "",
