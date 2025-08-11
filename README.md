@@ -1,5 +1,4 @@
 
-
 # Ongrove Admin CMS 구축 프로젝트
 
 > 이 프로젝트는 React + Vite 기반으로 구축된 관리자 CMS압니다.  
@@ -96,6 +95,7 @@ yarn build
 ## 디렉토리 구조
 
 components/common/
+.
 ├── Button.jsx #
 ├── Calendar.jsx
 ├── CalendarToolbar.jsx #
