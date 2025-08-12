@@ -167,6 +167,8 @@ export default function BrandDetail() {
   };
 
   const handleSave = async () => {
+    if (isSaving) return;
+
     const onError = (message) => {
       showModal({
         title: "필수 항목을 입력해 주세요.",
@@ -175,116 +177,109 @@ export default function BrandDetail() {
       });
     };
 
-    if (isSaving) return;
-    setIsSaving(true);
+    const activeRef = currentLang === 0 ? koFormRef : enFormRef;
+    const original = currentLang === 0 ? koData.data : enData.data;
+    const lang = currentLang === 0 ? "KO" : "EN";
 
-    try {
-      const koValues = await koFormRef.current?.submit?.(onError);
-      const enValues = await enFormRef.current?.submit?.(onError);
+    const values = await activeRef.current?.submit?.(onError);
+    if (!values) return;
 
-      if (!koValues && !enValues) {
-        setIsSaving(false);
-        return;
-      }
-
-      const saveOne = async (data, lang, original) => {
-        const payload = {
-          ...data,
-          lang: lang,
-          id: masterId,
-          name: data.brandName,
-          category: data.office,
-          content: data.description,
-          title: data.title,
-          subTitle: data.subTitle,
-          thumbText: data.thumbTxt || data.thumbText || "",
-          thumbImg: toImageMeta(data.mainImage, original.mainImage),
-          mainPcImg: toImageMeta(data.pcImage, original.pcImage),
-          mainMoImg: toImageMeta(data.moImage, original.moImage),
-          contentImg1: toImageMeta(data.contentImage1, original.contentImage1),
-          contentImg2: toImageMeta(data.contentImage2, original.contentImage2),
-          contentImg3: toImageMeta(data.contentImage3, original.contentImage3),
-          contentImg4: toImageMeta(data.contentImage4, original.contentImage4),
-          contentImg5: toImageMeta(data.contentImage5, original.contentImage5),
-          pcBodyImage: toImageMeta(data.pcBodyImage, original.pcBodyImage),
-          moBodyImage: toImageMeta(data.moBodyImage, original.moBodyImage),
-          brandTel: data.storePhone,
-          brandLocation: data.storeLocation,
-          homeUrl: data.homepageUrl || "",
-          mainImg: toImageMeta(data.mainImage, original.mainImage),
-          useYn: data.useStatus === "active" ? "Y" : "N",
-          homeUrlNew: data.homepageNewTab ? "Y" : "N",
-          instagram: data.sns?.instagram?.url || "",
-          facebook: data.sns?.facebook?.url || "",
-          youtube: data.sns?.youtube?.url || "",
-          twitter: data.sns?.twitter?.url || "",
-          blog: data.sns?.blog?.url || "",
-          mon: data.openingHours?.월?.time,
-          tue: data.openingHours?.화?.time,
-          wed: data.openingHours?.수?.time,
-          thu: data.openingHours?.목?.time,
-          fri: data.openingHours?.금?.time,
-          sat: data.openingHours?.토?.time,
-          sun: data.openingHours?.일?.time,
-          monHoliday: data.openingHours?.월?.holiday ? "Y" : "N",
-          tueHoliday: data.openingHours?.화?.holiday ? "Y" : "N",
-          wedHoliday: data.openingHours?.수?.holiday ? "Y" : "N",
-          thuHoliday: data.openingHours?.목?.holiday ? "Y" : "N",
-          friHoliday: data.openingHours?.금?.holiday ? "Y" : "N",
-          satHoliday: data.openingHours?.토?.holiday ? "Y" : "N",
-          sunHoliday: data.openingHours?.일?.holiday ? "Y" : "N",
-          breakTime: data.openingHours?.breakTime?.time,
-          breakYn: data.openingHours?.breakTime?.none ? "Y" : "N",
-          keywordList: data.keywordList?.length < 1 ? [] : data.keywordList,
-        };
-
-        // bcId가 있는 경우에만 contentId 추가
-        if (data.bcId !== undefined && data.bcId !== null) {
-          payload.contentId = data.bcId;
-        }
-
-        try {
-          const checkRes = await api.get(
-            `/api/v1/brand/detail/${masterId}/${lang}`
-          );
-          if (checkRes.data?.data?.bcId) {
-            payload.contentId = checkRes.data.data.bcId; // 기존 bcId가 있다면 사용
-          }
-          setLoading(false);
-
-          const apiUrl =
-            payload.contentId !== undefined && payload.contentId !== null
-              ? "/api/v1/brand/update"
-              : "/api/v1/brand/insert";
-          const res = await api.post(apiUrl, payload);
-
-          console.log("응답 결과:", res.data);
-        } catch (err) {
-          console.error("브랜드 상세 로딩 실패:", err);
-        }
+    const saveOne = async (data, lang, original) => {
+      const payload = {
+        ...data,
+        lang: lang,
+        id: masterId,
+        name: data.brandName,
+        category: data.office,
+        content: data.description,
+        title: data.title,
+        subTitle: data.subTitle,
+        thumbText: data.thumbTxt || data.thumbText || "",
+        thumbImg: toImageMeta(data.mainImage, original.mainImage),
+        mainPcImg: toImageMeta(data.pcImage, original.pcImage),
+        mainMoImg: toImageMeta(data.moImage, original.moImage),
+        contentImg1: toImageMeta(data.contentImage1, original.contentImage1),
+        contentImg2: toImageMeta(data.contentImage2, original.contentImage2),
+        contentImg3: toImageMeta(data.contentImage3, original.contentImage3),
+        contentImg4: toImageMeta(data.contentImage4, original.contentImage4),
+        contentImg5: toImageMeta(data.contentImage5, original.contentImage5),
+        pcBodyImage: toImageMeta(data.pcBodyImage, original.pcBodyImage),
+        moBodyImage: toImageMeta(data.moBodyImage, original.moBodyImage),
+        brandTel: data.storePhone,
+        brandLocation: data.storeLocation,
+        homeUrl: data.homepageUrl || "",
+        mainImg: toImageMeta(data.mainImage, original.mainImage),
+        useYn: data.useStatus === "active" ? "Y" : "N",
+        homeUrlNew: data.homepageNewTab ? "Y" : "N",
+        instagram: data.sns?.instagram?.url || "",
+        facebook: data.sns?.facebook?.url || "",
+        youtube: data.sns?.youtube?.url || "",
+        twitter: data.sns?.twitter?.url || "",
+        blog: data.sns?.blog?.url || "",
+        mon: data.openingHours?.월?.time,
+        tue: data.openingHours?.화?.time,
+        wed: data.openingHours?.수?.time,
+        thu: data.openingHours?.목?.time,
+        fri: data.openingHours?.금?.time,
+        sat: data.openingHours?.토?.time,
+        sun: data.openingHours?.일?.time,
+        monHoliday: data.openingHours?.월?.holiday ? "Y" : "N",
+        tueHoliday: data.openingHours?.화?.holiday ? "Y" : "N",
+        wedHoliday: data.openingHours?.수?.holiday ? "Y" : "N",
+        thuHoliday: data.openingHours?.목?.holiday ? "Y" : "N",
+        friHoliday: data.openingHours?.금?.holiday ? "Y" : "N",
+        satHoliday: data.openingHours?.토?.holiday ? "Y" : "N",
+        sunHoliday: data.openingHours?.일?.holiday ? "Y" : "N",
+        breakTime: data.openingHours?.breakTime?.time,
+        breakYn: data.openingHours?.breakTime?.none ? "Y" : "N",
+        keywordList: data.keywordList?.length < 1 ? [] : data.keywordList,
       };
 
-      if (currentLang === 0) {
-        const koValues = await koFormRef.current?.submit?.();
-        if (!koValues) return;
-
-        await saveOne(koValues, "KO", koData.data);
-      } else {
-        const enValues = await enFormRef.current?.submit?.();
-        if (!enValues) return;
-
-        await saveOne(enValues, "EN", enData.data);
+      // bcId가 있으면 contentId 추가
+      if (data.bcId !== undefined && data.bcId !== null) {
+        payload.contentId = data.bcId;
       }
 
-      alert("브랜드 정보가 수정되었습니다.");
-      navigate("/retail/brand/?refresh=" + Date.now());
-      // setIsReadOnly(true); // 다시 읽기 전용으로 전환
-    } catch (err) {
-      console.error("수정 실패:", err);
-      alert("수정 실패. 다시 시도해주세요.");
-    } finally {
-      setIsSaving(false);
-    }
+      const checkRes = await api.get(
+        `/api/v1/brand/detail/${masterId}/${lang}`
+      );
+      if (checkRes.data?.data?.bcId) {
+        payload.contentId = checkRes.data.data.bcId;
+      }
+
+      const apiUrl =
+        payload.contentId !== undefined && payload.contentId !== null
+          ? "/api/v1/brand/update"
+          : "/api/v1/brand/insert";
+      await api.post(apiUrl, payload);
+    };
+
+    showModal({
+      title: "수정 확인",
+      message: "수정하시겠습니까?",
+      showCancel: true,
+      onConfirm: async () => {
+        setIsSaving(true);
+        try {
+          await saveOne(values, lang, original);
+          showModal({
+            title: "수정 완료",
+            message: "브랜드 정보가 수정되었습니다.",
+            showCancel: false,
+            onConfirm: () => navigate("/retail/brand/?refresh=" + Date.now()),
+          });
+        } catch (err) {
+          console.error("수정 실패:", err);
+          showModal({
+            title: "수정 실패",
+            message: "잠시 후 다시 시도해주세요.",
+            showCancel: false,
+          });
+        } finally {
+          setIsSaving(false);
+        }
+      },
+    });
   };
 
   return (
