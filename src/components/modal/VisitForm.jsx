@@ -19,6 +19,10 @@ export default function VisitForm({
   const isSecretary = permission === "OFFICE_SECRETARY_ADMIN";
   const [isComposing, setIsComposing] = useState(false);
 
+  // 방문 인원 범위
+  const MIN_VISITORS = 1;
+  const MAX_VISITORS = 10;
+
   // 전화번호 입력 핸들러
   const handleTelChange = (e) => {
     const value = e.target.value;
@@ -73,6 +77,26 @@ export default function VisitForm({
     }
   };
 
+  // [추가] extraVisitors 전용 업데이트 헬퍼
+  const updateExtra = (idx, patch) => {
+    setExtraVisitors((prev) =>
+      prev.map((v, i) => (i === idx ? { ...v, ...patch } : v))
+    );
+  };
+
+  // [추가] 010-XXXX-XXXX 포맷 헬퍼 (대표/추가 방문자 공용)
+  const formatTel010 = (value) => {
+    if (!value || value === "010") return "010-";
+    const starts = value.startsWith("010-");
+    const digits = (starts ? value.slice(4) : value)
+      .replace(/[^0-9]/g, "")
+      .slice(0, 8);
+    if (digits.length === 0) return "010-";
+    if (digits.length > 4)
+      return `010-${digits.slice(0, 4)}-${digits.slice(4)}`;
+    return `010-${digits}`;
+  };
+
   const handleChange = (e) => {
     const value = e.target.value;
     if (isComposing) {
@@ -105,6 +129,17 @@ export default function VisitForm({
   const [visitNumber, setVisitNumber] = useState(
     isEdit ? initialData.visitNumber || "" : ""
   );
+
+  const [extraVisitors, setExtraVisitors] = useState([]);
+
+  useEffect(() => {
+    const currentNum = Number(visitNumber || 0);
+    const maxExtras = Math.max(0, Math.min(currentNum, MAX_VISITORS) - 1);
+    if (extraVisitors.length > maxExtras) {
+      setExtraVisitors((prev) => prev.slice(0, maxExtras));
+    }
+  }, [visitNumber, extraVisitors.length]);
+
   const [visitPurpose, setVisitPurpose] = useState(
     isEdit ? initialData.visitPurpose || "" : ""
   );
@@ -253,17 +288,64 @@ export default function VisitForm({
       return;
     }
 
+    const normalizePhone = (v) => (v || "").replace(/[^0-9]/g, ""); // 숫자만
+    const ensureTel = (v) => (v || "").trim(); // UI 검증 통과했으니 빈문자 방지
+
+    const members = [
+      {
+        name: name.trim(),
+        email: email.trim(),
+        tel: ensureTel(tel),
+        phoneNumber: normalizePhone(tel),
+        accessCard: card.trim(),
+        sort: 1,
+      },
+      ...extraVisitors.map((v, i) => {
+        const telStr = ensureTel(v.tel);
+        return {
+          name: (v.name || "").trim(),
+          email: (v.email || "").trim(),
+          tel: telStr,
+          phoneNumber: normalizePhone(telStr),
+          accessCard: (v.card || "").trim(),
+          sort: i + 2,
+        };
+      }),
+    ];
+
+    const hasBadPhone = members.some((m) => !m.phoneNumber);
+    if (hasBadPhone) {
+      alert("방문자 연락처가 비어 있습니다. 전화번호를 확인해 주세요.");
+      return;
+    }
+
+    // visitNumber와 memberList 개수 동기화 검사
+    const memberCount = members.length;
+    const visitNum = Number(visitNumber || 0);
+    if (visitNum !== memberCount) {
+      alert(
+        `방문 인원(${visitNum})과 방문자 목록(${memberCount})이 일치하지 않습니다.`
+      );
+      return;
+    }
+
+    if (!(numVisit >= MIN_VISITORS && numVisit <= MAX_VISITORS)) {
+      alert(`방문 인원은 ${MIN_VISITORS}~${MAX_VISITORS}명까지만 가능합니다.`);
+      return;
+    }
+    if (members.length !== numVisit) {
+      alert("방문 인원과 방문자 폼 수가 일치하지 않습니다.");
+      return;
+    }
+
     const payload = {
       companyId: Number(companyId),
       visitDate: resveDate,
       visitTime: resveTime,
       visitBuilding: building,
       visitPurpose: visitPurpose,
-      email: email,
-      name: name,
-      tel: tel,
-      accessCard: card,
-      visitNumber: Number(visitNumber),
+      visitNumber: members.length, // 서버 요구: memberList 길이와 동일
+      memberList: members,
       ...(isEdit && { id: initialData.id }),
     };
 
@@ -323,6 +405,18 @@ export default function VisitForm({
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 이메일 형식 검사
 
+  const extraValid = extraVisitors.every(
+    (p) =>
+      p.name?.trim() &&
+      emailRegex.test(p.email || "") &&
+      (p.tel || "").trim().length === 13 &&
+      (p.tel || "").startsWith("010-") &&
+      (p.tel || "").includes("-", 4)
+  );
+  const peopleCountOk = Number(visitNumber || 0) === 1 + extraVisitors.length;
+  const numVisit = Number(visitNumber || 0);
+  const visitRangeOk = numVisit >= MIN_VISITORS && numVisit <= MAX_VISITORS;
+
   const isFormValid =
     companyId &&
     resveDate &&
@@ -336,10 +430,13 @@ export default function VisitForm({
     tel.includes("-", 4) &&
     visitPurpose.trim() !== "" &&
     name.trim() !== "" &&
-    visitNumber;
+    visitNumber &&
+    extraValid &&
+    peopleCountOk &&
+    visitRangeOk;
 
   return (
-    <div className="space-y-5 text-left">
+    <div className="max-h-[80dvh] space-y-5 overflow-y-auto pr-2 text-left">
       {isEdit && (
         <div className="flex w-full gap-4">
           <div className="w-full">
@@ -467,6 +564,77 @@ export default function VisitForm({
       </div>
 
       <div className="flex w-full gap-4">
+        <div className="w-1/2">
+          <label className="mb-1 block">
+            방문 인원 <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={visitNumber}
+            maxLength={2}
+            onChange={(e) => {
+              // 숫자만 허용
+              const raw = e.target.value.replace(/[^\d]/g, "");
+              if (raw === "") {
+                setVisitNumber("");
+                return;
+              }
+              const num = Math.min(
+                MAX_VISITORS,
+                Math.max(MIN_VISITORS, parseInt(raw, 10))
+              );
+              setVisitNumber(String(num));
+            }}
+            onBlur={() => {
+              // 빈값/0 방지: 최소 1로 보정
+              if (!visitNumber || Number(visitNumber) < MIN_VISITORS) {
+                setVisitNumber(String(MIN_VISITORS));
+              }
+            }}
+            placeholder={`인원 수 (${MIN_VISITORS}~${MAX_VISITORS})`}
+            className="w-full rounded border px-2 py-1"
+          />
+        </div>
+      </div>
+
+      {Number(visitNumber) >= 2 &&
+        (() => {
+          const maxExtras = Math.max(
+            0,
+            Math.min(Number(visitNumber || 0), MAX_VISITORS) - 1
+          );
+          const canAdd = extraVisitors.length < maxExtras;
+          return (
+            <div className="mt-2 flex items-center gap-2">
+              <button
+                type="button"
+                disabled={!canAdd}
+                onClick={() => {
+                  if (!canAdd) return;
+                  setExtraVisitors((prev) => [
+                    ...prev,
+                    { name: "", email: "", tel: "010-", card: "" },
+                  ]);
+                }}
+                className={`rounded px-3 py-1 text-white ${canAdd ? "bg-black hover:bg-gray-800" : "cursor-not-allowed bg-gray-400"}`}
+              >
+                + 방문자 추가
+              </button>
+              <span className="text-sm text-gray-600">
+                추가 가능 인원:{" "}
+                {Math.max(
+                  0,
+                  Math.min(Number(visitNumber || 0), MAX_VISITORS) -
+                    1 -
+                    extraVisitors.length
+                )}
+                명
+              </span>
+            </div>
+          );
+        })()}
+
+      <div className="flex w-full gap-4">
         <div className="w-full">
           <label className="mb-1 block">
             방문자명 <span className="text-red-500">*</span>
@@ -485,30 +653,6 @@ export default function VisitForm({
             className="w-full rounded border px-2 py-1"
           />
         </div>
-
-        <div className="w-full">
-          <label className="mb-1 block">
-            방문 인원 <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={visitNumber}
-            maxLength={2}
-            onChange={(e) => {
-              const input = e.target.value;
-              if (input === "") {
-                setVisitNumber("");
-                return;
-              }
-              if (!/^\d+$/.test(input)) return;
-              setVisitNumber(input);
-            }}
-            className="w-full rounded border px-2 py-1"
-          />
-        </div>
-      </div>
-
-      <div className="flex w-full gap-4">
         <div className="w-full">
           <label className="mb-1 block">
             방문자 이메일 <span className="text-red-500">*</span>
@@ -559,7 +703,88 @@ export default function VisitForm({
         />
       </div>
 
-      <div className="flex justify-center gap-3">
+      {extraVisitors.map((v, idx) => (
+        <div key={idx} className="mt-4 rounded-md border p-3">
+          <div className="mb-2 font-medium">추가 방문자 #{idx + 2}</div>
+
+          <div className="flex w-full gap-4">
+            <div className="w-full">
+              <label className="mb-1 block">
+                방문자명 <span className="text-red-500">*</span>
+              </label>
+              <input
+                value={v.name}
+                maxLength={50}
+                onChange={(e) =>
+                  updateExtra(idx, {
+                    name: e.target.value.replace(/[^가-힣a-zA-Z0-9\s]/g, ""),
+                  })
+                }
+                className="w-full rounded border px-2 py-1"
+              />
+            </div>
+
+            <div className="w-full">
+              <label className="mb-1 block">
+                방문자 이메일 <span className="text-red-500">*</span>
+              </label>
+              <input
+                value={v.email}
+                maxLength={50}
+                onChange={(e) =>
+                  updateExtra(idx, {
+                    email: e.target.value.replace(/[^가-힣a-zA-Z0-9@._-]/g, ""),
+                  })
+                }
+                className="w-full rounded border px-2 py-1"
+              />
+            </div>
+
+            <div className="w-full">
+              <label className="mb-1 block">
+                방문자 연락처 <span className="text-red-500">*</span>
+              </label>
+              <input
+                value={v.tel}
+                maxLength={13}
+                onChange={(e) =>
+                  updateExtra(idx, { tel: formatTel010(e.target.value) })
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Backspace" && v.tel === "010-")
+                    e.preventDefault();
+                }}
+                placeholder="010 뒤 8자리를 입력해 주세요."
+                className="w-full rounded border px-2 py-1"
+              />
+            </div>
+          </div>
+
+          <div className="mt-2 w-[50%]">
+            <label className="mb-1 block">출입카드 번호</label>
+            <input
+              value={v.card}
+              maxLength={20}
+              onChange={(e) => updateExtra(idx, { card: e.target.value })}
+              className="w-full rounded border px-2 py-1"
+            />
+          </div>
+
+          <div className="mt-3 flex justify-end">
+            <button
+              type="button"
+              onClick={() =>
+                setExtraVisitors((prev) => prev.filter((_, i) => i !== idx))
+              }
+              className="rounded border px-3 py-1 hover:bg-gray-50"
+            >
+              삭제
+            </button>
+          </div>
+        </div>
+      ))}
+
+      <div className="sticky bottom-0 z-10 flex justify-center gap-3 border-t bg-white pt-3">
         <button
           onClick={handleSubmit}
           disabled={!isFormValid}
