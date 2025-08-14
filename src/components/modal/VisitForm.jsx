@@ -291,50 +291,53 @@ export default function VisitForm({
     const normalizePhone = (v) => (v || "").replace(/[^0-9]/g, ""); // 숫자만
     const ensureTel = (v) => (v || "").trim(); // UI 검증 통과했으니 빈문자 방지
 
+    // 추가자가 “완성”되었는지 판정하는 헬퍼
+    const isCompleteExtra = (p) =>
+      p.name?.trim() &&
+      emailRegex.test(p.email || "") &&
+      (p.tel || "").trim().length === 13 &&
+      (p.tel || "").startsWith("010-") &&
+      (p.tel || "").includes("-", 4);
+
+    // 완성된 추가 방문자만 포함
+    const validExtras = extraVisitors.filter(isCompleteExtra);
+
     const members = [
       {
         name: name.trim(),
         email: email.trim(),
         tel: ensureTel(tel),
-        phoneNumber: normalizePhone(tel),
+        // phoneNumber: normalizePhone(tel),
         accessCard: card.trim(),
         sort: 1,
       },
-      ...extraVisitors.map((v, i) => {
+      ...validExtras.map((v, i) => {
         const telStr = ensureTel(v.tel);
         return {
           name: (v.name || "").trim(),
           email: (v.email || "").trim(),
           tel: telStr,
-          phoneNumber: normalizePhone(telStr),
+          // phoneNumber: normalizePhone(telStr),
           accessCard: (v.card || "").trim(),
           sort: i + 2,
         };
       }),
     ];
 
-    const hasBadPhone = members.some((m) => !m.phoneNumber);
-    if (hasBadPhone) {
-      alert("방문자 연락처가 비어 있습니다. 전화번호를 확인해 주세요.");
-      return;
-    }
+    // const hasBadPhone = members.some((m) => !m.phoneNumber);
+    // if (hasBadPhone) {
+    //   alert("방문자 연락처가 비어 있습니다. 전화번호를 확인해 주세요.");
+    //   return;
+    // }
+
+    //  삭제: visitNumber(입력값)와 members.length(실제 전송값) 일치 강제 검사
 
     // visitNumber와 memberList 개수 동기화 검사
     const memberCount = members.length;
     const visitNum = Number(visitNumber || 0);
-    if (visitNum !== memberCount) {
-      alert(
-        `방문 인원(${visitNum})과 방문자 목록(${memberCount})이 일치하지 않습니다.`
-      );
-      return;
-    }
 
     if (!(numVisit >= MIN_VISITORS && numVisit <= MAX_VISITORS)) {
       alert(`방문 인원은 ${MIN_VISITORS}~${MAX_VISITORS}명까지만 가능합니다.`);
-      return;
-    }
-    if (members.length !== numVisit) {
-      alert("방문 인원과 방문자 폼 수가 일치하지 않습니다.");
       return;
     }
 
@@ -405,15 +408,6 @@ export default function VisitForm({
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 이메일 형식 검사
 
-  const extraValid = extraVisitors.every(
-    (p) =>
-      p.name?.trim() &&
-      emailRegex.test(p.email || "") &&
-      (p.tel || "").trim().length === 13 &&
-      (p.tel || "").startsWith("010-") &&
-      (p.tel || "").includes("-", 4)
-  );
-  const peopleCountOk = Number(visitNumber || 0) === 1 + extraVisitors.length;
   const numVisit = Number(visitNumber || 0);
   const visitRangeOk = numVisit >= MIN_VISITORS && numVisit <= MAX_VISITORS;
 
@@ -431,8 +425,6 @@ export default function VisitForm({
     visitPurpose.trim() !== "" &&
     name.trim() !== "" &&
     visitNumber &&
-    extraValid &&
-    peopleCountOk &&
     visitRangeOk;
 
   return (
@@ -620,6 +612,7 @@ export default function VisitForm({
               >
                 + 방문자 추가
               </button>
+
               <span className="text-sm text-gray-600">
                 추가 가능 인원:{" "}
                 {Math.max(
