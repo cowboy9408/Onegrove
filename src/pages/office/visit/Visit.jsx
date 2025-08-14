@@ -307,7 +307,7 @@ export default function Visit() {
                 <tr>
                   <th className="border p-2">출입카드 번호</th>
                   <td className="border p-2">{detail.accessCard}</td>
-                  <th className="border p-2"></th>
+                  <th className="border p-2">알림톡 발송 여부</th>
                   <td className="border p-2"></td>
                 </tr>
               </tbody>
