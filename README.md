@@ -581,6 +581,78 @@ src/pages/banner
 
 ---
 
+# src/pages/contents/whatson/event 디렉토리 구조 및 컴포넌트 설명
+
+`src/pages/contents/whatson/event` 폴더는 해당 프로젝트에서 What's On 영역 중 Event&Promotion 영역을 관리하는 폴더입니다.  
+Event&Promotion 영역의 컨텐츠를 등록 및 수정, 조회 등의 기능을 담당하는 컴포넌트로 구성되어 있습니다.
+
+---
+
+```bash
+src/pages/contents/whatson/event
+├─ EventLayout.jsx
+├─ EventListPage.jsx
+├─ EventRegist.jsx
+├─ EventDetail.jsx
+└─ components/
+├─ EventRegistForm.jsx  # 공통 폼 (국/영문 탭에서 공유)
+```
+
+---
+
+### EventLayout.jsx
+
+- 용도: 이벤트/프로모션 하위 화면을 감싸는 베이스 레이아웃.
+- 동작: 내부에 `Outlet`만 렌더
+
+---
+
+### EventListPage.jsx
+
+- 용도: 이벤트/프로모션 **목록/검색/일괄 삭제/등록 이동**.
+- 검색 필터: 카테고리, 등록일(기간), 타이틀(입력/Enter), 노출 여부(Y/N).
+- 테이블: 언어(ko/en), 타이틀(클릭 시 상세 페이지 이동), 진행 상태, 노출여부, 등록자, 등록일시.
+- 정렬/페이징: 최신 등록일 기준 정렬 후 페이지네이션(30개/페이지).
+- 액션: **등록**(신규 페이지로 이동), **삭제**(선택 후 `/item/delete` 호출).
+- 데이터: `/api/v1/event-promotion/item` 조회 → 클라이언트 필터/정렬 후 렌더.
+
+---
+
+### EventRegist.jsx
+
+- 용도: **신규 등록** (국문/영문 탭).
+- 탭: `0=국문`, `1=영문`. 탭별 폼 ref 관리(ko/en).
+- 저장: 현재 탭 폼의 `submit` → 유효성 통과 시 확인 모달 → `/item/insert` 호출 → 목록 이동.
+- 상태 공유: 브랜드/카테고리 선택값은 탭 간 공유 가능.
+
+---
+
+### EventDetail.jsx
+
+- 용도: **상세/수정** (국문/영문 탭).
+- 초기 로딩: `emId`로 `/item/{emId}` 조회 → 언어별 데이터 분리(ko/en) → 폼 값 패치.
+- 카테고리: `/item/category` 로드 후 코드/라벨 혼합 입력 보정(`resolveCategoryCode`).
+- 이미지 패치: 누락된 `path/name/status` 보정 및 CDN 경로 기본값 적용.
+- 저장: 탭별 `submit` 결과 → 파일 메타 정리(`toImageMeta`) → `/item/insert`(신규) 또는 `/item/update`(수정) 호출 → 목록 이동.
+- 기타: 종료일 수동입력 플래그를 localStorage에 저장/정리.
+
+---
+
+### components/EventRegistForm.jsx
+
+- 용도: 이벤트 등록/수정 **공통 폼**(국/영 재사용, `forwardRef`).
+- 주요 입력
+  - 카테고리(필수, API 옵션 로드), 노출 여부(active/inactive), 노출 순서(1~100), 제목(필수, 100자),  
+    이미지: 썸네일/본문(PC, MO 각 1개씩 필수), 하단배너(PC/MO, 선택), 상세 내용(에디터, 필수),
+    기간: 시작(날짜·시간), 종료(날짜·시간) **또는** 종료 수동입력(최대 10자),
+    진행 상태(진행/종료), 노출 브랜드(모달 선택), 디스크립션(최대 250자).
+- 검증: 카테고리/제목/필수 이미지(썸네일·본문 PC/MO)/상세 내용/기간 필수. 수동 종료 시 `endInput` 필수.
+- ref 메서드: `submit(onError)` → 유효성 실패 시 콜백 호출, 성공 시 **payload 반환**.
+- payload(예): `{ lang, showYn, sort?, category, title, thumbImg, imgBodyPc, imgBodyMo, imgPc?, imgMo?, content, description, startDate, endDate|null, endInput|null, manualEndInput, progressYn, brandId?, delYn:"N" }`
+- 동작 보조: 브랜드 조회/세팅, 카테고리 코드 보정, 시작/종료 시간 문자열 조립.
+
+---
+
 ## 참고
 
 - 대부분의 컴포넌트는 **TailwindCSS**를 기반으로 스타일링 되어 있으며,
