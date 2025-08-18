@@ -320,126 +320,126 @@ components/modal/
 
 ### BrandList.jsx
 
-용도: 이벤트/프로모션 아이템 등록에서 브랜드를 하나만 선택하는 리스트.
-주요 데이터
-카테고리: /api/v1/event-promotion/item/category 로딩.
-브랜드 목록(언어별): /api/v1/event-promotion/item/brand?lang=... 로딩 및 가공.
-필터/검색: 카테고리+키워드 노멀라이즈 후 필터링.
-선택 정책: 체크가 2개 이상이 되면 경고 모달로 단일 선택만 허용.
-주요 Props: selected, onConfirm, closeModal, lang="ko".
+- 용도: 이벤트/프로모션 아이템 등록에서 브랜드를 하나만 선택하는 리스트.
+- 주요 데이터
+- 카테고리: /api/v1/event-promotion/item/category 로딩.
+- 브랜드 목록(언어별): /api/v1/event-promotion/item/brand?lang=... 로딩 및 가공.
+- 필터/검색: 카테고리+키워드 노멀라이즈 후 필터링.
+- 선택 정책: 체크가 2개 이상이 되면 경고 모달로 단일 선택만 허용.
+- 주요 Props: selected, onConfirm, closeModal, lang="ko".
 
 ---
 
 ### MainBrandList.jsx
 
-용도: 메인 페이지 노출용 브랜드를 여러 개 선택. 컴포넌트명은 BrandList로 export 됩니다(파일명만 MainBrandList).
-초기 체크 값: 외부 selected를 문자열 배열로 세팅.
-선택 제한: 최대 20개 초과 시 경고 모달 표출.
-주요 Props: selected, onConfirm, closeModal.
+- 용도: 메인 페이지 노출용 브랜드를 여러 개 선택. 컴포넌트명은 BrandList로 export 됩니다(파일명만 MainBrandList).
+- 초기 체크 값: 외부 selected를 문자열 배열로 세팅.
+- 선택 제한: 최대 20개 초과 시 경고 모달 표출.
+- 주요 Props: selected, onConfirm, closeModal.
 
 ---
 
 ### WhatsOnList.jsx
 
-용도: 메인 ‘What’s On’ 콘텐츠 1건 선택.
-주요 데이터
-카테고리: /api/v1/main/content/category 로딩.
-콘텐츠 목록: /api/v1/main/content/list?lang=KO 로딩 후 테이블용 매핑.
-필터/검색: 카테고리/키워드 노멀라이즈 후 필터링.
-선택 정책: 체크 시 해당 ID만 유지(단일 선택).
-주요 Props: selected, onConfirm, closeModal.
+- 용도: 메인 ‘What’s On’ 콘텐츠 1건 선택.
+- 주요 데이터
+- 카테고리: /api/v1/main/content/category 로딩.
+- 콘텐츠 목록: /api/v1/main/content/list?lang=KO 로딩 후 테이블용 매핑.
+- 필터/검색: 카테고리/키워드 노멀라이즈 후 필터링.
+- 선택 정책: 체크 시 해당 ID만 유지(단일 선택).
+- 주요 Props: selected, onConfirm, closeModal.
 
 ---
 
 ### CompanySelectModal.jsx
 
-용도: 입주사(회사) 다중 선택 후 상위 폼에 반영.
-데이터 소스: /api/v1/work/companyList?lang=KO 로 입주사 목록 로딩 및 매핑.
-체크/선택: DataTable 체크박스 선택 상태를 checked로 관리.
-확정 동작: 기존 selected를 유지하지 않고 체크된 항목만으로 덮어씀.
-주요 Props: selected, onConfirm, closeModal.
+- 용도: 입주사(회사) 다중 선택 후 상위 폼에 반영.
+- 데이터 소스: /api/v1/work/companyList?lang=KO 로 입주사 목록 로딩 및 매핑.
+- 체크/선택: DataTable 체크박스 선택 상태를 checked로 관리.
+- 확정 동작: 기존 selected를 유지하지 않고 체크된 항목만으로 덮어씀.
+- 주요 Props: selected, onConfirm, closeModal.
 
 ---
 
 ### UserDetailModal.jsx
 
-용도: 회사 기본정보와 월 무료/유료 어메니티 사용시간 조회 표시.
-사용시간 조회: companyId 기준 무료/유료 시간을 병렬 조회.
-/api/v1/company/detail/time?companyId=<id>&type=free|paid 사용.
-표시 항목: 회사명/사용여부/오피스/층/대표명/연락처/이메일 등 읽기전용 필드.
-대표 이미지/총무 담당자 목록도 지원.
-주요 Props: userData.
+- 용도: 회사 기본정보와 월 무료/유료 어메니티 사용시간 조회 표시.
+- 사용시간 조회: companyId 기준 무료/유료 시간을 병렬 조회.
+- /api/v1/company/detail/time?companyId=<id>&type=free|paid 사용.
+- 표시 항목: 회사명/사용여부/오피스/층/대표명/연락처/이메일 등 읽기전용 필드.
+- 대표 이미지/총무 담당자 목록도 지원.
+- 주요 Props: userData.
 
 ---
 
 ### PasswordResetModal.jsx
 
-용도: 이메일 입력 → 임시 비밀번호 발급 요청.
-검증/요청: 이메일 정규식 검증 후 /api/v1/user/find-password POST.
-확인 버튼/닫기: 성공 시 안내 후 closeModal() 호출.
-주요 Props: closeModal.
+- 용도: 이메일 입력 → 임시 비밀번호 발급 요청.
+- 검증/요청: 이메일 정규식 검증 후 /api/v1/user/find-password POST.
+- 확인 버튼/닫기: 성공 시 안내 후 closeModal() 호출.
+- 주요 Props: closeModal.
 
 ---
 
 ### ReservationForm.jsx
 
-용도: 회의실/일정/인원/결제유형/실사용자 정보 등을 입력해서 예약 생성/수정.
-핵심 상태/Props: 장소/룸 옵션, 기존 예약, 수정 여부, VIP 여부 등.
-VIP 제한: VIP일 경우 표시/최대 수용 인원 4명, 기본 64명.
-룸 변경 시 처리: 룸 변경 후 현재 선택된 시간이 유효하지 않으면 자동 보정.
-예약 데이터 변화 시 재검증: 사용 불가 시간이면 사용 가능한 첫 시간으로 자동 이동.
-시간 옵션 생성: generateTimeOptions(9, 17) 등으로 정시 슬롯 구성.
-UI 예: Meeting Room 셀렉트 변경 시 예약 데이터 재조회 및 시간 보정.
-초기값 세팅/포맷팅: 기존 전화번호가 010- 형식이 아니면 포맷팅.
+- 용도: 회의실/일정/인원/결제유형/실사용자 정보 등을 입력해서 예약 생성/수정.
+- 핵심 상태/Props: 장소/룸 옵션, 기존 예약, 수정 여부, VIP 여부 등.
+- VIP 제한: VIP일 경우 표시/최대 수용 인원 4명, 기본 64명.
+- 룸 변경 시 처리: 룸 변경 후 현재 선택된 시간이 유효하지 않으면 자동 보정.
+- 예약 데이터 변화 시 재검증: 사용 불가 시간이면 사용 가능한 첫 시간으로 자동 이동.
+- 시간 옵션 생성: generateTimeOptions(9, 17) 등으로 정시 슬롯 구성.
+- UI 예: Meeting Room 셀렉트 변경 시 예약 데이터 재조회 및 시간 보정.
+- 초기값 세팅/포맷팅: 기존 전화번호가 010- 형식이 아니면 포맷팅.
 
 ---
 
 ### SleepReservationForm.jsx
 
-용도: Relax Room, 좌석(호실), 날짜/시간, 회사/사용자 선택 후 저장/수정/삭제.
-함수 시그니처/Props: room, roomList, initialData, isEdit, onSubmit, closeModal.
-좌석/시간 충돌 방지
-선택 좌석/시간이 이미 예약된 경우 옵션 비활성화.
-특정 시간에 좌석 예약 여부 판단 로직 제공.
-데이터 로딩
-룸 상세/입주사/사용자 목록 API 로딩.
-날짜별 전체 예약 스캔 후 상태에 반영.
-검증 및 제출/삭제
-필수값 검증 후 /api/v1/sleep/reserve/insert|update POST.
-삭제 시 확인 및 API 호출.
-주요 UI: 룸/좌석/일정/회사/아이디 선택 및 저장/수정/삭제 버튼.
+- 용도: Relax Room, 좌석(호실), 날짜/시간, 회사/사용자 선택 후 저장/수정/삭제.
+- 함수 시그니처/Props: room, roomList, initialData, isEdit, onSubmit, closeModal.
+- 좌석/시간 충돌 방지
+- 선택 좌석/시간이 이미 예약된 경우 옵션 비활성화.
+- 특정 시간에 좌석 예약 여부 판단 로직 제공.
+- 데이터 로딩
+- 룸 상세/입주사/사용자 목록 API 로딩.
+- 날짜별 전체 예약 스캔 후 상태에 반영.
+- 검증 및 제출/삭제
+- 필수값 검증 후 /api/v1/sleep/reserve/insert|update POST.
+- 삭제 시 확인 및 API 호출.
+- 주요 UI: 룸/좌석/일정/회사/아이디 선택 및 저장/수정/삭제 버튼.
 
 ---
 
 ### SleepReservationDetail.jsx
 
-용도: 상세 조회 + 수정 폼 호출 + 삭제.
-상세 조회: reservationId로 상세 조회 후, 같은 시간대/룸의 사용자 이름 별도 조회.
-표시 항목: 룸/호실/예약시간 등 상세 정보.
-시간 표현: 시작시간 + 50분을 종료로 계산해 범위를 표기.
-수정/삭제: 내부에서 SleepReservationForm 모달로 열어 수정, 삭제 API 지원.
-하단에 수정/삭제 버튼 노출.
+- 용도: 상세 조회 + 수정 폼 호출 + 삭제.
+- 상세 조회: reservationId로 상세 조회 후, 같은 시간대/룸의 사용자 이름 별도 조회.
+- 표시 항목: 룸/호실/예약시간 등 상세 정보.
+- 시간 표현: 시작시간 + 50분을 종료로 계산해 범위를 표기.
+- 수정/삭제: 내부에서 SleepReservationForm 모달로 열어 수정, 삭제 API 지원.
+- 하단에 수정/삭제 버튼 노출.
 
 ---
 
 ### VisitForm.jsx
 
-용도: 방문 날짜/시간/건물/입주사/방문자 정보 입력, 추가 방문자 관리.
-방문 인원 범위: 1~10명만 허용.
-전화번호 UX: 입력값을 자동으로 010-XXXX-XXXX 형식으로 포맷팅(백스페이스/비정상 입력 처리 포함).
-기존 값이 있을 때도 초기 포맷 보정.
-시간 선택: 09:00~18:00 범위에서, 예약 불가 시간은 (불가)로 비활성화.
-추가 방문자: 이름/이메일/연락처/카드번호 입력, 불완전한 항목은 제외하여 memberList 구성.
-payload & 전송: visitNumber를 memberList.length와 맞춰 전송, insert/update 분기.
-필수 검증: 이메일 형식/전화번호 길이/방문 인원 범위 등.
-하단 고정 버튼: 저장 버튼을 아래 고정(sticky)하여 접근성 개선.
+- 용도: 방문 날짜/시간/건물/입주사/방문자 정보 입력, 추가 방문자 관리.
+- 방문 인원 범위: 1~10명만 허용.
+- 전화번호 UX: 입력값을 자동으로 010-XXXX-XXXX 형식으로 포맷팅(백스페이스/비정상 입력 처리 포함).
+- 기존 값이 있을 때도 초기 포맷 보정.
+- 시간 선택: 09:00~18:00 범위에서, 예약 불가 시간은 (불가)로 비활성화.
+- 추가 방문자: 이름/이메일/연락처/카드번호 입력, 불완전한 항목은 제외하여 memberList 구성.
+- payload & 전송: visitNumber를 memberList.length와 맞춰 전송, insert/update 분기.
+- 필수 검증: 이메일 형식/전화번호 길이/방문 인원 범위 등.
+- 하단 고정 버튼: 저장 버튼을 아래 고정(sticky)하여 접근성 개선.
 
 ---
 
-# components/modal 디렉토리 구조 및 컴포넌트 설명
+# src/pages/admin/adminpage 디렉토리 구조 및 컴포넌트 설명
 
-`components/modal` 폴더는 해당 프로젝트에서 사용되는 모달을 모아놓은 공간입니다.  
-showmodal을 통해 사용되며, 위에 설명한 공통 UI를 포함하고 있습니다.
+`src/pages/admin/adminpage` 폴더는 해당 프로젝트에서 관리자 / 입주사 총무팀 계정을 관리하는 폴더입니다.  
+관리자 / 입주사 총무팀 계정 리스트부터 등록 및 수정, 조회 기능을 담당하는 컴포넌트로 구성되어 있습니다.
 
 ---
 
@@ -460,77 +460,65 @@ src/pages/admin/adminpage
 
 ### AdminLayout.jsx
 
-용도: 이벤트/프로모션 아이템 등록에서 브랜드를 하나만 선택하는 리스트.
-주요 데이터
-카테고리: /api/v1/event-promotion/item/category 로딩.
-브랜드 목록(언어별): /api/v1/event-promotion/item/brand?lang=... 로딩 및 가공.
-필터/검색: 카테고리+키워드 노멀라이즈 후 필터링.
-선택 정책: 체크가 2개 이상이 되면 경고 모달로 단일 선택만 허용.
-주요 Props: selected, onConfirm, closeModal, lang="ko".
+- 용도: 하위 라우트 감싸는 레이아웃(여백 p-4).
+- 동작: 내부 <Outlet /> 렌더
 
 ---
 
 ### AdminListPage.jsx
 
-용도: 메인 페이지 노출용 브랜드를 여러 개 선택. 컴포넌트명은 BrandList로 export 됩니다(파일명만 MainBrandList).
-초기 체크 값: 외부 selected를 문자열 배열로 세팅.
-선택 제한: 최대 20개 초과 시 경고 모달 표출.
-주요 Props: selected, onConfirm, closeModal.
+- 용도: 관리자 목록/검색/삭제/페이징.
+- 필터: 관리자 유형/이름/아이디/사용여부.
+- 액션: 상세 이동(/admin/detail/:id), 등록 이동(/admin/list/regist), 선택 삭제.
+- API: GET /api/v1/user/admin?isManager=N, POST /api/v1/user/admin/delete.
 
 ---
 
 ### AdminRegist.jsx
 
-용도: 메인 ‘What’s On’ 콘텐츠 1건 선택.
-주요 데이터
-카테고리: /api/v1/main/content/category 로딩.
-콘텐츠 목록: /api/v1/main/content/list?lang=KO 로딩 후 테이블용 매핑.
-필터/검색: 카테고리/키워드 노멀라이즈 후 필터링.
-선택 정책: 체크 시 해당 ID만 유지(단일 선택).
-주요 Props: selected, onConfirm, closeModal.
+- 용도: 관리자 신규 등록.
+- 기본값: role=NORMAL_ADMIN, status=active, gender=male.
+- 유효성: 아이디(영소문자·숫자 최대 16자), 이메일 형식, 비밀번호 일치, 휴대폰 010- 뒤 8자리.
+- 액션: 등록 → /admin/list, 목록 이동 시 확인 모달.
+- API: POST /api/v1/user/admin/insert.
 
 ---
 
 ### AdminDetailPage.jsx
 
-용도: 입주사(회사) 다중 선택 후 상위 폼에 반영.
-데이터 소스: /api/v1/work/companyList?lang=KO 로 입주사 목록 로딩 및 매핑.
-체크/선택: DataTable 체크박스 선택 상태를 checked로 관리.
-확정 동작: 기존 selected를 유지하지 않고 체크된 항목만으로 덮어씀.
-주요 Props: selected, onConfirm, closeModal.
+- 용도: 관리자 상세/수정/잠금해제/임시비번.
+- 조회: GET /api/v1/user/admin/:id (아이디 수정 불가).
+- 액션: 수정 POST /api/v1/user/admin/update, 잠금 해제 /api/v1/user/unlock, 임시 비번 /api/v1/user/temp-password.
+- 표시: 유형/사용여부/성별/이름/연락처/이메일/잠금상태.
 
 ---
 
 ### AffairListPage.jsx
 
-용도: 회사 기본정보와 월 무료/유료 어메니티 사용시간 조회 표시.
-사용시간 조회: companyId 기준 무료/유료 시간을 병렬 조회.
-/api/v1/company/detail/time?companyId=<id>&type=free|paid 사용.
-표시 항목: 회사명/사용여부/오피스/층/대표명/연락처/이메일 등 읽기전용 필드.
-대표 이미지/총무 담당자 목록도 지원.
-주요 Props: userData.
+- 용도: 입주사 총무팀 목록/검색/삭제/페이징.
+- 준비: GET /api/v1/user/company로 회사 목록 로드(중복 companyId 제거) → 셀렉트 옵션.
+- 필터: 입주사/이름/아이디/사용여부.
+- 액션: 상세 이동(/admin/affair/detail/:id), 등록 이동(/admin/affair/regist), 선택 삭제.
+- API: GET /api/v1/user/admin?isManager=Y, POST /api/v1/user/admin/delete.
 
 ---
 
 ### AffairRegist.jsx
 
-용도: 이메일 입력 → 임시 비밀번호 발급 요청.
-검증/요청: 이메일 정규식 검증 후 /api/v1/user/find-password POST.
-확인 버튼/닫기: 성공 시 안내 후 closeModal() 호출.
-주요 Props: closeModal.
+- 용도: 입주사 총무팀 신규 등록.
+- 기본값: role=OFFICE_SECRETARY_ADMIN, status=active, isManager=Y, isReservation(Y/N), companyId 필수.
+- 유효성: 이름(최대 10자), 아이디(영소문자·숫자 최대 16자), 휴대폰 8자리, 이메일 형식, 비번 일치.
+- 액션: 등록 → /admin/affair, 목록 이동 시 확인 모달.
+- API: GET /api/v1/user/company, POST /api/v1/user/admin/insert.
 
 ---
 
 ### AffairDetailPage.jsx
 
-용도: 회의실/일정/인원/결제유형/실사용자 정보 등을 입력해서 예약 생성/수정.
-핵심 상태/Props: 장소/룸 옵션, 기존 예약, 수정 여부, VIP 여부 등.
-VIP 제한: VIP일 경우 표시/최대 수용 인원 4명, 기본 64명.
-룸 변경 시 처리: 룸 변경 후 현재 선택된 시간이 유효하지 않으면 자동 보정.
-예약 데이터 변화 시 재검증: 사용 불가 시간이면 사용 가능한 첫 시간으로 자동 이동.
-시간 옵션 생성: generateTimeOptions(9, 17) 등으로 정시 슬롯 구성.
-UI 예: Meeting Room 셀렉트 변경 시 예약 데이터 재조회 및 시간 보정.
-초기값 세팅/포맷팅: 기존 전화번호가 010- 형식이 아니면 포맷팅.
+- 용도: 입주사 총무팀 상세/수정/잠금해제/임시비번.
+- 조회: GET /api/v1/user/admin/:id + 회사 목록(GET /api/v1/user/company), 아이디 수정 불가.
+- 액션: 수정 POST /api/v1/user/admin/update, 잠금 해제 /api/v1/user/unlock, 임시 비번 /api/v1/user/temp-password.
+- 표시: 입주사/사용여부/성별/연락처/이메일/예약기능(Y/N)/잠금상태.
 
 ---
 
