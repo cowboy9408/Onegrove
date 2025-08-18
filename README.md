@@ -9,7 +9,7 @@
 
 | 항목            | 설명                                |
 | --------------- | ----------------------------------- |
-| 프레임워크      | React 19, Vite, Node                |
+| 프레임워크      | React 19, Vite, Node 22.14.0        |
 | 스타일링        | TailwindCSS, shadcn/ui              |
 | 상태 관리       | Zustand                             |
 | 폼 처리 및 검증 | React Hook Form, Zod                |
@@ -96,7 +96,7 @@ yarn build
 ```bash
 
 components/common/
-├── Button.jsx #
+├── Button.jsx
 ├── Calendar.jsx
 ├── CalendarToolbar.jsx
 ├── calendar.css
