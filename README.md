@@ -1,6 +1,6 @@
 # Ongrove Admin CMS 구축 프로젝트
 
-> 이 프로젝트는 React + Vite 기반으로 구축된 관리자 CMS압니다.  
+> 이 프로젝트는 React + Vite 기반으로 구축된 관리자 CMS입니다.  
 > TailwindCSS, Zustand, 다양한 캘린더 및 폼 관리 라이브러리가 통합되어 있어 일정 관리, UI 구성, 상태 관리를 빠르고 유연하게 개발할 수 있도록 구성되어 있습니다.
 
 ---
@@ -460,7 +460,7 @@ src/pages/admin/adminpage
 
 ### AdminLayout.jsx
 
-- 용도: 하위 라우트 감싸는 레이아웃(여백 p-4).
+- 용도: 하위 라우트 감싸는 레이아웃
 - 동작: 내부 <Outlet /> 렌더
 
 ---
@@ -507,7 +507,7 @@ src/pages/admin/adminpage
 
 - 용도: 입주사 총무팀 신규 등록.
 - 기본값: role=OFFICE_SECRETARY_ADMIN, status=active, isManager=Y, isReservation(Y/N), companyId 필수.
-- 유효성: 이름(최대 10자), 아이디(영소문자·숫자 최대 16자), 휴대폰 8자리, 이메일 형식, 비번 일치.
+- 유효성: 이름(최대 10자), 아이디(영소문자·숫자 최대 16자), 휴대폰 8자리, 이메일 형식, 비밀번호 일치.
 - 액션: 등록 → /admin/affair, 목록 이동 시 확인 모달.
 - API: GET /api/v1/user/company, POST /api/v1/user/admin/insert.
 
@@ -515,10 +515,69 @@ src/pages/admin/adminpage
 
 ### AffairDetailPage.jsx
 
-- 용도: 입주사 총무팀 상세/수정/잠금해제/임시비번.
+- 용도: 입주사 총무팀 상세/수정/잠금해제/임시비밀번호.
 - 조회: GET /api/v1/user/admin/:id + 회사 목록(GET /api/v1/user/company), 아이디 수정 불가.
 - 액션: 수정 POST /api/v1/user/admin/update, 잠금 해제 /api/v1/user/unlock, 임시 비번 /api/v1/user/temp-password.
 - 표시: 입주사/사용여부/성별/연락처/이메일/예약기능(Y/N)/잠금상태.
+
+---
+
+# src/pages/banner 디렉토리 구조 및 컴포넌트 설명
+
+`src/pages/banner` 폴더는 해당 프로젝트에서 배너 영역을 관리하는 폴더입니다.  
+메뉴별 배너 영역의 컨텐츠를 등록 및 수정 기능을 담당하는 컴포넌트로 구성되어 있습니다.
+
+---
+
+```bash
+src/pages/banner
+├─ BannerLayout.jsx
+├─ MainBannerPage.jsx        # MENU: bn0101 (메인)
+├─ WhatsonBannerPage.jsx     # MENU: bn0102 (What's On)
+├─ LifeStyleBannerPage.jsx   # MENU: bn0103 (라이프스타일)
+├─ WorkBannerPage.jsx        # MENU: bn0104 (워크)
+├─ AboutBannerPage.jsx       # MENU: bn0105 (어바웃)
+└─ component/
+   └─ BannerForm.jsx         # 공통 폼 (국/영문 탭에서 공유)
+```
+
+### BannerLayout.jsx
+
+- 용도: 하위 라우트 감싸는 레이아웃
+- 동작: 내부 <Outlet /> 렌더
+
+---
+
+### BannerForm.jsx
+
+- 용도: 배너 입력/검증/매핑 공통 폼(국문/영문 탭에서 재사용).
+- 주요 필드: 배너타입(N=기본형, B=대형), 사용여부(Y/N), 타이틀/서브타이틀, URL, 이미지(PC/MO).
+- 이미지 규격 안내: PC 1920×140, MO 720×264, 최대 20MB, JPG/JPEG/PNG.
+- 필수 검증: `title`, `url`, `bannerType`, `displayYn`, `image1.path(PC)`, `image2.path(MO)`.
+- props:
+  - `data`: 현재 언어 데이터(초기값/재조회값).
+  - `lang`: `"ko"` 또는 `"en"` (저장 시 `"KO"`/`"EN"`로 변환).
+  - `menu`: 메뉴 코드(`bn0101` 등).
+- 메서드(ref 노출): `submit(onError) → payload|null`
+  - 누락 시 `onError(message)` 호출 후 `null` 반환.
+  - 성공 시 서버 전송용 payload 반환.
+- 이름 매핑(중요):
+  - `subtitle → subTitle`
+  - `bannerType → type`
+  - `displayYn → showYn`
+  - `image1 → pcImg`, `image2 → moImg`
+
+---
+
+### MainBannerPage.jsx
+
+- 용도: **메인** 띠배너 관리(국문/영문 탭).
+- 탭: `0=KO`, `1=EN`.
+- 조회: `GET /api/v1/banner/bn0101/{KO|EN}` → 폼 `reset`.
+- 저장: `ref.submit(onError)` → `POST /api/v1/banner/insert|update`(id 유무로 분기) → 성공 후 **재조회**.
+- UI: 상단 탭, 우측 하단 정렬 저장 버튼.
+
+※ 나머지 메뉴의 배너 영역은 메뉴별로 각각 관리되고있으나, 컴포넌트 구조는 메뉴 코드 제외 동일합니다.
 
 ---
 
