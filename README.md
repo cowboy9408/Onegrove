@@ -584,7 +584,7 @@ src/pages/banner
 # src/pages/contents/whatson/event 디렉토리 구조 및 컴포넌트 설명
 
 `src/pages/contents/whatson/event` 폴더는 해당 프로젝트에서 What's On 영역 중 Event&Promotion 영역을 관리하는 폴더입니다.  
-Event&Promotion 영역의 컨텐츠를 등록 및 수정, 조회 등의 기능을 담당하는 컴포넌트로 구성되어 있습니다.
+Event&Promotion 영역의 콘텐츠를 등록 및 수정, 조회 등의 기능을 담당하는 컴포넌트로 구성되어 있습니다.
 
 ---
 
@@ -595,7 +595,7 @@ src/pages/contents/whatson/event
 ├─ EventRegist.jsx
 ├─ EventDetail.jsx
 └─ components/
-├─ EventRegistForm.jsx  # 공통 폼 (국/영문 탭에서 공유)
+      └─ EventRegistForm.jsx  # 공통 폼 (국/영문 탭에서 공유)
 ```
 
 ---
@@ -638,7 +638,7 @@ src/pages/contents/whatson/event
 
 ---
 
-### components/EventRegistForm.jsx
+### EventRegistForm.jsx
 
 - 용도: 이벤트 등록/수정 **공통 폼**(국/영 재사용, `forwardRef`).
 - 주요 입력
@@ -652,6 +652,145 @@ src/pages/contents/whatson/event
 - 동작 보조: 브랜드 조회/세팅, 카테고리 코드 보정, 시작/종료 시간 문자열 조립.
 
 ---
+
+# src/pages/contents/whatson/stories 디렉토리 구조 및 컴포넌트 설명
+
+`src/pages/contents/whatson/stories` 폴더는 해당 프로젝트에서 What's On 영역 중 Stories of Onegrove 영역을 관리하는 폴더입니다.  
+Stories of Onegrove 영역의 콘텐츠를 등록 및 수정, 조회 등의 기능을 담당하는 컴포넌트로 구성되어 있습니다.
+
+---
+
+```bash
+src/pages/contents/whatson/stories
+├─ StoriesLayout.jsx
+├─ StoriesListPage.jsx
+├─ StoriesRegist.jsx
+├─ StoriesDetail.jsx
+└─ components/
+       └─ StoriesRegistForm.jsx  # 공통 폼 (국/영문 탭에서 공유)
+```
+
+---
+
+### StoriesLayout.jsx
+
+- 용도: Stories 하위 화면을 감싸는 레이아웃(`Outlet` 렌더).
+
+---
+
+### StoriesListPage.jsx
+
+- 용도: 스토리 **목록/검색/삭제/등록 이동**.
+- 검색: 카테고리(텍스트), 등록일 범위(기간 선택), 타이틀(Enter로 즉시 검색), 노출 여부(Y/N).
+- 데이터 로딩: `GET /api/v1/stories` → `contentList`에서 **KO/EN 분리** 후 테이블 바인딩.
+- 테이블: 노출순서(ko/en), 카테고리(ko/en), 타이틀(클릭 시 상세 이동 `...?lang=ko|en`), 상태, 노출여부, 등록자, 등록일시.
+- 페이징: 30개/페이지, 검색 조건 반영하여 클라이언트 슬라이싱.
+- 액션: **등록**(신규 페이지로 이동), **삭제**(선택행 확인 모달 → `POST /api/v1/stories/delete`에 ID 배열 전송).
+
+---
+
+### StoriesRegist.jsx
+
+- 용도: **신규 등록** 탭 화면(국문/영문).
+- 탭 & 상태: `0=국문`, `1=영문`; 탭별 폼 ref/상태 분리(`koFormRef`, `enFormRef`).
+- 저장: 현재 탭 폼의 `submit(onError)` → 확인 모달 → `POST /api/v1/stories/insert` → 목록 이동(`/contents/whatson/stories/list`).
+- 버튼: 저장 / 목록(이동 확인 모달).
+
+---
+
+### StoriesRegistForm.jsx
+
+- 용도: 스토리 **공통 폼**(국/영 재사용, `forwardRef`).
+- 주요 입력: 제목(필수, 100자), 디스크립션(필수, 200자), 카테고리(필수), 노출순서(1~100), 노출여부(사용/미사용), 노출기간(시작/종료 **날짜+시간**), 본문 에디터(필수), **추가 내용**(옵션 토글), 썸네일/패턴(상단·하단 PC·MO 각 1개 **필수**), **스와이프 이미지**(최소 3개, 최대 10개, 캡션 포함).
+- 이미지 메타: 신규/유지/수정/삭제를 `status: "C"|"R"|"E"|"D"`로 생성(`toImageMeta`), 삭제/교체 이력 반영.
+- 유효성: 카테고리/제목/디스크립션/본문/기간/필수 이미지 모두 확인, 스와이프 이미지는 **3개 이상**.
+- 반환(payload 예):  
+   `{
+  id|null, lang:"ko|en", showYn:"Y|N", sort:"노출순서",
+  category, title, description, content, addContent?,
+  thumbImg, patternTopPc/Mo, patternBottomPc/Mo,
+  storiesImgList: [{...meta, caption, sort, status}],
+  startDt:"YYYY-MM-DD HH:mm", endDt:"YYYY-MM-DD HH:mm", delYn:"N"
+}`
+- 추가 기능: 스와이프 이미지 **추가/삭제/재정렬**, 추가 내용 토글 시 에디터 초기화 처리.
+
+---
+
+### StoriesDetail.jsx
+
+- 용도: **상세/수정** 탭 화면(국문/영문).
+- 조회: `GET /api/v1/stories/detail/{emId}/KO` & `/EN` → 폼 값 패치(이미지 경로/파일명/상태 보정 포함).
+- 저장: 현재 탭 값으로 payload 빌드(삭제된 이미지 `status:"D"` 포함) → `POST /api/v1/stories/update`(id 존재) 또는 `insert`(신규) → 목록 이동.
+- 부가 표시: 등록/수정 일시 및 사용자 정보 표.
+- 탭 진입 파라미터: `?lang=ko|en`로 초기 탭 결정.
+
+---
+
+# src/pages/contents/whatson/press 디렉토리 구조 및 컴포넌트 설명
+
+`src/pages/contents/whatson/press` 폴더는 해당 프로젝트에서 What's On 영역 중 Press & Media 영역을 관리하는 폴더입니다.  
+Press & Media 영역의 콘텐츠를 등록 및 수정, 조회 등의 기능을 담당하는 컴포넌트로 구성되어 있습니다.
+
+---
+
+```bash
+src/pages/contents/whatson/press
+├─ PressListPage.jsx
+├─ PressRegist.jsx
+├─ PressDetail.jsx
+└─ component/
+      └─ PressRegistForm.jsx  # 공통 폼 (국/영문 탭에서 공유)
+```
+
+---
+
+### PressListPage.jsx
+
+- 용도: 프레스 콘텐츠 **목록/검색/삭제/등록 이동** 화면.
+- 검색 필터: 카테고리(셀렉트), 등록일(기간), 타이틀(Enter 즉시검색), 노출여부(Y/N).
+- 데이터 로딩: `GET /api/v1/press` → ko/en 항목 병합하여 한 행으로 표시(언어별 타이틀/노출여부 컬럼).
+- 카테고리 옵션: `GET /api/v1/press/category` 사전 로딩.
+- 정렬/페이징: 등록일 **최신순**, 30개/페이지.
+- 이동: 타이틀 클릭 시 상세로 이동 `.../media/{pmId}?lang=ko|en` / 등록 버튼은 신규 페이지로 이동.
+- 삭제: 선택 행 후 `POST /api/v1/press/delete`(ID 배열).
+- URL 동기화: 검색·페이지 등 쿼리스트링 반영(`name, category, visibility, startDate, endDate, page`).
+
+---
+
+### PressRegist.jsx
+
+- 용도: 프레스 **신규 등록** (국문/영문 탭).
+- 탭: `0=국문`, `1=영문`; 탭별 폼 ref 분리(`koFormRef`, `enFormRef`).
+- 저장: 현재 탭 `ref.submit(onError)` → 확인 모달 → `POST /api/v1/press/insert` → 목록 이동.
+- 버튼: 저장 / 목록(이동 확인 모달).
+- 상태: 탭별 `koData`, `enData` 보유(초기 빈 객체).
+
+---
+
+### PressDetail.jsx
+
+- 용도: 프레스 **상세/수정** (국문/영문 탭).
+- 조회: `GET /api/v1/press/{pmId}` → 응답 배열에서 `lang==="ko"|"en"` 분리 후 각 폼에 패치.
+- 이미지 패치: 기존 이미지 `path` 있으면 `status:"R"`로 보정(유지), 삭제 시 `status:"D"` 처리.
+- 저장: 현재 탭 `submit` 값 + 기존값 병합 → `thumbImgPc/Mo`를 **toImageMeta**로 정규화 →  
+  `POST /api/v1/press/update`(id 존재) 또는 `insert`(신규) → 완료 모달 → 목록으로 이동(`?refresh=timestamp`).
+- 메타 표: 등록/수정 일시·사용자 정보 테이블 제공(언어별).
+- 초기 탭: `?lang=ko|en` 쿼리로 결정.
+
+---
+
+### PressRegistForm.jsx
+
+- 용도: 프레스 등록/수정 **공통 폼**(`forwardRef`, 국/영 재사용).
+- 입력: 카테고리(필수, 옵션은 `GET /api/v1/press/category`), 제목(필수, 최대 100자),  
+  썸네일 이미지 PC/MO(둘 다 필수), 노출여부(노출/미노출), 내용(에디터, 필수), 발행일(단일 날짜).
+- 기본값: `status:"inactive"`, `publishDate: 오늘(YYYY-MM-DD)`.
+- 검증: 카테고리/제목/PC·MO 이미지/내용/발행일 **필수**(미입력 시 `onError(message)` 호출).
+- 이미지 메타: 업로드 파일을 `{id,name,originalName,size,extension,mime,classification:"press-media",path,status}`로 변환.
+- ref 메서드:
+  - `submit(onError) → { id?, lang, category, title, thumbImgPc, thumbImgMo, showYn, content, publishDate } | null`
+  - `setValue(key, value)`(에디터 포함 값 패치).
+- 업로드 가이드: PC/MO 썸네일 **416×280px, 20MB 이하, JPG/JPEG/PNG 1개**.
 
 ## 참고
 
