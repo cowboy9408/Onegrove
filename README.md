@@ -447,13 +447,13 @@ components/modal/
 
 ```bash
 src/pages/admin/adminpage
-├─ AdminLayout.jsx # 하위 라우트를 감싸는 레이아웃(패딩만 적용)
+├─ AdminLayout.jsx # 하위 라우트를 감싸는 레이아웃
 ├─ AdminListPage.jsx # 관리자 목록/검색/삭제/페이징
 ├─ AdminRegist.jsx # 관리자 신규 등록(유효성 검사 포함)
-├─ AdminDetailPage.jsx # 관리자 상세/수정/잠금 해제/임시비번 발급
+├─ AdminDetailPage.jsx # 관리자 상세/수정/잠금 해제/임시비밀번호 발급
 ├─ AffairListPage.jsx # 입주사 총무팀 목록/검색/삭제/페이징
 ├─ AffairRegist.jsx # 입주사 총무팀 신규 등록(입주사 선택/유효성)
-└─ AffairDetailPage.jsx # 입주사 총무팀 상세/수정/잠금 해제/임시비번
+└─ AffairDetailPage.jsx # 입주사 총무팀 상세/수정/잠금 해제/임시비밀번호
 ```
 
 ## 컴포넌트 상세 설명
@@ -486,9 +486,9 @@ src/pages/admin/adminpage
 
 ### AdminDetailPage.jsx
 
-- 용도: 관리자 상세/수정/잠금해제/임시비번.
+- 용도: 관리자 상세/수정/잠금해제/임시비밀번호.
 - 조회: GET /api/v1/user/admin/:id (아이디 수정 불가).
-- 액션: 수정 POST /api/v1/user/admin/update, 잠금 해제 /api/v1/user/unlock, 임시 비번 /api/v1/user/temp-password.
+- 액션: 수정 POST /api/v1/user/admin/update, 잠금 해제 /api/v1/user/unlock, 임시 비밀번호 /api/v1/user/temp-password.
 - 표시: 유형/사용여부/성별/이름/연락처/이메일/잠금상태.
 
 ---
@@ -517,7 +517,7 @@ src/pages/admin/adminpage
 
 - 용도: 입주사 총무팀 상세/수정/잠금해제/임시비밀번호.
 - 조회: GET /api/v1/user/admin/:id + 회사 목록(GET /api/v1/user/company), 아이디 수정 불가.
-- 액션: 수정 POST /api/v1/user/admin/update, 잠금 해제 /api/v1/user/unlock, 임시 비번 /api/v1/user/temp-password.
+- 액션: 수정 POST /api/v1/user/admin/update, 잠금 해제 /api/v1/user/unlock, 임시 비밀번호 /api/v1/user/temp-password.
 - 표시: 입주사/사용여부/성별/연락처/이메일/예약기능(Y/N)/잠금상태.
 
 ---
