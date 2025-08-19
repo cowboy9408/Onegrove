@@ -39,9 +39,9 @@ yarn dev
 npm run dev
 ```
 
-로컬 서버는 기본적으로 **http://localhost:5173** 에서 실행됩니다.
-개발(테스트) 서버는 **https://admin-dev.onegrove.kr/** 입니다.
-운영 서버는 **https://cms.onegrove.kr/** 입니다.
+- 로컬 서버는 기본적으로 **http://localhost:5173** 에서 실행됩니다.
+- 개발(테스트) 서버는 **https://admin-dev.onegrove.kr/** 입니다.
+- 운영 서버는 **https://cms.onegrove.kr/** 입니다.
 
 ---
 
@@ -55,7 +55,7 @@ yarn build
 
 ### 4. 형상관리
 
-형상관리 : GIT
+형상관리 : GITLab
 
 - dev : development
 
