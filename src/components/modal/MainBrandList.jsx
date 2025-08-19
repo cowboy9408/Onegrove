@@ -25,7 +25,7 @@ export default function BrandList({ selected = [], onConfirm, closeModal }) {
   useEffect(() => {
     if (items.length > 0) {
       setFilteredItems(items); // 처음 필터 설정
-      setChecked(selected.map(String)); // ensure reset even after brand load
+      setChecked(selected.map(String));
     }
   }, [items]);
 
