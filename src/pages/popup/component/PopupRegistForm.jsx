@@ -15,38 +15,80 @@ const PopupRegistForm = forwardRef(({ data, lang }, ref) => {
   });
   const { register, setValue, watch, getValues, reset } = methods;
 
+  const normalizeImage = (file, fallbackStatus = "C") => {
+    if (!file) return null;
+    const path =
+      file.path ||
+      file.url ||
+      file.fileUrl ||
+      file.file_path ||
+      file.downloadUrl ||
+      file.location ||
+      file.filePath ||
+      null;
+
+    const name = file.name || file.fileName || file.originalName || null;
+    const ext =
+      file.extension ||
+      (name && name.includes(".") ? name.slice(name.lastIndexOf(".")) : null);
+
+    return {
+      id: file.id ?? file.fileId ?? file.seq ?? null,
+      originalName: file.originalName ?? name ?? "",
+      name: name ?? "",
+      size: file.size ?? file.fileSize ?? null,
+      extension: ext,
+      mime: file.mime ?? file.mimetype ?? file.contentType ?? null,
+      classification: file.classification ?? null,
+      path,
+      status: file.status || fallbackStatus,
+    };
+  };
+
   useEffect(() => {
-    if (data) {
-      reset({
-        title: data.title || "",
-        isVisible: String(data.useYn ?? "Y"),
-        url: data.landingUrl || "",
-        period: {
-          startDate: data.startDt ? new Date(data.startDt) : null,
-          endDate: data.endDt ? new Date(data.endDt) : null,
-        },
-        pcImg: data.pcImg ? { ...data.pcImg, status: "R" } : null,
-        moImg: data.moImg ? { ...data.moImg, status: "R" } : null,
-      });
-    }
+    if (!data) return;
+    reset({
+      title: data.title ?? "",
+      isVisible: String(data.useYn ?? "Y"),
+      url: data.landingUrl ?? "",
+      period: {
+        startDate: data.startDt ? new Date(data.startDt) : null,
+        endDate: data.endDt ? new Date(data.endDt) : null,
+      },
+      pcImg: data.pcImg
+        ? normalizeImage({ ...data.pcImg, status: "R" }, "R")
+        : null,
+      moImg: data.moImg
+        ? normalizeImage({ ...data.moImg, status: "R" }, "R")
+        : null,
+    });
   }, [data, reset]);
 
-  const handleImageChange = (field, newFile) => {
-    const prevFile = getValues(field);
-    let status = "C"; // 기본값: 신규 등록
+  const handleImageChange = (field, incoming) => {
+    const prev = getValues(field);
 
-    if (prevFile && prevFile.id && newFile.id === prevFile.id) {
-      status = "R"; // 기존 이미지와 동일
-    } else if (prevFile && prevFile.id && newFile.id !== prevFile.id) {
-      status = "E"; // 기존 이미지에서 수정됨
+    // 상태 계산: 기존과 동일(R) / 변경(E) / 신규(C)
+    const status =
+      prev?.id && incoming?.id
+        ? incoming.id === prev.id
+          ? "R"
+          : "E"
+        : prev
+          ? "E"
+          : "C";
+
+    // ★ path 보장: 업로더가 url/filePath 등으로 줄 때도 path 생성
+    const normalized = normalizeImage({ ...incoming, status }, status);
+
+    if (!normalized?.path) {
+      alert(
+        "이미지 업로드가 완료되지 않았습니다. 업로드 완료 후 저장해주세요."
+      );
+      return;
     }
 
-    const updatedFile = {
-      ...newFile,
-      status,
-    };
-
-    setValue(field, updatedFile);
+    // RHF에 '정규화된 메타'를 저장 (value로도 그대로 사용 가능)
+    setValue(field, normalized, { shouldValidate: true });
   };
 
   useImperativeHandle(ref, () => ({
@@ -57,14 +99,23 @@ const PopupRegistForm = forwardRef(({ data, lang }, ref) => {
         onError?.("타이틀을 입력해주세요.");
         return null;
       }
-
       if (!values.period?.startDate || !values.period?.endDate) {
         onError?.("노출 기간을 선택해주세요.");
         return null;
       }
 
-      if (!values.pcImg || !values.moImg) {
-        onError?.("이미지를 등록해주세요.");
+      // ★ 혹시 이전 단계에서 path가 비었다면 한 번 더 정규화
+      const pc = values.pcImg?.path
+        ? values.pcImg
+        : normalizeImage(values.pcImg, values.pcImg?.status ?? "C");
+      const mo = values.moImg?.path
+        ? values.moImg
+        : normalizeImage(values.moImg, values.moImg?.status ?? "C");
+
+      if (!pc?.path || !mo?.path) {
+        onError?.(
+          "이미지 업로드가 완료되지 않았습니다. 업로드 완료 후 저장해주세요."
+        );
         return null;
       }
 
@@ -90,8 +141,8 @@ const PopupRegistForm = forwardRef(({ data, lang }, ref) => {
         endDt: formatDate(values.period.endDate),
         landingUrl: values.url,
         useYn: values.isVisible,
-        pcImg: toImageMeta(values.pcImg),
-        moImg: toImageMeta(values.moImg),
+        pcImg: toImageMeta(pc), // ← 정규화된 객체 기반
+        moImg: toImageMeta(mo),
       };
     },
   }));

@@ -60,7 +60,6 @@ export default function PopupDetail() {
     });
     if (!form) return;
 
-    // 현재 언어 데이터가 없는 경우 = "처음 등록" → insert
     const isNewLang = !currentData || Object.keys(currentData).length === 0;
 
     showModal({
@@ -75,13 +74,10 @@ export default function PopupDetail() {
             ? "/api/v1/popup/insert"
             : "/api/v1/popup/update";
 
-          // 서버가 기존 팝업 ID를 요구합니다.
-          // 대개 "id" 또는 "popupId"를 받습니다. 먼저 id로 시도하고,
-          // 서버가 popupId를 요구하면 키만 바꿔주세요.
           const payload = {
-            ...form, // PopupRegistForm에서 만든 페이로드(title, dates, images 등)
-            id, // 중요: 기존 팝업 식별자 (Number(id) 필요하면 감싸세요)
-            lang: langCode, // KO / EN (대문자)
+            ...form,
+            id,
+            lang: langCode,
           };
 
           await api.post(url, payload);
@@ -114,7 +110,7 @@ export default function PopupDetail() {
         defaultIndex={currentLang}
         onTabChange={(index) => {
           setCurrentLang(index);
-          // 탭 전환 시 URL도 동기화 (새로고침/공유 시 동일 화면 보장)
+
           setSearchParams({ lang: index === 1 ? "en" : "ko" });
         }}
       >
