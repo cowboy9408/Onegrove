@@ -798,6 +798,30 @@ src/pages/contents/whatson/press
 
 ---
 
+### LoginPage.jsx
+
+- 용도: **관리자 로그인** 화면(아이디/비밀번호 입력, 로그인, 비밀번호 찾기).
+- 입력 UX
+  - 아이디: 한글/영문/숫자만 허용, 공백 제거. **한글 조합 중(IMF/IME)**에는 필터 미적용 → 조합 종료 시 일괄 정제.
+  - 비밀번호: `type="password"`, 클리어 버튼 제공.
+- 로그인 처리
+  - `getUserInfo(username, password)` 호출 성공 시  
+    `accessToken/refreshToken` 상태(zustand) & `localStorage` 저장, `name/companyId` 상태 저장 → `/` 이동.
+  - 실패 시 모달로 에러 표시(`extractErrorMessage`).
+- 세션 초기화
+  - 마운트 시 기존 `accessToken`, `refreshToken`, `auth-storage` **제거**(강제 로그아웃/깨끗한 시작).
+- 보안/토큰
+  - `jwtDecode`로 토큰 디버그(콘솔). 실제 화면 표시 없음.
+  - 토큰은 zustand(`useAuthStore`)와 `localStorage`에 동시 보관.
+- 보조 기능
+  - **아이디 저장** 체크박스 UI만 존재(현재 코드상 _실제 저장/자동 입력은 미구현_).
+  - **비밀번호 찾기**: 모달 오픈(`PasswordResetModal`).
+- 레이아웃/스타일
+  - 중앙 정렬 단일 카드, 상단 로고(`/img/ONE GROVE.png`).
+  - 공통 컴포넌트: `Input`, `Button`, `Checkbox`, `useModal`.
+
+---
+
 ### Meeting.jsx
 
 - 용도: **일반 회의실** 예약 캘린더(가예약/확정 표시, 상세·수정·취소).
