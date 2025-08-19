@@ -458,67 +458,76 @@ src/pages/admin/adminpage
 
 ## 컴포넌트 상세 설명
 
+---
+
 ### AdminLayout.jsx
 
-- 용도: 하위 라우트 감싸는 레이아웃
-- 동작: 내부 <Outlet /> 렌더
+- 용도: 관리자 영역 공통 레이아웃. `Outlet` 렌더.
 
 ---
 
 ### AdminListPage.jsx
 
-- 용도: 관리자 목록/검색/삭제/페이징.
-- 필터: 관리자 유형/이름/아이디/사용여부.
-- 액션: 상세 이동(/admin/detail/:id), 등록 이동(/admin/list/regist), 선택 삭제.
-- API: GET /api/v1/user/admin?isManager=N, POST /api/v1/user/admin/delete.
+- 용도: **일반/콘텐츠/오피스 관리자** 목록/검색/삭제/등록 이동.
+- 데이터: `GET /api/v1/user/admin?isManager=N` → 최신 등록순 정렬 → 30개/페이지.
+- 검색 필터: 관리자 유형(셀렉트), 이름, 아이디, 사용 여부(사용/미사용). Enter 검색 및 URL 쿼리 동기화.
+- 액션: **등록**(`/admin/list/regist`), **삭제**(선택 id 배열 전달 → `/user/admin/delete`).
+- 표 컬럼: 번호, 유형, 이름, 아이디, 이메일, 사용 여부, 등록일시 등.
 
 ---
 
 ### AdminRegist.jsx
 
-- 용도: 관리자 신규 등록.
-- 기본값: role=NORMAL_ADMIN, status=active, gender=male.
-- 유효성: 아이디(영소문자·숫자 최대 16자), 이메일 형식, 비밀번호 일치, 휴대폰 010- 뒤 8자리.
-- 액션: 등록 → /admin/list, 목록 이동 시 확인 모달.
-- API: POST /api/v1/user/admin/insert.
+- 용도: **관리자 계정 등록**(NORMAL/CONTENTS/OFFICE).
+- 입력: 이름/성별, 아이디(영소문자·숫자 4~16), 비밀번호·확인, 전화(010- + 8자리), 이메일, 사용 여부.
+- 검증: 아이디/비밀번호 일치, 전화 8자리, 이메일 형식 등 모달 안내.
+- 전송: `POST /api/v1/user/admin/insert` (payload에 `role`, `isUse`, `isManager:"N"`, `isReservation:"Y"` 포함) → 성공 시 목록으로 이동.
 
 ---
 
 ### AdminDetailPage.jsx
 
-- 용도: 관리자 상세/수정/잠금해제/임시비밀번호.
-- 조회: GET /api/v1/user/admin/:id (아이디 수정 불가).
-- 액션: 수정 POST /api/v1/user/admin/update, 잠금 해제 /api/v1/user/unlock, 임시 비밀번호 /api/v1/user/temp-password.
-- 표시: 유형/사용여부/성별/이름/연락처/이메일/잠금상태.
+- 용도: **관리자 상세/수정**.
+- 조회: `GET /api/v1/user/admin/{id}` → 폼 패치(이름, 성별, 아이디, 전화, 이메일, 사용 여부).
+- 기능:
+  - **수정**: 검증 후 `POST /api/v1/user/admin/update` (`isManager:"N"` 등 포함).
+  - **계정 잠금 해제** 버튼(잠금 상태일 때만): `POST /api/v1/user/unlock`.
+  - **임시 비밀번호 발급**: `POST /api/v1/user/temp-password`.
+- 전화 UX: 입력은 8자리만 허용, 저장 시 `010-####-####`로 포맷.
 
 ---
 
 ### AffairListPage.jsx
 
-- 용도: 입주사 총무팀 목록/검색/삭제/페이징.
-- 준비: GET /api/v1/user/company로 회사 목록 로드(중복 companyId 제거) → 셀렉트 옵션.
-- 필터: 입주사/이름/아이디/사용여부.
-- 액션: 상세 이동(/admin/affair/detail/:id), 등록 이동(/admin/affair/regist), 선택 삭제.
-- API: GET /api/v1/user/admin?isManager=Y, POST /api/v1/user/admin/delete.
+- 용도: **입주사 총무팀(OFFICE_SECRETARY_ADMIN)** 목록/검색/삭제/등록 이동.
+- 입주사 옵션: `GET /api/v1/user/company` 로드 → **중복 companyId 제거** 후 셀렉트 구성.
+- 데이터: `GET /api/v1/user/admin?isManager=Y` → 최신 등록순 정렬 → 30개/페이지.
+- 검색 필터: 입주사, 이름, 아이디, 사용 여부(사용/미사용). Enter 검색 및 URL 쿼리 동기화.
+- 액션: **등록**(`/admin/affair/regist`), **삭제**(`/user/admin/delete`).
+- 표 컬럼: 번호, 입주사, 유형, 이름, 아이디, 이메일, 사용 여부, 등록일 등.
 
 ---
 
 ### AffairRegist.jsx
 
-- 용도: 입주사 총무팀 신규 등록.
-- 기본값: role=OFFICE_SECRETARY_ADMIN, status=active, isManager=Y, isReservation(Y/N), companyId 필수.
-- 유효성: 이름(최대 10자), 아이디(영소문자·숫자 최대 16자), 휴대폰 8자리, 이메일 형식, 비밀번호 일치.
-- 액션: 등록 → /admin/affair, 목록 이동 시 확인 모달.
-- API: GET /api/v1/user/company, POST /api/v1/user/admin/insert.
+- 용도: **입주사 총무팀 계정 등록**(role 고정: `OFFICE_SECRETARY_ADMIN`).
+- 입력: 입주사(필수), 이름/성별, 아이디(영소문자·숫자 4~16), 비밀번호·확인, 전화(010- + 8자리), 이메일, 사용 여부, 어메니티 예약 가능(Y/N).
+- 검증: 필수값·아이디 규칙·전화 8자리·이메일 형식·비밀번호 일치.
+- 전송: `POST /api/v1/user/admin/insert` (payload에 `companyId`, `isManager:"Y"`, `isReservation` 포함) → 성공 시 총무 목록으로 이동.
 
 ---
 
 ### AffairDetailPage.jsx
 
-- 용도: 입주사 총무팀 상세/수정/잠금해제/임시비밀번호.
-- 조회: GET /api/v1/user/admin/:id + 회사 목록(GET /api/v1/user/company), 아이디 수정 불가.
-- 액션: 수정 POST /api/v1/user/admin/update, 잠금 해제 /api/v1/user/unlock, 임시 비밀번호 /api/v1/user/temp-password.
-- 표시: 입주사/사용여부/성별/연락처/이메일/예약기능(Y/N)/잠금상태.
+- 용도: **입주사 총무팀 상세/수정**.
+- 조회:
+  - 상세: `GET /api/v1/user/admin/{id}` → 폼 패치(입주사, 이름, 성별, 아이디, 전화, 이메일, 사용 여부, 예약 가능 여부).
+  - 입주사 목록: `GET /api/v1/user/company` → **중복 제거** 후 셀렉트 구성.
+- 기능:
+  - **수정**: 검증 후 `POST /api/v1/user/admin/update` (`isManager:"Y"`, `isReservation` 포함).
+  - **계정 잠금 해제**: `POST /api/v1/user/unlock` (해제 시 안내 모달).
+  - **임시 비밀번호 발급**(버튼 존재 가능, 구현 위치에 따라 상세는 코드 참고).
+- 전화 UX: 입력 8자리 제한, 저장 시 `010-####-####` 포맷.
 
 ---
 
