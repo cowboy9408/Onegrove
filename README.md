@@ -577,7 +577,7 @@ src/pages/banner
 - 저장: `ref.submit(onError)` → `POST /api/v1/banner/insert|update`(id 유무로 분기) → 성공 후 **재조회**.
 - UI: 상단 탭, 우측 하단 정렬 저장 버튼.
 
-※ 나머지 메뉴의 배너 영역은 메뉴별로 각각 관리되고있으나, 컴포넌트 구조는 메뉴 코드 제외 동일합니다.
+※ 나머지 메뉴의 배너 영역은 메뉴별로 각각 관리되고있으나, 컴포넌트 구조는 메뉴 코드를 제외하면 동일합니다.
 
 ---
 
@@ -791,6 +791,91 @@ src/pages/contents/whatson/press
   - `submit(onError) → { id?, lang, category, title, thumbImgPc, thumbImgMo, showYn, content, publishDate } | null`
   - `setValue(key, value)`(에디터 포함 값 패치).
 - 업로드 가이드: PC/MO 썸네일 **416×280px, 20MB 이하, JPG/JPEG/PNG 1개**.
+
+---
+
+# 그 외 주요 컴포넌트 설명
+
+---
+
+### Meeting.jsx
+
+- 용도: **일반 회의실** 예약 캘린더(가예약/확정 표시, 상세·수정·취소).
+- 오피스/회의실 선택: `/meeting/location-list`, `/meeting/room-list?isVip=N&location=...` 로드 후 첫 방 자동 선택.
+- 설정/수용인원: `/meeting/setting?isVip=N` 기반으로 방별 `capacity` 매핑(useMemo).
+- 일정 로딩: `/meeting?roomId={id}&isVip=N&lang=ko` → `CommonCalendar`에 이벤트 표시.
+- 권한 처리: `OFFICE_SECRETARY_ADMIN`은 **본인 예약만 상세정보** 노출/클릭 가능.
+- 상세 모달: 예약 종류/일정/상태/사용자·예약자 정보 테이블, **확정/취소/수정** 버튼(유·무료/예약일 임박 여부에 따른 제한 로직).
+- 신규 예약: “예약하기” → `ReservationForm` 모달(초기값 전달, 저장 시 재조회).
+- 경로 : src/pages/office/meeting/Meeting.jsx
+
+---
+
+### Viproom.jsx
+
+- 용도: **Executive(VIP) 회의실** 예약 캘린더. 전체 흐름은 `Meeting.jsx`와 동일하되 `isVip=Y`, 용어만 Executive로 표기.
+- 차이점
+  - API: `/meeting/setting?isVip=Y`, `/meeting/room-list?isVip=Y&location=...`, `/meeting?roomId=...&isVip=Y`.
+  - 기본 `capacity` 예외값 4, 모달 키/상태 유지를 위한 `currentStateRef`/고유 `modalKey` 사용.
+  - 상세 모달 타이틀/버튼 라벨: “Executive Room …”.
+  - 경로 : src/pages/office/viproom/Viproom.jsx
+
+---
+
+### ReserveHistory.jsx
+
+- 용도: **회의실 예약 이력** 조회/검색/엑셀 다운로드 화면.
+- 검색 필터: **Meeting Room**(이력에서 고유값 생성), **입주사**(GET `/api/v1/meeting/office-list?lang=ko`), **예약 종류**(전체/무료/유료), **예약 일정**(기간), **예약 상태**(전체/가예약/예약 확정/예약 취소).
+- 데이터 로딩: **이력** `GET /api/v1/meeting/history` → 상태에 저장 후 **클라이언트 필터링** 적용.
+- 목록 & 페이징: `DataTableSimple`로 표 렌더, **30개/페이지**(`Pagination`).
+- 표 컬럼: 번호, 회의실, 입주사, 결제 유형, 예약 일정, **누적 무료 시간**, **누적 유료 시간**, 예약 상태, 실제 예약자, 연락처, 이메일, 등록일시, 등록자.
+- 엑셀 다운로드: 필터 결과가 있을 때 **POST** `/api/v1/meeting/history-excel`(body: 현재 필터 결과) → **xlsx Blob** 저장(파일명: `회의실_예약_이력_YYYY-MM-DD-HH-MM-SS.xlsx`).
+- 날짜 필터 로직: `resvDatetime`의 **시작 시각**만 파싱 후 일 단위로 정규화해 범위 비교.
+- URL 동기화: `page`를 쿼리스트링으로 유지/초기화, **초기화 버튼**으로 필터 기본값 복원.
+- 기타: `activeFilter` 변경 시 이력/입주사 목록 재조회, Meeting Room 드롭다운은 **이력 데이터의 고유 회의실명**으로 구성.
+- 경로 : src/pages/office/ReserveHistory.jsx
+
+---
+
+### SleepReserve.jsx
+
+- 용도: **Relax Room(수면실)** 시간대별 예약/상세/수정.
+- 방 선택/상세: `/sleep/reserve/list/room`(목록), `/sleep/room/detail/{roomId}`(시간대/성별/침대 정보).
+- 슬롯 생성: 시작~종료에서 **60분 간격 슬롯**, 각 슬롯 이용시간 **50분**(예: 10:00~10:50).
+- 예약 현황: `/sleep/reserve/list/count`(슬롯별 카운트) + 슬롯 펼치기 시 `/sleep/reserve/list/detail`(개별 침대 예약내역).
+- 수용 인원: `infoList.useYn==="Y"` 개수 기반, 성별에 따라 M=8 / W=7 / 기타=7로 상한.
+- 날짜 이동: 오늘 기준 **지난 8일~오늘** 범위 내에서만 이전/다음 이동 가능.
+- 모달
+  - “예약하기”: `SleepReservationForm`(저장 후 카운트/상세 재로드)
+  - 예약 클릭: `SleepReservationDetail`(수정/취소 후 목록 재로드)
+- 경로 : src/pages/office/sleep/SleepReserve.jsx
+
+---
+
+### Visit.jsx
+
+- 용도: **방문 예약** 목록/검색/대량 확정/단건 상세·수정·등록.
+- 카테고리 로드: `/visit/category` → 입주사/상태/방문동 옵션 일괄 세팅.
+- 검색 필터: 입주사/상태/방문 신청일(기간)/방문동/카드번호(3자리↑)/방문객명 → URL 쿼리(`page, companyId, …`)와 동기화.
+- 목록/정렬: 클라이언트 필터 후 정렬(기준 컬럼 asc/desc, 동률 시 등록일시 보조정렬), 페이지 사이즈 30.
+- 상세 모달: `/visit/detail/{id}` → 예약일시/상태/방문일·시간/입주사/방문동/목적/연락처/카드번호 표시 + **확정/취소/수정**.
+- 대량 확정: 체크 선택 후 **가예약만** `/visit/confirm` 호출.
+- 등록/수정: `VisitForm` 모달로 입력/검증 → 저장 후 재조회.
+- 경로 : src/pages/office/visit/Visit.jsx
+
+---
+
+### src/pages/submain/work/component/CompanyList.jsx
+
+- 용도: **Work 입주사 리스트** 관리(선택/정렬/삭제표시). 드래그앤드롭으로 노출 순서 지정.
+- 선택 관리: `CompanySelectModal`로 선택 확정 시
+  - 기존 목록과 신규 선택을 **companyId 기준 병합**.
+  - 해제 항목은 `delYn:"Y"`로 표시(보존), 유지/신규는 `delYn:"N"`.
+- 정렬/제한: `delYn!=="Y"` 항목만 **1~N 문자열 sort** 재부여, 화면엔 **최대 20개** 노출.
+- DnD: `@hello-pangea/dnd`로 순서 변경 → 변경 즉시 sort 재계산.
+- 삭제 버튼: 개별 항목 `delYn:"Y"` 마킹(리스트에선 숨김, 데이터는 유지).
+
+---
 
 ## 참고
 
