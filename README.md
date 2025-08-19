@@ -316,123 +316,99 @@ components/modal/
 └─ VisitForm.jsx
 ```
 
-## 컴포넌트 상세 설명
+## 컴포넌트 설명
+
+---
 
 ### BrandList.jsx
 
-- 용도: 이벤트/프로모션 아이템 등록에서 브랜드를 하나만 선택하는 리스트.
-- 주요 데이터
-- 카테고리: /api/v1/event-promotion/item/category 로딩.
-- 브랜드 목록(언어별): /api/v1/event-promotion/item/brand?lang=... 로딩 및 가공.
-- 필터/검색: 카테고리+키워드 노멀라이즈 후 필터링.
-- 선택 정책: 체크가 2개 이상이 되면 경고 모달로 단일 선택만 허용.
-- 주요 Props: selected, onConfirm, closeModal, lang="ko".
+- 용도: **이벤트·프로모션용 브랜드 선택 모달**(다중 선택).
+- 검색/필터: 대표 카테고리(`GET /api/v1/event-promotion/item/category`) + 브랜드명 키워드.
+- 데이터: `GET /api/v1/event-promotion/item/brand?lang=ko|en` → 테이블 표시(카테고리/브랜드명).
+- 선택: 체크박스 다중 선택 → `onConfirm(checkedIds)`로 반환, 초기값은 `selected` 반영.
 
 ---
 
 ### MainBrandList.jsx
 
-- 용도: 메인 페이지 노출용 브랜드를 여러 개 선택. 컴포넌트명은 BrandList로 export 됩니다(파일명만 MainBrandList).
-- 초기 체크 값: 외부 selected를 문자열 배열로 세팅.
-- 선택 제한: 최대 20개 초과 시 경고 모달 표출.
-- 주요 Props: selected, onConfirm, closeModal.
+- 용도: **메인 노출용 브랜드 선택 모달**(다중 선택).
+- 검색/필터: 대표 카테고리(`GET /api/v1/brand/category`) + 브랜드명.
+- 데이터: `GET /api/v1/main/brand/list?lang=KO` → 테이블 표시(카테고리/브랜드명).
+- 선택: 체크박스 다중 선택, 초기값 `selected` 동기화 및 `초기화` 버튼 제공.
 
 ---
 
 ### WhatsOnList.jsx
 
-- 용도: 메인 ‘What’s On’ 콘텐츠 1건 선택.
-- 주요 데이터
-- 카테고리: /api/v1/main/content/category 로딩.
-- 콘텐츠 목록: /api/v1/main/content/list?lang=KO 로딩 후 테이블용 매핑.
-- 필터/검색: 카테고리/키워드 노멀라이즈 후 필터링.
-- 선택 정책: 체크 시 해당 ID만 유지(단일 선택).
-- 주요 Props: selected, onConfirm, closeModal.
+- 용도: **What’s On 콘텐츠 선택 모달**(단일 선택).
+- 검색/필터: 메뉴 카테고리(`GET /api/v1/main/content/category`) + 타이틀.
+- 데이터: `GET /api/v1/main/content/list?lang=KO` → 테이블(메뉴/타이틀/기간/사용여부).
+- 선택: 체크 시 **단일 선택**으로 고정, 초기화/검색 제공.
 
 ---
 
 ### CompanySelectModal.jsx
 
-- 용도: 입주사(회사) 다중 선택 후 상위 폼에 반영.
-- 데이터 소스: /api/v1/work/companyList?lang=KO 로 입주사 목록 로딩 및 매핑.
-- 체크/선택: DataTable 체크박스 선택 상태를 checked로 관리.
-- 확정 동작: 기존 selected를 유지하지 않고 체크된 항목만으로 덮어씀.
-- 주요 Props: selected, onConfirm, closeModal.
-
----
-
-### UserDetailModal.jsx
-
-- 용도: 회사 기본정보와 월 무료/유료 어메니티 사용시간 조회 표시.
-- 사용시간 조회: companyId 기준 무료/유료 시간을 병렬 조회.
-- /api/v1/company/detail/time?companyId=<id>&type=free|paid 사용.
-- 표시 항목: 회사명/사용여부/오피스/층/대표명/연락처/이메일 등 읽기전용 필드.
-- 대표 이미지/총무 담당자 목록도 지원.
-- 주요 Props: userData.
+- 용도: **입주사 선택 모달**(다중 선택).
+- 데이터: `GET /api/v1/work/companyList?lang=KO` → 테이블(입주사명).
+- 동작: 검색/초기화 제공, `추가` 시 체크 항목으로 **선택 목록을 새로 구성**하여 `onConfirm` 전달.
 
 ---
 
 ### PasswordResetModal.jsx
 
-- 용도: 이메일 입력 → 임시 비밀번호 발급 요청.
-- 검증/요청: 이메일 정규식 검증 후 /api/v1/user/find-password POST.
-- 확인 버튼/닫기: 성공 시 안내 후 closeModal() 호출.
-- 주요 Props: closeModal.
-
----
-
-### ReservationForm.jsx
-
-- 용도: 회의실/일정/인원/결제유형/실사용자 정보 등을 입력해서 예약 생성/수정.
-- 핵심 상태/Props: 장소/룸 옵션, 기존 예약, 수정 여부, VIP 여부 등.
-- VIP 제한: VIP일 경우 표시/최대 수용 인원 4명, 기본 64명.
-- 룸 변경 시 처리: 룸 변경 후 현재 선택된 시간이 유효하지 않으면 자동 보정.
-- 예약 데이터 변화 시 재검증: 사용 불가 시간이면 사용 가능한 첫 시간으로 자동 이동.
-- 시간 옵션 생성: generateTimeOptions(9, 17) 등으로 정시 슬롯 구성.
-- UI 예: Meeting Room 셀렉트 변경 시 예약 데이터 재조회 및 시간 보정.
-- 초기값 세팅/포맷팅: 기존 전화번호가 010- 형식이 아니면 포맷팅.
-
----
-
-### SleepReservationForm.jsx
-
-- 용도: Relax Room, 좌석(호실), 날짜/시간, 회사/사용자 선택 후 저장/수정/삭제.
-- 함수 시그니처/Props: room, roomList, initialData, isEdit, onSubmit, closeModal.
-- 좌석/시간 충돌 방지
-- 선택 좌석/시간이 이미 예약된 경우 옵션 비활성화.
-- 특정 시간에 좌석 예약 여부 판단 로직 제공.
-- 데이터 로딩
-- 룸 상세/입주사/사용자 목록 API 로딩.
-- 날짜별 전체 예약 스캔 후 상태에 반영.
-- 검증 및 제출/삭제
-- 필수값 검증 후 /api/v1/sleep/reserve/insert|update POST.
-- 삭제 시 확인 및 API 호출.
-- 주요 UI: 룸/좌석/일정/회사/아이디 선택 및 저장/수정/삭제 버튼.
+- 용도: **비밀번호 찾기** 모달.
+- 검증: 이메일 형식 확인(미입력/오형식 안내).
+- 전송: `POST /api/v1/user/find-password` 성공 시 발송 안내 후 닫기.
 
 ---
 
 ### SleepReservationDetail.jsx
 
-- 용도: 상세 조회 + 수정 폼 호출 + 삭제.
-- 상세 조회: reservationId로 상세 조회 후, 같은 시간대/룸의 사용자 이름 별도 조회.
-- 표시 항목: 룸/호실/예약시간 등 상세 정보.
-- 시간 표현: 시작시간 + 50분을 종료로 계산해 범위를 표기.
-- 수정/삭제: 내부에서 SleepReservationForm 모달로 열어 수정, 삭제 API 지원.
-- 하단에 수정/삭제 버튼 노출.
+- 용도: **수면실 예약 상세/수정/삭제** 모달.
+- 조회: `GET /api/v1/sleep/reserve/detail/{id}` → 상세 표시, **동시간대 목록 조회**로 예약자명 보정(`GET /sleep/reserve/list/detail`).
+- 기능: **수정**(내부에서 `SleepReservationForm` 오픈) / **삭제**(`DELETE /sleep/reserve/delete/{id}`).
+- 표시: 시간대는 `시작~(시작+50분)` 형태로 가공 출력.
+
+---
+
+### SleepReservationForm.jsx
+
+- 용도: **수면실(Relax Room) 예약 등록/수정** 폼.
+- 주요 필드: 수면실/호실, 입주사/사용자, 날짜, 시작시간(09~17시), 종료시간(자동 1시간), 메모.
+- 중복 방지: 선택된 호실·시간에 **기예약 존재 시 비활성화**(표시에 “(예약됨)”).
+- 데이터 로딩: 방 상세(`GET /sleep/room/detail/{roomId}`), 입주사/사용자 목록, **해당 날짜 09~17시 전체 슬롯의 예약 현황**을 루프 호출해 캐시.
+- 수정 모드: 기존 `roomNumberId/시간/회사/사용자` 등을 로드해 초기값 세팅.
+
+---
+
+### ReservationForm.jsx
+
+- 용도: **회의실(일반/VIP) 예약 등록/수정** 폼.
+- 주요 필드: 오피스/회의실, 결제유형(무료/유료), 날짜/시작/종료, 내용, 예약자 이름/연락처/이메일, 인원수, 비고.
+- 방/용량: 오피스 변경 시 **룸 옵션 재로딩 + 수용인원(capacity) 반영**, 선택한 시간 가용성 검사.
+- 일정 검증: 선택 시간이 점유되면 **가장 이른 가용 시간**으로 자동 보정, 종료시간도 자동 제안(+1h, 충돌 회피).
+- 전송: `POST /api/v1/meeting/{insert|update}`; 특정 오류 메시지(수정불가/등록불가/3일 전 변경불가)별 안내 처리.
 
 ---
 
 ### VisitForm.jsx
 
-- 용도: 방문 날짜/시간/건물/입주사/방문자 정보 입력, 추가 방문자 관리.
-- 방문 인원 범위: 1~10명만 허용.
-- 전화번호 UX: 입력값을 자동으로 010-XXXX-XXXX 형식으로 포맷팅(백스페이스/비정상 입력 처리 포함).
-- 기존 값이 있을 때도 초기 포맷 보정.
-- 시간 선택: 09:00~18:00 범위에서, 예약 불가 시간은 (불가)로 비활성화.
-- 추가 방문자: 이름/이메일/연락처/카드번호 입력, 불완전한 항목은 제외하여 memberList 구성.
-- payload & 전송: visitNumber를 memberList.length와 맞춰 전송, insert/update 분기.
-- 필수 검증: 이메일 형식/전화번호 길이/방문 인원 범위 등.
-- 하단 고정 버튼: 저장 버튼을 아래 고정(sticky)하여 접근성 개선.
+- 용도: **방문 예약 등록/수정** 폼 + **추가 방문자 관리**.
+- 방문 인원: **1~10명** 허용, 대표 1명 + 추가 방문자(N-1) 자동 제어.
+- 전화번호 UX: 입력을 항상 `010-XXXX-XXXX`로 **자동 포맷팅**(백스페이스/비정상 입력/초기값 보정 포함).
+- 한글 IME: 이름/이메일 입력 시 **조합 중에는 필터 미적용**, 조합 종료 후 정제.
+- 건물/입주사: 건물 리스트(`GET /api/v1/visit/building-list`), 입주사(`GET /api/v1/sleep/reserve/company`), 총무 권한은 **자사만 노출**.
+- 추가 방문자: 이름/이메일/연락처/카드번호, **불완전 항목은 제외**하여 `memberList` 구성.
+- 전송/검증: `visitNumber`는 `memberList.length`와 **동일**하게 보내며(서버 요구), 이메일 형식/전화 길이/필수값 검증 후 `insert|update` 분기.
+
+---
+
+### UserDetailModal.jsx
+
+- 용도: **입주사 상세 정보 뷰어**(읽기 전용).
+- 표시: 사용 여부(라디오, 비활성), 오피스/층, 대표명/전화/이메일, 대표 이미지, 총무 담당자 리스트.
+- 월별 어메니티 시간: **무료/유료** 사용시간을 동시 조회하여 상단 지표로 표시.
 
 ---
 
