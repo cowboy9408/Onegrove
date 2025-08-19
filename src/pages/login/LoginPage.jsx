@@ -29,7 +29,9 @@ export default function LoginPage() {
       setUsername(value.trim());
     } else {
       // 조합이 끝난 후에만 필터 적용
-      setUsername(value.replace(/[^가-힣a-zA-Z0-9\s]/g, "")).replace(/\s/g, "").trim();
+      setUsername(value.replace(/[^가-힣a-zA-Z0-9\s]/g, ""))
+        .replace(/\s/g, "")
+        .trim();
     }
   };
 
@@ -90,7 +92,12 @@ export default function LoginPage() {
             onCompositionEnd={(e) => {
               setIsComposing(false);
               // 조합 끝난 값도 정제
-              setUsername(e.target.value.replace(/[^가-힣a-zA-Z0-9\s]/g, "").replace(/\s/g, "").trim())
+              setUsername(
+                e.target.value
+                  .replace(/[^가-힣a-zA-Z0-9\s]/g, "")
+                  .replace(/\s/g, "")
+                  .trim()
+              );
             }}
           />
           <Input

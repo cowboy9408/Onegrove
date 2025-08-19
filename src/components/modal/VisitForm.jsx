@@ -702,9 +702,7 @@ export default function VisitForm({
 
           <div className="flex w-full gap-4">
             <div className="w-full">
-              <label className="mb-1 block">
-                방문자명 <span className="text-red-500">*</span>
-              </label>
+              <label className="mb-1 block">방문자명</label>
               <input
                 value={v.name}
                 maxLength={50}
@@ -718,9 +716,7 @@ export default function VisitForm({
             </div>
 
             <div className="w-full">
-              <label className="mb-1 block">
-                방문자 이메일 <span className="text-red-500">*</span>
-              </label>
+              <label className="mb-1 block">방문자 이메일</label>
               <input
                 value={v.email}
                 maxLength={50}
@@ -734,9 +730,7 @@ export default function VisitForm({
             </div>
 
             <div className="w-full">
-              <label className="mb-1 block">
-                방문자 연락처 <span className="text-red-500">*</span>
-              </label>
+              <label className="mb-1 block">방문자 연락처</label>
               <input
                 value={v.tel}
                 maxLength={13}

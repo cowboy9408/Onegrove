@@ -99,7 +99,7 @@ const EventRegistForm = forwardRef(
 
     useEffect(() => {
       if (data?.brandId) {
-        setValue("brandId", data.brandId); // ← 이 줄을 새로 추가합니다!
+        setValue("brandId", data.brandId);
       }
     }, [data?.brandId]);
 

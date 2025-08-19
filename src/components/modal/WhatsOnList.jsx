@@ -106,7 +106,7 @@ export default function WhatsOnList({ selected, onConfirm, closeModal }) {
             </Col>
             <Col>
               <Input
-                label="타이틀"
+                placeholder="타이틀을 입력해 주세요."
                 topLabel={false}
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
