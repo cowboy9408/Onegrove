@@ -25,7 +25,7 @@ export default function BrandList({ selected = [], onConfirm, closeModal }) {
   useEffect(() => {
     if (items.length > 0) {
       setFilteredItems(items); // 처음 필터 설정
-      setChecked(selected.map(String)); // ensure reset even after brand load
+      setChecked(selected.map(String));
     }
   }, [items]);
 
@@ -109,7 +109,7 @@ export default function BrandList({ selected = [], onConfirm, closeModal }) {
             </Col>
             <Col>
               <Input
-                label="브랜드명"
+                placeholder="브랜드를 입력해 주세요."
                 topLabel={false}
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
