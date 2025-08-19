@@ -304,16 +304,16 @@ showmodal을 통해 사용되며, 위에 설명한 공통 UI를 포함하고 있
 
 ```bash
 components/modal/
-├─ BrandList.jsx # 이벤트/프로모션 상품용 '브랜드' 단일 선택 리스트
-├─ MainBrandList.jsx # 메인 화면용 '브랜드' 다중 선택 리스트(최대 20개)
-├─ WhatsOnList.jsx # What's On(메인 콘텐츠) 단일 선택 리스트
-├─ CompanySelectModal.jsx # 입주사 다중 선택 모달
-├─ UserDetailModal.jsx # 입주사(회사) 상세 정보 조회 모달(읽기 전용)
-├─ PasswordResetModal.jsx # 비밀번호 찾기(임시 비밀번호 발송) 모달
-├─ ReservationForm.jsx # 회의실 예약 폼
-├─ SleepReservationForm.jsx # 수면실 예약 폼
-├─ SleepReservationDetail.jsx # 수면실 예약 상세/수정/삭제 모달
-└─ VisitForm.jsx # 방문 예약 폼(추가 방문자 관리 포함)
+├─ BrandList.jsx
+├─ MainBrandList.jsx
+├─ WhatsOnList.jsx
+├─ CompanySelectModal.jsx
+├─ UserDetailModal.jsx
+├─ PasswordResetModal.jsx
+├─ ReservationForm.jsx
+├─ SleepReservationForm.jsx
+├─ SleepReservationDetail.jsx
+└─ VisitForm.jsx
 ```
 
 ## 컴포넌트 상세 설명
@@ -447,13 +447,13 @@ components/modal/
 
 ```bash
 src/pages/admin/adminpage
-├─ AdminLayout.jsx # 하위 라우트를 감싸는 레이아웃
-├─ AdminListPage.jsx # 관리자 목록/검색/삭제/페이징
-├─ AdminRegist.jsx # 관리자 신규 등록(유효성 검사 포함)
-├─ AdminDetailPage.jsx # 관리자 상세/수정/잠금 해제/임시비밀번호 발급
-├─ AffairListPage.jsx # 입주사 총무팀 목록/검색/삭제/페이징
-├─ AffairRegist.jsx # 입주사 총무팀 신규 등록(입주사 선택/유효성)
-└─ AffairDetailPage.jsx # 입주사 총무팀 상세/수정/잠금 해제/임시비밀번호
+├─ AdminLayout.jsx
+├─ AdminListPage.jsx
+├─ AdminRegist.jsx
+├─ AdminDetailPage.jsx
+├─ AffairListPage.jsx
+├─ AffairRegist.jsx
+└─ AffairDetailPage.jsx
 ```
 
 ## 컴포넌트 상세 설명
@@ -798,7 +798,7 @@ src/pages/contents/whatson/press
 
 ---
 
-### LoginPage.jsx
+### src/pages/login/LoginPage.jsx
 
 - 용도: **관리자 로그인** 화면(아이디/비밀번호 입력, 로그인, 비밀번호 찾기).
 - 입력 UX
@@ -819,6 +819,76 @@ src/pages/contents/whatson/press
 - 레이아웃/스타일
   - 중앙 정렬 단일 카드, 상단 로고(`/img/ONE GROVE.png`).
   - 공통 컴포넌트: `Input`, `Button`, `Checkbox`, `useModal`.
+
+---
+
+### src/lib/apiClient.js
+
+- 용도: **Axios 인스턴스** 구성 + 토큰 자동첨부 + 로딩 상태 처리 + **401 자동 리프레시**.
+- 동작
+  - `baseURL = import.meta.env.VITE_API_BASE_URL`로 생성, `withCredentials:true`.
+  - 요청 인터셉터: `localStorage.accessToken` → `Authorization: Bearer ...`, `useLoadingStore.startLoading()`.
+  - 응답 인터셉터: 성공/에러 모두 `endLoading()` 보장.
+  - **401 처리(리프레시)**: `/api/v1/auth/refresh` 호출 → 새 `accessToken`을 `useAuthStore.setAccessToken` + `localStorage` 저장 후 원 요청 재시도.
+  - 리프레시 실패 시: 토큰/스토리지 정리(주석으로 로그인 리다이렉트 옵션).
+
+---
+
+### src/lib/utils.js
+
+- 용도: **UI/업무 공통 유틸** 모음.
+- 포함 함수
+  - `cn(...inputs)`: `clsx` + `tailwind-merge`로 클래스 안전 병합.
+  - `isWeekend(date)`: 토/일 판별.
+  - `isHoliday(date)`: 간단 공휴일(1/1, 3/1, 5/5, 8/15, 10/3, 12/25) 판별.
+  - `getBusinessDaysDiff(from, to)`: 주말/공휴일 제외 **영업일 수** 계산.
+  - `extractErrorMessage(error, defaultMsg)`: `"400 BAD_REQUEST \"실제메시지\""` 포맷 등에서 **가독성 있는 에러문구** 추출.
+  - `extractSuccessMessage(response, defaultMsg)`: 성공 메시지 안전 추출.
+
+---
+
+### src/layouts/AuthLayout.jsx
+
+- 용도: **인증 보호 레이아웃**(사이드바/헤더/푸터 + 권한 검사).
+- 인증 흐름
+  - 쿠키 `ACCESS_TOKEN` 존재 여부로 1차 검사 → 없으면 토큰/스토리지 정리 후 `/login` 이동.
+  - 스토어에 `accessToken` 없으면 **쿠키 토큰으로 보강**.
+  - 라우트 메타에서 `permissions` 확인 → 불일치 시 로그아웃 후 `/login`.
+- UI: 사이드바 확장/축소, 모바일 토글 버튼, `Outlet` 영역에 페이지 출력.
+
+---
+
+### src/routes/index.jsx
+
+- 용도: **라우트 메타(routeMeta)** 정의 + 접근권한 + 사이드바 데이터 + 매칭/빌드 유틸.
+- 주요 항목
+  - `routeMeta`: 레이아웃/페이지/아이콘/권한/숨김 여부를 포함한 트리.
+  - `buildRoutes()`: `routeMeta` → React Router Routes로 변환.
+  - `extractSidebarItems(items, role)`: 권한/hidden 반영해 **사이드바 메뉴** 생성.
+  - `findMatchingRoute(pathname)`: 현재 경로에 매칭되는 라우트 메타 검색.
+
+---
+
+### src/api/user.js
+
+- 용도: **인증 API** 래퍼.
+- `getUserInfo(username, password)`
+  - `POST {VITE_API_BASE_URL}/api/v1/auth/login` (쿠키 포함) → 유저/토큰 정보 반환.
+- `getRefreshAccessToken()`
+  - `POST {VITE_API_BASE_URL}/api/v1/auth/refresh` → 새 `accessToken`/`permission` 받아 `useAuthStore.setAccessToken`로 저장.
+
+---
+
+### src/store/authStore.js
+
+- 용도: **인증 상태(Zustand + persist)** 관리.
+- 상태: `accessToken`, `refreshToken`, `permission`, `name`, `companyId`, `companyName`.
+- 메서드
+  - `setAccessToken(token)`: `jwtDecode`로 **roles/id/company** 파싱 → 상태/로컬스토리지 저장 + 쿠키 `ACCESS_TOKEN`(12h, sameSite:strict, dev에서 secure).
+  - `setRefreshToken(token)`: 상태/로컬스토리지 저장.
+  - `removeAccessToken()`: 토큰/권한/회사 식별자 초기화 + 쿠키 제거.
+  - `hasPermission(requiredPermission)`: 현재 권한 포함 여부 체크.
+  - `setName(name)`, `setCompanyId(companyId)`: 보조 세터.
 
 ---
 
