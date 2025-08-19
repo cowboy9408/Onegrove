@@ -9,7 +9,7 @@ import Col from "@/components/layout/Col";
 import ResultSection from "@/components/layout/ResultSection";
 import Row from "@/components/layout/Row";
 import SearchSection from "@/components/layout/SearchSection";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import DateRangePicker from "@/components/common/Datepicker";
 import Radio from "@/components/common/Radio";
@@ -21,68 +21,115 @@ export default function PopupListPage() {
   const navigate = useNavigate();
   const { showModal } = useModal();
 
-  const [name, setName] = useState(searchParams.get("name") || "");
-  const [email, setEmail] = useState(searchParams.get("email") || "");
-  const [page, setPage] = useState(searchParams.get("page") || 1);
+  const [title, setTitle] = useState(searchParams.get("title") || "");
+  const [visibility, setVisibility] = useState(
+    searchParams.get("visibility") || ""
+  ); // "Y" | "N" | ""
+  const [startDate, setStartDate] = useState(
+    searchParams.get("start") ? new Date(searchParams.get("start")) : null
+  );
+  const [endDate, setEndDate] = useState(
+    searchParams.get("end") ? new Date(searchParams.get("end")) : null
+  );
+  const fmt = (d) => (d ? new Date(d).toISOString().slice(0, 10) : "");
+  const [page, setPage] = useState(Number(searchParams.get("page") || 1));
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
-  const [visibility, setVisibility] = useState(""); // 노출 여부
+
   const [checkedIds, setCheckedIds] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
-
-  const nameId = useId();
 
   const size = 30;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await api.get("/api/v1/popup", {
-          params: {
-            page,
-            size,
-          },
-        });
+        const params = {
+          page,
+          size,
+          ...(title ? { title } : {}), // ← 백엔드 키가 name이면 { name: title }
+          ...(visibility ? { useYn: visibility } : {}),
+          ...(startDate ? { startDt: fmt(startDate) } : {}),
+          ...(endDate ? { endDt: fmt(endDate) } : {}),
+        };
 
-        const list = res.data?.data || [];
+        const res = await api.get("/api/v1/popup", { params });
 
-        const parsedData = list.map((item) => {
-          const contentKo = item.contentList.find((c) => c.lang === "KO") || {};
-          const contentEn = item.contentList.find((c) => c.lang === "EN") || {};
+        // 1) 페이지 메타
+        const pageable = res?.data?.pageable ?? {};
+        setTotal(Number(pageable.totalElements ?? 0));
 
-          const formatDate = (str) =>
-            str && str !== "-" ? str.split(" ")[0] : "-";
+        // 2) 데이터 매핑 (KO/EN 각각 한 줄)
+        const list = Array.isArray(res?.data?.data) ? res.data.data : [];
+
+        const looksLikeDate = (v) =>
+          typeof v === "string" && /\d{4}-\d{2}-\d{2}/.test(v);
+
+        const norm = (entry) => {
+          if (!entry) {
+            return {
+              title: "-",
+              startDt: "-",
+              endDt: "-",
+              useYn: "-",
+              createUser: "-",
+              createDt: "-",
+            };
+          }
+          // createUser/createDt가 뒤바뀐 샘플 대비 (안전 처리)
+          const rawUser = entry.createUser ?? "-";
+          const rawDt = entry.createDt ?? "-";
+          const createUser =
+            looksLikeDate(rawUser) && !looksLikeDate(rawDt) ? rawDt : rawUser;
+          const createDt = looksLikeDate(rawDt)
+            ? rawDt
+            : looksLikeDate(rawUser)
+              ? rawUser
+              : rawDt;
 
           return {
-            pmId: item.id, // 상세 링크 등에 사용
-            no: item.rownum,
+            title: entry.title ?? "-",
+            startDt: entry.startDt ?? "-",
+            endDt: entry.endDt ?? "-",
+            useYn: entry.useYn ?? "-",
+            createUser,
+            createDt,
+          };
+        };
 
-            ko_title: contentKo.title ?? "-",
-            en_title: contentEn.title ?? "-",
+        const tableData = list.map((item) => {
+          const id = item.id;
+          const rownum = item.rownum ?? "";
+          const ko = norm(item.contentList?.find((c) => c.lang === "KO"));
+          const en = norm(item.contentList?.find((c) => c.lang === "EN"));
 
-            status_ko: contentKo.useYn ?? "-",
-            status_en: contentEn.useYn ?? "-",
-
-            start_ko: formatDate(contentKo.startDt),
-            start_en: formatDate(contentEn.startDt),
-            end_ko: formatDate(contentKo.endDt),
-            end_en: formatDate(contentEn.endDt),
-
-            created_user_ko: contentKo.createUser ?? "-",
-            created_user_en: contentEn.createUser ?? "-",
-
-            created_at_ko: contentKo.createDt?.split(" ")[0] ?? "-",
-            created_at_en: contentEn.createDt?.split(" ")[0] ?? "-",
-            _id: String(item.id),
+          return {
+            // 체크박스/네비게이션 호환 위해 둘 다 제공
+            id,
+            pmId: id,
+            no: rownum,
+            // 타이틀
+            ko_title: ko.title,
+            en_title: en.title,
+            // 노출여부
+            status_ko: ko.useYn,
+            status_en: en.useYn,
+            // 기간
+            start_ko: ko.startDt,
+            start_en: en.startDt,
+            end_ko: ko.endDt,
+            end_en: en.endDt,
+            // 등록자/등록일시
+            created_user_ko: ko.createUser,
+            created_user_en: en.createUser,
+            created_at_ko: ko.createDt,
+            created_at_en: en.createDt,
           };
         });
 
-        setData(parsedData);
-        setTotal(res.data?.pageable?.totalElements || 0);
-      } catch (err) {
-        console.error("팝업 리스트 로딩 실패:", err);
+        setData(tableData);
+      } catch (e) {
+        console.error(e);
       }
     };
 
@@ -95,72 +142,105 @@ export default function PopupListPage() {
     );
   };
 
+  const handleSearch = () => {
+    const params = {
+      title,
+      visibility,
+      start: fmt(startDate),
+      end: fmt(endDate),
+      page: 1, // 검색 시 1페이지로
+    };
+    Object.keys(params).forEach((k) => {
+      if (!params[k]) delete params[k];
+    });
+    setPage(1);
+    setSearchParams(params);
+    setRefreshKey((k) => k + 1);
+  };
+
+  const handleReset = () => {
+    setTitle("");
+    setVisibility("");
+    setStartDate(null);
+    setEndDate(null);
+    setPage(1);
+    setSearchParams({ page: 1 });
+    setRefreshKey((k) => k + 1);
+  };
+
   return (
     <div>
       <SearchSection>
         <Box>
-          <Row>
-            <Col>
-              <Select label={"입주사"}>
-                <option value="">전체</option>
-                <option value="">입주사1</option>
-                <option value="">입주사2</option>
-              </Select>
-            </Col>
-            <Col>
-              <Input
-                id={nameId}
-                label={"이름"}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onClear={() => setName("")}
+          {/* 1행: 등록일(좌) / 노출여부(우) */}
+          <Row className="items-end gap-4">
+            <Col className="w-1/2">
+              <div className="mb-2 text-sm font-medium">등록일</div>
+              <DateRangePicker
+                mode="range"
+                startDate={startDate}
+                endDate={endDate}
+                onRangeChange={({ startDate, endDate }) => {
+                  setStartDate(startDate);
+                  setEndDate(endDate);
+                }}
               />
             </Col>
-            <Row>
-              <Col>
-                <DateRangePicker
-                  startDate={startDate}
-                  endDate={endDate}
-                  onChange={({ startDate, endDate }) => {
-                    setStartDate(startDate);
-                    setEndDate(endDate);
-                  }}
-                />
-              </Col>
-            </Row>
-            <span className="flex items-center text-sm font-medium whitespace-nowrap text-gray-800">
-              노출 여부
-            </span>
-            <Radio
-              id="visible"
-              name="visibility"
-              value="Y"
-              checked={visibility === "Y"}
-              onChange={(e) => setVisibility(e.target.value)}
-              label="노출"
-            />
-            <Radio
-              id="hidden"
-              name="visibility"
-              value="N"
-              checked={visibility === "N"}
-              onChange={(e) => setVisibility(e.target.value)}
-              label="미노출"
-            />
 
-            <Col className="flex gap-2 self-end">
-              <Button
-                className={"h-12 w-full"}
-                onClick={() => {
-                  setSearchParams({ name, email, page });
-                }}
-              >
-                검색
-              </Button>
+            <Col className="w-1/2">
+              <div className="mb-2 text-sm font-medium">노출 여부</div>
+              <div className="flex items-center gap-6">
+                <Radio
+                  id="visible"
+                  name="visibility"
+                  value="Y"
+                  checked={visibility === "Y"}
+                  onChange={(e) => setVisibility(e.target.value)}
+                  label="노출"
+                />
+                <Radio
+                  id="hidden"
+                  name="visibility"
+                  value="N"
+                  checked={visibility === "N"}
+                  onChange={(e) => setVisibility(e.target.value)}
+                  label="미노출"
+                />
+                {/* 전체(제거) 상태로 두고 싶으면 라디오를 선택 해제하거나 초기화 버튼을 사용하세요 */}
+              </div>
+            </Col>
+          </Row>
+
+          {/* 2행: 타이틀(좌) / 버튼들(우) */}
+          <Row className="mt-4 items-end gap-4">
+            <Col className="w-1/2">
+              <Input
+                id="popup-title"
+                label="타이틀"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onClear={() => setTitle("")}
+              />
+            </Col>
+
+            <Col className="w-1/2">
+              <div className="flex justify-end gap-2">
+                <Button className="h-12 px-6" onClick={handleSearch}>
+                  검색
+                </Button>
+                <Button
+                  className="h-12 px-6"
+                  variant="outline"
+                  onClick={handleReset}
+                >
+                  초기화
+                </Button>
+              </div>
             </Col>
           </Row>
         </Box>
       </SearchSection>
+
       <div className="mb-4 flex items-center justify-between">
         <ResultSummary total={total} />
 
@@ -322,7 +402,6 @@ export default function PopupListPage() {
             },
           ]}
           data={data}
-          link={{ base: "/popup/regist", path: "pmId" }}
           checkable={true}
           checkedIds={checkedIds}
           onCheck={handleCheck}
@@ -331,7 +410,10 @@ export default function PopupListPage() {
         <Pagination
           current={page}
           totalPages={Math.ceil(total / size)}
-          onChange={(page) => setPage(page)}
+          onChange={(p) => {
+            setPage(p);
+            setSearchParams({ ...Object.fromEntries(searchParams), page: p });
+          }}
         />
       </ResultSection>
     </div>
