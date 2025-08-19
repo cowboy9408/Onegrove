@@ -8,7 +8,7 @@ import useModal from "@/hooks/useModal";
 import PopupRegistForm from "./component/PopupRegistForm";
 
 export default function PopupDetail() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const initialLang = searchParams.get("lang") || "ko";
 
   const [currentLang, setCurrentLang] = useState(initialLang === "en" ? 1 : 0);
@@ -47,8 +47,10 @@ export default function PopupDetail() {
 
   const handleClickSave = async () => {
     const ref = currentLang === 0 ? koFormRef : enFormRef;
+    const langCode = currentLang === 0 ? "KO" : "EN";
+    const currentData = currentLang === 0 ? koData : enData;
 
-    // 폼 유효성 검사 (필수 항목 누락 시 모달)
+    // 폼 유효성
     const form = await ref.current?.submit?.((message) => {
       showModal({
         title: "필수 항목을 입력해 주세요.",
@@ -56,25 +58,50 @@ export default function PopupDetail() {
         showCancel: false,
       });
     });
-
     if (!form) return;
 
-    // 유효성 통과 → 저장 확인 모달
-    showModal({
-      title: "저장 확인",
-      message: "저장하시겠습니까?",
-      showCancel: true,
-      onConfirm: () => handleSave(form),
-    });
-  };
+    // 현재 언어 데이터가 없는 경우 = "처음 등록" → insert
+    const isNewLang = !currentData || Object.keys(currentData).length === 0;
 
-  const handleSave = async (form) => {
-    try {
-      await api.post("/api/v1/popup/update", form);
-      navigate("/popup");
-    } catch (err) {
-      console.error("저장 실패:", err);
-    }
+    showModal({
+      title: isNewLang ? "등록 확인" : "수정 확인",
+      message: isNewLang
+        ? `${langCode} 콘텐츠를 새로 등록할까요?`
+        : `${langCode} 콘텐츠를 수정할까요?`,
+      showCancel: true,
+      onConfirm: async () => {
+        try {
+          const url = isNewLang
+            ? "/api/v1/popup/insert"
+            : "/api/v1/popup/update";
+
+          // 서버가 기존 팝업 ID를 요구합니다.
+          // 대개 "id" 또는 "popupId"를 받습니다. 먼저 id로 시도하고,
+          // 서버가 popupId를 요구하면 키만 바꿔주세요.
+          const payload = {
+            ...form, // PopupRegistForm에서 만든 페이로드(title, dates, images 등)
+            id, // 중요: 기존 팝업 식별자 (Number(id) 필요하면 감싸세요)
+            lang: langCode, // KO / EN (대문자)
+          };
+
+          await api.post(url, payload);
+
+          showModal({
+            title: "완료",
+            message: "저장되었습니다.",
+            showCancel: false,
+            onConfirm: () => navigate("/popup"),
+          });
+        } catch (err) {
+          console.error(err);
+          showModal({
+            title: "오류",
+            message: "저장 중 문제가 발생했습니다.",
+            showCancel: false,
+          });
+        }
+      },
+    });
   };
 
   return (
@@ -84,8 +111,12 @@ export default function PopupDetail() {
           { key: "kr", label: "국문" },
           { key: "en", label: "영문" },
         ]}
-        defaultIndex={0}
-        onTabChange={(index) => setCurrentLang(index)}
+        defaultIndex={currentLang}
+        onTabChange={(index) => {
+          setCurrentLang(index);
+          // 탭 전환 시 URL도 동기화 (새로고침/공유 시 동일 화면 보장)
+          setSearchParams({ lang: index === 1 ? "en" : "ko" });
+        }}
       >
         <TabPanel>
           <PopupRegistForm
