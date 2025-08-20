@@ -105,7 +105,7 @@ export default function BrandList({
             </Col>
             <Col>
               <Input
-                label="브랜드명"
+                placeholder="브랜드를 입력해 주세요."
                 topLabel={false}
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
