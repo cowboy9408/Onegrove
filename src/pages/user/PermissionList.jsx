@@ -10,16 +10,17 @@ import ResultSection from "@/components/layout/ResultSection";
 import Row from "@/components/layout/Row";
 import SearchSection from "@/components/layout/SearchSection";
 import { useEffect, useId, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import Radio from "@/components/common/Radio";
 import api from "@/lib/apiClient";
 import { useAuthStore } from "@/store/authStore";
+import useModal from "@/hooks/useModal";
 
 export default function PermissionList() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const { permission, companyId } = useAuthStore(); // 로그인된 사용자의 역할(role) 가져오기
 
+  const { permission, companyId } = useAuthStore(); // 로그인된 사용자의 역할(role) 가져오기
+  const { showModal } = useModal();
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
@@ -34,6 +35,7 @@ export default function PermissionList() {
   };
   const [searchFilter, setSearchFilter] = useState(defaultFilter);
   const [activeFilter, setActiveFilter] = useState(defaultFilter);
+  const [updating, setUpdating] = useState(false);
 
   const nameId = useId();
   const emailId = useId();
@@ -43,7 +45,7 @@ export default function PermissionList() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await api.get("/api/v1/user/member");
+        const response = await api.get("/api/v1/user/wait-member");
         const res = response.data;
 
         if (res.success) {
@@ -63,7 +65,7 @@ export default function PermissionList() {
           } else {
             // 관리자일 경우 전체 회사 옵션 구성
             const uniqueCompanies = Array.from(
-              new Map(allData.map((item) => [item.companyId, item])).values()
+              new Map(allData.map((item) => [item.companyName, item])).values()
             );
             setCompanyOptions(uniqueCompanies);
           }
@@ -84,10 +86,90 @@ export default function PermissionList() {
     );
   };
 
+  const handleUpdateStatusDo = async (status /* 'Y' | 'N' */) => {
+    const verb = status === "Y" ? "승인" : "거절";
+    try {
+      setUpdating(true);
+      // 선택 ID 정규화(문자→숫자)
+      const checkArr = checkedIds
+        .map((v) => Number(v))
+        .filter((v) => !Number.isNaN(v));
+
+      const res = await api.post("/api/v1/user/wait-member/update", {
+        checkArr,
+        status,
+      });
+      const ok =
+        res?.data?.success ?? (res?.status >= 200 && res?.status < 300);
+
+      if (ok) {
+        showModal({
+          title: "완료",
+          message: `${verb}이 완료되었습니다.`,
+          confirmButton: "확인",
+        });
+        setCheckedIds([]);
+        setPage(1);
+        setRefreshKey((prev) => prev + 1);
+      } else {
+        showModal({
+          title: "오류",
+          message: `${verb} 실패: 서버 오류`,
+          confirmButton: "확인",
+        });
+      }
+    } catch (err) {
+      console.error(`${verb} 요청 실패:`, err);
+      showModal({
+        title: "에러",
+        message: `${verb} 중 오류가 발생했습니다.`,
+        confirmButton: "확인",
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleClickApprove = () => {
+    if (!checkedIds?.length) {
+      showModal({
+        title: "알림",
+        message: "승인할 항목을 선택해주세요.",
+        confirmButton: "확인",
+      });
+      return;
+    }
+    showModal({
+      title: "승인 확인",
+      message: "선택한 회원을 승인하시겠습니까?",
+      showCancel: true,
+      confirmButton: "승인",
+      onConfirm: () => handleUpdateStatusDo("Y"),
+    });
+  };
+
+  const handleClickReject = () => {
+    if (!checkedIds?.length) {
+      showModal({
+        title: "알림",
+        message: "거절할 항목을 선택해주세요.",
+        confirmButton: "확인",
+      });
+      return;
+    }
+    showModal({
+      title: "거절 확인",
+      message: "선택한 회원을 거절하시겠습니까?",
+      showCancel: true,
+      confirmButton: "거절",
+      onConfirm: () => handleUpdateStatusDo("N"),
+    });
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await api.get("/api/v1/user/member");
+        const response = await api.get("/api/v1/user/wait-member");
         const res = response.data;
 
         if (res.success) {
@@ -97,7 +179,11 @@ export default function PermissionList() {
 
           let filtered = allData;
 
-          if (permission === "OFFICE_SECRETARY_ADMIN" && companyId) {
+          if (
+            permission === "OFFICE_SECRETARY_ADMIN" &&
+            companyId &&
+            filtered.some((i) => i.companyId != null)
+          ) {
             filtered = filtered.filter(
               (item) => String(item.companyId) === String(companyId)
             );
@@ -123,14 +209,14 @@ export default function PermissionList() {
 
           if (activeFilter.email) {
             filtered = filtered.filter((item) =>
-              item.username?.includes(activeFilter.email)
+              item.userName?.includes(activeFilter.email)
             );
           }
 
-          if (activeFilter.status === "active") {
-            filtered = filtered.filter((item) => item.isUse === "사용");
-          } else if (activeFilter.status === "inactive") {
-            filtered = filtered.filter((item) => item.isUse === "미사용");
+          if (activeFilter.status) {
+            filtered = filtered.filter(
+              (item) => item.status === activeFilter.status
+            );
           }
 
           // 페이지네이션 처리
@@ -142,23 +228,21 @@ export default function PermissionList() {
           setData(
             paginated.map((item, index) => ({
               no: totalFiltered - (startIndex + index),
-              _id: item.id,
+              _id: item.id, // 체크박스 선택용 PK (DataTable이 _id를 쓴다면 유지)
               companyName: item.companyName,
-              occupancy: "", // 입주사 없음
               name: item.name,
-              username: item.username,
+              username: item.userName, // userName -> username으로 표기 통일
               email: item.email,
-              status: item.status,
-              valuable: item.isUse,
-              createUser: item.createUser,
+              phone: item.phone ?? "",
+              gender: item.gender ?? "",
+              status: item.status ?? "",
               created_at: item.createDatetime
                 ? new Date(item.createDatetime).toLocaleString("ko-KR", {
                     year: "numeric",
                     month: "2-digit",
                     day: "2-digit",
-                    // hour: "2-digit",
-                    // minute: "2-digit",
-                    // second: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
                   })
                 : "",
             }))
@@ -238,24 +322,33 @@ export default function PermissionList() {
             </Col>
             <Col>
               <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium">사용 여부</span>
+                <span className="text-sm font-medium">상태</span>
                 <div className="flex flex-row items-center gap-4">
                   <Radio
                     name="status"
-                    value="active"
-                    label="사용"
-                    checked={searchFilter.status === "active"}
+                    value=""
+                    label="전체"
+                    checked={searchFilter.status === ""}
                     onChange={() =>
-                      setSearchFilter({ ...searchFilter, status: "active" })
+                      setSearchFilter({ ...searchFilter, status: "" })
                     }
                   />
                   <Radio
                     name="status"
-                    value="inactive"
-                    label="미사용"
-                    checked={searchFilter.status === "inactive"}
+                    value="대기"
+                    label="대기"
+                    checked={searchFilter.status === "대기"}
                     onChange={() =>
-                      setSearchFilter({ ...searchFilter, status: "inactive" })
+                      setSearchFilter({ ...searchFilter, status: "대기" })
+                    }
+                  />
+                  <Radio
+                    name="status"
+                    value="거절"
+                    label="거절"
+                    checked={searchFilter.status === "거절"}
+                    onChange={() =>
+                      setSearchFilter({ ...searchFilter, status: "거절" })
                     }
                   />
                 </div>
@@ -292,44 +385,17 @@ export default function PermissionList() {
         <div className="flex gap-2">
           {permission !== "OFFICE_SECRETARY_ADMIN" && (
             <Button
-              className="bg-black text-white hover:bg-gray-800"
-              onClick={() => {
-                navigate("/user/regist");
-              }}
+              className="bg-black text-white hover:bg-gray-800 disabled:opacity-50"
+              onClick={handleClickApprove}
+              disabled={updating}
             >
               승인
             </Button>
           )}
           <Button
-            className="bg-black text-white hover:bg-gray-800"
-            onClick={async () => {
-              if (checkedIds.length === 0) {
-                alert("삭제할 항목을 선택해주세요.");
-                return;
-              }
-
-              const confirmed =
-                window.confirm("선택한 회원을 삭제하시겠습니까?");
-              if (!confirmed) return;
-
-              try {
-                const res = await api.post("/api/v1/user/member/delete", {
-                  checkArr: checkedIds,
-                });
-
-                if (res.status === 200 || res.data.success) {
-                  alert("삭제가 완료되었습니다.");
-                  setCheckedIds([]);
-                  setPage(1);
-                  setRefreshKey((prev) => prev + 1);
-                } else {
-                  alert("삭제 실패: 서버 오류");
-                }
-              } catch (err) {
-                console.error("삭제 요청 실패:", err);
-                alert("삭제 중 오류가 발생했습니다.");
-              }
-            }}
+            className="bg-black text-white hover:bg-gray-800 disabled:opacity-50"
+            onClick={handleClickReject}
+            disabled={updating}
           >
             거절
           </Button>
@@ -341,26 +407,11 @@ export default function PermissionList() {
             { key: "no", label: "번호" },
             { key: "companyName", label: "입주사" },
             { key: "name", label: "이름" },
-            {
-              key: "username",
-              label: "아이디",
-              render: (row) => (
-                <button
-                  className="text-black-600 underline"
-                  onClick={() => navigate(`/user/detail/${row._id}`)}
-                >
-                  {row.username}
-                </button>
-              ),
-            },
+            { key: "username", label: "아이디" },
             { key: "email", label: "이메일" },
-            { key: "status", label: "계정 상태" },
-            {
-              key: "valuable",
-              label: "사용 여부",
-              render: (row) => row.valuable,
-            },
-            { key: "createUser", label: "등록자" },
+            { key: "phone", label: "연락처" },
+            { key: "gender", label: "성별" },
+            { key: "status", label: "상태" },
             { key: "created_at", label: "등록일시" },
           ]}
           data={data}
