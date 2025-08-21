@@ -296,7 +296,8 @@ export default function PermissionList() {
             username: item.userName,
             email: item.email,
             phone: item.phone ?? "",
-            gender: item.gender ?? "",
+            gender:
+              item.gender === "M" ? "남자" : item.gender === "F" ? "여자" : "",
             status: item.status ?? "",
             created_at: item.createDatetime
               ? new Date(item.createDatetime).toLocaleString("ko-KR", {
