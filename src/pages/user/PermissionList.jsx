@@ -9,7 +9,7 @@ import Col from "@/components/layout/Col";
 import ResultSection from "@/components/layout/ResultSection";
 import Row from "@/components/layout/Row";
 import SearchSection from "@/components/layout/SearchSection";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import Radio from "@/components/common/Radio";
 import api from "@/lib/apiClient";
@@ -19,7 +19,9 @@ import useModal from "@/hooks/useModal";
 export default function PermissionList() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { permission, companyId } = useAuthStore(); // 로그인된 사용자의 역할(role) 가져오기
+  const { permission, companyId, companyName } = useAuthStore(); // 회사명까지 사용
+  const IS_SECRETARY = permission === "OFFICE_SECRETARY_ADMIN";
+
   const { showModal } = useModal();
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [data, setData] = useState([]);
@@ -27,12 +29,16 @@ export default function PermissionList() {
   const [checkedIds, setCheckedIds] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
   const [companyOptions, setCompanyOptions] = useState([]);
+  const [companiesLoaded, setCompaniesLoaded] = useState(false);
+  const initialAppliedRef = useRef(false); // 총무팀 고정값 1회만 적용
   const defaultFilter = {
     name: "",
     email: "",
     status: "",
-    type: "",
+    // 총무팀이면 입주사 셀렉트(type)를 내 회사명으로 고정
+    type: IS_SECRETARY ? companyName || "" : "",
   };
+
   const [searchFilter, setSearchFilter] = useState(defaultFilter);
   const [activeFilter, setActiveFilter] = useState(defaultFilter);
   const [updating, setUpdating] = useState(false);
@@ -43,42 +49,52 @@ export default function PermissionList() {
   const size = 30;
 
   useEffect(() => {
-    const fetchData = async () => {
+    let mounted = true;
+
+    const loadCompanies = async () => {
       try {
-        const response = await api.get("/api/v1/user/wait-member");
-        const res = response.data;
+        const { data: res } = await api.get("/api/v1/user/company");
+        if (!mounted) return;
+        if (!res?.success) return;
 
-        if (res.success) {
-          let allData = res.data;
+        const list = Array.isArray(res.data) ? res.data : [];
 
-          console.log(allData.map((v) => v.companyName));
-
-          if (permission === "OFFICE_SECRETARY_ADMIN") {
-            const myCompanyName = allData[0]?.companyName;
-            if (myCompanyName) {
-              setSearchFilter((prev) => ({ ...prev, type: myCompanyName }));
-              setActiveFilter((prev) => ({ ...prev, type: myCompanyName }));
-              setCompanyOptions([
-                { companyId: null, companyName: myCompanyName },
-              ]);
-            }
-          } else {
-            // 관리자일 경우 전체 회사 옵션 구성
-            const uniqueCompanies = Array.from(
-              new Map(allData.map((item) => [item.companyName, item])).values()
-            );
-            setCompanyOptions(uniqueCompanies);
-          }
-
-          // 이후 필터 처리
+        // 1) 옵션 먼저 세팅
+        if (IS_SECRETARY && companyId) {
+          const mine = list.find(
+            (c) => String(c.companyId) === String(companyId)
+          );
+          setCompanyOptions(mine ? [mine] : [{ companyId, companyName }]);
+        } else {
+          setCompanyOptions(list);
         }
-      } catch (error) {
-        console.error("API 요청 실패:", error);
+        // 2) 값 고정은 1회만 (초기화/URL 동기화 이펙트가 덮어쓰지 않게)
+        if (IS_SECRETARY && !initialAppliedRef.current) {
+          setSearchFilter((prev) => ({ ...prev, type: companyName || "" }));
+          setActiveFilter((prev) => ({ ...prev, type: companyName || "" }));
+          initialAppliedRef.current = true;
+        }
+
+        setCompaniesLoaded(true);
+      } catch (e) {
+        console.error("/api/v1/user/company 실패:", e);
+        setCompaniesLoaded(true);
       }
     };
 
-    fetchData();
-  }, [page, refreshKey]);
+    loadCompanies();
+    return () => {
+      mounted = false;
+    };
+  }, [IS_SECRETARY, companyId, companyName]);
+
+  // 총무팀: 옵션 로딩 완료 후에도 type이 비어있으면 회사명 주입(안전망)
+  useEffect(() => {
+    if (IS_SECRETARY && companiesLoaded && !activeFilter.type) {
+      setSearchFilter((prev) => ({ ...prev, type: companyName || "" }));
+      setActiveFilter((prev) => ({ ...prev, type: companyName || "" }));
+    }
+  }, [IS_SECRETARY, companiesLoaded, activeFilter.type, companyName]);
 
   const handleCheck = (id, checked) => {
     setCheckedIds((prev) =>
@@ -169,94 +185,146 @@ export default function PermissionList() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await api.get("/api/v1/user/wait-member");
+        // 총무팀이면 companyId만 있으면 바로 조회 (회사명/옵션 로딩 대기 X)
+        if (IS_SECRETARY) {
+          if (!companyId) return;
+
+          // 회사명 준비 상태: (1) companyOptions에서 내 ID 매칭되는 회사명  OR
+          //                 (2) store의 companyName  OR
+          //                 (3) 이미 고정된 activeFilter.type 중 하나라도 존재
+          const nameReady = Boolean(
+            companyOptions.find(
+              (c) => String(c.companyId) === String(companyId)
+            )?.companyName ||
+              companyName ||
+              activeFilter.type
+          );
+          if (!nameReady) return;
+        }
+
+        // ★ 서버 파라미터: 총무팀은 무조건 내 companyId, 관리자는 회사명→ID 역매핑
+        let params = {};
+        if (IS_SECRETARY) {
+          params.companyId = companyId;
+        } else {
+          const selected = companyOptions.find(
+            (c) => c.companyName === activeFilter.type
+          );
+          if (selected?.companyId != null)
+            params.companyId = selected.companyId;
+        }
+        // (디버깅) console.log("wait-member params", params);
+
+        const response = await api.get("/api/v1/user/wait-member", { params });
         const res = response.data;
+        if (!res?.success) return;
 
-        if (res.success) {
-          let allData = res.data;
+        // ----- 원본 데이터 -----
+        let filtered = Array.isArray(res.data) ? res.data : [];
 
-          console.log(allData.map((item) => item.isUse));
+        // ★ 정규화 유틸 + 총무팀용 '실사용 회사명' 계산
+        const norm = (s) => (s ?? "").toString().trim().toLowerCase();
+        const effectiveCompanyName = IS_SECRETARY
+          ? // companyOptions에서 내 companyId에 해당하는 회사명 우선 사용
+            (companyOptions.find(
+              (c) => String(c.companyId) === String(companyId)
+            )?.companyName ??
+            // 없으면 store의 companyName
+            companyName ??
+            // 그래도 없으면 이미 고정된 activeFilter.type
+            activeFilter.type)
+          : activeFilter.type;
 
-          let filtered = allData;
-
-          if (
-            permission === "OFFICE_SECRETARY_ADMIN" &&
-            companyId &&
-            filtered.some((i) => i.companyId != null)
-          ) {
+        // ★ 총무팀 방어 필터: 응답에 companyId가 있으면 ID로, 없으면 '정규화된 회사명'으로 필터
+        if (IS_SECRETARY) {
+          if (companyId && filtered.some((i) => i?.companyId != null)) {
             filtered = filtered.filter(
               (item) => String(item.companyId) === String(companyId)
             );
-          }
-
-          filtered.sort((a, b) => {
-            const dateA = new Date(a.createDatetime);
-            const dateB = new Date(b.createDatetime);
-            return dateB - dateA;
-          });
-
-          if (activeFilter.type) {
+          } else if (effectiveCompanyName) {
+            const target = norm(effectiveCompanyName);
             filtered = filtered.filter(
-              (item) => item.companyName === activeFilter.type
+              (item) => norm(item.companyName) === target
             );
           }
-
-          if (activeFilter.name) {
-            filtered = filtered.filter((item) =>
-              item.name?.includes(activeFilter.name)
-            );
-          }
-
-          if (activeFilter.email) {
-            filtered = filtered.filter((item) =>
-              item.userName?.includes(activeFilter.email)
-            );
-          }
-
-          if (activeFilter.status) {
-            filtered = filtered.filter(
-              (item) => item.status === activeFilter.status
-            );
-          }
-
-          // 페이지네이션 처리
-          const startIndex = (page - 1) * size;
-          const paginated = filtered.slice(startIndex, startIndex + size);
-          const totalFiltered = filtered.length;
-
-          // 데이터 형식을 맞춰서 상태에 저장
-          setData(
-            paginated.map((item, index) => ({
-              no: totalFiltered - (startIndex + index),
-              _id: item.id, // 체크박스 선택용 PK (DataTable이 _id를 쓴다면 유지)
-              companyName: item.companyName,
-              name: item.name,
-              username: item.userName, // userName -> username으로 표기 통일
-              email: item.email,
-              phone: item.phone ?? "",
-              gender: item.gender ?? "",
-              status: item.status ?? "",
-              created_at: item.createDatetime
-                ? new Date(item.createDatetime).toLocaleString("ko-KR", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                : "",
-            }))
-          );
-
-          setTotal(filtered.length); // 필터링된 전체 개수
         }
+
+        // ★ (관리자/검색 공통) 회사명 보조 필터도 정규화 비교로
+        if (activeFilter.type) {
+          const target = norm(activeFilter.type);
+          filtered = filtered.filter(
+            (item) => norm(item.companyName) === target
+          );
+        }
+
+        // 나머지 검색 필터
+        if (activeFilter.name) {
+          filtered = filtered.filter((item) =>
+            item.name?.includes(activeFilter.name)
+          );
+        }
+        if (activeFilter.email) {
+          filtered = filtered.filter((item) =>
+            item.userName?.includes(activeFilter.email)
+          );
+        }
+        if (activeFilter.status) {
+          filtered = filtered.filter(
+            (item) => item.status === activeFilter.status
+          );
+        }
+
+        // 정렬
+        filtered.sort((a, b) => {
+          const dateA = new Date(a.createDatetime);
+          const dateB = new Date(b.createDatetime);
+          return dateB - dateA;
+        });
+
+        // 페이징
+        const startIndex = (page - 1) * size;
+        const paginated = filtered.slice(startIndex, startIndex + size);
+        const totalFiltered = filtered.length;
+
+        // 상태 반영
+        setData(
+          paginated.map((item, index) => ({
+            no: totalFiltered - (startIndex + index),
+            _id: item.id,
+            companyName: item.companyName,
+            name: item.name,
+            username: item.userName,
+            email: item.email,
+            phone: item.phone ?? "",
+            gender: item.gender ?? "",
+            status: item.status ?? "",
+            created_at: item.createDatetime
+              ? new Date(item.createDatetime).toLocaleString("ko-KR", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "",
+          }))
+        );
+        setTotal(filtered.length);
       } catch (error) {
         console.error("API 요청 실패:", error);
       }
     };
 
     fetchData();
-  }, [page, activeFilter, refreshKey]);
+  }, [
+    page,
+    activeFilter,
+    refreshKey,
+    IS_SECRETARY,
+    companyId,
+    companiesLoaded, // 있어도 무방
+    companyOptions, // effectiveCompanyName 계산을 위해 필요
+  ]);
 
   return (
     <div>
@@ -266,17 +334,27 @@ export default function PermissionList() {
             <Col>
               <Select
                 label="입주사"
-                value={searchFilter.type}
+                value={searchFilter.type || ""}
                 disabled={permission === "OFFICE_SECRETARY_ADMIN"}
                 onChange={(e) =>
                   setSearchFilter({ ...searchFilter, type: e.target.value })
                 }
               >
+                {/* 옵션 로딩 전 또는 현재 값이 옵션 목록에 없을 때 임시 보관 */}
+                {(!companiesLoaded ||
+                  (searchFilter.type &&
+                    !companyOptions.some(
+                      (c) => c.companyName === searchFilter.type
+                    ))) && (
+                  <option value={searchFilter.type || ""}>
+                    {searchFilter.type || (companiesLoaded ? "전체" : "로딩중")}
+                  </option>
+                )}
                 {permission !== "OFFICE_SECRETARY_ADMIN" && (
                   <option value="">전체</option>
                 )}
                 {companyOptions.map((company) => (
-                  <option key={company.companyName} value={company.companyName}>
+                  <option key={company.companyId} value={company.companyName}>
                     {company.companyName}
                   </option>
                 ))}
