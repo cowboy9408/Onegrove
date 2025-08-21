@@ -734,7 +734,7 @@ export const routeMeta = [
             element: <MeetingListPage />,
             title: (
               <>
-                Metting Room / Executive Room
+                Meeting Room / Executive Room
                 <br />
                 예약 설정
               </>
