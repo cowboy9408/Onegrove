@@ -119,8 +119,6 @@ export default function PopupListPage() {
           return ko === visibility || en === visibility;
         };
 
-        // 현재 UI 라벨은 "등록일"이지만 서버엔 period(start/end)가 내려옵니다.
-        // 아래 필터는 start/end 기간으로 동작합니다. (createDt 기준으로 바꾸려면 안내 드릴게요)
         const matchesPeriod = (item) => {
           if (!sod && !eod) return true;
           const ko = item.contentList?.find((c) => c.lang === "KO");
@@ -298,7 +296,6 @@ export default function PopupListPage() {
                   onChange={(e) => setVisibility(e.target.value)}
                   label="미노출"
                 />
-                {/* 전체(제거) 상태로 두고 싶으면 라디오를 선택 해제하거나 초기화 버튼을 사용하세요 */}
               </div>
             </Col>
           </Row>
