@@ -113,22 +113,6 @@ export default function PermissionDetail() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  // const mapRoleToForm = (role) => {
-  //   switch (role.toUpperCase()) {
-  //     case "NORMAL_ADMIN":
-  //     case "ADMIN":
-  //       return "admin";
-  //     case "RETAIL_ADMIN":
-  //     case "RETAIL":
-  //       return "retail";
-  //     case "OFFICE_ADMIN":
-  //     case "MANAGER":
-  //       return "manager";
-  //     default:
-  //       return "admin";
-  //   }
-  // };
-
   const mapGender = (gender) => {
     switch (gender) {
       case "M":

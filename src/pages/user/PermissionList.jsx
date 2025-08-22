@@ -88,7 +88,6 @@ export default function PermissionList() {
     };
   }, [IS_SECRETARY, companyId, companyName]);
 
-  // 총무팀: 옵션 로딩 완료 후에도 type이 비어있으면 회사명 주입(안전망)
   useEffect(() => {
     if (IS_SECRETARY && companiesLoaded && !activeFilter.type) {
       setSearchFilter((prev) => ({ ...prev, type: companyName || "" }));
@@ -202,7 +201,6 @@ export default function PermissionList() {
           if (!nameReady) return;
         }
 
-        // ★ 서버 파라미터: 총무팀은 무조건 내 companyId, 관리자는 회사명→ID 역매핑
         let params = {};
         if (IS_SECRETARY) {
           params.companyId = companyId;
@@ -222,7 +220,6 @@ export default function PermissionList() {
         // ----- 원본 데이터 -----
         let filtered = Array.isArray(res.data) ? res.data : [];
 
-        // ★ 정규화 유틸 + 총무팀용 '실사용 회사명' 계산
         const norm = (s) => (s ?? "").toString().trim().toLowerCase();
         const effectiveCompanyName = IS_SECRETARY
           ? // companyOptions에서 내 companyId에 해당하는 회사명 우선 사용
@@ -235,7 +232,6 @@ export default function PermissionList() {
             activeFilter.type)
           : activeFilter.type;
 
-        // ★ 총무팀 방어 필터: 응답에 companyId가 있으면 ID로, 없으면 '정규화된 회사명'으로 필터
         if (IS_SECRETARY) {
           if (companyId && filtered.some((i) => i?.companyId != null)) {
             filtered = filtered.filter(
@@ -249,7 +245,6 @@ export default function PermissionList() {
           }
         }
 
-        // ★ (관리자/검색 공통) 회사명 보조 필터도 정규화 비교로
         if (activeFilter.type) {
           const target = norm(activeFilter.type);
           filtered = filtered.filter(
