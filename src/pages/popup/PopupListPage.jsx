@@ -31,7 +31,28 @@ export default function PopupListPage() {
   const [endDate, setEndDate] = useState(
     searchParams.get("end") ? new Date(searchParams.get("end")) : null
   );
-  const fmt = (d) => (d ? new Date(d).toISOString().slice(0, 10) : "");
+
+  // YYYY-MM-DD (로컬)
+  const fmtDate = (d) => {
+    if (!d) return "";
+    const dd = new Date(d);
+    const y = dd.getFullYear();
+    const m = String(dd.getMonth() + 1).padStart(2, "0");
+    const day = String(dd.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  // YYYY-MM-DD HH:mm:ss (로컬, 시작/끝 경계)
+  const fmtDateTime = (d, end = false) => {
+    if (!d) return "";
+    const base = fmtDate(d);
+    return end ? `${base} 23:59:59` : `${base} 00:00:00`;
+  };
+
+  // API에서 내려온 "YYYY-MM-DD HH:mm:ss" → Date
+  const parseApiDate = (s) =>
+    typeof s === "string" ? new Date(s.replace(" ", "T")) : null;
+
   const [page, setPage] = useState(Number(searchParams.get("page") || 1));
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
@@ -44,23 +65,99 @@ export default function PopupListPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // 1) 백엔드가 어떤 키를 받는지 모를 때를 대비해 "안전망"으로 여러 키 동시 전송
+        const startStr = startDate ? fmtDateTime(startDate, false) : "";
+        const endStr = endDate ? fmtDateTime(endDate, true) : "";
+
         const params = {
           page,
           size,
-          ...(title ? { title } : {}), // ← 백엔드 키가 name이면 { name: title }
-          ...(visibility ? { useYn: visibility } : {}),
-          ...(startDate ? { startDt: fmt(startDate) } : {}),
-          ...(endDate ? { endDt: fmt(endDate) } : {}),
+          ...(title
+            ? { title, name: title, popupTitle: title, keyword: title }
+            : {}),
+          ...(visibility ? { useYn: visibility, visibility } : {}),
+          ...(startStr
+            ? {
+                startDt: startStr,
+                startDate: startStr,
+                fromDt: startStr,
+                start: startStr,
+              }
+            : {}),
+          ...(endStr
+            ? { endDt: endStr, endDate: endStr, toDt: endStr, end: endStr }
+            : {}),
         };
 
         const res = await api.get("/api/v1/popup", { params });
 
-        // 1) 페이지 메타
-        const pageable = res?.data?.pageable ?? {};
-        setTotal(Number(pageable.totalElements ?? 0));
+        // 원본 리스트
+        const raw = Array.isArray(res?.data?.data) ? res.data.data : [];
 
-        // 2) 데이터 매핑 (KO/EN 각각 한 줄)
-        const list = Array.isArray(res?.data?.data) ? res.data.data : [];
+        // 2) 프론트 폴백 필터 (서버가 필터/페이징을 무시해도 동작 보장)
+        const sod = startDate
+          ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
+          : null;
+        const eod = endDate
+          ? new Date(new Date(endDate).setHours(23, 59, 59, 999))
+          : null;
+
+        const matchesTitle = (item) => {
+          if (!title?.trim()) return true;
+          const t = title.trim().toLowerCase();
+          const ko =
+            item.contentList?.find((c) => c.lang === "KO")?.title ?? "";
+          const en =
+            item.contentList?.find((c) => c.lang === "EN")?.title ?? "";
+          return ko.toLowerCase().includes(t) || en.toLowerCase().includes(t);
+        };
+
+        const matchesVisibility = (item) => {
+          if (!visibility) return true;
+          const ko = item.contentList?.find((c) => c.lang === "KO")?.useYn;
+          const en = item.contentList?.find((c) => c.lang === "EN")?.useYn;
+          return ko === visibility || en === visibility;
+        };
+
+        // 현재 UI 라벨은 "등록일"이지만 서버엔 period(start/end)가 내려옵니다.
+        // 아래 필터는 start/end 기간으로 동작합니다. (createDt 기준으로 바꾸려면 안내 드릴게요)
+        const matchesPeriod = (item) => {
+          if (!sod && !eod) return true;
+          const ko = item.contentList?.find((c) => c.lang === "KO");
+          const en = item.contentList?.find((c) => c.lang === "EN");
+          const langs = [ko, en].filter(Boolean);
+
+          return langs.some((c) => {
+            const s = parseApiDate(c.startDt); // 시작
+            const e = parseApiDate(c.endDt); // 종료
+            if (!s || !e) return false;
+
+            // 겹침(overlap) 조건
+            const overlapStartOk = !eod || s <= eod; // 시작이 선택 종료 이전
+            const overlapEndOk = !sod || e >= sod; // 종료가 선택 시작 이후
+            return overlapStartOk && overlapEndOk;
+          });
+        };
+
+        const filtered = raw.filter(
+          (item) =>
+            matchesTitle(item) && matchesVisibility(item) && matchesPeriod(item)
+        );
+
+        // 3) 서버가 pageable을 안 주면 프론트에서 페이징
+        const pageable = res?.data?.pageable;
+        const hasServerPaging =
+          !!pageable && typeof pageable?.totalElements === "number";
+        const totalElements = hasServerPaging
+          ? pageable.totalElements
+          : filtered.length;
+
+        // 클라이언트 페이징 슬라이스
+        const startIdx = (page - 1) * size;
+        const pageSlice = hasServerPaging
+          ? filtered
+          : filtered.slice(startIdx, startIdx + size);
+        setTotal(totalElements);
 
         const looksLikeDate = (v) =>
           typeof v === "string" && /\d{4}-\d{2}-\d{2}/.test(v);
@@ -76,7 +173,7 @@ export default function PopupListPage() {
               createDt: "-",
             };
           }
-          // createUser/createDt가 뒤바뀐 샘플 대비 (안전 처리)
+          // createUser/createDt 뒤바뀐 값 안전 처리
           const rawUser = entry.createUser ?? "-";
           const rawDt = entry.createDt ?? "-";
           const createUser =
@@ -97,29 +194,24 @@ export default function PopupListPage() {
           };
         };
 
-        const tableData = list.map((item) => {
+        const tableData = pageSlice.map((item) => {
           const id = item.id;
           const rownum = item.rownum ?? "";
           const ko = norm(item.contentList?.find((c) => c.lang === "KO"));
           const en = norm(item.contentList?.find((c) => c.lang === "EN"));
 
           return {
-            // 체크박스/네비게이션 호환 위해 둘 다 제공
             id,
             pmId: id,
             no: rownum,
-            // 타이틀
             ko_title: ko.title,
             en_title: en.title,
-            // 노출여부
             status_ko: ko.useYn,
             status_en: en.useYn,
-            // 기간
             start_ko: ko.startDt,
             start_en: en.startDt,
             end_ko: ko.endDt,
             end_en: en.endDt,
-            // 등록자/등록일시
             created_user_ko: ko.createUser,
             created_user_en: en.createUser,
             created_at_ko: ko.createDt,
@@ -146,9 +238,9 @@ export default function PopupListPage() {
     const params = {
       title,
       visibility,
-      start: fmt(startDate),
-      end: fmt(endDate),
-      page: 1, // 검색 시 1페이지로
+      start: fmtDate(startDate),
+      end: fmtDate(endDate),
+      page: 1,
     };
     Object.keys(params).forEach((k) => {
       if (!params[k]) delete params[k];
@@ -352,13 +444,23 @@ export default function PopupListPage() {
             {
               key: "status",
               label: "노출 여부",
-              render: (row) => (
-                <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-                  <div className="p-2">{row.status_ko}</div>
-                  <div className="p-2">{row.status_en}</div>
-                </div>
-              ),
+              render: (row) => {
+                // 변환 함수 정의
+                const label = (v) => {
+                  if (v === "Y") return "노출";
+                  if (v === "N") return "미노출";
+                  return "-"; // 값이 없거나 다른 경우
+                };
+
+                return (
+                  <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                    <div className="p-2">{label(row.status_ko)}</div>
+                    <div className="p-2">{label(row.status_en)}</div>
+                  </div>
+                );
+              },
             },
+
             {
               key: "startDt",
               label: "시작일",
@@ -409,7 +511,7 @@ export default function PopupListPage() {
 
         <Pagination
           current={page}
-          totalPages={Math.ceil(total / size)}
+          totalPages={Math.max(1, Math.ceil(total / size))}
           onChange={(p) => {
             setPage(p);
             setSearchParams({ ...Object.fromEntries(searchParams), page: p });
