@@ -217,7 +217,6 @@ export default function PermissionList() {
         const res = response.data;
         if (!res?.success) return;
 
-        // ----- 원본 데이터 -----
         let filtered = Array.isArray(res.data) ? res.data : [];
 
         const norm = (s) => (s ?? "").toString().trim().toLowerCase();
