@@ -32,7 +32,6 @@ export default function PopupListPage() {
     searchParams.get("end") ? new Date(searchParams.get("end")) : null
   );
 
-  // YYYY-MM-DD (로컬)
   const fmtDate = (d) => {
     if (!d) return "";
     const dd = new Date(d);
@@ -42,14 +41,12 @@ export default function PopupListPage() {
     return `${y}-${m}-${day}`;
   };
 
-  // YYYY-MM-DD HH:mm:ss (로컬, 시작/끝 경계)
   const fmtDateTime = (d, end = false) => {
     if (!d) return "";
     const base = fmtDate(d);
     return end ? `${base} 23:59:59` : `${base} 00:00:00`;
   };
 
-  // API에서 내려온 "YYYY-MM-DD HH:mm:ss" → Date
   const parseApiDate = (s) =>
     typeof s === "string" ? new Date(s.replace(" ", "T")) : null;
 
@@ -65,7 +62,6 @@ export default function PopupListPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1) 백엔드가 어떤 키를 받는지 모를 때를 대비해 "안전망"으로 여러 키 동시 전송
         const startStr = startDate ? fmtDateTime(startDate, false) : "";
         const endStr = endDate ? fmtDateTime(endDate, true) : "";
 
@@ -91,10 +87,8 @@ export default function PopupListPage() {
 
         const res = await api.get("/api/v1/popup", { params });
 
-        // 원본 리스트
         const raw = Array.isArray(res?.data?.data) ? res.data.data : [];
 
-        // 2) 프론트 폴백 필터 (서버가 필터/페이징을 무시해도 동작 보장)
         const sod = startDate
           ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
           : null;
@@ -142,7 +136,6 @@ export default function PopupListPage() {
             matchesTitle(item) && matchesVisibility(item) && matchesPeriod(item)
         );
 
-        // 3) 서버가 pageable을 안 주면 프론트에서 페이징
         const pageable = res?.data?.pageable;
         const hasServerPaging =
           !!pageable && typeof pageable?.totalElements === "number";
@@ -171,7 +164,7 @@ export default function PopupListPage() {
               createDt: "-",
             };
           }
-          // createUser/createDt 뒤바뀐 값 안전 처리
+
           const rawUser = entry.createUser ?? "-";
           const rawDt = entry.createDt ?? "-";
           const createUser =

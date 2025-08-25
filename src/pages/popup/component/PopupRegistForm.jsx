@@ -77,7 +77,7 @@ const PopupRegistForm = forwardRef(({ data, lang }, ref) => {
           ? "E"
           : "C";
 
-    // ★ path 보장: 업로더가 url/filePath 등으로 줄 때도 path 생성
+    // path 보장: 업로더가 url/filePath 등으로 줄 때도 path 생성
     const normalized = normalizeImage({ ...incoming, status }, status);
 
     if (!normalized?.path) {
@@ -104,7 +104,7 @@ const PopupRegistForm = forwardRef(({ data, lang }, ref) => {
         return null;
       }
 
-      // ★ 혹시 이전 단계에서 path가 비었다면 한 번 더 정규화
+      // 혹시 이전 단계에서 path가 비었다면 한 번 더 정규화
       const pc = values.pcImg?.path
         ? values.pcImg
         : normalizeImage(values.pcImg, values.pcImg?.status ?? "C");
