@@ -72,6 +72,36 @@ export default function LoginPage() {
     localStorage.removeItem("refreshToken");
   }, []);
 
+  const handleSaveId = (e) => {
+    setSaveId(e.target.checked);
+
+    if (!e.target.checked) {
+      localStorage.removeItem("savedUserId");
+      setSaveId(false)
+    } else {
+      localStorage.setItem("savedUserId", username);
+    }
+    console.log(localStorage.getItem("savedUserId"));
+  };
+
+  // 저장된 아이디 불러오기
+  useEffect(() => {
+    const savedId = localStorage.getItem("savedUserId");
+
+    if (savedId) {
+      setUsername(savedId);
+      setSaveId(true);
+    }
+  }, []);
+
+  // 아이디 저장 이미 체크된 경우, 입력이 업데이트 되면 자동저장
+  useEffect(() => {
+    if (saveId) {
+      localStorage.setItem("savedUserId", username)
+    }
+  }, [username])
+
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4 font-sans dark:bg-white">
       <img
@@ -120,7 +150,7 @@ export default function LoginPage() {
               id="saveId"
               label="아이디 저장"
               checked={saveId}
-              onChange={(e) => setSaveId(e.target.checked)}
+              onChange={handleSaveId}
             />
             <button
               type="button"

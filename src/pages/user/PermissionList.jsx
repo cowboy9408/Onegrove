@@ -321,6 +321,8 @@ export default function PermissionList() {
     companyOptions, // effectiveCompanyName 계산을 위해 필요
   ]);
 
+  const test = 0
+
   return (
     <div>
       <SearchSection>
@@ -456,7 +458,7 @@ export default function PermissionList() {
         <ResultSummary total={total} />
 
         <div className="flex gap-2">
-          {permission === "OFFICE_SECRETARY_ADMIN" && (
+          {permission !== "OFFICE_SECRETARY_ADMIN" && (
             <Button
               className="bg-black text-white hover:bg-gray-800 disabled:opacity-50"
               onClick={handleClickApprove}
