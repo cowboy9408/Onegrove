@@ -456,15 +456,13 @@ export default function PermissionList() {
         <ResultSummary total={total} />
 
         <div className="flex gap-2">
-          {permission === "OFFICE_SECRETARY_ADMIN" && (
-            <Button
-              className="bg-black text-white hover:bg-gray-800 disabled:opacity-50"
-              onClick={handleClickApprove}
-              disabled={updating}
-            >
-              승인
-            </Button>
-          )}
+          <Button
+            className="bg-black text-white hover:bg-gray-800 disabled:opacity-50"
+            onClick={handleClickApprove}
+            disabled={updating}
+          >
+            승인
+          </Button>
           <Button
             className="bg-black text-white hover:bg-gray-800 disabled:opacity-50"
             onClick={handleClickReject}
