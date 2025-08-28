@@ -71,17 +71,19 @@ export default function CompanySelectModal({
       </div>
 
       {/* 테이블 */}
-      <DataTable
-        columns={[{ key: "companyName", label: "입주사명" }]}
-        data={filtered}
-        checkable
-        checkedIds={checked}
-        onCheck={(id, isChecked) => {
-          setChecked((prev) =>
-            isChecked ? [...prev, id] : prev.filter((v) => v !== id)
-          );
-        }}
-      />
+      <div className="max-h-[60vh] overflow-y-auto rounded border">
+        <DataTable
+          columns={[{ key: "companyName", label: "입주사명" }]}
+          data={filtered}
+          checkable
+          checkedIds={checked}
+          onCheck={(id, isChecked) => {
+            setChecked((prev) =>
+              isChecked ? [...prev, id] : prev.filter((v) => v !== id)
+            );
+          }}
+        />
+      </div>
 
       {/* 하단 버튼 */}
       <div className="mt-4 flex justify-center gap-3">
