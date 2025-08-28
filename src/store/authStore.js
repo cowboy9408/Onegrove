@@ -14,6 +14,7 @@ export const useAuthStore = create(
       name: null,
       companyId: null,
       companyName: null,
+      firstLogin: false,
 
       setAccessToken: (token) => {
         if (!token) return;
@@ -55,7 +56,12 @@ export const useAuthStore = create(
         localStorage.setItem("refreshToken", token);
       },
       removeAccessToken: () => {
-        set({ accessToken: null, permission: null, companyId: null });
+        set({
+          accessToken: null,
+          permission: null,
+          companyId: null,
+          firstLogin: false,
+        });
 
         Cookies.remove(accessToken, {
           sameSite: "strict",
@@ -70,6 +76,7 @@ export const useAuthStore = create(
         set({ name });
       },
       setCompanyId: (companyId) => set({ companyId }),
+      setFirstLogin: (v) => set({ firstLogin: !!v }),
     }),
     {
       name: "auth-storage",

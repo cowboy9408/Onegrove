@@ -9,6 +9,7 @@ import PasswordResetModal from "@/components/modal/PasswordResetModal";
 import { getUserInfo } from "@/api/user";
 import { jwtDecode } from "jwt-decode";
 import { extractErrorMessage } from "@/lib/utils";
+import ChangePasswordModal from "@/components/modal/ChangePassword";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -16,6 +17,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
   const setRefreshToken = useAuthStore((state) => state.setRefreshToken);
+  const setFirstLogin = useAuthStore((state) => state.setFirstLogin);
   const [saveId, setSaveId] = useState(false);
   const { showModal } = useModal();
   const setName = useAuthStore((state) => state.setName);
@@ -51,6 +53,48 @@ export default function LoginPage() {
       localStorage.setItem("accessToken", res.accessToken);
       localStorage.setItem("refreshToken", res.refreshToken);
 
+      const first =
+        // 1) 응답에 firstLogin이 있으면 우선 사용
+        (typeof res.firstLogin !== "undefined"
+          ? !!res.firstLogin
+          : undefined) ??
+        // 2) 없다면 토큰 클레임에서 읽는 예시 (필드명은 서버 스펙에 맞춰 변경)
+        (() => {
+          try {
+            const claim = jwtDecode(res.accessToken);
+            return !!(claim?.mustChangePassword ?? claim?.first_login);
+          } catch {
+            return false;
+          }
+        })();
+
+      setFirstLogin(first);
+
+      if (first) {
+        // 모달 바로 띄우고, 닫기/성공 시 홈으로 이동
+        showModal({
+          title: "비밀번호 변경",
+          children: ({ closeModal }) => (
+            <ChangePasswordModal
+              closeModal={() => {
+                closeModal();
+              }}
+              onSuccess={() => {
+                // 비번 변경 성공 → 최초로그인 해제 → 닫고 → 홈으로
+                setFirstLogin(false);
+                closeModal();
+                navigate("/");
+              }}
+            />
+          ),
+          showCancel: false, // 최초로그인 강제라면 닫기/취소 막기
+          customButton: true,
+          size: "md",
+        });
+        return; // 여기서 종료 (홈 네비게이션 보류)
+      }
+
+      // 최초로그인이 아니면 평소대로 홈 이동
       navigate("/");
     } catch (err) {
       console.error("로그인 실패", err);
