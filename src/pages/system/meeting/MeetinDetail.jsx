@@ -147,9 +147,9 @@ export default function MeetingDetail() {
     fetchData();
   }, [id, setValue]);
 
-  const handleChange = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  };
+  // const handleChange = (field, value) => {
+  //   setForm((prev) => ({ ...prev, [field]: value }));
+  // };
 
   const onSubmit = async (form) => {
     if (
@@ -282,7 +282,7 @@ export default function MeetingDetail() {
 
             {/* 위치 선택란 */}
             <div>
-              <p className="mb-1 text-sm font-medium text-gray-800 dark:text-gray-100">
+              <p className="mb-1 pb-2 text-sm font-medium text-gray-800 dark:text-gray-100">
                 위치<span className="text-red-500">*</span>
               </p>
               <select
@@ -307,7 +307,7 @@ export default function MeetingDetail() {
               required
             />
             <div>
-              <p className="mb-2 text-sm font-medium text-gray-700">
+              <p className="mb-2 pb-2 text-sm font-medium text-gray-700">
                 운영 시간
                 <span className="text-red-500">*</span>
               </p>

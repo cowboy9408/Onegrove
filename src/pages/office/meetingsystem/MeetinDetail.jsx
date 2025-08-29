@@ -147,9 +147,9 @@ export default function MeetingDetail() {
     fetchData();
   }, [id, setValue]);
 
-  const handleChange = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  };
+  // const handleChange = (field, value) => {
+  //   setForm((prev) => ({ ...prev, [field]: value }));
+  // };
 
   const onSubmit = async (form) => {
     if (

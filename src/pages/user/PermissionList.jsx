@@ -321,6 +321,8 @@ export default function PermissionList() {
     companyOptions, // effectiveCompanyName 계산을 위해 필요
   ]);
 
+  const test = 0
+
   return (
     <div>
       <SearchSection>

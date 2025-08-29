@@ -134,7 +134,7 @@ export default function MeetingRule() {
           />
         </TabPanel>
       </Tabs>
-      <div className="flex justify-end gap-4 px-6 pb-6">
+      <div className="flex justify-end gap-4 p-6">
         <Button onClick={handleClickSave}>저장</Button>
       </div>
     </Section>
