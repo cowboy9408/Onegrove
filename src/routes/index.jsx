@@ -590,7 +590,7 @@ export const routeMeta = [
           {
             uuid: "fc07f96b-d19c-4677-a7f1-5d39d36e2666",
             path: "/office/viproom",
-            element: <Viproom />,
+            element: <Viproom />, //TODO
             title: "Executive Room 예약",
             hidden: false,
             permissions: [
@@ -603,7 +603,7 @@ export const routeMeta = [
           {
             uuid: "28f505be-2143-4fe3-bef3-3b7e031a8247",
             path: "/office/visit",
-            element: <Visit />,
+            element: <Visit />, //TODO
             title: "방문 예약",
             hidden: false,
             permissions: [

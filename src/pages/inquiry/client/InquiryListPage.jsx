@@ -28,7 +28,17 @@ export default function InquiryListPage() {
   const [endDate, setEndDate] = useState(null);
   const [statusType, setStatusType] = useState("상태");
   const [statusKeyword, setStatusKeyword] = useState("");
-  const [language, setLanguage] = useState("all"); // 언어 상태
+  const [language, setLanguage] = useState("all"); // 언어 상태\
+
+  const defaultFilter = {
+    name: "",
+    category: "",
+    visibility: "",
+    page: 1,
+  };
+
+  const [searchFilter, setSearchFilter] = useState(defaultFilter);
+  const [activeFilter, setActiveFilter] = useState(defaultFilter);
 
   const handleLanguageChange = (e) => {
     setLanguage(e.target.value);
@@ -72,60 +82,62 @@ export default function InquiryListPage() {
     <div>
       <SearchSection>
         <Box>
-          <Row>
-            <Col>
-              <Select label={"담당 부서"}>
-                <option value="">전체</option>
-                <option value="">상태1</option>
-                <option value="">상태2</option>
-              </Select>
-            </Col>
-            <Col>
-              <Select label={"문의 유형"}>
-                <option value="">전체</option>
-                <option value="">답변1</option>
-                <option value="">답변2</option>
-              </Select>
-            </Col>
-            <Col>
-              <Select label={"답변상태"}>
-                <option value="">전체</option>
-                <option value="">답변1</option>
-                <option value="">답변2</option>
-              </Select>
-            </Col>
-            <Row className="pb-4">
-              <Col>
-                <p className="mb-1 text-sm font-medium text-gray-800">언어</p>
-                <div className="flex gap-4">
-                  <Radio
-                    id="lang-all"
-                    name="language"
-                    value="all"
-                    checked={language === "all"}
-                    onChange={handleLanguageChange}
-                    label="전체"
-                  />
-                  <Radio
-                    id="lang-ko"
-                    name="language"
-                    value="ko"
-                    checked={language === "ko"}
-                    onChange={handleLanguageChange}
-                    label="국문"
-                  />
-                  <Radio
-                    id="lang-en"
-                    name="language"
-                    value="en"
-                    checked={language === "en"}
-                    onChange={handleLanguageChange}
-                    label="영문"
-                  />
-                </div>
-              </Col>
-            </Row>
+          <Col>
             <Row>
+              <Col>
+                <Select label={"담당 부서"}>
+                  <option value="">전체</option>
+                  <option value="">상태1</option>
+                  <option value="">상태2</option>
+                </Select>
+              </Col>
+              <Col>
+                <Select label={"문의 유형"}>
+                  <option value="">전체</option>
+                  <option value="">답변1</option>
+                  <option value="">답변2</option>
+                </Select>
+              </Col>
+              <Col>
+                <Select label={"답변상태"}>
+                  <option value="">전체</option>
+                  <option value="">답변1</option>
+                  <option value="">답변2</option>
+                </Select>
+              </Col>
+              <Row className="pb-4">
+                <Col>
+                  <p className="mb-1 text-sm font-medium text-gray-800">언어</p>
+                  <div className="flex gap-4">
+                    <Radio
+                      id="lang-all"
+                      name="language"
+                      value="all"
+                      checked={language === "all"}
+                      onChange={handleLanguageChange}
+                      label="전체"
+                    />
+                    <Radio
+                      id="lang-ko"
+                      name="language"
+                      value="ko"
+                      checked={language === "ko"}
+                      onChange={handleLanguageChange}
+                      label="국문"
+                    />
+                    <Radio
+                      id="lang-en"
+                      name="language"
+                      value="en"
+                      checked={language === "en"}
+                      onChange={handleLanguageChange}
+                      label="영문"
+                    />
+                  </div>
+                </Col>
+              </Row>
+            </Row>
+            <Col>
               <Col>
                 <DateRangePicker
                   startDate={startDate}
@@ -136,7 +148,7 @@ export default function InquiryListPage() {
                   }}
                 />
               </Col>
-            </Row>
+            </Col>
             <Row>
               <Col>
                 <Input
@@ -165,7 +177,7 @@ export default function InquiryListPage() {
                 초기화
               </Button>
             </div>
-          </Row>
+          </Col>
         </Box>
       </SearchSection>
       <ResultSummary total={total} />
